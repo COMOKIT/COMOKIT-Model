@@ -1,4 +1,4 @@
-#Simplified model of SRAS-cov-2 pandemic
+# Simplified model of SRAS-cov-2 pandemic
 
 - data for world country GIS layers is taken from : https://hub.arcgis.com/datasets/a21fdb46d23e4ef896f31475217cbb08_1
 - data for basic demographics is taken from : https://population.un.org/wpp/Download/Standard/CSV/ 
@@ -10,4 +10,4 @@
 
 ## Data about the pandemic
 
-- OMS gives up-to-date data from around the world : 
+- A all-in-one data repository : https://github.com/CSSEGISandData/COVID-19
