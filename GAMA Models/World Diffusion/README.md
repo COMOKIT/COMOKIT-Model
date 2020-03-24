@@ -11,3 +11,7 @@
 ## Data about the pandemic
 
 - A all-in-one data repository : https://github.com/CSSEGISandData/COVID-19
+
+## Dara about worldwide mobilities
+
+- https://bluehub.jrc.ec.europa.eu/migration/app/index.html
