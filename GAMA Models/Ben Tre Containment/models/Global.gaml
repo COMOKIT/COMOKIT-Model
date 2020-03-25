@@ -18,34 +18,83 @@ import "Constants.gaml"
 import "Parameters.gaml"
 
 global {
+
 	init {
-		create River from:river_shapefile;
-		create Commune from:commune_shapefile;
-		create Road from: road_shapefile;
+		create River from: river_shapefile;
+		create Commune from: commune_shapefile;
+		create Road from: shp_roads;
 		road_network <- as_edge_graph(Road);
-		create Building from: building_shapefile {		
-		}
-		ask (0.1*length(Building)) among Building{				
-				is_school <- true;
-		}  
-		create Individual number: nb_people {
-			my_school <- any(Building where (each.is_school)); //sch[rnd_choice(idx)]; 
-			my_building <- any(Building where (!each.is_school));
-			location <- any_location_in(my_building);
-			my_bound <- my_building.shape;
-			//			masked <- flip(0.8) ? true : false;
+		create Building from: shp_buildings {
+			create Individual {
+				ageCategory <- 23 + rnd(30);
+				sex <- 0;
+				home <- myself;
+				office <- any(Building - home);
+				location <- (home.location);
+				status <- "susceptible";
+				bound <- home.shape;
+			}
+
+			create Individual {
+				ageCategory <- 23 + rnd(30);
+				sex <- 1;
+				home <- myself;
+				office <- any(Building - home);
+				location <- (home.location);
+				status <- "susceptible";
+				bound <- home.shape;
+			}
+
+			create Individual number: rnd(3) {
+				ageCategory <- rnd(22);
+				sex <- rnd(1);
+				home <- myself;
+				school <- any(Building - home);
+				location <- (home.location);
+				status <- "susceptible";
+				bound <- home.shape;
+			}
+
 		}
 
-		ask (0.5*nb_people) among Individual {
-			masked <- true;
+		ask (N_grandfather * length(Building)) among Building {
+			create Individual {
+				ageCategory <- 55 + rnd(50);
+				sex <- 0;
+				home <- myself;
+				location <- (home.location);
+				status <- "susceptible";
+				bound <- home.shape;
+			}
+
 		}
 
-		ask 1 among (Individual) {
-			exposed <- true;
+		ask (M_grandmother * length(Building)) among Building {
+			create Individual {
+				ageCategory <- 50 + rnd(50);
+				sex <- 1;
+				home <- myself;
+				location <- (home.location);
+				status <- "susceptible";
+				bound <- home.shape;
+			}
+
+		}
+
+		ask Individual where ((each.ageCategory < 55 and each.sex = 0) or (each.ageCategory < 50 and each.sex = 1)) {
+			agenda_week[8] <- "work";
+			agenda_week[17] <- "home";
+		}
+
+		ask 2 among Individual {
+			incubation_time <- rnd(max_incubation_time);
+			status <- "exposed";
 		}
 
 	}
-	reflex stop_sim when:cycle>=1500{
+
+	reflex stop_sim when: cycle >= 1500 {
 		do pause;
 	}
+
 }

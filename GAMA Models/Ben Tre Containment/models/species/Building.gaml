@@ -4,16 +4,20 @@
 * Description: 
 * Tags: Tag1, Tag2, TagN
 ***/
-model Species_Building
-import "Individual.gaml" 
+model Species_Building 
 
-species Building parent:Individual {
+species Building {
 
-	bool is_school <- false;
+	float chargeVirale;
+	geometry shape;
+	string type_activity;
+	reflex updateChargeVirale{
+		
+	}
 
 	aspect default {
 //		draw name color:#black;
-		draw shape color: is_school ? #blue : #gray empty: true;
+		draw shape color: type_activity="school" ? #blue : #gray empty: true;
 	}
 
 }

@@ -9,7 +9,7 @@ model Species_River
 
 species River{
 	aspect default {
-		draw shape color: #cyan ;
+		draw shape color: #lightgray ;
 	}
 	
 }

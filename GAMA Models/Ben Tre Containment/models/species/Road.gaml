@@ -10,7 +10,7 @@ model Species_Road
 species Road {
 
 	aspect default {
-		draw shape+10 color: #black;
+		draw shape color: #black;
 	}
 
 }

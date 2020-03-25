@@ -7,19 +7,28 @@
 model Parameters
 
 global {
-	float seed <- 0.5362681362380473; //
 //	float seed <- 0.2955510396397566;
 	file river_shapefile <- file("../includes/kenhrach_region.shp");
 	file commune_shapefile <- file("../includes/ranhbinhdai_region.shp");
-	file road_shapefile <- file("../includes/roads_osm.shp");
-	file building_shapefile <- file("../includes/nha_ThuaDuc_region.shp");
-	geometry shape <- envelope(building_shapefile);
-	int max_exposed_period <- 30;
+	file shp_roads <- file("../includes/roads_osm.shp");
+	file shp_buildings <- file("../includes/nha_ThuaDuc_region.shp");
+	geometry shape <- envelope(shp_buildings);
 	graph road_network;
-	bool off_school<-true;
-	int dead<-0;
-	int nb_people<-500;
-	float motor_spd<-50.0;
-//	map<string, float> profiles <- ["poor"::0.3, "medium"::0.4, "standard"::0.2, "rich"::0.1]; //	map<string,float> profiles <- ["innovator"::0.0,"early_adopter"::0.1,"early_majority"::0.2,"late_majority"::0.3, "laggard"::0.5];
-
+	float step<-1#h;
+	float transmission_rate<-0.5;
+	float max_incubation_time<-360.0;//15 * 24h
+	float max_recovery_time<-360.0;
+	float max_hospitalization_time<-360.0;
+	
+	float proba_free_rider;
+	
+	float alpha<-0.5;
+	float epsilon<-0.5;
+	float sigma<-0.5;
+	float delta<-0.9;
+	
+	float R0<-2.0;
+	
+	float N_grandfather<-0.2;
+	float M_grandmother<-0.3;
 }
