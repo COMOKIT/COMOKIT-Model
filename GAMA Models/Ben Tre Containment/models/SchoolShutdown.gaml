@@ -9,32 +9,30 @@ model Corona
 global {
 	float seed <- 0.5362681362380473; //
 //	float seed <- 0.2955510396397566;
-	file road_shapefile <- file("../includes/roads.shp");
-	file building_shapefile <- file("../includes/buildings.shp");
-	geometry shape <- envelope(building_shapefile);
+	file river_shapefile <- file("../includes/kenhrach_region.shp");
+	file commune_shapefile <- file("../includes/ranhbinhdai_region.shp");
+	file road_shapefile <- file("../includes/roads_osm.shp");
+	file building_shapefile <- file("../includes/nha_ThuaDuc_region.shp");
+	geometry shape <- envelope(commune_shapefile);
 	int max_exposed_period <- 30;
-	list<string>
-	schoolname <- ["Tieu hoc Mac Dinh Chi", "TrÆ°á»ng THPT ChÃ¢u VÄƒn LiÃªm", "THPT BC Pháº¡m Ngá»c Hiá»ƒn", "TrÆ°á»ng THCS ÄoÃ n Thá»‹ Äiá»ƒm", "NgÃ´ Quyá»n", "Máº§m non TÃ¢y ÄÃ´", "Trung TÃ¢m GiÃ¡o Dá»¥c ThÆ°á»ng XuyÃªn"];
 	graph road_network;
 	bool off_school<-true;
 	int dead<-0;
 	int nb_people<-500;
+	float motor_spd<-50.0;
 //	map<string, float> profiles <- ["poor"::0.3, "medium"::0.4, "standard"::0.2, "rich"::0.1]; //	map<string,float> profiles <- ["innovator"::0.0,"early_adopter"::0.1,"early_majority"::0.2,"late_majority"::0.3, "laggard"::0.5];
 	init {
+		create river from:river_shapefile;
+		create commune from:commune_shapefile;
 		create road from: road_shapefile;
 		road_network <- as_edge_graph(road);
-		create building from: building_shapefile {
-			if (name in schoolname) {
-				is_school <- true;
-			}
-
+		create building from: building_shapefile {		
 		}
-
-		list sch <- (building where (each.is_school)) sort (-each.shape.area);
-		float total <- sum(sch collect each.shape.area);
-		list idx <- sch collect (each.shape.area / total);
+		ask (0.1*length(building)) among building{				
+				is_school <- true;
+		}  
 		create people number: nb_people {
-			my_school <- sch[rnd_choice(idx)]; // any(building where (each.is_school));
+			my_school <- any(building where (each.is_school)); //sch[rnd_choice(idx)]; 
 			my_building <- any(building where (!each.is_school));
 			location <- any_location_in(my_building);
 			my_bound <- my_building.shape;
@@ -54,11 +52,25 @@ global {
 		do pause;
 	}
 }
+species commune{
+
+	aspect default {
+		draw shape color: #gainsboro border:#black;
+	}
+
+	
+}
+species river{
+	aspect default {
+		draw shape color: #cyan ;
+	}
+	
+}
 
 species road {
 
 	aspect default {
-		draw shape color: #gray empty: true;
+		draw shape color: #black;
 	}
 
 }
@@ -84,7 +96,7 @@ species building parent: virus_container {
 //}
 species people parent: virus_container skills: [moving] {
 	float spd <- 1.0;
-	float size <- 2.0;
+	float size <- 5.0;
 	building my_building <- nil;
 	building my_school <- nil;
 	people my_friend <- nil;
@@ -202,7 +214,7 @@ species people parent: virus_container skills: [moving] {
 	}
 
 	reflex visit when: state = "visiting" {
-		do goto target: my_target on: road_network speed: 10.0;
+		do goto target: my_target on: road_network speed: motor_spd;
 		if (location distance_to my_target < (size * 2)) {
 			state <- "wander";
 		}
@@ -210,7 +222,7 @@ species people parent: virus_container skills: [moving] {
 	}
 
 	reflex moving when: state = "moving" {
-		do goto target: my_target speed: 10.0;
+		do goto target: my_target speed: motor_spd;
 		if (location distance_to my_target < (size * 2)) {
 			state <- "wander";
 		}
@@ -228,33 +240,33 @@ species people parent: virus_container skills: [moving] {
 
 experiment sim {
 //	parameter "OFF SCHOOL" var: off_school <- true category: "Education planning";
-	init{
-		create simulation{
-			seed<-0.5362681362380473;
-			off_school<-false;
-		}
-	}
+//	init{
+//		create simulation{
+//			seed<-0.5362681362380473;
+//			off_school<-false;
+//		}
+//	}
 	output {
-//		 layout horizontal([0::6321,1::3679]) tabs:true editors: false;
- layout vertical([0::5000,1::5000]) tabs:true editors: false;
-		display "d1" synchronized: false type:java2D {
-			graphics "g"{
-				draw "School shutdown:"+off_school at:{180,20} color:#black perspective:false;
-			}
-			species road refresh: false;
+
+// layout horizontal([0::5000,1::5000]) tabs:true editors: false;
+ 		display "d1" synchronized: false type:opengl {
+		 
+			species commune ;
+			species river;
+			species road ;
 			species building;
 			species people;
 		}
-
-		display "chart" {
-			chart "sir" background: #white axes: #black {
-				data "susceptible" value: length(people where (each.susceptible)) color: #green marker: false style: line;
-				data "infected" value: length(people where (each.exposed or each.infected)) color: #red marker: false style: line;
-				data "recovered" value: length(people where (each.recovered)) color: #blue marker: false style: line;
-				data "dead" value: dead color: #black marker: false style: line;
-			}
-
-		}
+//
+//		display "chart" {
+//			chart "sir" background: #white axes: #black {
+//				data "susceptible" value: length(people where (each.susceptible)) color: #green marker: false style: line;
+//				data "infected" value: length(people where (each.exposed or each.infected)) color: #red marker: false style: line;
+//				data "recovered" value: length(people where (each.recovered)) color: #blue marker: false style: line;
+//				data "dead" value: dead color: #black marker: false style: line;
+//			}
+//
+//		}
 
 	}
 
