@@ -19,6 +19,7 @@ species Individual skills: [moving] {
 	Building home;
 	Building school;
 	Building office;
+	list<Individual> relatives;
 	geometry bound;
 	float incubation_time; //15 * 24h
 	float recovery_time;
