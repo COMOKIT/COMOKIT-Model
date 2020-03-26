@@ -28,7 +28,7 @@ import "../Parameters.gaml"
 import "Building.gaml"
 import "Activity.gaml"
 species Individual skills: [moving] {
-	geometry shape <- circle(3);
+	//geometry shape <- circle(3);
 	int ageCategory;
 	int sex; //0 M 1 F
 	string state; //stayHome, goingWork
