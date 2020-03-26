@@ -24,7 +24,6 @@ global {
 	init {
 		do create_activities;
 		
-		
 		create River from: river_shapefile;
 		create Boundary from: commune_shapefile;
 		create Road from: shp_roads;
@@ -110,11 +109,6 @@ global {
 			incubation_time <- rnd(max_incubation_time);
 			status <- exposed;
 		}
-
+		
 	}
-
-	reflex stop_sim when: cycle >= 1500 {
-		do pause;
-	}
-
 }

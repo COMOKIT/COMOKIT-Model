@@ -7,22 +7,21 @@
 model Corona
 
 import "../Global.gaml"
-import "../species/Policy.gaml"
 import "Abstract.gaml"
 
 global {
 
-	init {  
+	init { 
 		do create_authority;
 		ask Authority {
-			policies << lockDown;
+			policies << noMeetingRelaxing;
 		}
 
 	}
 
 }
 
-experiment "Lock Down" parent: "Abstract Experiment" {
+experiment "No Meeting No Relaxing" parent: "Abstract Experiment" {
 	output {
 		display "Main" parent: d1 {
 		}

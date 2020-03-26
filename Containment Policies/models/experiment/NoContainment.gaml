@@ -11,12 +11,10 @@ import "Abstract.gaml"
 
 global {
 
-	init {
-	// Create an authority 
-		write "Create an authority ";
-		create Authority;
+	init { 
+		do create_authority;
 		ask Authority {
-			policies << createPolicy(true, true);
+			policies << noContainment;
 		}
 
 	}

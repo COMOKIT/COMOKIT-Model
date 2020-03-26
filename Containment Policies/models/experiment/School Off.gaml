@@ -11,19 +11,17 @@ import "Abstract.gaml"
 
 global {
 
-	init {
-	// Create an authority 
-		write "Create an authority ";
-		create Authority;
+	init { 
+		do create_authority;
 		ask Authority {
-			policies << createPolicy(false, true);
+			policies << noSchool; 
 		}
 
 	}
 
 }
 
-experiment "School_Off" parent: "Abstract Experiment" {
+experiment "School Off" parent: "Abstract Experiment" {
 	output {
 		display "Main" parent: d1 {
 		}
