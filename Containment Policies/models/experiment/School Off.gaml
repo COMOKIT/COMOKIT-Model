@@ -15,7 +15,7 @@ global {
 			
 			create Politics  {
 				Gov_policy<-self;
-				authorsisation["school"]<-false;
+				authorsisation[schooling]<-false;
 			} 
 
 	}

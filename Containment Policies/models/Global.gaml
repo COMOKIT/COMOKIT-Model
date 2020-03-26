@@ -32,7 +32,7 @@ global {
 				home <- myself;
 				office <- any(Building - home);
 				location <- (home.location);
-				status <- "susceptible";
+				status <- susceptible;
 				bound <- home.shape;
 			}
 			//mother
@@ -42,7 +42,7 @@ global {
 				home <- myself;
 				office <- any(Building - home);
 				location <- (home.location);
-				status <- "susceptible";
+				status <- susceptible;
 				bound <- home.shape;
 			}
 			//children
@@ -52,7 +52,7 @@ global {
 				home <- myself;
 				school <- any(Building - home);
 				location <- (home.location);
-				status <- "susceptible";
+				status <- susceptible;
 				bound <- home.shape;
 			}
 
@@ -64,7 +64,7 @@ global {
 				sex <- 0;
 				home <- myself;
 				location <- (home.location);
-				status <- "susceptible";
+				status <- susceptible;
 				bound <- home.shape;
 			}
 
@@ -76,7 +76,7 @@ global {
 				sex <- 1;
 				home <- myself;
 				location <- (home.location);
-				status <- "susceptible";
+				status <- susceptible;
 				bound <- home.shape;
 			}
 
@@ -84,16 +84,16 @@ global {
 
 		ask Individual where ((each.ageCategory < 55 and each.sex = 0) or (each.ageCategory < 50 and each.sex = 1)) {
 			if (ageCategory < 23) {
-				agenda_week[8] <- "school";
+				agenda_week[8] <- schooling;
 			} else {
-				agenda_week[8] <- "work";
+				agenda_week[8] <- working;
 			}
-			agenda_week[17] <- "home";
+			agenda_week[17] <- staying_at_home;
 		}
 
 		ask 2 among Individual {
 			incubation_time <- rnd(max_incubation_time);
-			status <- "exposed";
+			status <- exposed;
 		}
 
 	}
