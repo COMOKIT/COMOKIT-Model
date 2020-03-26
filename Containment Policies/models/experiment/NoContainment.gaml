@@ -23,8 +23,6 @@ global {
 }
 
 experiment "No Containment" parent: "Abstract Experiment"{
-
-
 	output {
 		display "Main" parent: d1 {}
 	}

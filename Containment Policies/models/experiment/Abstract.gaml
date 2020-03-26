@@ -12,7 +12,7 @@ import "../species/Politics.gaml"
 experiment "Abstract Experiment" virtual: true {
 	output {
 		display "d1" synchronized: false type: opengl background: #black virtual: true {
-			species Commune {
+			species Boundary {
 						draw shape color: #yellow empty:true;
 				
 			}

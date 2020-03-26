@@ -7,7 +7,7 @@
 model Global
 
 import "species/Building.gaml"
-import "species/Commune.gaml"
+import "species/Boundary.gaml"
 import "species/River.gaml"
 import "species/Road.gaml"
 import "species/Individual.gaml"
@@ -21,7 +21,7 @@ global {
 
 	init {
 		create River from: river_shapefile;
-		create Commune from: commune_shapefile;
+		create Boundary from: commune_shapefile;
 		create Road from: shp_roads;
 		road_network <- as_edge_graph(Road);
 		create Building from: shp_buildings {
