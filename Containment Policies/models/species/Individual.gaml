@@ -10,9 +10,6 @@ import "../Constants.gaml"
 import "../Parameters.gaml"
 import "Building.gaml"
 import "Activity.gaml"
-
-
-
 species Individual skills: [moving] {
 	int ageCategory;
 	int sex; //0 M 1 F
@@ -27,6 +24,7 @@ species Individual skills: [moving] {
 	float recovery_time;
 	float hospitalization_time;
 	map<int, Activity> agenda_week;
+	Activity last_activity;
 	bool free_rider;
 	int tick <- 0;
 
@@ -56,30 +54,13 @@ species Individual skills: [moving] {
 
 	reflex executeAgenda {
 		Activity act <- agenda_week[current_date.hour];
-		if (!Authority[0].allows(self, act)) {
-		//			write "denied";
-			return;
+		if (act != nil) {
+			last_activity <- act;
 		}
 
-		if (act != nil) {
-			if (act = a_home[0]) {
-				bound <- home.shape;
-				location <- any_location_in(home);
-			}
-
-			if (act = a_work[0]) {
-				bound <- office.shape;
-				location <- any_location_in(office);
-			}
-
-			if (act = a_school[0]) {
-				if (ageCategory < 23) {
-					bound <- school.shape;
-					location <- any_location_in(school);
-				}
-
-			}
-
+		if (Authority[0].allows(self, last_activity)) {
+			bound <- any(last_activity.find_target(self));
+			location <- any_location_in(bound);
 		}
 
 		do wander bounds: bound speed: 0.001;

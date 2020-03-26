@@ -15,7 +15,7 @@ global {
 	map<string, Activity> Activities;
 
 	action create_activities {
-		loop s over: Activity.subspecies {
+		loop s over: Activity.subspecies { 
 			create s returns: new_activity;
 			Activities[string(s)] <- Activity(first(new_activity)) ;
 		}

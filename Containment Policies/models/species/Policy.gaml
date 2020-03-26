@@ -7,15 +7,16 @@
 model Policy
 
 import "Individual.gaml"
-
-
 species Policy {
 	map<string, bool> allowed_activities;
-	
-	bool is_allowed (Individual i, Activity activity) {
-		return allowed_activities[species_of(activity).name];
-	}
+	bool is_allowed (Individual i, Activity activity) { 
+		if (allowed_activities[species_of(activity).name] != nil) {
+			return allowed_activities[species_of(activity).name];
+		} else {
+			return true;
+		}
 
+	}
 
 }
 

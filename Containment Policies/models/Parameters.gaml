@@ -14,8 +14,10 @@ global {
 //	float seed <- 0.2955510396397566;
 	file river_shapefile <- file("../data/Ben Tre/kenhrach_region.shp");
 	file commune_shapefile <- file("../data/Ben Tre/ranhbinhdai_region.shp");
-	file shp_roads <- file("../data/Ben Tre/roads_osm.shp");
-	file shp_buildings <- file("../data/Ben Tre/nha_ThuaDuc_region.shp");
+//	file shp_roads <- file("../data/Ben Tre/roads_osm.shp");
+//	file shp_buildings <- file("../data/Ben Tre/nha_ThuaDuc_region.shp");
+	file shp_roads <- file("../data/Vinh Phuc/roads.shp");
+	file shp_buildings <- file("../data/Vinh Phuc/buildings.shp");
 
 	graph road_network;
 	float step<-1#h;
@@ -39,9 +41,9 @@ global {
 	
 	Authority authority;
 	
-	init {
-		write "Creating Activities";
-		do create_activities;
-	}
+//	init {
+//		write "Creating Activities";
+//		do create_activities;
+//	}
 	
 }

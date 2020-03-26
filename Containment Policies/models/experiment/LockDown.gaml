@@ -12,19 +12,25 @@ import "Abstract.gaml"
 
 global {
 
-	init { 
-			
+	init {
+
+	// Create an authority 
+		write "Create an authority ";
+		create Authority;
+		write "ask auth";
 		ask Authority {
-			policies << lockDown;
-		}	 
+			policies << createLockDownPolicy();
+		}
+
 	}
 
 }
 
-experiment "Lock Down" parent: "Abstract Experiment"{
-
-
+experiment "Lock Down" parent: "Abstract Experiment" {
 	output {
-		display "Main" parent: d1 {}
+		display "Main" parent: d1 {
+		}
+
 	}
+
 }

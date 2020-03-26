@@ -7,17 +7,15 @@
 model Constants
 
 global {
-	string susceptible<-"susceptible";
-	string exposed<-"exposed";
-	string asymptomatic<-"asymptomatic";
-	string infected<-"infected";
-	string recovered<-"recovered";
-	string death<-"death";
-	
-	
-	
-	
+	string susceptible <- "susceptible";
+	string exposed <- "exposed";
+	string asymptomatic <- "asymptomatic";
+	string infected <- "infected";
+	string recovered <- "recovered";
+	string death <- "death";
+
 	// Building types
+	string t_school <- "school";
 	string t_shop <- "shop";
 	string t_market <- "market";
 	string t_supermarket <- "supermarket";
@@ -34,5 +32,6 @@ global {
 	string t_park <- "park";
 	string t_meeting <- "meeting";
 	string t_repairshop <- "repairshop";
-	
+	list<string>
+	building_types <- [t_school, t_shop, t_market, t_supermarket, t_bookstore, t_cinema, t_gamecenter, t_karaoke, t_restaurant, t_coffeeshop, t_farm, t_playground, t_hospital, t_supplypoint, t_park, t_meeting, t_repairshop];
 }
