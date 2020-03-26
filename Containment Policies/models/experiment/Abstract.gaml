@@ -7,16 +7,16 @@
 model Corona
 
 import "../Global.gaml"
-import "../species/Politics.gaml"
 
 experiment "Abstract Experiment" virtual: true {
 	output {
-		display "d1" synchronized: false type: opengl background: #black virtual: true {
-			species Boundary {
-						draw shape color: #yellow empty:true;
-				
+		display "d1" synchronized: false type: opengl background: #black virtual: true draw_env: false {
+			//species Boundary {
+			//	draw shape color: #yellow empty:false;	
+			//}
+			species River {
+				draw shape color: #darkgray empty:false ;
 			}
-			species River;
 			species Road {
 				draw shape + 3 color: #white;
 			}
@@ -24,7 +24,7 @@ experiment "Abstract Experiment" virtual: true {
 				draw shape * 3 color: type_activity="school" ? #blue : #gray empty: true;
 			}
 			species Individual {
-				draw circle(15) color: status = exposed ? #orange : (status = infected ? #red : #green);
+				draw sphere(20) color: status = exposed ? #orange : (status = infected ? #red : #green);
 			}
 		}
 
