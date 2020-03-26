@@ -9,6 +9,21 @@ model Species_Activity
 
 import "Individual.gaml"
 import "Building.gaml"
+
+global {
+	// A map of all possible activities
+	map<string, Activity> Activities;
+
+	init {
+		loop s over: Activity.subspecies {
+			create s returns: new_activity;
+			Activities[string(s)] <- Activity(first(new_activity)) ;
+		}
+
+	}
+
+}
+
 species Activity {
 	string type;
 	bool chose_nearest <- false;
@@ -25,40 +40,40 @@ species Activity {
 
 }
 
-species goToWork parent: Activity {
+species Work parent: Activity {
 	list<Building> find_target (Individual i) {
 		return [i.office];
 	}
 
 }
 
-species goToSchool parent: Activity {
+species School parent: Activity {
 	list<Building> find_target (Individual i) {
 		return [i.school];
 	}
 
 }
 
-species goBackHome parent: Activity {
+species Home parent: Activity {
 	list<Building> find_target (Individual i) {
 		return [i.home];
 	}
 
 }
 
-species goShopping parent: Activity {
+species Shopping parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "shop") closest_to self];
+			return [Building where (each.type_activity = shop) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "shop"));
+			return nb_candidat among (Building where (each.type_activity = shop));
 		}
 
 	}
 
 }
 
-species goToMarket parent: Activity {
+species Market parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "market") closest_to self];
@@ -70,7 +85,7 @@ species goToMarket parent: Activity {
 
 }
 
-species goToSuperMarket parent: Activity {
+species Supermarket parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "supermarket") closest_to self];
@@ -82,7 +97,7 @@ species goToSuperMarket parent: Activity {
 
 }
 
-species goToBookStore parent: Activity {
+species Bookstore parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "bookstore") closest_to self];
@@ -94,7 +109,7 @@ species goToBookStore parent: Activity {
 
 }
 
-species goToCinema parent: Activity {
+species Movie parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "cinema") closest_to self];
@@ -106,7 +121,7 @@ species goToCinema parent: Activity {
 
 }
 
-species goToGameCenter parent: Activity {
+species Game parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "gammecenter") closest_to self];
@@ -118,7 +133,7 @@ species goToGameCenter parent: Activity {
 
 }
 
-species goToKaraoke parent: Activity {
+species Karaoke parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "karaoke") closest_to self];
@@ -130,7 +145,7 @@ species goToKaraoke parent: Activity {
 
 }
 
-species goToRestaurant parent: Activity {
+species Restaurant parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "restaurant") closest_to self];
@@ -142,7 +157,7 @@ species goToRestaurant parent: Activity {
 
 }
 
-species goToCoffee parent: Activity {
+species Coffee parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "coffeeshop") closest_to self];
@@ -154,7 +169,7 @@ species goToCoffee parent: Activity {
 
 }
 
-species goToFarm parent: Activity {
+species Farm parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "farm") closest_to self];
@@ -165,7 +180,7 @@ species goToFarm parent: Activity {
 
 }
 
-species exchangeProduct parent: Activity {
+species Trade parent: Activity {
 	list<Building> building_outside_commune <- Building where !(each overlaps world.shape);
 	list<Building> find_target (Individual i) {
 		return nb_candidat among (building_outside_commune);
@@ -173,7 +188,7 @@ species exchangeProduct parent: Activity {
 
 }
 
-species kidsPlayingInTheStreet parent: Activity {
+species Play parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "playground") closest_to self];
@@ -185,7 +200,7 @@ species kidsPlayingInTheStreet parent: Activity {
 
 }
 
-species visitSickPeopleAtHospital parent: Activity {
+species Visit parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "hospital") closest_to self];
@@ -197,7 +212,7 @@ species visitSickPeopleAtHospital parent: Activity {
 
 }
 
-species takeSupplyProducts parent: Activity {
+species Collect parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "supplypoint") closest_to self];
@@ -237,30 +252,31 @@ species goToThepark parent: Activity {
 
 species publicmeeting parent: Activity {
 	list<Building> find_target (Individual i) {
-
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "meeting") closest_to self];
 		} else {
 			return nb_candidat among (Building where (each.type_activity = "meeting"));
-		}	
+		}
+
 	}
 
 }
 
-species spreadingFlyers parent: Activity {
+species Spread parent: Activity {
 	list<Building> find_target (Individual i) {
-		return Building at_distance 5#km;
+		return Building at_distance 5 #km;
 	}
 
 }
 
-species repareHouse parent: Activity {
-	list<Building> find_target (Individual i) { 
+species Repair parent: Activity {
+	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
 			return [Building where (each.type_activity = "repare") closest_to self];
 		} else {
 			return nb_candidat among (Building where (each.type_activity = "repare"));
-		}	
+		}
+
 	}
 
 }

@@ -25,6 +25,7 @@ experiment "Abstract Experiment" virtual: true {
 			}
 			species Individual {
 				draw sphere(20) color: status = exposed ? #orange : (status = infected ? #red : #green);
+				draw circle(20) color: status = exposed ? #yellow : (status = infected ? #orangered : #lime);
 			}
 		}
 
