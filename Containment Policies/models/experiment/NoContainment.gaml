@@ -6,18 +6,15 @@
 ***/
 model Corona
 
+import "../Global.gaml"
 import "Abstract.gaml"
 
 global {
 
 	init { 
-			
-			create Politics  {
-				Gov_policy<-self;
-				authorsisation[schooling]<-true;
-				authorsisation[working]<-true;
-			} 
-
+		ask Authority {
+			policies << noContainment;
+		}			
 	}
 
 }

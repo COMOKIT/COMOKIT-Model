@@ -14,7 +14,7 @@ global {
 	// A map of all possible activities
 	map<string, Activity> Activities;
 
-	init {
+	action create_activities {
 		loop s over: Activity.subspecies {
 			create s returns: new_activity;
 			Activities[string(s)] <- Activity(first(new_activity)) ;
@@ -40,147 +40,147 @@ species Activity {
 
 }
 
-species Work parent: Activity {
+species a_work parent: Activity {
 	list<Building> find_target (Individual i) {
 		return [i.office];
 	}
 
 }
 
-species School parent: Activity {
+species a_school parent: Activity {
 	list<Building> find_target (Individual i) {
 		return [i.school];
 	}
 
 }
 
-species Home parent: Activity {
+species a_home parent: Activity {
 	list<Building> find_target (Individual i) {
 		return [i.home];
 	}
 
 }
 
-species Shopping parent: Activity {
+species a_shop parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = shop) closest_to self];
+			return [Building where (each.type_activity = t_shop) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = shop));
+			return nb_candidat among (Building where (each.type_activity = t_shop));
 		}
 
 	}
 
 }
 
-species Market parent: Activity {
+species a_market parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "market") closest_to self];
+			return [Building where (each.type_activity = t_market) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "market"));
+			return nb_candidat among (Building where (each.type_activity = t_market));
 		}
 
 	}
 
 }
 
-species Supermarket parent: Activity {
+species a_supermarket parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "supermarket") closest_to self];
+			return [Building where (each.type_activity = t_supermarket) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "supermarket"));
+			return nb_candidat among (Building where (each.type_activity = t_supermarket));
 		}
 
 	}
 
 }
 
-species Bookstore parent: Activity {
+species a_bookstore parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "bookstore") closest_to self];
+			return [Building where (each.type_activity = t_bookstore) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "bookstore"));
+			return nb_candidat among (Building where (each.type_activity = t_bookstore));
 		}
 
 	}
 
 }
 
-species Movie parent: Activity {
+species a_movie parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "cinema") closest_to self];
+			return [Building where (each.type_activity = t_cinema) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "cinema"));
+			return nb_candidat among (Building where (each.type_activity = t_cinema));
 		}
 
 	}
 
 }
 
-species Game parent: Activity {
+species a_game parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "gammecenter") closest_to self];
+			return [Building where (each.type_activity = t_gamecenter) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "gamecenter"));
+			return nb_candidat among (Building where (each.type_activity = t_gamecenter));
 		}
 
 	}
 
 }
 
-species Karaoke parent: Activity {
+species a_karaoke parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "karaoke") closest_to self];
+			return [Building where (each.type_activity = t_karaoke) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "karaoke"));
+			return nb_candidat among (Building where (each.type_activity = t_karaoke));
 		}
 
 	}
 
 }
 
-species Restaurant parent: Activity {
+species a_restaurant parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "restaurant") closest_to self];
+			return [Building where (each.type_activity = t_restaurant) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "restaurant"));
+			return nb_candidat among (Building where (each.type_activity = t_restaurant));
 		}
 
 	}
 
 }
 
-species Coffee parent: Activity {
+species a_coffee parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "coffeeshop") closest_to self];
+			return [Building where (each.type_activity = t_coffeeshop) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "coffeeshop"));
+			return nb_candidat among (Building where (each.type_activity = t_coffeeshop));
 		}
 
 	}
 
 }
 
-species Farm parent: Activity {
+species a_farm parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "farm") closest_to self];
+			return [Building where (each.type_activity = t_farm) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "farm"));
+			return nb_candidat among (Building where (each.type_activity = t_farm));
 		} //TODO land parcel? 
 	}
 
 }
 
-species Trade parent: Activity {
+species a_trade parent: Activity {
 	list<Building> building_outside_commune <- Building where !(each overlaps world.shape);
 	list<Building> find_target (Individual i) {
 		return nb_candidat among (building_outside_commune);
@@ -188,93 +188,93 @@ species Trade parent: Activity {
 
 }
 
-species Play parent: Activity {
+species a_play parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "playground") closest_to self];
+			return [Building where (each.type_activity = t_playground) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "playground"));
+			return nb_candidat among (Building where (each.type_activity = t_playground));
 		}
 
 	}
 
 }
 
-species Visit parent: Activity {
+species a_visit parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "hospital") closest_to self];
+			return [Building where (each.type_activity = t_hospital) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "hospital"));
+			return nb_candidat among (Building where (each.type_activity = t_hospital));
 		}
 
 	}
 
 }
 
-species Collect parent: Activity {
+species a_collect parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "supplypoint") closest_to self];
+			return [Building where (each.type_activity = t_supplypoint) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "supplypoint"));
+			return nb_candidat among (Building where (each.type_activity = t_supplypoint));
 		}
 
 	}
 
 }
 
-species visitNeighbors parent: Activity {
+species a_neighbours parent: Activity {
 	list<Building> find_target (Individual i) {
 		return [Building closest_to self];
 	}
 
 }
 
-species visitRelativeOrFriends parent: Activity {
+species a_friends parent: Activity {
 	list<Building> find_target (Individual i) {
 		return nb_candidat among (i.relatives collect (each.home));
 	}
 
 }
 
-species goToThepark parent: Activity {
+species a_park parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "park") closest_to self];
+			return [Building where (each.type_activity = t_park) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "park"));
+			return nb_candidat among (Building where (each.type_activity = t_park));
 		}
 
 	}
 
 }
 
-species publicmeeting parent: Activity {
+species a_meeting parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "meeting") closest_to self];
+			return [Building where (each.type_activity = t_meeting) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "meeting"));
+			return nb_candidat among (Building where (each.type_activity = t_meeting));
 		}
 
 	}
 
 }
 
-species Spread parent: Activity {
+species a_spread parent: Activity {
 	list<Building> find_target (Individual i) {
 		return Building at_distance 5 #km;
 	}
 
 }
 
-species Repair parent: Activity {
+species a_repair parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = "repare") closest_to self];
+			return [Building where (each.type_activity = t_repairshop) closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = "repare"));
+			return nb_candidat among (Building where (each.type_activity = t_repairshop));
 		}
 
 	}

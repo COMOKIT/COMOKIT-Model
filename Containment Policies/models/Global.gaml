@@ -13,13 +13,18 @@ import "species/Road.gaml"
 import "species/Individual.gaml"
 import "species/Hospital.gaml"
 import "species/Activity.gaml"
-import "species/Spatialized_Politics.gaml"
+import "species/Authority.gaml"
+import "species/Activity.gaml"
 import "Constants.gaml"
 import "Parameters.gaml"
 
 global {
+		geometry shape <- envelope(shp_buildings);
 
 	init {
+		do create_activities;
+		
+		
 		create River from: river_shapefile;
 		create Boundary from: commune_shapefile;
 		create Road from: shp_roads;
@@ -84,17 +89,20 @@ global {
 
 		ask Individual where ((each.ageCategory < 55 and each.sex = 0) or (each.ageCategory < 50 and each.sex = 1)) {
 			if (ageCategory < 23) {
-				agenda_week[8] <- schooling;
+				agenda_week[8] <- a_school[0];
 			} else {
-				agenda_week[8] <- working;
+				agenda_week[8] <- a_work[0];
 			}
-			agenda_week[17] <- staying_at_home;
+			agenda_week[17] <- a_home[0];
 		}
 
 		ask 2 among Individual {
 			incubation_time <- rnd(max_incubation_time);
 			status <- exposed;
 		}
+		
+		// Create an authority 
+		create Authority;
 
 	}
 

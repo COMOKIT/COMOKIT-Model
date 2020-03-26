@@ -13,28 +13,26 @@ global {
 	string infected<-"infected";
 	string recovered<-"recovered";
 	string death<-"death";
-	string schooling<-"schooling";
-	string working<-"working";
 	
-	string staying_at_home<-"at_home";
+	
 	
 	
 	// Building types
-	string shop <- "shop";
-	string market <- "market";
-	string supermarket <- "supermarket";
-	string bookstore <- "bookstore";
-	string cinema <- "cinema";
-	string gamecenter <- "gamecenter";
-	string karaoke <- "karaoke";
-	string restaurant <- "restaurant";
-	string coffeeshop <- "coffeeshop";
-	string farm <- "farm";
-	string playground <- "playground";
-	string hospital <- "hospital";
-	string supplypoint <- "supplypoint";
-	string park <- "park";
-	string meeting <- "meeting";
-	string repairshop <- "repairshop";
+	string t_shop <- "shop";
+	string t_market <- "market";
+	string t_supermarket <- "supermarket";
+	string t_bookstore <- "bookstore";
+	string t_cinema <- "cinema";
+	string t_gamecenter <- "gamecenter";
+	string t_karaoke <- "karaoke";
+	string t_restaurant <- "restaurant";
+	string t_coffeeshop <- "coffeeshop";
+	string t_farm <- "farm";
+	string t_playground <- "playground";
+	string t_hospital <- "hospital";
+	string t_supplypoint <- "supplypoint";
+	string t_park <- "park";
+	string t_meeting <- "meeting";
+	string t_repairshop <- "repairshop";
 	
 }

@@ -7,16 +7,14 @@
 model Corona
 
 import "../Global.gaml"
-import "../species/Politics.gaml"
 import "Abstract.gaml"
 
 global {
 
 	init {
-		create Politics {
-			Gov_policy <- self;
-			authorsisation[schooling] <- false;
-		}
+		ask Authority {
+			policies << noSchool;
+		}	
 
 	}
 

@@ -5,14 +5,18 @@
 * Tags: Tag1, Tag2, TagN
 ***/
 model Parameters
-import "species/Politics.gaml"
+
+import "species/Authority.gaml"
+
+
+
 global {
 //	float seed <- 0.2955510396397566;
 	file river_shapefile <- file("../data/Ben Tre/kenhrach_region.shp");
 	file commune_shapefile <- file("../data/Ben Tre/ranhbinhdai_region.shp");
 	file shp_roads <- file("../data/Ben Tre/roads_osm.shp");
 	file shp_buildings <- file("../data/Ben Tre/nha_ThuaDuc_region.shp");
-	geometry shape <- envelope(shp_buildings);
+
 	graph road_network;
 	float step<-1#h;
 	float transmission_rate<-0.5;
@@ -33,5 +37,11 @@ global {
 	float M_grandmother<-0.3;
 	
 	
-	Politics Gov_policy;
+	Authority authority;
+	
+	init {
+		write "Creating Activities";
+		do create_activities;
+	}
+	
 }

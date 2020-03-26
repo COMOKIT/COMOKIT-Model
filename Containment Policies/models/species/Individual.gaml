@@ -5,15 +5,17 @@
 * Tags: Tag1, Tag2, TagN
 ***/
 model Species_Individual
+
 import "../Constants.gaml"
 import "../Parameters.gaml"
 import "Building.gaml"
 import "Activity.gaml"
+
+
+
 species Individual skills: [moving] {
-	//geometry shape <- circle(3);
 	int ageCategory;
 	int sex; //0 M 1 F
-	string state; //stayHome, goingWork
 	string status; //susceptible, exposed, asymptomatic, infected, recovered, death
 	bool wearMask;
 	Building home;
@@ -24,8 +26,7 @@ species Individual skills: [moving] {
 	float incubation_time; //15 * 24h
 	float recovery_time;
 	float hospitalization_time;
-	map<int, string> agenda_week;
-	map<int, Activity> agenda_weekend;
+	map<int, Activity> agenda_week;
 	bool free_rider;
 	int tick <- 0;
 
@@ -54,28 +55,29 @@ species Individual skills: [moving] {
 	}
 
 	reflex executeAgenda {
-		string act <- agenda_week[current_date.hour];
-		
-		if(Gov_policy.ask_authorisation(self,act)=false){
-//			write "denied";
+		Activity act <- agenda_week[current_date.hour];
+		if (!Authority[0].allows(self, act)) {
+		//			write "denied";
 			return;
 		}
+
 		if (act != nil) {
-			if (act = staying_at_home) {
+			if (act = a_home[0]) {
 				bound <- home.shape;
 				location <- any_location_in(home);
 			}
 
-			if (act = working) {
+			if (act = a_work[0]) {
 				bound <- office.shape;
 				location <- any_location_in(office);
 			}
 
-			if (act = schooling) {
+			if (act = a_school[0]) {
 				if (ageCategory < 23) {
 					bound <- school.shape;
 					location <- any_location_in(school);
 				}
+
 			}
 
 		}
