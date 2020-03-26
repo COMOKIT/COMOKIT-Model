@@ -8,7 +8,7 @@ model Species_Politics
 import "Politics.gaml"
 
 species Spatialized_Politics parent:Politics{
-
+	geometry application_area;
 	aspect default {
 		draw shape+10 color: #black;
 	}

@@ -7,10 +7,11 @@
 model Species_Road
 
 
-species Road {
+species Commune{
+	
 
 	aspect default {
-		draw shape color: #black;
+		draw shape color: #black empty:true;
 	}
-
+	
 }

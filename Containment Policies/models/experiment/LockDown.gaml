@@ -19,7 +19,7 @@ experiment "Lock Down" {
 
 		display "chart" {
 			chart "sir" background: #white axes: #black {
-				data "susceptible" value: length(Individual where (each.status="susceptible")) color: #green marker: false style: line;
+//				data "susceptible" value: length(Individual where (each.status="susceptible")) color: #green marker: false style: line;
 				data "exposed" value: length(Individual where (each.status="exposed")) color: #orange marker: false style: line;
 				data "infected" value: length(Individual where (each.status="asymptomatic" or each.status="infected")) color: #red marker: false style: line;
 				data "recovered" value: length(Individual where (each.status="recovered")) color: #blue marker: false style: line;

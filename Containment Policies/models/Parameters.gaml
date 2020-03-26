@@ -8,10 +8,10 @@ model Parameters
 
 global {
 //	float seed <- 0.2955510396397566;
-	file river_shapefile <- file("../includes/kenhrach_region.shp");
-	file commune_shapefile <- file("../includes/ranhbinhdai_region.shp");
-	file shp_roads <- file("../includes/roads_osm.shp");
-	file shp_buildings <- file("../includes/nha_ThuaDuc_region.shp");
+	file river_shapefile <- file("../data/Ben Tre/kenhrach_region.shp");
+	file commune_shapefile <- file("../data/Ben Tre/ranhbinhdai_region.shp");
+	file shp_roads <- file("../data/Ben Tre/roads_osm.shp");
+	file shp_buildings <- file("../data/Ben Tre/nha_ThuaDuc_region.shp");
 	geometry shape <- envelope(shp_buildings);
 	graph road_network;
 	float step<-1#h;
