@@ -5,7 +5,7 @@
 * Tags: Tag1, Tag2, TagN
 ***/
 model Parameters
-
+import "species/Politics.gaml"
 global {
 //	float seed <- 0.2955510396397566;
 	file river_shapefile <- file("../data/Ben Tre/kenhrach_region.shp");
@@ -31,4 +31,7 @@ global {
 	
 	float N_grandfather<-0.2;
 	float M_grandmother<-0.3;
+	
+	
+	Politics Gov_policy;
 }

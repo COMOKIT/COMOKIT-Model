@@ -15,15 +15,15 @@ global {
 			
 			create Politics  {
 				Gov_policy<-self;
-				authorsisation["school"]<-false;
-				authorsisation["work"]<-false;
+				authorsisation["school"]<-true;
+				authorsisation["work"]<-true;
 			} 
 
 	}
 
 }
 
-experiment "Lock Down" {
+experiment "No Containment" {
 	output {
 		display "d1" synchronized: false type: java2D {
 			species Commune;

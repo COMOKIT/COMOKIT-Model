@@ -8,8 +8,9 @@ model Species_Politics
 import "Individual.gaml"
 
 species Politics {
+	map<string,bool> authorsisation;
 	bool ask_authorisation(Individual i, string activity){
-		return true;
+		return authorsisation[activity];
 	}
 	aspect default {
 		draw shape+10 color: #black;

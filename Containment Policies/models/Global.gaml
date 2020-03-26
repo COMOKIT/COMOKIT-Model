@@ -25,6 +25,7 @@ global {
 		create Road from: shp_roads;
 		road_network <- as_edge_graph(Road);
 		create Building from: shp_buildings {
+			//father
 			create Individual {
 				ageCategory <- 23 + rnd(30);
 				sex <- 0;
@@ -34,7 +35,7 @@ global {
 				status <- "susceptible";
 				bound <- home.shape;
 			}
-
+			//mother
 			create Individual {
 				ageCategory <- 23 + rnd(30);
 				sex <- 1;
@@ -44,7 +45,7 @@ global {
 				status <- "susceptible";
 				bound <- home.shape;
 			}
-
+			//children
 			create Individual number: rnd(3) {
 				ageCategory <- rnd(22);
 				sex <- rnd(1);
@@ -56,7 +57,7 @@ global {
 			}
 
 		}
-
+	
 		ask (N_grandfather * length(Building)) among Building {
 			create Individual {
 				ageCategory <- 55 + rnd(50);
@@ -82,7 +83,11 @@ global {
 		}
 
 		ask Individual where ((each.ageCategory < 55 and each.sex = 0) or (each.ageCategory < 50 and each.sex = 1)) {
-			agenda_week[8] <- "work";
+			if (ageCategory < 23) {
+				agenda_week[8] <- "school";
+			} else {
+				agenda_week[8] <- "work";
+			}
 			agenda_week[17] <- "home";
 		}
 

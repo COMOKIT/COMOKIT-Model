@@ -16,14 +16,13 @@ global {
 			create Politics  {
 				Gov_policy<-self;
 				authorsisation["school"]<-false;
-				authorsisation["work"]<-false;
 			} 
 
 	}
 
 }
 
-experiment "Lock Down" {
+experiment "School_Off" {
 	output {
 		display "d1" synchronized: false type: java2D {
 			species Commune;
