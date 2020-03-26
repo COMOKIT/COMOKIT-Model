@@ -3,24 +3,6 @@
 * Author: hqngh
 * Description: 
 * Tags: Tag1, Tag2, TagN
-* les individus et la dynamique épidémiologique
-J hésite encore pour utiliser l archi fsm ou pas. J ai 
-* l impression que ce n est pas la peine, dans un reflex
- ça serait plus simple ...
-Il faudrait rajouter un attribut école et workplace pour 
-* chaque individu je pense
-Init des pop : dans un premier temps très simple : chaque
-*  bâtiment maison, a N % d avoir un grand père, M% d avoir
- une grande mère, 2 parents et rnd(3) enfants
-Il faudrait lier le foyer au bâtiment
-Créer les agenda: enfant 8 à l’école , 17h maison
-Et faire 2 premières politiques : tout autorisé et 
-* interdire déplacement des enfants à l école
-Agenda parent : pareil que enfant avec working place
-Et proba d infection dans bâtiment
-Désolé j écris en réfléchissant, c est un peu le bazar 😀
-On essaye avec 1 fichier de paramètres et constantes 
-* globales et un fichier par species et 1 fichier par experiment ?
 ***/
 model Species_Individual
 import "../Constants.gaml"
@@ -48,7 +30,7 @@ species Individual skills: [moving] {
 
 	reflex become_infected when: status = exposed and (tick >= incubation_time) {
 		if (flip(epsilon)) {
-			status <- "asymptomatic";
+			status <- asymptomatic;
 			recovery_time <- rnd(max_recovery_time);
 			tick <- 0;
 		} else if (flip(sigma)) {
@@ -59,12 +41,12 @@ species Individual skills: [moving] {
 
 	}
 
-	reflex recovering when: (status = "asymptomatic" or status = infected) and (tick >= recovery_time) {
+	reflex recovering when: (status = asymptomatic or status = infected) and (tick >= recovery_time) {
 		if (flip(delta)) {
-			status <- "recovered";
+			status <- recovered;
 			tick <- 0;
 		} else {
-			status <- "death";
+			status <- death;
 			tick <- 0;
 		}
 
