@@ -50,6 +50,13 @@ experiment "Abstract Experiment" virtual:true{
 	
 	output {
 		display "d1" synchronized: false type: opengl background: color.darker.darker virtual: true draw_env: false {
+			
+			overlay position: { 5, 5 } size: { 700 #px, 100 #px } background: # black transparency: 0.5 border: #black rounded: true
+            {
+           		draw world.name + (" - Day " + int((current_date - starting_date) /  #day)) + (" - Cases " + world.number_of_infected) font: default perspective: true at: { 20#px, 20#px} anchor: #top_left color: #white;// world.color.brighter;
+			
+        
+           }
 			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../../data/Default/satellite.png"  refresh: false;
 			
 			//species Boundary {
@@ -58,9 +65,9 @@ experiment "Abstract Experiment" virtual:true{
 			species River {
 				draw shape color: color.darker empty:false ;
 			}
-			species Road {
+			/* species Road {
 				draw shape + 1 color: #red ;
-			}
+			}*/
 			species Building {
 				draw shape color:  #lightgrey empty: true width: 2;
 			}
@@ -68,9 +75,9 @@ experiment "Abstract Experiment" virtual:true{
 				draw square(20) color: status = exposed ? #yellow : (status = infected ? #orangered : #lime);
 				//draw circle(10) color: status = exposed ? #orange : (status = infected ? #red : #green);
 			}
-			species title position: {0,0.9} {
+			/*species title position: {0,0.9} {
 				draw world.name + (" - Day " + int((current_date - starting_date) /  #day)) + (" - Cases " + world.number_of_infected) font: default perspective: true anchor: #top_left color: #white;// world.color.brighter;
-			}
+			}*/
 		}
 
 		display "chart" virtual: true {
