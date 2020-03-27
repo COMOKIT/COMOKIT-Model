@@ -17,7 +17,7 @@ species Building {
 
 	aspect default {
 //		draw name color:#black;
-		draw shape color: type_activity="school" ? #blue : #gray empty: true;
+		draw shape color: #gray empty: true;
 	}
 
 }
