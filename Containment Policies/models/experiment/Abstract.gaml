@@ -9,7 +9,7 @@ model Corona
 import "../Global.gaml"
 
 global {
-	font default <- font("Helvetica", 24, #bold);
+	font default <- font("Helvetica", 18, #bold);
 	int number_of_infected <- 0 update: length(Individual where (each.status = "asymptomatic" or each.status = "infected"));
 
 	init { 
@@ -54,13 +54,13 @@ experiment "Abstract Experiment" virtual:true{
 			//	draw shape color: #yellow empty:false;	
 			//}
 			species River {
-				draw shape color: #white empty:false ;
+				draw shape color: color.darker empty:false ;
 			}
 			species Road {
 				draw shape + 1 color: #grey ;
 			}
 			species Building {
-				draw shape * 2 color:  #gray empty: true width: 2;
+				draw shape * 2 color:  #lightgrey empty: true width: 2;
 			}
 			species Individual {
 				draw square(20) color: status = exposed ? #yellow : (status = infected ? #orangered : #lime);

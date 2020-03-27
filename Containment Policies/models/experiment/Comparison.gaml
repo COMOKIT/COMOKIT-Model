@@ -44,7 +44,7 @@ experiment "Comparison" parent: "Abstract Experiment" {
 	
 	permanent {
 		
-		display "charts" toolbar: false {
+		display "charts" toolbar: false background: #black{
 			chart "Infected cases" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
 			loop s over: simulations {
 				data s.name value: s.number_of_infected color: s.color marker: false style: line thickness: 2; 
