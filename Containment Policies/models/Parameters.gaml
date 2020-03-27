@@ -21,24 +21,18 @@ global {
 
 	graph road_network;
 	float step<-1#h;
-	float transmission_rate<-0.5;
-	float max_incubation_time<-360.0;//15 * 24h
-	float max_recovery_time<-360.0;
-	float max_hospitalization_time<-360.0;
-	
+
 	float proba_free_rider;
-	
-	float alpha<-0.5;
-	float epsilon<-0.5;
-	float sigma<-0.5;
-	float delta<-0.9;
-	
-	float R0<-2.0;
 	
 	float N_grandfather<-0.2;
 	float M_grandmother<-0.3;
 	
 
+	//Epidemiological parameters
+	float contact_distance <- 2#m;
+	float successful_contact_rate <- 0.7;
+	float proportion_asymptomatic <- 0.3;
+	float proportion_dead_symptomatic <- 0.01;
 	
 	
 }

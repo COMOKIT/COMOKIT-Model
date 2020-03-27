@@ -26,7 +26,10 @@ experiment "No Containment" parent: "Abstract Experiment" {
 	output {
 		display "Main" parent: d1 {
 		}
-
+		display "Chart" parent: chart {
+		}
+		display "Cumulative incidence" parent: cumulative_incidence {
+		}
 	}
 
 }

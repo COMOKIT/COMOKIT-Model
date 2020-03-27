@@ -7,12 +7,13 @@
 model Constants
 
 global {
-	string susceptible <- "susceptible";
-	string exposed <- "exposed";
-	string asymptomatic <- "asymptomatic";
-	string infected <- "infected";
-	string recovered <- "recovered";
-	string death <- "death";
+	string susceptible <- "S";
+	string exposed <- "E";
+	string asymptomatic <- "A";
+	string symptomatic_without_symptoms <- "Ua";
+	string symptomatic_with_symptoms <- "Us";
+	string recovered <- "R";
+	string dead <- "D";
 
 	// Building types
 	string t_school 		<- "school";

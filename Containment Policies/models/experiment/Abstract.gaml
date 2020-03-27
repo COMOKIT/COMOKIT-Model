@@ -10,7 +10,7 @@ import "../Global.gaml"
 
 global {
 	font default <- font("Helvetica", 18, #bold);
-	int number_of_infected <- 0 update: length(Individual where (each.status = "asymptomatic" or each.status = "infected"));
+	int number_of_infected <- 0 update: length(Individual where (each.status = symptomatic_with_symptoms or each.status = symptomatic_without_symptoms or each.status = asymptomatic));
 
 	init { 
 		do global_init;
@@ -72,7 +72,7 @@ experiment "Abstract Experiment" virtual:true{
 				draw shape color:  #lightgrey empty: true width: 2;
 			}
 			species Individual {
-				draw square(20) color: status = exposed ? #yellow : (status = infected ? #orangered : #lime);
+				draw square(20) color: status = exposed ? #yellow : ((status = symptomatic_without_symptoms)or(status = symptomatic_with_symptoms)or(status = asymptomatic) ? #orangered : (status = recovered?#blue:#lime));
 				//draw circle(10) color: status = exposed ? #orange : (status = infected ? #red : #green);
 			}
 			/*species title position: {0,0.9} {
@@ -82,11 +82,18 @@ experiment "Abstract Experiment" virtual:true{
 
 		display "chart" virtual: true {
 			chart "sir" background: #white axes: #black {
-			//				data "susceptible" value: length(Individual where (each.status="susceptible")) color: #green marker: false style: line;
-				data "exposed" value: length(Individual where (each.status = "exposed")) color: #orange marker: false style: line;
-				data "infected" value: length(Individual where (each.status = "asymptomatic" or each.status = "infected")) color: #red marker: false style: line;
-				data "recovered" value: length(Individual where (each.status = "recovered")) color: #blue marker: false style: line;
-				data "dead" value: length(Individual where (each.status = "death")) color: #black marker: false style: line;
+				data "susceptible" value: length(Individual where (each.status=susceptible)) color: #green marker: false style: line;
+				data "exposed" value: length(Individual where (each.status = exposed)) color: #orange marker: false style: line;
+				data "infected" value: length(Individual where (each.status = asymptomatic or each.status=symptomatic_without_symptoms or each.status = symptomatic_with_symptoms)) color: #red marker: false style: line;
+				data "recovered" value: length(Individual where (each.status = recovered)) color: #blue marker: false style: line;
+				data "dead" value: length(Individual where (each.status = dead)) color: #black marker: false style: line;
+			}
+
+		}
+		
+		display "cumulative_incidence" virtual: true {
+			chart "cumulative incidence" background: #white axes: #black {
+				data "cumulative incidence" value: total_number_of_infected color: #red marker: false style: line;
 			}
 
 		}

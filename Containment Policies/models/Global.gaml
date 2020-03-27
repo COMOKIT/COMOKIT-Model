@@ -17,10 +17,12 @@ import "species/Authority.gaml"
 import "species/Activity.gaml"
 import "Constants.gaml"
 import "Parameters.gaml"
+import "Monitors.gaml"
 
 global {
 	geometry shape <- envelope(shp_buildings);
-
+	
+	
 	action global_init {
 		do create_activities;
 		if (shp_river != nil) {
@@ -50,6 +52,7 @@ global {
 				last_activity <- a_home[0];
 				ageCategory <- 23 + rnd(30);
 				sex <- 0;
+				status <- "S";
 				home <- myself;
 				office <- any(Building - home);
 				location <- (home.location);
@@ -61,6 +64,7 @@ global {
 				last_activity <- a_home[0];
 				ageCategory <- 23 + rnd(30);
 				sex <- 1;
+				status <- "S";
 				home <- myself;
 				office <- any(Building - home);
 				location <- (home.location);
@@ -71,6 +75,7 @@ global {
 			create Individual number: rnd(3) {
 				last_activity <- a_home[0];
 				ageCategory <- rnd(22);
+				status <- "S";
 				sex <- rnd(1);
 				home <- myself;
 				school <- any(Building where (each.type_activity = t_school) - home);
@@ -120,14 +125,9 @@ global {
 		}
 
 		ask 2 among Individual {
-			incubation_time <- rnd(max_incubation_time);
-			status <- exposed;
+			do defineNewCase;
 		}
 
-		ask 2 among Individual {
-			recovery_time <- rnd(max_recovery_time);
-			status <- infected;
-		}
 
 	}
 
