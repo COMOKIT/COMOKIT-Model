@@ -50,6 +50,8 @@ experiment "Abstract Experiment" virtual:true{
 	
 	output {
 		display "d1" synchronized: false type: opengl background: color.darker.darker virtual: true draw_env: false {
+			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../../data/Default/satellite.png"  refresh: false;
+			
 			//species Boundary {
 			//	draw shape color: #yellow empty:false;	
 			//}
@@ -57,17 +59,17 @@ experiment "Abstract Experiment" virtual:true{
 				draw shape color: color.darker empty:false ;
 			}
 			species Road {
-				draw shape + 1 color: #grey ;
+				draw shape + 1 color: #red ;
 			}
 			species Building {
-				draw shape * 2 color:  #lightgrey empty: true width: 2;
+				draw shape color:  #lightgrey empty: true width: 2;
 			}
 			species Individual {
 				draw square(20) color: status = exposed ? #yellow : (status = infected ? #orangered : #lime);
 				//draw circle(10) color: status = exposed ? #orange : (status = infected ? #red : #green);
 			}
 			species title position: {0,0.9} {
-				draw world.name + (" - Day " + int((current_date - starting_date) /  #day)) + (" - Cases " + world.number_of_infected) font: default perspective: true anchor: #top_left color: world.color.brighter;
+				draw world.name + (" - Day " + int((current_date - starting_date) /  #day)) + (" - Cases " + world.number_of_infected) font: default perspective: true anchor: #top_left color: #white;// world.color.brighter;
 			}
 		}
 
