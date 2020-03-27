@@ -17,19 +17,19 @@ global
 	//Time between exposure and symptom onset (Lognormal)
 	float get_incubation_time
 	{
-		return rnd(3,14);
+		return lognormal_rnd(1.57,0.65)*24;
 	}
 	
 	//Time between onset and onset of secondary case (Normal)
 	float get_serial_interval
 	{
-		return rnd(6,18);
+		return gauss_rnd(3.96,3.75)*24;
 	}
 	
-	//Time between onset and recovery (Gamma)
+	//Time between onset and recovery (Lognormal)
 	float get_infectious_time
 	{
-		return rnd(16,28);
+		return lognormal_rnd(log(20.8),0.34)*24;
 	}
 	
 	bool is_asymptomatic

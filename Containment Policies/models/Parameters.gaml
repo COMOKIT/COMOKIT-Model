@@ -29,8 +29,9 @@ global {
 	
 
 	//Epidemiological parameters
+	float R0 <- 2.5;
 	float contact_distance <- 2#m;
-	float successful_contact_rate <- 0.7;
+	float successful_contact_rate <- R0 * 1/(14.69973*24);
 	float proportion_asymptomatic <- 0.3;
 	float proportion_dead_symptomatic <- 0.01;
 	

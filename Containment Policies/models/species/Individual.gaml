@@ -129,12 +129,12 @@ species Individual  {
 	
 	reflex executeAgenda {
 		Activity act <- agenda_week[current_date.hour];
-		if (act != nil) { 
+		if (act != nil) {
+			last_activity <- act;
 			if (Authority[0].allows(self, act)) {
 				bound <- any(act.find_target(self));
 				location <- any_location_in(bound);
 			}
-
 		}
 	}
 
