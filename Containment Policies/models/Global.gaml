@@ -21,7 +21,7 @@ import "Parameters.gaml"
 global {
 		geometry shape <- envelope(shp_buildings);
 
-	init {
+	action global_init {
 		do create_activities;
 		
 		create River from: river_shapefile;
@@ -108,6 +108,10 @@ global {
 		ask 2 among Individual {
 			incubation_time <- rnd(max_incubation_time);
 			status <- exposed;
+		}
+		ask 2 among Individual {
+			recovery_time <- rnd(max_recovery_time);
+			status <- infected;
 		}
 		
 	}

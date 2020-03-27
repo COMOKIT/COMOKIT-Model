@@ -37,8 +37,20 @@ species Authority {
 				allowed_activities[string(s)] <- false;
 			}
 		}
-		return Policy(result);
+		return first(result);
 	}
+	
+	SpatialPolicy createQuarantinePolicyAtRadius(point loc, float radius){		
+		create SpatialPolicy returns: result {
+			loop s over: Activity.subspecies {
+				allowed_activities[string(s)] <- false;
+			}
+		}
+		SpatialPolicy p<-first(result);
+		p.application_area<-circle(radius) at_location loc;
+		return p;
+	}
+	
 	Policy createNoMeetingPolicy {
 		create Policy returns: result {
 			allowed_activities[a_school.name] <- false;
@@ -52,7 +64,7 @@ species Authority {
 			allowed_activities[a_restaurant.name] <- false;
 		}
 
-		return Policy(first(result));
+		return (first(result));
 	}
 
 	Policy createPolicy (bool school, bool work) {
@@ -61,7 +73,7 @@ species Authority {
 			allowed_activities[a_work.name] <- work;
 		}
 
-		return Policy(first(result));
+		return (first(result));
 	}
 
 	bool allows (Individual i, Activity activity) { 
