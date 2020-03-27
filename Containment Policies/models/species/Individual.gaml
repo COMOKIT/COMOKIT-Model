@@ -22,7 +22,7 @@ global
 }
 
 
-species Individual skills: [moving] {
+species Individual  {
 	int ageCategory;
 	int sex; //0 M 1 F
 	bool wearMask;
@@ -74,16 +74,10 @@ species Individual skills: [moving] {
 
 	reflex infectOthers when: self.is_infectious()
 	{
-		list<Individual> contacts <- (Individual at_distance contact_distance);
-		 if (length(contacts) > 0) {
-		 	ask contacts where(each.status=susceptible)
+		ask (Individual where ((flip(successful_contact_rate)) and (each.status = susceptible) and ((each.location distance_to self.location) <= contact_distance)))
 		 	{
-		 		if(flip(successful_contact_rate))
-				{
 					do defineNewCase;
-				}
 		 	}
-		 }
 	}
 	
 	reflex becomeInfectious when: self.is_exposed() and(tick >= incubation_time)
@@ -142,7 +136,6 @@ species Individual skills: [moving] {
 			}
 
 		}
-		do wander bounds: bound speed: 0.001;
 	}
 
 	reflex updateDiseaseCycle when:(status!=recovered)or(status!=dead) {

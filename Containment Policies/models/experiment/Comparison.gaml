@@ -12,7 +12,7 @@ import "Abstract.gaml"
 
 
 
-experiment "Comparison" parent: "Abstract Experiment" {
+experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
 	action _init_ {
 		string shape_path <- self.ask_dataset_path();
