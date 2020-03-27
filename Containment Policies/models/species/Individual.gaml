@@ -22,7 +22,7 @@ global
 }
 
 
-species Individual  {
+species Individual{
 	int ageCategory;
 	int sex; //0 M 1 F
 	bool wearMask;
@@ -52,10 +52,11 @@ species Individual  {
 		self.serial_interval <- world.get_serial_interval();
 		self.infectious_time <- world.get_infectious_time();
 		
+		
 		if(serial_interval<0)
 		{
-			infectious_time <- infectious_time - serial_interval;
-			incubation_time <- incubation_time + serial_interval;
+			self.infectious_time <- self.infectious_time - self.serial_interval;
+			self.incubation_time <- self.incubation_time + self.serial_interval;
 		}
 		self.tick <- 0;
 	}
@@ -74,7 +75,7 @@ species Individual  {
 
 	reflex infectOthers when: self.is_infectious()
 	{
-		ask (Individual where ((flip(successful_contact_rate)) and (each.status = susceptible) and ((each.location distance_to self.location) <= contact_distance)))
+		ask (Individual where ((flip(successful_contact_rate)) and (each.status = susceptible) and (each.bound = self.bound)))
 		 	{
 					do defineNewCase;
 		 	}
