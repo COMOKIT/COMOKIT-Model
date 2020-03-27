@@ -14,7 +14,6 @@ import "Abstract.gaml"
 
 experiment "Comparison" parent: "Abstract Experiment" {
 
-	file grid_data <- image_file('../data/Vinh Phuc/satellite_modified.tif') ;
 	action _init_ {
 		string shape_path <- self.ask_dataset_path();
 		create simulation with: [dataset::shape_path] {
@@ -24,22 +23,22 @@ experiment "Comparison" parent: "Abstract Experiment" {
 			}
 
 		}
-//
-//		create simulation with: [dataset::shape_path]{
-//			name <- "No Containment";
-//			ask Authority { 
-//				policies << noContainment;
-//			}
-//
-//		}
-//
-//		create simulation with: [dataset::shape_path]{
-//			name <- "Home Containment";
-//			ask Authority {
-//				policies << lockDown;
-//			}
-//
-//		}
+
+		create simulation with: [dataset::shape_path]{
+			name <- "No Containment";
+			ask Authority { 
+				policies << noContainment;
+			}
+
+		}
+
+		create simulation with: [dataset::shape_path]{
+			name <- "Home Containment";
+			ask Authority {
+				policies << lockDown;
+			}
+
+		}
 
 	}
 	
@@ -57,8 +56,8 @@ experiment "Comparison" parent: "Abstract Experiment" {
 
 	output {
 		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false;
-		display "Main" {
-			image grid_data;
+		display "Main" parent: d1 {
+
 		}
 
 	}
