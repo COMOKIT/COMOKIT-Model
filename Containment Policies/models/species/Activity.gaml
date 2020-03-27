@@ -5,6 +5,9 @@
 * Tags: Tag1, Tag2, TagN
 * 
 ***/
+
+@no_experiment
+
 model Species_Activity
 
 import "Individual.gaml"

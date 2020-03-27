@@ -4,12 +4,18 @@
 * Description: 
 * Tags: Tag1, Tag2, TagN
 ***/
+
+
+@no_experiment
 model Species_Individual
 
 import "../Constants.gaml"
 import "../Parameters.gaml"
 import "Building.gaml"
 import "Activity.gaml"
+import "Authority.gaml"
+
+
 species Individual skills: [moving] {
 	int ageCategory;
 	int sex; //0 M 1 F

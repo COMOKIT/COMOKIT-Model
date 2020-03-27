@@ -4,6 +4,9 @@
 * Description: 
 * Tags: Tag1, Tag2, TagN
 ***/
+
+@no_experiment
+
 model Authority
 
 import "Policy.gaml"

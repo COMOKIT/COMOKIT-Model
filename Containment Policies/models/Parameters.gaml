@@ -6,18 +6,18 @@
 ***/
 model Parameters
 
-import "species/Authority.gaml"
 
 
 
 global {
-//	float seed <- 0.2955510396397566;
-	file river_shapefile <- file("../data/Ben Tre/kenhrach_region.shp");
-	file commune_shapefile <- file("../data/Ben Tre/ranhbinhdai_region.shp");
-//	file shp_roads <- file("../data/Ben Tre/roads_osm.shp");
-//	file shp_buildings <- file("../data/Ben Tre/nha_ThuaDuc_region.shp");
-	file shp_roads <- file("../data/Vinh Phuc/roads.shp");
-	file shp_buildings <- file("../data/Vinh Phuc/buildings.shp");
+	
+	
+	string dataset <- "../../data/Vinh Phuc/"; // default
+	
+	file shp_river <- file_exists(dataset+"river.shp") ? shape_file(dataset+"river.shp"):nil;
+	file shp_commune <- file_exists(dataset+"commune.shp") ? shape_file(dataset+"commune.shp"):nil;
+	file shp_roads <- file_exists(dataset+"roads.shp") ? shape_file(dataset+"roads.shp"):nil;
+	file shp_buildings <- file_exists(dataset+"buildings.shp") ? shape_file(dataset+"buildings.shp"):nil;
 
 	graph road_network;
 	float step<-1#h;
@@ -38,12 +38,7 @@ global {
 	float N_grandfather<-0.2;
 	float M_grandmother<-0.3;
 	
+
 	
-	Authority authority;
-	
-//	init {
-//		write "Creating Activities";
-//		do create_activities;
-//	}
 	
 }

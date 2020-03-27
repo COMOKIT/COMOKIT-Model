@@ -4,6 +4,9 @@
 * Description: 
 * Tags: Tag1, Tag2, TagN
 ***/
+
+@no_experiment
+
 model Policy
 
 import "Individual.gaml"

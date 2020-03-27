@@ -10,27 +10,13 @@ import "../Global.gaml"
 import "Abstract.gaml"
 
 
-global {
 
-	init { 
-		do global_init;
-		do create_authority;
-		create title;
-	}
-
-}
-
-species title {
-	point location <- {0,0};
-	aspect default {
-		draw world.name font: font("Helvetica", 36, #bold) perspective: true anchor: #top_left;
-	}
-}
 
 experiment "Comparison" parent: "Abstract Experiment" {
 
-	init {
-		ask simulation {
+	action _init_ {
+		string shape_path <- self.ask_dataset_path();
+		create simulation with: [dataset::shape_path] {
 			name <- "School closed";
 			ask Authority {
 				policies << noSchool;
@@ -38,16 +24,16 @@ experiment "Comparison" parent: "Abstract Experiment" {
 
 		}
 
-		create simulation {
+		create simulation with: [dataset::shape_path]{
 			name <- "No Containment";
-			ask Authority {
+			ask Authority { 
 				policies << noContainment;
 			}
 
 		}
 
-		create simulation {
-			name <- "Full Containment";
+		create simulation with: [dataset::shape_path]{
+			name <- "Home Containment";
 			ask Authority {
 				policies << lockDown;
 			}
@@ -55,12 +41,22 @@ experiment "Comparison" parent: "Abstract Experiment" {
 		}
 
 	}
+	
+	permanent {
+		
+		display "charts" toolbar: false {
+			chart "Infected cases" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
+			loop s over: simulations {
+				data s.name value: s.number_of_infected color: s.color marker: false style: line thickness: 2; 
+				
+			}}
+		}
+	}
 
 
 	output {
-		layout #split consoles: false editors: false navigator: false tray: false tabs: false;
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false;
 		display "Main" parent: d1 {
-			species title position: {0.1,0.8};
 
 		}
 
