@@ -135,15 +135,13 @@ species Individual skills: [moving] {
 	
 	reflex executeAgenda {
 		Activity act <- agenda_week[current_date.hour];
-		if (act != nil) {
-			last_activity <- act;
-		}
+		if (act != nil) { 
+			if (Authority[0].allows(self, act)) {
+				bound <- any(act.find_target(self));
+				location <- any_location_in(bound);
+			}
 
-		if (Authority[0].allows(self, last_activity)) {
-			bound <- any(last_activity.find_target(self));
-			location <- any_location_in(bound);
 		}
-
 		do wander bounds: bound speed: 0.001;
 	}
 
