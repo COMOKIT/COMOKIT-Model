@@ -43,6 +43,21 @@ global {
 	map<int,int> max_mobility;
 	graph mobility_graph <- spatial_graph([]);
 	
+	// Epidemio -----------
+	
+	string base_url_timeseries <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/";
+	
+	string confirmed_file <- "time_series_covid19_confirmed_global.csv";
+	string dead_file <- "time_series_covid19_deaths_global.csv";
+	string recovered_file <- "time_series_covid19_recovered_global.csv";
+	
+	file cf <- text_file(base_url_timeseries+confirmed_file); 
+	string CONFIRMED <- "Confirmed case";
+	file df <- text_file(base_url_timeseries+dead_file);
+	string DEAD <- "Dead case";
+	file rf <- text_file(base_url_timeseries+recovered_file);
+	string RECOVERED <- "Recovered case";  
+	
 	// Other --------------
 	
 	list<rgb> demo_palette <- [rgb(255,255,178),rgb(254,217,118),rgb(254,178,76),
@@ -84,7 +99,7 @@ global {
 		if country one_matches (each.mob_code=nil or each.mob_code="") { 
 			list<country> cs <- country where (each.mob_code=nil or each.mob_code="");
 			write "List of unkown country mobility: "+sample(cs collect (each.CNTRY_NAME));
-			error "There is "+length(cs)+" countries without mobility code";
+			//error "There is "+length(cs)+" countries without mobility code";
 		}
 		
 		// Read trans-border mobilities and bound them to countries
@@ -100,7 +115,10 @@ global {
 		}
 		
 		// Build mobility graph
-		do build_mobility_graph(last(mob_years));
+		do build_mobility_graph(last(mob_years),false);
+		
+		// Build covid19 epidemiological history
+		do build_epidemic_history();
 		
 		// Assigne color to country for population
 		min_pop <- min(country collect (each.pop));
@@ -112,26 +130,85 @@ global {
 		
 	}
 	
-	action build_mobility_graph(int year) {
+	/*
+	 * Build a graph using cross border estimateed mobilities in a given year
+	 * TODO : fix the graph/weights
+	 */
+	action build_mobility_graph(int year, bool debug <- true) {
 		ask country { mobility_graph <- mobility_graph add_node self; }
 		map<pair<point,point>,int> mobility_weights;
 		ask country { 
-			loop linked over:mobility_map[year].keys { 
-				mobility_graph <- mobility_graph add_edge (self::linked);
-				mobility_weights[mobility_graph edge_between (self::linked)] <- mobility_map[year][linked];
+			loop linked over:mobility_map[year].keys {
+				if mobility_map[year][linked] > 0 { 
+					mobility_graph <- mobility_graph add_edge (self::linked);
+					mobility_weights[link(self,linked)] <- mobility_map[year][linked];
+				}
 			} 
 		}
 		mobility_graph <- mobility_graph with_weights mobility_weights;
 		
-		loop i from:0 to:10 {
-			country o <- any(country);
-			country d <- any(country-o);
-			write "Does mobility graph contains an edge between "+o.mob_code+" and "+d.mob_code+" : "+
-				mobility_graph contains_edge link(o,d);
-			write "There have been "+ mobility_graph weight_of link(o,d) +" estimated trips between "
-				+o.mob_code+" and "+d.mob_code;
-			write "As of "+sample(mobility_weights[mobility_graph edge_between (o::d)]);
+		if debug {
+			loop k over:sample(mobility_weights.keys,10,false) {
+				country o <- country first_with (each.location=first(k));
+				country d <- country first_with (each.location=last(k));
+				write "Does mobility graph contains an edge between "+o.mob_code+" and "+d.mob_code+" : "+
+					mobility_graph contains_edge k;
+				write "Graph weight between the two country: "+ sample(mobility_graph weight_of k);
+				write "Weights report on the map "+sample(mobility_weights[k]);
+			}
 		}
+	}
+	
+	/*
+	 * Build epidemiological history for countries around the world using data from:
+	 * https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data
+	 */
+	action build_epidemic_history {
+		
+		matrix mat_cc <- csv_file(cf);
+		matrix mat_dc <- csv_file(df);
+		
+		if not(mat_cc.rows = mat_dc.rows and mat_cc.columns = mat_dc.columns) {
+			error "Confirmed and dead data do not match";
+		}
+			
+		list<date> history;
+		loop j from:4 to:mat_cc.columns-1{
+			if mat_cc[j,0]!=nil {
+				list<string> d <- string(mat_cc[j,0]) split_with "/";
+				history <+ date([int("20"+last(d)),int(first(d)),int(d[1])]);
+			}
+		}
+		
+		list<string> c_name;
+		loop i from:1 to:mat_cc.rows-1 {
+			c_name <+ mat_cc[1,i];
+		}
+		
+		loop i from:1 to:mat_cc.rows-1 {
+			country c <- country first_with (country_match(each.CNTRY_NAME,mat_cc[1,i]));
+			if c!=nil {
+				loop j from:4 to:mat_cc.columns-1 {
+					try {
+						date the_date <- history[j-4];
+						if c.epi_history[the_date]=nil { c.epi_history[the_date] <- []; }
+						else { 
+							c.epi_history[the_date][CONFIRMED] <- int(mat_cc[j,i]);
+							c.epi_history[the_date][DEAD] <- int(mat_dc[j,i]);
+						}
+					} catch {
+						if length(history) > j-4 { error "Error reading epistemological history";}
+					}
+				} 
+			} else {
+				if not(nan contains mat_cc[1,i]) {
+					error "No country match for epidemiological record of "+mat_cc[1,i];
+				}
+			}
+		}
+		
+		matrix mat_rc <- csv_file(rf);
+		
 	}
 	
 	/*
@@ -159,6 +236,29 @@ global {
 		int max_bound <- round(p_value) = min_bound ? round(p_value)+1 : round(p_value);
 		return blend(palette[min_bound],palette[max_bound],1-relica);
 	}
+	
+	list<list<string>> cc <- [
+		["US","United States"],["Myanmar","Burma"],["Tanzania","United Republic of Tanzania"],
+		["Vietnam","Viet Nam"],["Laos","Lao People's Democratic Republic"],["Cabo Verde","Cape Verde"],
+		["Cote d'Ivoire","Ivory Coast"],["Congo (Brazzaville)","Congo"],["Bahamas, The","Bahamas"],
+		["Congo (Kinshasa)","Zair","Democratic Republic of the Congo"],["Gambia, The","Gambia"],
+		["Iran","Iran (Islamic Republic of)"],["Moldova","Republic of Moldova"],["Saint Lucia","St. Lucia"],
+		["Korea","Republic of Korea","\"Korea"],["Taiwan","Taiwan*"],["West Bank and Gaza","Gaza Strip"],
+		["St. Vincent and the Grenadines","Saint Vincent and the Grenadines"],
+		["St. Kitts and Nevis","Saint Kitts and Nevis"]
+	];
+	
+	list<string> nan <- ["Diamond Princess","Holy See","Timor-Leste","Antarctica","Kosovo"];
+	
+	/*
+	 * Cope with the various country names across data sources
+	 */
+	bool country_match(string c1, string c2) {
+		if lower_case(c1) = lower_case(c2) {return true;}
+		list<string> cl <- cc first_with (each contains c1);
+		return cl = nil ? false : cl contains c2;
+	}
+	
 }
 
 /*
@@ -178,6 +278,8 @@ species country {
 	map<int,map<country,int>> mobility_map;
 	
 	// ---------------
+	// Epidemio
+	map<date,map<string,int>> epi_history;
 	// SIR
 	
 	////////////////////
@@ -186,6 +288,7 @@ species country {
 	
 	init {
 		loop y over:mob_years { mobility_map[y] <- []; }
+		epi_history <- [];
 	}
 	
 	// ---------------
