@@ -39,13 +39,16 @@ global {
 		road_network <- as_edge_graph(Road);
 		list<float> tmp <- building_types collect (1 / length(building_types));
 		if (shp_buildings != nil) {
-			create Building from: shp_buildings {
-				type_activity <- building_types[rnd_choice(tmp)];
+			create Building from: shp_buildings with: [type_activity::string(read("type"))]{
+				if(type_activity = "") {
+					type_activity <- "home";
+				}
 			}
-
 		}
 
-		ask Building {
+		list<Building> homes <- Building where (each.type_activity = "home");
+
+		ask homes {
 		//father
 			create Individual {
 				last_activity <- a_home[0];
@@ -85,7 +88,7 @@ global {
 
 		}
 
-		ask (N_grandfather * length(Building)) among Building {
+		ask (N_grandfather * length(Building)) among homes {
 			create Individual {
 				last_activity <- a_home[0];
 				ageCategory <- 55 + rnd(50);
@@ -98,7 +101,7 @@ global {
 
 		}
 
-		ask (M_grandmother * length(Building)) among Building {
+		ask (M_grandmother * length(Building)) among homes {
 			create Individual {
 				last_activity <- a_home[0];
 				ageCategory <- 50 + rnd(50);
