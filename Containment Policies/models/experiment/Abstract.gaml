@@ -51,12 +51,12 @@ experiment "Abstract Experiment" virtual:true{
 	output {
 		display "d1" synchronized: false type: opengl background: color.darker.darker virtual: true draw_env: false {
 			
-			overlay position: { 5, 5 } size: { 700 #px, 100 #px } background: # black transparency: 0.5 border: #black rounded: true
-            {
-           		draw world.name + (" - Day " + int((current_date - starting_date) /  #day)) + (" - Cases " + world.number_of_infected) font: default perspective: true at: { 20#px, 20#px} anchor: #top_left color: #white;// world.color.brighter;
-			
-        
-           }
+//			overlay position: { 5, 5 } size: { 700 #px, 100 #px } background: # black transparency: 0.5 border: #black rounded: true
+//            {
+//           		draw world.name + (" - Day " + int((current_date - starting_date) /  #day)) + (" - Cases " + world.number_of_infected) font: default perspective: true at: { 20#px, 20#px} anchor: #top_left color: #white;// world.color.brighter;
+//			
+//        
+//           }
 			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../../data/Default/satellite.png"  refresh: false;
 			
 			//species Boundary {

@@ -16,7 +16,7 @@ global {
 		do global_init;
 		do create_authority;
 		ask Authority {
-			loop i over: Individual where (each.status=infected){				
+			loop i over: Individual where (each.status=asymptomatic or each.status=symptomatic_without_symptoms or each.status=symptomatic_with_symptoms){				
 				policies << createQuarantinePolicyAtRadius(i.location, 200#m);
 			}
 		}

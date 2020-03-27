@@ -17,7 +17,6 @@ import "species/Authority.gaml"
 import "species/Activity.gaml"
 import "Constants.gaml"
 import "Parameters.gaml"
-import "Monitors.gaml"
 
 global {
 	geometry shape <- envelope(shp_buildings);

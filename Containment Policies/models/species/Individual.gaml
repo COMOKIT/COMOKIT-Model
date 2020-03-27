@@ -12,10 +12,14 @@ model Species_Individual
 import "../Constants.gaml"
 import "../Parameters.gaml"
 import "../Functions.gaml"
-import "../Monitors.gaml"
 import "Building.gaml"
 import "Activity.gaml"
 import "Authority.gaml"
+
+global
+{
+	int total_number_of_infected <- 0;
+}
 
 
 species Individual skills: [moving] {
@@ -42,7 +46,7 @@ species Individual skills: [moving] {
 	
 	action defineNewCase
 	{
-		world.total_number_of_infected <- world.total_number_of_infected +1;
+		total_number_of_infected <- total_number_of_infected +1;
 		self.status <- exposed;
 		self.incubation_time <- world.get_incubation_time();
 		self.serial_interval <- world.get_serial_interval();
@@ -55,8 +59,20 @@ species Individual skills: [moving] {
 		}
 		self.tick <- 0;
 	}
+	
+	bool is_infectious {
+		return [asymptomatic,symptomatic_without_symptoms, symptomatic_with_symptoms ] contains status;
+	}
+	
+	bool is_exposed {
+		return status = exposed;
+	}
+	
+	bool is_infected {
+		return self.is_infectious() or self.is_exposed();
+	}
 
-	reflex infectOthers when: (status=asymptomatic)or(status=symptomatic_without_symptoms)or(status=symptomatic_with_symptoms)
+	reflex infectOthers when: self.is_infectious()
 	{
 		list<Individual> contacts <- (Individual at_distance contact_distance);
 		 if (length(contacts) > 0) {
@@ -70,7 +86,7 @@ species Individual skills: [moving] {
 		 }
 	}
 	
-	reflex becomeInfectious when: (status=exposed)and(tick >= incubation_time)
+	reflex becomeInfectious when: self.is_exposed() and(tick >= incubation_time)
 	{
 		if(world.is_asymptomatic())
 		{
