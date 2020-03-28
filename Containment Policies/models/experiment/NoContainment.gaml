@@ -17,9 +17,7 @@ global {
 		ask Authority {
 			policies << noContainment;
 		}
-
 	}
-
 }
 
 experiment "No Containment" parent: "Abstract Experiment" {

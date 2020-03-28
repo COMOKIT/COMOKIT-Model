@@ -19,6 +19,8 @@ import "Authority.gaml"
 global
 {
 	int total_number_of_infected <- 0;
+	int total_number_reported <- 0;
+	int total_number_individual <- 0;
 }
 
 
@@ -34,6 +36,7 @@ species Individual{
 	
 	
 	string status; //S,E,Ua,Us,A,R,D
+	string report_status; //Not-tested, Negative, Positive
 	float incubation_time; 
 	float infectious_time;
 	float serial_interval;
@@ -41,8 +44,52 @@ species Individual{
 	
 	map<int, Activity> agenda_week;
 	Activity last_activity;
-	bool free_rider;
+	bool free_rider <- false;
 	int tick <- 0;
+	
+	
+	action testIndividual
+	{
+		if(self.is_infected())
+		{
+			if(flip(probability_true_positive))
+			{
+				report_status <- tested_positive;
+				total_number_reported <- total_number_reported+1;
+			}
+			else
+			{
+				report_status <- tested_negative;
+			}
+		}
+		else
+		{
+			if(flip(probability_true_negative))
+			{
+				report_status <- tested_negative;
+			}
+			else
+			{
+				report_status <- tested_positive;
+				total_number_reported <- total_number_reported+1;
+			}
+		}
+	}
+
+	action updateWearMask
+	{
+		if(free_rider)
+		{
+			wearMask <- false;
+		}
+		else
+		{
+			if(flip(proportion_wearing_mask))
+			{
+				wearMask <- true;
+			}
+		}
+	}
 	
 	action defineNewCase
 	{
@@ -80,9 +127,13 @@ species Individual{
 	reflex infectOthers when: self.is_infectious()
 	{
 		float effective_successful_contact_rate <- successful_contact_rate;
-		if((self.is_asymptomatic())or(self.wearMask))
+		if(self.is_asymptomatic())
 		{
 			effective_successful_contact_rate <- effective_successful_contact_rate * factor_contact_rate_asymptomatic;
+		}
+		if(self.wearMask)
+		{
+			effective_successful_contact_rate <- effective_successful_contact_rate * factor_contact_rate_wearing_mask;
 		}
 		ask (Individual where ((flip(effective_successful_contact_rate)) and (each.status = susceptible) and (each.bound = self.bound)))
 	 	{
@@ -115,7 +166,7 @@ species Individual{
 	reflex becomeSymptomatic when: (status=symptomatic_without_symptoms) and (tick>=serial_interval)
 	{
 		status <- symptomatic_with_symptoms;
-		wearMask <- flip(proportion_symptomatic_using_mask);
+		do testIndividual();
 	}
 	
 	reflex becomeNotInfectious when: ((status=symptomatic_with_symptoms) or (status=asymptomatic))and(tick>=infectious_time)
@@ -151,6 +202,7 @@ species Individual{
 
 	reflex updateDiseaseCycle when:(status!=recovered)or(status!=dead) {
 		tick <- tick + 1;
+		do updateWearMask();
 	}
 
 	aspect default {

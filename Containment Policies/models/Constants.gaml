@@ -14,6 +14,10 @@ global {
 	string symptomatic_with_symptoms <- "Us";
 	string recovered <- "R";
 	string dead <- "D";
+	
+	string not_tested <- "Not tested";
+	string tested_positive <- "Positive";
+	string tested_negative <- "Negative";
 
 	// Building types
 	string t_school 		<- "school";
