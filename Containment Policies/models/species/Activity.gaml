@@ -10,8 +10,11 @@
 
 model Species_Activity
 
+import "../Global.gaml"
+
 import "Individual.gaml"
 import "Building.gaml"
+
 
 global {
 	// A map of all possible activities
@@ -41,7 +44,7 @@ species Activity {
 		draw shape + 10 color: #black;
 	}
 
-}
+} 
 
 species a_work parent: Activity {
 	list<Building> find_target (Individual i) {
@@ -67,9 +70,9 @@ species a_home parent: Activity {
 species a_shop parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = t_shop) closest_to self];
+			return [shops closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = t_shop));
+			return nb_candidat among shops;
 		}
 
 	}
@@ -79,9 +82,9 @@ species a_shop parent: Activity {
 species a_market parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = t_market) closest_to self];
+			return [markets closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = t_market));
+			return nb_candidat among markets;
 		}
 
 	}
@@ -91,9 +94,9 @@ species a_market parent: Activity {
 species a_supermarket parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = t_supermarket) closest_to self];
+			return [supermarkets closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = t_supermarket));
+			return nb_candidat among supermarkets;
 		}
 
 	}
@@ -103,9 +106,9 @@ species a_supermarket parent: Activity {
 species a_bookstore parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = t_bookstore) closest_to self];
+			return [bookstores closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = t_bookstore));
+			return nb_candidat among bookstores;
 		}
 
 	}
@@ -115,9 +118,9 @@ species a_bookstore parent: Activity {
 species a_movie parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = t_cinema) closest_to self];
+			return [cinemas closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = t_cinema));
+			return nb_candidat among cinemas;
 		}
 
 	}
@@ -127,9 +130,9 @@ species a_movie parent: Activity {
 species a_game parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = t_gamecenter) closest_to self];
+			return [game_centers closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = t_gamecenter));
+			return nb_candidat among game_centers;
 		}
 
 	}
@@ -139,9 +142,9 @@ species a_game parent: Activity {
 species a_karaoke parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = t_karaoke) closest_to self];
+			return [karaokes closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = t_karaoke));
+			return nb_candidat among karaokes;
 		}
 
 	}
@@ -151,9 +154,9 @@ species a_karaoke parent: Activity {
 species a_restaurant parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = t_restaurant) closest_to self];
+			return [restaurants closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = t_restaurant));
+			return nb_candidat among restaurants;
 		}
 
 	}
@@ -163,9 +166,9 @@ species a_restaurant parent: Activity {
 species a_coffee parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = t_coffeeshop) closest_to self];
+			return [coffeeshops closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = t_coffeeshop));
+			return nb_candidat among coffeeshops;
 		}
 
 	}
@@ -175,16 +178,15 @@ species a_coffee parent: Activity {
 species a_farm parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = t_farm) closest_to self];
+			return [farms closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = t_farm));
+			return nb_candidat among farms;
 		} //TODO land parcel? 
 	}
 
 }
 
 species a_trade parent: Activity {
-	list<Building> building_outside_commune <- Building where !(each overlaps world.shape);
 	list<Building> find_target (Individual i) {
 		return nb_candidat among (building_outside_commune);
 	}
@@ -194,9 +196,9 @@ species a_trade parent: Activity {
 species a_play parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = t_playground) closest_to self];
+			return [playgrounds closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = t_playground));
+			return nb_candidat among playgrounds;
 		}
 
 	}
@@ -206,9 +208,9 @@ species a_play parent: Activity {
 species a_visit parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = t_hospital) closest_to self];
+			return [hospitals closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = t_hospital));
+			return nb_candidat among hospitals;
 		}
 
 	}
@@ -218,9 +220,9 @@ species a_visit parent: Activity {
 species a_collect parent: Activity {
 	list<Building> find_target (Individual i) {
 		if (chose_nearest) {
-			return [Building where (each.type_activity = t_supplypoint) closest_to self];
+			return [supply_points closest_to self];
 		} else {
-			return nb_candidat among (Building where (each.type_activity = t_supplypoint));
+			return nb_candidat among supply_points;
 		}
 
 	}
