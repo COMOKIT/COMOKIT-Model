@@ -155,7 +155,8 @@ global {
 		ask 2 among Individual {
 			do defineNewCase;
 		}
-
+		
+		total_number_individual <- length(Individual);
 
 	}
 
