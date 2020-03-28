@@ -7,10 +7,7 @@
 model Corona
 
 import "../Global.gaml"
-import "Abstract.gaml"
-
-
-
+import "Abstract Experiment.gaml"
 
 experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 

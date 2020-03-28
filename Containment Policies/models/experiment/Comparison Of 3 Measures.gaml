@@ -7,7 +7,7 @@
 model Corona
 
 import "../Global.gaml"
-import "Abstract.gaml"
+import "Abstract Experiment.gaml"
 
 
 
@@ -16,7 +16,8 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
 	action _init_ {
 		string shape_path <- self.ask_dataset_path();
-		create simulation with: [dataset::shape_path] {
+		float simulation_seed <- rnd(2000.0);
+		create simulation with: [dataset::shape_path, seed::simulation_seed] {
 			name <- "School closed";
 			ask Authority {
 				policies << noSchool;
@@ -24,7 +25,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
 		}
 
-		create simulation with: [dataset::shape_path]{
+		create simulation with: [dataset::shape_path, seed::simulation_seed]{
 			name <- "No Containment";
 			ask Authority { 
 				policies << noContainment;
@@ -32,7 +33,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
 		}
 
-		create simulation with: [dataset::shape_path]{
+		create simulation with: [dataset::shape_path, seed::simulation_seed]{
 			name <- "Home Containment";
 			ask Authority {
 				policies << lockDown;

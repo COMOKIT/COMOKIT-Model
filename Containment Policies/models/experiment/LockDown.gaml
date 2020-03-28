@@ -8,7 +8,7 @@ model Corona
 
 import "../Global.gaml"
 import "../species/Policy.gaml"
-import "Abstract.gaml"
+import "Abstract Experiment.gaml"
 
 global {
 

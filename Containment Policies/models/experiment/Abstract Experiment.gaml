@@ -23,7 +23,7 @@ global {
 }
 
 species title {
-	point location <- {-world.shape.width/2,0};
+	point location <- {0, world.shape.height};
 }
 
 experiment "Abstract Experiment" virtual:true{
@@ -33,8 +33,7 @@ experiment "Abstract Experiment" virtual:true{
 	string ask_dataset_path {
 		int index <- -1;
 		string question <- "Available datasets : ";
-		list<string> dirs <- folder("../../data").contents  ;
-		dirs <- dirs where folder_exists("../../data/" + each);
+		list<string> dirs <- self.gather_dataset_names();
 		loop i from: 0 to: length(dirs) - 1 {
 			question <- question + (i+1) + "- " + dirs[i] + " | ";
 		}
@@ -46,6 +45,13 @@ experiment "Abstract Experiment" virtual:true{
 	}
 	
 	
+	list<string> gather_dataset_names {
+		list<string> dirs <- folder("../../data").contents  ;
+		dirs <- dirs where folder_exists("../../data/" + each);
+		return dirs;
+	}
+	
+	
 	
 	
 	output {
@@ -53,9 +59,8 @@ experiment "Abstract Experiment" virtual:true{
 			
 			overlay position: { 5, 5 } size: { 700 #px, 200 #px }  transparency: 0 
             {
-           		draw world.name  font: default at: { 20#px, 20#px} color:text_color;
-           		draw ("Day " + int((current_date - starting_date) /  #day))  font: default at: { 20#px, 60#px}  color:text_color;
-           		draw ("Cases " + world.number_of_infectious)  font: default perspective: true at: { 20#px, 100#px}  color:text_color;
+           		draw world.name  font: default at: { 20#px, 20#px} anchor: #top_left color:text_color;
+           		draw ("Day " + int((current_date - starting_date) /  #day)) + " | " + ("Cases " + world.number_of_infectious)  font: default at: { 20#px, 50#px} anchor: #top_left color:text_color;
             }
 			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../../data/Default/satellite.png" transparency: 0.5 refresh: false;
 			
@@ -77,6 +82,7 @@ experiment "Abstract Experiment" virtual:true{
 			}
 
 		}
+
 
 		display "chart" virtual: true {
 			chart "sir" background: #white axes: #black {
