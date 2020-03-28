@@ -55,8 +55,8 @@ species Individual{
 		
 		if(serial_interval<0)
 		{
-			self.infectious_time <- self.infectious_time - self.serial_interval;
-			self.incubation_time <- self.incubation_time + self.serial_interval;
+			self.infectious_time <- max(0,self.infectious_time - self.serial_interval);
+			self.incubation_time <- max(0,self.incubation_time + self.serial_interval);
 		}
 		self.tick <- 0;
 	}
@@ -72,13 +72,22 @@ species Individual{
 	bool is_infected {
 		return self.is_infectious() or self.is_exposed();
 	}
+	
+	bool is_asymptomatic {
+		return [asymptomatic,symptomatic_without_symptoms] contains status;
+	}
 
 	reflex infectOthers when: self.is_infectious()
 	{
-		ask (Individual where ((flip(successful_contact_rate)) and (each.status = susceptible) and (each.bound = self.bound)))
-		 	{
-					do defineNewCase;
-		 	}
+		float effective_successful_contact_rate <- successful_contact_rate;
+		if((self.is_asymptomatic())or(self.wearMask))
+		{
+			effective_successful_contact_rate <- effective_successful_contact_rate * factor_contact_rate_asymptomatic;
+		}
+		ask (Individual where ((flip(effective_successful_contact_rate)) and (each.status = susceptible) and (each.bound = self.bound)))
+	 	{
+				do defineNewCase;
+	 	}
 	}
 	
 	reflex becomeInfectious when: self.is_exposed() and(tick >= incubation_time)
@@ -106,6 +115,7 @@ species Individual{
 	reflex becomeSymptomatic when: (status=symptomatic_without_symptoms) and (tick>=serial_interval)
 	{
 		status <- symptomatic_with_symptoms;
+		wearMask <- flip(proportion_symptomatic_using_mask);
 	}
 	
 	reflex becomeNotInfectious when: ((status=symptomatic_with_symptoms) or (status=asymptomatic))and(tick>=infectious_time)
