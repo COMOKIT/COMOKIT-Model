@@ -31,13 +31,13 @@ experiment "Datasets" parent: "Abstract Experiment" autorun: true {
 	
 	permanent {
 		
-		display "charts" toolbar: false background: #black refresh: every(24 #cycle){
-			chart "Infected cases" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
-			loop s over: simulations {
-				data s.name value: s.number_of_infectious color: s.color marker: false style: line thickness: 2; 
-				
-			}}
-		}
+//		display "charts" toolbar: false background: #black refresh: every(24 #cycle){
+//			chart "Infected cases" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
+//			loop s over: simulations {
+//				data s.name value: s.number_of_infectious color: s.color marker: false style: line thickness: 2; 
+//				
+//			}}
+//		}
 	}
 
 
@@ -48,11 +48,20 @@ experiment "Datasets" parent: "Abstract Experiment" autorun: true {
 		display name synchronized: false type: opengl background: #black draw_env: false  {
 			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../../data/Default/satellite.png" transparency: 0.5 refresh: false;
 			
-			species Building {
-				draw shape color:  #lightgrey empty: true width: 2;
+			species Building transparency: 0.7 refresh:false{
+				draw shape depth: rnd(50) color:  #lightgrey empty: false width: 2;
 			}
-			species Individual {
-				draw square(self.is_infectious() ? 30:10) color: status = exposed ? #yellow : (self.is_infectious() ? #orangered : (status = recovered?#blue:#green));
+			agents "Other" value: Individual where (each.status = recovered or each.status=susceptible) transparency: 0.5 {
+				draw sphere(30) color:  (status = recovered?#blue:#green)at: location - {0,0,30};
+			}
+			
+			
+			agents "Exposed" value: Individual where (each.status = exposed) transparency: 0.5 {
+				draw sphere(30) color: #yellow at: location - {0,0,30};
+			}
+			
+			agents "Infectious" value: Individual where (each.is_infectious()) transparency: 0.5 {
+				draw sphere(50) color: #red at: location - {0,0,50};
 			}
 			species title {
 				draw world.name  font: default at: {0, world.shape.height/2 - 30#px} color:world.color.brighter.brighter anchor: #top_left;
