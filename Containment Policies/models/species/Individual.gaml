@@ -32,7 +32,7 @@ species Individual{
 	Building school;
 	Building office;
 	list<Individual> relatives;
-	geometry bound;
+	Building bound;
 	
 	
 	string status; //S,E,Ua,Us,A,R,D

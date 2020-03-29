@@ -20,23 +20,8 @@ import "Parameters.gaml"
 
 global {
 	geometry shape <- envelope(shp_buildings);
-	list<Building> shops ;	
-	list<Building> markets ;	
-	list<Building> supermarkets ;
-	list<Building> bookstores ;
-	list<Building> cinemas ;
-	list<Building> game_centers ;
-	list<Building> karaokes;
-	list<Building> restaurants;
-	list<Building> coffeeshops;
-	list<Building> building_outside_commune;
-	list<Building> playgrounds;
-	list<Building> hospitals;
-	list<Building> supply_points;
-	list<Building> farms;
-	
+
 	action global_init {
-		do create_activities;
 		if (shp_river != nil) {
 			create River from: shp_river;
 		}
@@ -58,22 +43,11 @@ global {
 				}
 			}
 		}
+		do create_activities;
+		
 		list<Building> homes <- Building where (each.type_activity = "home");
 		list<Building> schools <- Building where (each.type_activity = t_school);
-		shops <- Building where (each.type_activity = t_shop);	
-		markets <- Building where (each.type_activity = t_market) ;	
-		supermarkets <- Building where (each.type_activity = t_supermarket);
-		bookstores <-Building where (each.type_activity = t_bookstore) ;
-		cinemas <- Building where (each.type_activity = t_cinema) ;
-		game_centers <- Building where (each.type_activity = t_gamecenter) ;
-		karaokes <- Building where (each.type_activity = t_karaoke) ;
-		restaurants <- Building where (each.type_activity = t_restaurant);
-		coffeeshops <- Building where (each.type_activity = t_coffeeshop);
-		farms <- Building where (each.type_activity = t_farm);
-		building_outside_commune <- Building where !(each overlaps world.shape);
-		playgrounds <- Building where (each.type_activity = t_playground);
-		hospitals <- Building where (each.type_activity = t_hospital);
-		supply_points <- Building where (each.type_activity = t_supplypoint) ;
+	
 		ask homes {
 		//father
 			create Individual {
@@ -85,7 +59,7 @@ global {
 				office <- any(Building - home);
 				location <- (home.location);
 				status <- susceptible;
-				bound <- home.shape;
+				bound <- home;
 			}
 			//mother
 			create Individual {
@@ -97,7 +71,7 @@ global {
 				office <- any(Building - home);
 				location <- (home.location);
 				status <- susceptible;
-				bound <- home.shape;
+				bound <- home;
 			}
 			//children
 			create Individual number: rnd(3) {
@@ -109,7 +83,7 @@ global {
 				school <- any(schools - home);
 				location <- (home.location);
 				status <- susceptible;
-				bound <- home.shape;
+				bound <- home;
 			}
 
 		}
@@ -122,7 +96,7 @@ global {
 				home <- myself;
 				location <- (home.location);
 				status <- susceptible;
-				bound <- home.shape;
+				bound <- home;
 			}
 
 		}
@@ -135,7 +109,7 @@ global {
 				home <- myself;
 				location <- (home.location);
 				status <- susceptible;
-				bound <- home.shape;
+				bound <- home;
 			}
 
 		}
@@ -148,7 +122,7 @@ global {
 			}
 
 			agenda_week[15 + rnd(3)] <- a_home[0];
-			agenda_week[19 + rnd(3)] <- any(Activities);
+			agenda_week[19 + rnd(3)] <- any(Activities where (each in buildings_per_activity.keys));
 			agenda_week[(23 + rnd(3)) mod 24] <- a_home[0];
 		}
 
