@@ -88,6 +88,10 @@ species Individual{
 			{
 				wearMask <- true;
 			}
+			else
+			{
+				wearMask <- false;
+			}
 		}
 	}
 	
