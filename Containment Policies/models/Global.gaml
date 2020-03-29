@@ -22,6 +22,7 @@ global {
 	geometry shape <- envelope(shp_buildings);
 
 	action global_init {
+		write "global init";
 		if (shp_river != nil) {
 			create River from: shp_river;
 		}
@@ -41,6 +42,12 @@ global {
 				if(type_activity = "") {
 					type_activity <- "home";
 				}
+			}
+		}
+		ask Building {
+			neigbors <- Building at_distance 500#m;
+			if empty(neigbors) {
+				neigbors << Building closest_to self;
 			}
 		}
 		do create_activities;
@@ -113,7 +120,8 @@ global {
 			}
 
 		}
-
+		list<Activity> possible_activities <- Activities.values where ((each.type_of_building = nil) or (each.type_of_building in buildings_per_activity.keys));
+		possible_activities <- possible_activities - a_school - a_work - a_home;
 		ask Individual where ((each.ageCategory < 55 and each.sex = 0) or (each.ageCategory < 50 and each.sex = 1)) {
 			if (ageCategory < 23) {
 				agenda_week[7 + rnd(2)] <- a_school[0];
@@ -122,7 +130,7 @@ global {
 			}
 
 			agenda_week[15 + rnd(3)] <- a_home[0];
-			agenda_week[19 + rnd(3)] <- any(Activities where (each in buildings_per_activity.keys));
+			agenda_week[19 + rnd(3)] <- any(possible_activities);
 			agenda_week[(23 + rnd(3)) mod 24] <- a_home[0];
 		}
 

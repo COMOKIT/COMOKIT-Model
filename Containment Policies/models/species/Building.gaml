@@ -12,8 +12,9 @@ model Species_Building
 species Building {
 
 	float chargeVirale;
-	geometry shape;
 	string type_activity;
+	list<Building> neigbors;
+	
 	reflex updateChargeVirale{
 		
 	}

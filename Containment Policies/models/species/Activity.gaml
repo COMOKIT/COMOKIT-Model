@@ -34,7 +34,7 @@ global {
 }
 
 species Activity {
-	string type_of_building;
+	string type_of_building <- nil;
 	bool chose_nearest <- false;
 	int duration_min <- 1;
 	int duration_max <- 8;
@@ -135,7 +135,7 @@ species a_collect parent: Activity {
 species a_neighbours parent: Activity {
 	
 	list<Building> find_target (Individual i) {
-		return [Building closest_to self];
+		return i.bound.neigbors;
 	}
 
 }
@@ -157,7 +157,7 @@ species a_meeting parent: Activity {
 
 species a_spread parent: Activity {
 	list<Building> find_target (Individual i) {
-		return Building at_distance 5 #km;
+		return list(Building) - i.bound;
 	}
 
 }

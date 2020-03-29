@@ -12,9 +12,7 @@ import "Abstract Experiment.gaml"
 global {
 
 	init { 
-		do global_init;
-		do create_authority;
-		ask Authority {
+			ask Authority {
 			policies << noSchool; 
 		}
 

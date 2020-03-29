@@ -12,8 +12,6 @@ import "Abstract Experiment.gaml"
 global {
 
 	init { 
-		do global_init;
-		do create_authority;
 		ask Authority {
 			policies << noContainment;
 		}
