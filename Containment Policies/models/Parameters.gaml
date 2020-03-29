@@ -42,4 +42,9 @@ global {
 	//Mask parameters
 	float factor_contact_rate_wearing_mask <- 0.5; //Assumed
 	float proportion_wearing_mask <- 0.0;
+	
+	//Agenda paramaters
+	float proba_activity_night <- 0.7;
+	float proba_lunch_outside <- 0.5;
+	float proba_lunch_at_home <- 0.5;
 }

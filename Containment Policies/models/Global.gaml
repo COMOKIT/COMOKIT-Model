@@ -67,36 +67,24 @@ global {
 				last_activity <- a_home[0];
 				ageCategory <- rnd(23,53);
 				sex <- 0;
-				status <- "S";
 				home <- myself;
 				office <- working_places.keys[rnd_choice(working_places.values)];
-				location <- (home.location);
-				status <- susceptible;
-				bound <- home;
 			} 
 			//mother
 			create Individual {
 				last_activity <- a_home[0];
 				ageCategory <- 23 + rnd(30);
 				sex <- 1;
-				status <- "S";
 				home <- myself;
 				office <- working_places.keys[rnd_choice(working_places.values)];
-				location <- (home.location);
-				status <- susceptible;
-				bound <- home;
 			}
 			//children
 			create Individual number: rnd(3) {
 				last_activity <- a_home[0];
 				ageCategory <- rnd(22);
-				status <- "S";
 				sex <- rnd(1);
 				home <- myself;
 				school <- (ageCategory <=  18) ? any(schools.keys[rnd_choice(schools.values)]) : any(schools.keys[rnd_choice(universities.values)]);
-				location <- (home.location);
-				status <- susceptible;
-				bound <- home;
 			}
 
 		}
@@ -107,9 +95,6 @@ global {
 				ageCategory <- 55 + rnd(50);
 				sex <- 0;
 				home <- myself;
-				location <- (home.location);
-				status <- susceptible;
-				bound <- home;
 			}
 
 		}
@@ -120,24 +105,49 @@ global {
 				ageCategory <- 50 + rnd(50);
 				sex <- 1;
 				home <- myself;
-				location <- (home.location);
-				status <- susceptible;
-				bound <- home;
+				
 			}
-
+		}
+		ask Individual {
+			location <- (home.location);
+			status <- susceptible;
+			bound <- home;
 		}
 		list<Activity> possible_activities <- Activities.values where ((each.type_of_building = nil) or (each.type_of_building in buildings_per_activity.keys));
 		possible_activities <- possible_activities - a_school - a_work - a_home;
 		ask Individual where ((each.ageCategory < 55 and each.sex = 0) or (each.ageCategory < 50 and each.sex = 1)) {
+			int current_hour;
 			if (ageCategory < 23) {
-				agenda_week[7 + rnd(2)] <- a_school[0];
-			} else {
-				agenda_week[6 + rnd(2)] <- a_work[0];
+				current_hour <- rnd(7,9);
+				agenda_week[current_hour] <- a_school[0];
 			}
-
-			agenda_week[15 + rnd(3)] <- a_home[0];
-			agenda_week[19 + rnd(3)] <- any(possible_activities);
-			agenda_week[(23 + rnd(3)) mod 24] <- a_home[0];
+			 else {
+				current_hour <- rnd(6,8);
+				agenda_week[current_hour] <- a_work[0];
+			}
+			if (flip(proba_lunch_outside)) {
+				
+				current_hour <- rnd(11,13);
+				if (not flip(proba_lunch_at_home) and (possible_activities first_with (each.type_of_building = t_restaurant)) != nil) {
+					agenda_week[current_hour] <- possible_activities first_with (each.type_of_building = t_restaurant);
+				} else {
+					agenda_week[current_hour] <- a_home[0];
+				}
+				current_hour <- current_hour + rnd(1,2);
+				if (ageCategory < 23) {
+					agenda_week[current_hour] <- a_school[0];
+				} else {
+					agenda_week[current_hour] <- a_work[0];
+				}
+			}
+			current_hour <- rnd(15,18);
+			agenda_week[current_hour] <- a_home[0];
+			current_hour <- current_hour + rnd(1,3);
+			if (ageCategory > 12) and flip(proba_activity_night) {
+				agenda_week[current_hour] <- any(possible_activities);
+				current_hour <- (current_hour + rnd(1,3)) mod 24;
+			}
+			agenda_week[current_hour] <- a_home[0];
 		}
 
 		ask 2 among Individual {
