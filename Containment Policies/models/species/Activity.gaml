@@ -10,6 +10,8 @@
 
 model Species_Activity
 
+import "../Constants.gaml"
+
 import "../Global.gaml"
 
 import "Individual.gaml"
@@ -26,9 +28,7 @@ global {
 			Activities[string(s)] <- Activity(first(new_activity)) ;
 		}
 		buildings_per_activity <- Building group_by (each.type_activity);
-		buildings_per_activity["outside"] <-  Building where !(each overlaps world.shape);
-		
-		
+		buildings_per_activity["outside"] <-  Building where !(each overlaps world.shape);	
 	}
 
 }
@@ -132,6 +132,10 @@ species a_collect parent: Activity {
 	string type_of_building <- t_supplypoint;
 }
 
+species a_sport parent: Activity {
+	string type_of_building <- t_sport;
+}
+
 species a_neighbours parent: Activity {
 	
 	list<Building> find_target (Individual i) {
@@ -147,8 +151,16 @@ species a_friends parent: Activity {
 
 }
 
+species a_admin_task parent: Activity {
+	string type_of_building <- t_admin;
+}
+
 species a_park parent: Activity {
 	string type_of_building <- t_park;
+}
+
+species a_workship_place parent: Activity {
+	string type_of_building <- t_place_of_worship;
 }
 
 species a_meeting parent: Activity {

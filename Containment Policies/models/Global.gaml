@@ -39,30 +39,41 @@ global {
 		list<float> tmp <- building_types collect (1 / length(building_types));
 		if (shp_buildings != nil) {
 			create Building from: shp_buildings with: [type_activity::string(read("type"))]{
-				if(type_activity = "") {
-					type_activity <- "home";
+				switch type_activity {
+					match "" {type_activity <- "home";}
+					match "store" {type_activity <- "shop";}
+					match "caphe" {type_activity <- "coffeeshop";}
+					match "caphe-karaoke" {type_activity <- "coffeeshop";}
+					match "lake" {do die;}
 				}
 			}
 		}
 		
 		do create_activities;
 		
-		list<Building> homes <- Building where (each.type_activity = "home");
-		list<Building> schools <- Building where (each.type_activity = t_school);
-	
+		list<Building> homes <- Building where (each.type_activity in [t_home,t_hotel]);
+		map<Building, float> schools <- (Building where (each.type_activity = t_school)) as_map (each:: each.shape.area);
+		map<Building, float> universities <- Building where (each.type_activity = t_university) as_map (each:: each.shape.area);
+		if empty(universities) {universities <-schools ;}
+		list<Building> offices <- Building where (each.type_activity = t_office);
+		list<Building> industries <- Building where (each.type_activity = t_industry);
+		list<Building> admins <- Building where (each.type_activity = t_admin);
+		list<Building> others <- Building - offices - admins - industries;
+		map<Building,float> working_places <- (admins + offices) as_map (each::each.shape.area * 4) + (industries) as_map (each::each.shape.area * 2)+ others as_map (each::each.shape.area) ; 
+		
 		ask homes {
 		//father
 			create Individual {
 				last_activity <- a_home[0];
-				ageCategory <- 23 + rnd(30);
+				ageCategory <- rnd(23,53);
 				sex <- 0;
 				status <- "S";
 				home <- myself;
-				office <- any(Building - home);
+				office <- working_places.keys[rnd_choice(working_places.values)];
 				location <- (home.location);
 				status <- susceptible;
 				bound <- home;
-			}
+			} 
 			//mother
 			create Individual {
 				last_activity <- a_home[0];
@@ -70,7 +81,7 @@ global {
 				sex <- 1;
 				status <- "S";
 				home <- myself;
-				office <- any(Building - home);
+				office <- working_places.keys[rnd_choice(working_places.values)];
 				location <- (home.location);
 				status <- susceptible;
 				bound <- home;
@@ -82,7 +93,7 @@ global {
 				status <- "S";
 				sex <- rnd(1);
 				home <- myself;
-				school <- any(schools - home);
+				school <- (ageCategory <=  18) ? any(schools.keys[rnd_choice(schools.values)]) : any(schools.keys[rnd_choice(universities.values)]);
 				location <- (home.location);
 				status <- susceptible;
 				bound <- home;
