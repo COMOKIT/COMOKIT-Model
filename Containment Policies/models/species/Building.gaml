@@ -13,8 +13,18 @@ species Building {
 
 	float chargeVirale;
 	string type_activity;
-	list<Building> neigbors;
+	list<Building> neighbors;
 	
+	
+	list<Building> get_neighbors {
+		if empty(neighbors) {
+			neighbors <- Building at_distance 500#m;
+			if empty(neighbors) {
+				neighbors << Building closest_to self;
+			}
+		}
+		return neighbors;
+	}
 	reflex updateChargeVirale{
 		
 	}

@@ -44,12 +44,7 @@ global {
 				}
 			}
 		}
-		ask Building {
-			neigbors <- Building at_distance 500#m;
-			if empty(neigbors) {
-				neigbors << Building closest_to self;
-			}
-		}
+		
 		do create_activities;
 		
 		list<Building> homes <- Building where (each.type_activity = "home");

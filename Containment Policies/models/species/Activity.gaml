@@ -135,7 +135,7 @@ species a_collect parent: Activity {
 species a_neighbours parent: Activity {
 	
 	list<Building> find_target (Individual i) {
-		return i.bound.neigbors;
+		return i.bound.get_neighbors();
 	}
 
 }
