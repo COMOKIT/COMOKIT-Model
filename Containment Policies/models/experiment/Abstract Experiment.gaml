@@ -77,7 +77,7 @@ experiment "Abstract Experiment" virtual:true{
 				draw shape color:  #lightgrey empty: true width: 2;
 			}
 			species Individual {
-				draw square(20) color: status = exposed ? #yellow : (self.is_infectious() ? #orangered : (status = recovered?#blue:#lime));
+				draw square(status=susceptible or status=recovered? 10: 20) color: status = exposed ? #yellow : (self.is_infectious() ? #orangered : (status = recovered?#blue:#green));
 				//draw circle(10) color: status = exposed ? #orange : (status = infected ? #red : #green);
 			}
 

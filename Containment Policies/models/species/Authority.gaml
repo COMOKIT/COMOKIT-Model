@@ -43,6 +43,16 @@ species Authority {
 		return first(result);
 	}
 	
+	PartialPolicy createLockDownPolicyWithToleranceOf(float p) {
+		create PartialPolicy returns: result {
+			tolerance <- p;
+			loop s over: Activity.subspecies {
+				allowed_activities[string(s)] <- false;
+			}
+		}
+		return first(result);
+	}
+	
 	SpatialPolicy createQuarantinePolicyAtRadius(point loc, float radius){		
 		create SpatialPolicy returns: result {
 			loop s over: Activity.subspecies {

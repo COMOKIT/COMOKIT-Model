@@ -23,6 +23,22 @@ species Policy {
 
 }
 
+/**
+ * Same as Policy but a proportion of normally forbidden activities are allowed
+ */
+species PartialPolicy parent: Policy {
+	
+	float tolerance; // between 0 (no tolerance) and 1.0
+	
+	bool is_allowed (Individual i, Activity activity) {
+		bool allowed <- super.is_allowed(i, activity);
+		if (!allowed) {
+			allowed <- flip(tolerance);
+		} 
+	return allowed;
+	}
+}
+
 species SpatialPolicy parent: Policy {
 	geometry application_area;
 	bool is_allowed (Individual i, Activity activity) {
