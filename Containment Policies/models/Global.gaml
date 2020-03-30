@@ -155,8 +155,19 @@ global {
 			}
 			agenda_week[current_hour] <- a_home[0];
 		}
+		ask Individual where empty(each.agenda_week) {
+			int num_activity <- rnd(0,max_num_activity_for_old_people);
+			int current_hour <- rnd(7,9);
+			loop times: num_activity {
+				agenda_week[current_hour] <- any(possible_activities);
+				current_hour <- (current_hour + rnd(1,4)) mod 24;
+				agenda_week[current_hour] <- a_home[0];
+				current_hour <- (current_hour + rnd(1,4)) mod 24;
+			}
+		
+		}
 
-		ask 2 among Individual {
+		ask num_infected_init among Individual {
 			do defineNewCase;
 		}
 		

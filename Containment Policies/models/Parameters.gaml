@@ -25,6 +25,8 @@ global {
 	float N_grandfather<-0.2;
 	float M_grandmother<-0.3;
 	
+	int num_infected_init <- 2;
+	
 
 	//Epidemiological parameters
 	bool transmission_human <- true;
@@ -49,6 +51,7 @@ global {
 	float proportion_wearing_mask <- 0.0;
 	
 	//Agenda paramaters
+	int max_num_activity_for_old_people <- 3;
 	float proba_activity_night <- 0.7;
 	float proba_lunch_outside_workplace <- 0.5;
 	float proba_lunch_at_home <- 0.5;
