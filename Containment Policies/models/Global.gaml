@@ -20,7 +20,7 @@ import "Parameters.gaml"
 
 global {
 	geometry shape <- envelope(shp_buildings);
-
+	outside the_outside;
 	action global_init {
 		write "global init";
 		if (shp_river != nil) {
@@ -49,6 +49,8 @@ global {
 			}
 		}
 		
+		create outside;
+		the_outside <- first(outside);
 		do create_activities;
 		
 		list<Building> homes <- Building where (each.type_activity in [t_home,t_hotel]);
@@ -68,7 +70,7 @@ global {
 				ageCategory <- rnd(23,53);
 				sex <- 0;
 				home <- myself;
-				office <- working_places.keys[rnd_choice(working_places.values)];
+				office <- flip(proba_go_outside) ? the_outside :working_places.keys[rnd_choice(working_places.values)];
 			} 
 			//mother
 			create Individual {
@@ -76,7 +78,7 @@ global {
 				ageCategory <- 23 + rnd(30);
 				sex <- 1;
 				home <- myself;
-				office <- working_places.keys[rnd_choice(working_places.values)];
+				office <- flip(proba_go_outside) ? the_outside :working_places.keys[rnd_choice(working_places.values)];
 			}
 			//children
 			create Individual number: rnd(3) {
@@ -84,7 +86,11 @@ global {
 				ageCategory <- rnd(22);
 				sex <- rnd(1);
 				home <- myself;
-				school <- (ageCategory <=  18) ? any(schools.keys[rnd_choice(schools.values)]) : any(schools.keys[rnd_choice(universities.values)]);
+				if (ageCategory <=  18) {
+					school <- (empty(schools) or flip(proba_go_outside)) ? the_outside :any(schools.keys[rnd_choice(schools.values)]) ;
+				} else {
+					school <- (empty(universities) or flip(proba_go_outside)) ? the_outside : any(schools.keys[rnd_choice(universities.values)]);
+				}
 			}
 
 		}
@@ -113,8 +119,8 @@ global {
 			status <- susceptible;
 			bound <- home;
 		}
-		list<Activity> possible_activities <- Activities.values where ((each.type_of_building = nil) or (each.type_of_building in buildings_per_activity.keys));
-		possible_activities <- possible_activities - a_school - a_work - a_home;
+		//list<Activity> possible_activities <- Activities.values where ((each.type_of_building = nil) or (each.type_of_building in buildings_per_activity.keys));
+		list<Activity> possible_activities <- Activities.values - a_school - a_work - a_home;
 		ask Individual where ((each.ageCategory < 55 and each.sex = 0) or (each.ageCategory < 50 and each.sex = 1)) {
 			int current_hour;
 			if (ageCategory < 23) {
@@ -125,7 +131,7 @@ global {
 				current_hour <- rnd(6,8);
 				agenda_week[current_hour] <- a_work[0];
 			}
-			if (flip(proba_lunch_outside)) {
+			if (flip(proba_lunch_outside_workplace)) {
 				
 				current_hour <- rnd(11,13);
 				if (not flip(proba_lunch_at_home) and (possible_activities first_with (each.type_of_building = t_restaurant)) != nil) {

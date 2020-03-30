@@ -66,8 +66,8 @@ experiment "Abstract Experiment" virtual:true{
 			species Building {
 				draw shape color:  viralLoad>0?rgb(255*viralLoad,0,0):#lightgrey empty: true width: 2;
 			}
-			species Individual {
-				draw square(status=susceptible or status=recovered? 10: 20) color: status = exposed ? #yellow : (self.is_infectious() ? #orangered : (status = recovered?#blue:#green));
+			agents "Individual"  value: Individual where not (each.is_outside){
+				draw square(status=susceptible or status=recovered? 10: 20) color: status = exposed ? #yellow : (self.is_infectious() ? #orangered : (status = recovered?#blue:#green)) ;	
 			}
 
 		}
@@ -78,16 +78,16 @@ experiment "Abstract Experiment" virtual:true{
 			species Building transparency: 0.7 refresh:false{
 				draw shape depth: rnd(50) color:  #lightgrey empty: false width: 2;
 			}
-			agents "Other" value: Individual where (each.status = recovered or each.status=susceptible) transparency: 0.5 {
+			agents "Other" value: Individual where (not each.is_outside and each.status = recovered or each.status=susceptible) transparency: 0.5 {
 				draw sphere(30) color:  (status = recovered?#blue:#green)at: location - {0,0,30};
 			}
 			
 			
-			agents "Exposed" value: Individual where (each.status = exposed) transparency: 0.5 {
+			agents "Exposed" value: Individual where (not each.is_outside and each.status = exposed) transparency: 0.5 {
 				draw sphere(30) color: #yellow at: location - {0,0,30};
 			}
 			
-			agents "Infectious" value: Individual where (each.is_infectious()) transparency: 0.5 {
+			agents "Infectious" value: Individual where (not each.is_outside and each.is_infectious()) transparency: 0.5 {
 				draw sphere(50) color: #red at: location - {0,0,50};
 			}
 
@@ -99,7 +99,7 @@ experiment "Abstract Experiment" virtual:true{
 			species Building {
 				draw shape color:  #lightgrey empty: true width: 2;
 			}
-			species Individual {
+			agents "Individual" value:Individual where not (each.is_outside) {
 				draw square(self.is_infectious() ? 30:10) color: status = exposed ? #yellow : (self.is_infectious() ? #orangered : (status = recovered?#blue:#green));
 			}
 			

@@ -33,6 +33,7 @@ species Individual{
 	Building office;
 	list<Individual> relatives;
 	Building bound;
+	bool is_outside <- false;
 	
 	
 	string status; //S,E,Ua,Us,A,R,D
@@ -128,7 +129,13 @@ species Individual{
 		return [asymptomatic,symptomatic_without_symptoms] contains status;
 	}
 
-	reflex infectOthers when: self.is_infectious()
+	reflex become_infected_outside when: is_outside {
+		if flip(proba_outside_contamination_per_hour) {
+			do defineNewCase;
+		}
+	}
+	
+	reflex infectOthers when: not is_outside and self.is_infectious()
 	{
 		float reduction_factor <- 1.0;
 		if(self.is_asymptomatic())
@@ -153,7 +160,7 @@ species Individual{
 	 	}
 	}
 	
-	reflex becomeInfectious when: self.is_exposed() and(tick >= incubation_time)
+	reflex becomeInfectious when: not is_outside and self.is_exposed() and(tick >= incubation_time)
 	{
 		if(world.is_asymptomatic())
 		{
@@ -207,6 +214,7 @@ species Individual{
 			last_activity <- act;
 			if (Authority[0].allows(self, act)) {
 				bound <- any(act.find_target(self));
+				is_outside <- bound = the_outside;
 				location <- any_location_in(bound);
 			}
 		}
@@ -225,7 +233,9 @@ species Individual{
 	}
 
 	aspect default {
-		draw shape color: status = exposed ? #pink : ((status = symptomatic_with_symptoms)or(status=asymptomatic)or(status=symptomatic_without_symptoms)? #red : #green);
+		if not is_outside {
+			draw shape color: status = exposed ? #pink : ((status = symptomatic_with_symptoms)or(status=asymptomatic)or(status=symptomatic_without_symptoms)? #red : #green);
+		}
 	}
 
 }

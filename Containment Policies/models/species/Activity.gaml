@@ -28,7 +28,7 @@ global {
 			Activities[string(s)] <- Activity(first(new_activity)) ;
 		}
 		buildings_per_activity <- Building group_by (each.type_activity);
-		buildings_per_activity["outside"] <-  Building where !(each overlaps world.shape);	
+		//buildings_per_activity["outside"] <-  Building where !(each overlaps world.shape);	
 	}
 
 }
@@ -41,6 +41,9 @@ species Activity {
 	int nb_candidat <- 3;
 	
 	list<Building> find_target (Individual i) {
+		if flip(proba_go_outside) or not (type_of_building in buildings_per_activity) {
+			return [the_outside];
+		}
 		if (chose_nearest) {
 			return [buildings_per_activity[type_of_building] closest_to self];
 		} else {
@@ -116,9 +119,9 @@ species a_farm parent: Activity {
 	string type_of_building <- t_farm;
 }
 
-species a_trade parent: Activity {
+/*species a_trade parent: Activity {
 	string type_of_building <- "outside";
-}
+}*/
 
 species a_play parent: Activity {
 	string type_of_building <- t_playground;

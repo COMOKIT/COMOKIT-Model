@@ -11,6 +11,7 @@ model Species_Building
 import "../Parameters.gaml"
 
 
+
 species Building {
 
 	float viralLoad <- 0.0;
@@ -44,3 +45,5 @@ species Building {
 	}
 
 }
+
+species outside parent: Building ;

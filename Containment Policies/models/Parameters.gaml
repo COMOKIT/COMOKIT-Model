@@ -50,6 +50,9 @@ global {
 	
 	//Agenda paramaters
 	float proba_activity_night <- 0.7;
-	float proba_lunch_outside <- 0.5;
+	float proba_lunch_outside_workplace <- 0.5;
 	float proba_lunch_at_home <- 0.5;
+	
+	float proba_go_outside <- 0.1;
+	float proba_outside_contamination_per_hour <- 0.0;
 }
