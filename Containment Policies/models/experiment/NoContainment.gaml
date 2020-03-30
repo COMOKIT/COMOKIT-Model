@@ -20,9 +20,9 @@ global {
 
 experiment "No Containment" parent: "Abstract Experiment" {
 	output {
-		display "Main" parent: d1 {
+		display "Main" parent: default_display {
 		}
-		display "Chart" parent: chart {
+		display "Chart" parent: default_white_chart {
 		}
 		display "Cumulative incidence" parent: cumulative_incidence {
 		}

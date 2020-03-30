@@ -46,24 +46,11 @@ experiment "Comparison of tolerance levels" parent: "Abstract Experiment" autoru
 	}
 
 	output {
-				
-		display "d2" synchronized: false type: opengl background: #black virtual: true draw_env: false  {
-			
-			species Building {
-				draw shape color:  #lightgrey empty: true width: 2;
-			}
-			species Individual {
-				draw square(self.is_infectious() ? 30:10) color: status = exposed ? #yellow : (self.is_infectious() ? #orangered : (status = recovered?#blue:#green));
-			}
-			graphics title {
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
+		display "Main" parent: simple_display {
+		graphics title {
 				draw world.name  font: default at: {0, world.shape.height/2 - 30#px} color:world.color anchor: #top_left;
 			}
-
-		}
-		
-		
-		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
-		display "Main" parent: d2 {
 		}
 
 	}

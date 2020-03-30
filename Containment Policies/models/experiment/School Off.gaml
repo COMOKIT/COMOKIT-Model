@@ -22,7 +22,7 @@ global {
 
 experiment "School Off" parent: "Abstract Experiment" {
 	output {
-		display "Main" parent: d1 {
+		display "Main" parent: default_display {
 		}
 
 	}

@@ -73,7 +73,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
 	output {
 		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false;
-		display "Main" parent: d1 {}
+		display "Main" parent: default_display {}
 	}
 
 }

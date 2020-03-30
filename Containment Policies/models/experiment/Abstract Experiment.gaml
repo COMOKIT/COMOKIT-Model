@@ -17,14 +17,10 @@ global {
 	init { 
 		do global_init;
 		do create_authority;
-		create title;
 	}
 
 }
 
-species title {
-	point location <- {0, world.shape.height};
-}
 
 experiment "Abstract Experiment" virtual:true{
 
@@ -55,7 +51,7 @@ experiment "Abstract Experiment" virtual:true{
 	
 	
 	output {
-		display "d1" synchronized: false type: opengl background: background virtual: true draw_env: false {
+		display "default_display" synchronized: false type: opengl background: background virtual: true draw_env: false {
 			
 			overlay position: { 5, 5 } size: { 700 #px, 200 #px }  transparency: 0 
             {
@@ -64,27 +60,54 @@ experiment "Abstract Experiment" virtual:true{
             }
 			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../../data/Default/satellite.png" transparency: 0.5 refresh: false;
 			
-			//species Boundary {
-			//	draw shape color: #yellow empty:false;	
-			//}
 			species River transparency: 0.5 {
 				draw shape color: color.darker empty:false ;
 			}
-			/* species Road {
-				draw shape + 1 color: #red ;
-			}*/
 			species Building {
 				draw shape color:  viralLoad>0?rgb(255*viralLoad,0,0):#lightgrey empty: true width: 2;
 			}
 			species Individual {
 				draw square(status=susceptible or status=recovered? 10: 20) color: status = exposed ? #yellow : (self.is_infectious() ? #orangered : (status = recovered?#blue:#green));
-				//draw circle(10) color: status = exposed ? #orange : (status = infected ? #red : #green);
 			}
+
+		}
+		
+		display "default_3D_display" synchronized: false type: opengl background: #black draw_env: false virtual: true {
+			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../../data/Default/satellite.png" transparency: 0.5 refresh: false;
+			
+			species Building transparency: 0.7 refresh:false{
+				draw shape depth: rnd(50) color:  #lightgrey empty: false width: 2;
+			}
+			agents "Other" value: Individual where (each.status = recovered or each.status=susceptible) transparency: 0.5 {
+				draw sphere(30) color:  (status = recovered?#blue:#green)at: location - {0,0,30};
+			}
+			
+			
+			agents "Exposed" value: Individual where (each.status = exposed) transparency: 0.5 {
+				draw sphere(30) color: #yellow at: location - {0,0,30};
+			}
+			
+			agents "Infectious" value: Individual where (each.is_infectious()) transparency: 0.5 {
+				draw sphere(50) color: #red at: location - {0,0,50};
+			}
+
+		}
+		
+		
+		display "simple_display" parent: default_display synchronized: false type: opengl background: #black virtual: true draw_env: false camera_pos: {1279.4829,1684.2932,3227.1738} camera_look_pos: {1279.4829,1684.2369,0.0084} camera_up_vector: {0.0,1.0,0.0} {
+			
+			species Building {
+				draw shape color:  #lightgrey empty: true width: 2;
+			}
+			species Individual {
+				draw square(self.is_infectious() ? 30:10) color: status = exposed ? #yellow : (self.is_infectious() ? #orangered : (status = recovered?#blue:#green));
+			}
+			
 
 		}
 
 
-		display "chart" virtual: true {
+		display "default_white_chart" virtual: true {
 			chart "sir" background: #white axes: #black {
 				data "susceptible" value: length(Individual where (each.status=susceptible)) color: #green marker: false style: line;
 				data "exposed" value: length(Individual where (each.is_exposed())) color: #orange marker: false style: line;

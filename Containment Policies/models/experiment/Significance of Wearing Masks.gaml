@@ -47,25 +47,12 @@ experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 	}
 
 	output {
-				
-		display "d2" synchronized: false type: opengl background: #black virtual: true draw_env: false camera_pos: {1279.4829,1684.2932,3227.1738} camera_look_pos: {1279.4829,1684.2369,0.0084} camera_up_vector: {0.0,1.0,0.0} {
-			
-			species Building {
-				draw shape color:  #lightgrey empty: true width: 2;
-			}
-			species Individual {
-				draw square(self.is_infectious() ? 30:10) color: status = exposed ? #yellow : (self.is_infectious() ? #orangered : (status = recovered?#blue:#green));
-			}
-			graphics title {
-				draw world.name  font: default at: {0, world.shape.height/2 - 30#px} color:world.color anchor: #top_left;
-				//draw ("Cases " + world.number_of_infectious)  font: default at: {0, world.shape.height/2 - 50#px}  color: world.color anchor: #top_left;
-			}
-
-		}
-		
 		
 		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
-		display "Main" parent: d2 {
+		display "Main" parent: simple_display {
+			graphics title {
+				draw world.name font: default at: {0, world.shape.height/2 - 30#px} color:world.color anchor: #top_left;
+			}
 		}
 
 	}
