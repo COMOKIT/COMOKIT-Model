@@ -115,13 +115,14 @@ global {
 			}
 		}
 		ask Individual {
-			location <- (home.location);
+			do enter_building(home);
 			status <- susceptible;
-			bound <- home;
 		}
 		//list<Activity> possible_activities <- Activities.values where ((each.type_of_building = nil) or (each.type_of_building in buildings_per_activity.keys));
-		list<Activity> possible_activities <- Activities.values - a_school - a_work - a_home;
+		list<Activity> possible_activities_tot <- Activities.values - a_school - a_work - a_home;
+		list<Activity> possible_activities_without_rel <- possible_activities_tot - a_friends;
 		ask Individual where ((each.ageCategory < 55 and each.sex = 0) or (each.ageCategory < 50 and each.sex = 1)) {
+			list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
 			int current_hour;
 			if (ageCategory < 23) {
 				current_hour <- rnd(7,9);
@@ -156,6 +157,7 @@ global {
 			agenda_week[current_hour] <- a_home[0];
 		}
 		ask Individual where empty(each.agenda_week) {
+			list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
 			int num_activity <- rnd(0,max_num_activity_for_old_people);
 			int current_hour <- rnd(7,9);
 			loop times: num_activity {

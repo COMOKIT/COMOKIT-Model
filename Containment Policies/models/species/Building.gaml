@@ -9,7 +9,7 @@
 
 model Species_Building 
 import "../Parameters.gaml"
-
+import "Individual.gaml"
 
 
 species Building {
@@ -17,11 +17,12 @@ species Building {
 	float viralLoad <- 0.0;
 	string type_activity;
 	list<Building> neighbors;
+	list<Individual> individuals;
 	
 	
 	list<Building> get_neighbors {
 		if empty(neighbors) {
-			neighbors <- Building at_distance 500#m;
+			neighbors <- Building at_distance building_neighbors_dist;
 			if empty(neighbors) {
 				neighbors << Building closest_to self;
 			}

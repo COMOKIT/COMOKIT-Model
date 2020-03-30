@@ -58,4 +58,8 @@ global {
 	
 	float proba_go_outside <- 0.0;
 	float proba_outside_contamination_per_hour <- 0.0;
+	
+	//Activity parameters
+	float building_neighbors_dist <- 500 #m; //used by visit to neighbors activity
+	
 }

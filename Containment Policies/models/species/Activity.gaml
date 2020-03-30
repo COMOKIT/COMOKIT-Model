@@ -41,7 +41,7 @@ species Activity {
 	int nb_candidat <- 3;
 	
 	list<Building> find_target (Individual i) {
-		if flip(proba_go_outside) or not (type_of_building in buildings_per_activity) {
+		if flip(proba_go_outside) or not (type_of_building in buildings_per_activity) or  empty(buildings_per_activity[type_of_building]){
 			return [the_outside];
 		}
 		if (chose_nearest) {

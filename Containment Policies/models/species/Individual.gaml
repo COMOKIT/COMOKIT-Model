@@ -49,6 +49,16 @@ species Individual{
 	int tick <- 0;
 	
 	
+	action enter_building(Building b) {
+		if (bound != nil ){
+			bound.individuals >> self;
+		}	
+		bound <- b;
+		bound.individuals << self;
+		location <- any_location_in(bound);
+	}
+	
+	
 	action testIndividual
 	{
 		if(self.is_infected())
@@ -153,11 +163,13 @@ species Individual{
 				do addViralLoad(reduction_factor*basic_viral_release);
 			}
 		}
-		
-		ask (Individual where ((flip(successful_contact_rate_human*reduction_factor)) and (each.status = susceptible) and (each.bound = self.bound) and transmission_human))
-	 	{
+		if transmission_human {
+			ask bound.individuals where (flip(successful_contact_rate_human*reduction_factor) and (each.status = susceptible))
+	 		{
 				do defineNewCase;
-	 	}
+	 		}
+		}
+		
 	}
 	
 	reflex becomeInfectious when: not is_outside and self.is_exposed() and(tick >= incubation_time)
@@ -213,9 +225,9 @@ species Individual{
 		if (act != nil) {
 			last_activity <- act;
 			if (Authority[0].allows(self, act)) {
-				bound <- any(act.find_target(self));
+				do enter_building(any(act.find_target(self)));
 				is_outside <- bound = the_outside;
-				location <- any_location_in(bound);
+				
 			}
 		}
 	}
