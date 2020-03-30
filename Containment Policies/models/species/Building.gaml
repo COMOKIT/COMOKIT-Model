@@ -8,10 +8,12 @@
 @no_experiment
 
 model Species_Building 
+import "../Parameters.gaml"
+
 
 species Building {
 
-	float chargeVirale;
+	float viralLoad <- 0.0;
 	string type_activity;
 	list<Building> neighbors;
 	
@@ -25,8 +27,15 @@ species Building {
 		}
 		return neighbors;
 	}
-	reflex updateChargeVirale{
-		
+	
+	action addViralLoad(float value){
+		if(transmission_building)
+		{
+			viralLoad <- min(1.0,viralLoad+value);
+		}
+	}
+	reflex updateViralLoad when: transmission_building{
+		viralLoad <- max(0.0,viralLoad - viralLoadDecrease);
 	}
 
 	aspect default {

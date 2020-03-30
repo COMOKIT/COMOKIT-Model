@@ -130,16 +130,24 @@ species Individual{
 
 	reflex infectOthers when: self.is_infectious()
 	{
-		float effective_successful_contact_rate <- successful_contact_rate;
+		float reduction_factor <- 1.0;
 		if(self.is_asymptomatic())
 		{
-			effective_successful_contact_rate <- effective_successful_contact_rate * factor_contact_rate_asymptomatic;
+			reduction_factor <- reduction_factor * factor_contact_rate_asymptomatic;
 		}
 		if(self.wearMask)
 		{
-			effective_successful_contact_rate <- effective_successful_contact_rate * factor_contact_rate_wearing_mask;
+			reduction_factor <- reduction_factor * factor_contact_rate_wearing_mask;
 		}
-		ask (Individual where ((flip(effective_successful_contact_rate)) and (each.status = susceptible) and (each.bound = self.bound)))
+		if(bound!=nil)and(transmission_building)
+		{
+			ask bound
+			{
+				do addViralLoad(reduction_factor*basic_viral_release);
+			}
+		}
+		
+		ask (Individual where ((flip(successful_contact_rate_human*reduction_factor)) and (each.status = susceptible) and (each.bound = self.bound) and transmission_human))
 	 	{
 				do defineNewCase;
 	 	}
@@ -204,8 +212,15 @@ species Individual{
 		}
 	}
 
-	reflex updateDiseaseCycle when:(status!=recovered)or(status!=dead) {
+	reflex updateDiseaseCycle when:(status!=recovered)and(status!=dead) {
 		tick <- tick + 1;
+		if((self.is_infected()=false)and(self.bound!=nil)and(transmission_building))
+		{
+			if(flip(bound.viralLoad*successful_contact_rate_building))
+			{
+				do defineNewCase();
+			}
+		}
 		do updateWearMask();
 	}
 

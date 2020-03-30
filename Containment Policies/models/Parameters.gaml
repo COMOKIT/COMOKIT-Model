@@ -27,13 +27,18 @@ global {
 	
 
 	//Epidemiological parameters
+	bool transmission_human <- true;
+	bool transmission_building <- false;
 	float R0 <- 2.5;
 	float contact_distance <- 2#m;
-	float successful_contact_rate <- R0 * 1/(14.69973*24);
+	float successful_contact_rate_human <- R0 * 1/(14.69973*24);
+	float successful_contact_rate_building <- R0 * 1/(14.69973*24);
 	float factor_contact_rate_asymptomatic <- 0.55;
 	float proportion_asymptomatic <- 0.3;
 	float proportion_dead_symptomatic <- 0.01;
 	float proportion_symptomatic_using_mask <- 0.2;
+	float basic_viral_release <- 3.0;
+	float viralLoadDecrease <- 0.33/24;
 	
 	//Testing parameter
 	float probability_true_positive <- 0.89;
