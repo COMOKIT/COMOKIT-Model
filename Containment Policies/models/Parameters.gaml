@@ -61,7 +61,7 @@ global {
 	];
 	
 	// building type that will considered as school (ou university) - for each type, the min and max age to go to this type of school.
-	map<list<int>,string> possible_schools <- [[3,18]::"school", [19,23]::"university"]; 
+	map<list<int>,string> possible_schools <- (dataset = "../../data/Ben Tre/") ? [[3,18]::"school"]: [[3,18]::"school", [19,23]::"university"]; 
 	
 	
 	//Agenda paramaters
