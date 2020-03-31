@@ -150,7 +150,7 @@ global {
 			current_hour <- rnd(15,18);
 			agenda_week[current_hour] <- a_home[0];
 			current_hour <- current_hour + rnd(1,3);
-			if (ageCategory > 12) and flip(proba_activity_night) {
+			if (ageCategory > 12) and flip(proba_activity_evening) {
 				agenda_week[current_hour] <- any(possible_activities);
 				current_hour <- (current_hour + rnd(1,3)) mod 24;
 			}
