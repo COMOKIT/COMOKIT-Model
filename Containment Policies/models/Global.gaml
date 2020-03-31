@@ -142,19 +142,24 @@ global {
 				current_hour <- current_hour + rnd(1,2);
 				if (age <= max_student_age) {
 					agenda_week[current_hour] <- studying[0];
-					current_hour <- rnd(school_hours[1][0],school_hours[1][1]);
 				} else {
 					agenda_week[current_hour] <- working[0];
-					current_hour <-rnd(work_hours[1][0],work_hours[1][1]);
 				}
+			}
+			if (age <= max_student_age) {
+					current_hour <- rnd(school_hours[1][0],school_hours[1][1]);
+			} else {
+				current_hour <-rnd(work_hours[1][0],work_hours[1][1]);
 			}
 			agenda_week[current_hour] <- staying_home[0];
 			current_hour <- current_hour + rnd(1,max_duration_lunch);
+			
 			if (age >= min_age_for_evening_act) and flip(proba_activity_evening) {
 				agenda_week[current_hour] <- any(possible_activities);
 				current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
+				agenda_week[current_hour] <- staying_home[0];
 			}
-			agenda_week[current_hour] <- staying_home[0];
+			
 		}
 		ask Individual where (each.age > retirement_age) {
 			list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
