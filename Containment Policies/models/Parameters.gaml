@@ -12,10 +12,9 @@ global {
 	
 	
 	//GIS data
+	//string dataset <- "../../data/Ben Tre/"; // default
 	string dataset <- "../../data/Vinh Phuc/"; // default
-	file shp_river <- file_exists(dataset+"river.shp") ? shape_file(dataset+"river.shp"):nil;
 	file shp_commune <- file_exists(dataset+"commune.shp") ? shape_file(dataset+"commune.shp"):nil;
-	file shp_roads <- file_exists(dataset+"roads.shp") ? shape_file(dataset+"roads.shp"):nil;
 	file shp_buildings <- file_exists(dataset+"buildings.shp") ? shape_file(dataset+"buildings.shp"):nil;
 
 	//simulation step

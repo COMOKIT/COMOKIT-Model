@@ -6,13 +6,12 @@
 ***/
 model Global
 
+
 import "species/Building.gaml"
-import "species/Boundary.gaml"
-import "species/River.gaml"
-import "species/Road.gaml"
 import "species/Individual.gaml"
 import "species/Hospital.gaml"
 import "species/Activity.gaml"
+import "species/Boundary.gaml"
 import "species/Authority.gaml"
 import "species/Activity.gaml"
 import "Constants.gaml"
@@ -24,18 +23,9 @@ global {
 	
 	action global_init {
 		write "global init";
-		if (shp_river != nil) {
-			create River from: shp_river;
-		}
-
 		if (shp_commune != nil) {
 			create Boundary from: shp_commune;
 		}
-
-		if (shp_roads != nil) {
-			create Road from: shp_roads;
-		}
-
 		if (shp_buildings != nil) {
 			create Building from: shp_buildings with: [type::string(read("type"))];
 		}
@@ -61,7 +51,7 @@ global {
 			max_student_age <- max(max_student_age, max(l));
 			min_student_age <- min(min_student_age, min(l));
 			string type <- possible_schools[l];
-			schools[l] <- buildings_per_activity[type] as_map (each:: each.shape.area);
+			schools[l] <- (type in buildings_per_activity.keys) ? (buildings_per_activity[type] as_map (each:: each.shape.area)) : map<Building,float>([]);
 		}
 			
 		ask homes {
@@ -110,11 +100,20 @@ global {
 				if (age <= max_student_age) {
 					loop l over: schools.keys {
 						if (age >= min(l) and age <= max(l)) {
-							school <-schools[l].keys[rnd_choice(schools[l].values)];
+							if (flip(proba_go_outside) or empty(schools[l])) {
+								school <- the_outside;	
+							} else {
+								school <-schools[l].keys[rnd_choice(schools[l].values)];
+							}
 						}
 					}
 				} else if (age <= retirement_age) { 
-					working_place <-working_places.keys[rnd_choice(working_places.values)];
+					if (flip(proba_go_outside) or empty(working_places)) {
+						working_place <- the_outside;	
+					} else {
+						working_place <-working_places.keys[rnd_choice(working_places.values)];
+					}
+					
 				}
 			}
 		}

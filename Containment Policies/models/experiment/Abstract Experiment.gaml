@@ -60,9 +60,6 @@ experiment "Abstract Experiment" virtual:true{
             }
 			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../../data/Default/satellite.png" transparency: 0.5 refresh: false;
 			
-			species River transparency: 0.5 {
-				draw shape color: color.darker empty:false ;
-			}
 			species Building {
 				draw shape color:  viralLoad>0?rgb(255*viralLoad,0,0):#lightgrey empty: true width: 2;
 			}
