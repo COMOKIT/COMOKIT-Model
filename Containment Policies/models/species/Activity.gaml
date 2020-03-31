@@ -21,33 +21,46 @@ import "Building.gaml"
 global {
 	// A map of all possible activities
 	map<string, Activity> Activities;
-	map<string,list<Building>> buildings_per_activity;
+	
 	action create_activities {
+		
 		loop s over: Activity.subspecies { 
 			create s returns: new_activity;
-			Activities[string(s)] <- Activity(first(new_activity)) ;
+			Activities[first(new_activity).name] <- Activity(first(new_activity)) ;
 		}
-		buildings_per_activity <- Building group_by (each.type_activity);
-		//buildings_per_activity["outside"] <-  Building where !(each overlaps world.shape);	
+		map<string,list<Building>> buildings_per_activity <- Building group_by (each.type);
+		
+		loop tb over: activities.keys { 
+			create Activity with:[name::tb, types_of_building::activities[tb]] {
+				Activities[tb] <-self ;
+				loop type over: types_of_building {
+					if (type in buildings_per_activity.keys) {
+						buildings <- buildings + buildings_per_activity[type];
+					}
+				}
+			}
+		}	
 	}
 
 }
 
 species Activity {
-	string type_of_building <- nil;
+	list<string> types_of_building <- [];
+	list<Building> buildings;
 	bool chose_nearest <- false;
 	int duration_min <- 1;
 	int duration_max <- 8;
 	int nb_candidat <- 3;
 	
+	
 	list<Building> find_target (Individual i) {
-		if flip(proba_go_outside) or not (type_of_building in buildings_per_activity) or  empty(buildings_per_activity[type_of_building]){
+		if flip(proba_go_outside) or  empty(buildings){
 			return [the_outside];
 		}
 		if (chose_nearest) {
-			return [buildings_per_activity[type_of_building] closest_to self];
+			return [buildings closest_to self];
 		} else {
-			return nb_candidat among buildings_per_activity[type_of_building];
+			return nb_candidat among buildings;
 		}
 
 	}
@@ -58,27 +71,43 @@ species Activity {
 
 } 
 
-species a_work parent: Activity {
+species visiting_neighbor parent: Activity {
+	string name <- act_neighbor;
 	list<Building> find_target (Individual i) {
-		return [i.office];
+		return i.bound.get_neighbors();
+	}
+}
+
+species visiting_friend parent: Activity {
+	string name <- act_friend;
+	list<Building> find_target (Individual i) {
+		return nb_candidat among (i.relatives collect (each.home));
+	}
+}
+
+species working parent: Activity {
+	string name <- act_working;
+	list<Building> find_target (Individual i) {
+		return [i.working_place];
 	}
 
 }
 
-species a_school parent: Activity {
+species studying parent: Activity {
+	string name <- act_studying;
 	list<Building> find_target (Individual i) {
 		return [i.school];
 	}
 
 }
 
-species a_home parent: Activity {
+species staying_home parent: Activity {
+	string name <- act_home;
 	list<Building> find_target (Individual i) {
 		return [i.home];
 	}
-
 }
-	
+/*
 species a_shop parent: Activity {
 	string type_of_building <- t_shop;
 }
@@ -119,10 +148,6 @@ species a_farm parent: Activity {
 	string type_of_building <- t_farm;
 }
 
-/*species a_trade parent: Activity {
-	string type_of_building <- "outside";
-}*/
-
 species a_play parent: Activity {
 	string type_of_building <- t_playground;
 }
@@ -139,20 +164,7 @@ species a_sport parent: Activity {
 	string type_of_building <- t_sport;
 }
 
-species a_neighbours parent: Activity {
-	
-	list<Building> find_target (Individual i) {
-		return i.bound.get_neighbors();
-	}
 
-}
-
-species a_friends parent: Activity {
-	list<Building> find_target (Individual i) {
-		return nb_candidat among (i.relatives collect (each.home));
-	}
-
-}
 
 species a_admin_task parent: Activity {
 	string type_of_building <- t_admin;
@@ -170,16 +182,9 @@ species a_meeting parent: Activity {
 	string type_of_building <- t_meeting;
 }
 
-species a_spread parent: Activity {
-	list<Building> find_target (Individual i) {
-		return list(Building) - i.bound;
-	}
-
-}
-
 species a_repair parent: Activity {
 	string type_of_building <- t_repairshop;
 }
-
+ */
 
 

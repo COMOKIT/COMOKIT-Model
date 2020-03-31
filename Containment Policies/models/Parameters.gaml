@@ -6,8 +6,7 @@
 ***/
 model Parameters
 
-
-
+import "Constants.gaml"
 
 global {
 	
@@ -62,4 +61,29 @@ global {
 	//Activity parameters
 	float building_neighbors_dist <- 500 #m; //used by "visit to neighbors" activity (max distance of neighborhood).
 	
+	int retirement_age <- 55;
+	int max_age <- 90;
+	list<list<int>> work_hours <- [[6,8], [15,18]];
+	list<list<int>> school_hours <- [[7,9], [15,18]];
+	list<int> first_act_old_hours <- [7,10];
+	
+	list<int> lunch_hours <- [11,13];
+	int max_duration_lunch <- 2;
+	int max_duration_default <- 3;
+	int min_age_for_evening_act <- 13;
+
+	
+	list<string> possible_homes <- ["", "home", "hostel"];
+	
+	map<string, float> possible_workplaces <-  ["office"::3.0, "admin"::2.0, "industry"::1.0, ""::0.5,"home"::0.5,"store"::1.0, "shop"::1.0,"bookstore"::1.0,
+		"gamecenter"::1.0, "restaurant"::1.0,"coffeeshop"::1.0,"caphe"::1.0, "caphe-karaoke"::1.0,"farm"::0.1, "repairshop"::1.0,"hostel"::1.0
+	];
+	map<list<int>,string> possible_schools <- [[3,18]::"school", [19,23]::"university"];
+	
+	
+	map<string, list<string>> activities <- ["shopping"::["shop","market","supermarket", "store"], act_eating::["restaurant","coffeeshop", "caphe"],
+	"leisure"::["gamecenter", "karaoke", "cinema", "caphe-karaoke"], "outside activity"::["playground", "park"], "sport"::["sport"],
+	 "other activity"::["admin","meeting", "supplypoint","bookstore", "place_of_worship"]];
+	
+	list<string> meeting_relaxing_act <- [act_working, act_studying,act_eating,"leisure","sport"];
 }

@@ -13,8 +13,8 @@ import "Individual.gaml"
 species Policy {
 	map<string, bool> allowed_activities;
 	bool is_allowed (Individual i, Activity activity) {
-		if (allowed_activities[species_of(activity).name] != nil) {
-			return allowed_activities[species_of(activity).name];
+		if (allowed_activities[activity.name] != nil) {
+			return allowed_activities[activity.name];
 		} else {
 			return true;
 		}
@@ -31,6 +31,7 @@ species PartialPolicy parent: Policy {
 	float tolerance; // between 0 (no tolerance) and 1.0
 	
 	bool is_allowed (Individual i, Activity activity) {
+		
 		bool allowed <- super.is_allowed(i, activity);
 		if (!allowed) {
 			allowed <- flip(tolerance);
@@ -43,8 +44,8 @@ species SpatialPolicy parent: Policy {
 	geometry application_area;
 	bool is_allowed (Individual i, Activity activity) {
 		if (application_area overlaps i) {
-			if (allowed_activities[species_of(activity).name] != nil) {
-				return allowed_activities[species_of(activity).name];
+			if (allowed_activities[activity.name] != nil) {
+				return allowed_activities[activity.name];
 			} else {
 				return true;
 			}

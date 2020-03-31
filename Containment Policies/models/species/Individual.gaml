@@ -25,12 +25,12 @@ global
 
 
 species Individual{
-	int ageCategory;
+	int age;
 	int sex; //0 M 1 F
 	bool wearMask;
 	Building home;
 	Building school;
-	Building office;
+	Building working_place;
 	list<Individual> relatives;
 	Building bound;
 	bool is_outside <- false;

@@ -21,6 +21,7 @@ import "Parameters.gaml"
 global {
 	geometry shape <- envelope(shp_buildings);
 	outside the_outside;
+	
 	action global_init {
 		write "global init";
 		if (shp_river != nil) {
@@ -36,138 +37,139 @@ global {
 		}
 
 		road_network <- as_edge_graph(Road);
-		list<float> tmp <- building_types collect (1 / length(building_types));
 		if (shp_buildings != nil) {
-			create Building from: shp_buildings with: [type_activity::string(read("type"))]{
-				switch type_activity {
-					match "" {type_activity <- "home";}
-					match "store" {type_activity <- "shop";}
-					match "caphe" {type_activity <- "coffeeshop";}
-					match "caphe-karaoke" {type_activity <- "coffeeshop";}
-					match "lake" {do die;}
-				}
-			}
+			create Building from: shp_buildings with: [type::string(read("type"))];
 		}
 		
 		create outside;
 		the_outside <- first(outside);
 		do create_activities;
 		
-		list<Building> homes <- Building where (each.type_activity in [t_home,t_hotel]);
-		map<Building, float> schools <- (Building where (each.type_activity = t_school)) as_map (each:: each.shape.area);
-		map<Building, float> universities <- Building where (each.type_activity = t_university) as_map (each:: each.shape.area);
-		if empty(universities) {universities <-schools ;}
-		list<Building> offices <- Building where (each.type_activity = t_office);
-		list<Building> industries <- Building where (each.type_activity = t_industry);
-		list<Building> admins <- Building where (each.type_activity = t_admin);
-		list<Building> others <- Building - offices - admins - industries;
-		map<Building,float> working_places <- (admins + offices) as_map (each::each.shape.area * 4) + (industries) as_map (each::each.shape.area * 2)+ others as_map (each::each.shape.area) ; 
+		list<Building> homes <- Building where (each.type in possible_homes);
+		map<string,list<Building>> buildings_per_activity <- Building group_by (each.type);
 		
+		map<Building,float> working_places;
+		loop wp over: possible_workplaces.keys {
+			if (wp in buildings_per_activity.keys) {
+					working_places <- working_places +  (buildings_per_activity[wp] as_map (each:: (possible_workplaces[wp] * each.shape.area)));  
+	
+			}
+		}
+		int min_student_age <- retirement_age;
+		int max_student_age <- 0;
+		map<list<int>,map<Building,float>> schools;
+		loop l over: possible_schools.keys {
+			max_student_age <- max(max_student_age, max(l));
+			min_student_age <- min(min_student_age, min(l));
+			string type <- possible_schools[l];
+			schools[l] <- buildings_per_activity[type] as_map (each:: each.shape.area);
+		}
+			
 		ask homes {
 		//father
 			create Individual {
-				last_activity <- a_home[0];
-				ageCategory <- rnd(23,53);
+				age <- rnd(max_student_age + 1,retirement_age);
 				sex <- 0;
 				home <- myself;
-				office <- flip(proba_go_outside) ? the_outside :working_places.keys[rnd_choice(working_places.values)];
 			} 
 			//mother
 			create Individual {
-				last_activity <- a_home[0];
-				ageCategory <- 23 + rnd(30);
+				age <- rnd(max_student_age + 1,retirement_age);
 				sex <- 1;
 				home <- myself;
-				office <- flip(proba_go_outside) ? the_outside :working_places.keys[rnd_choice(working_places.values)];
 			}
 			//children
 			create Individual number: rnd(3) {
-				last_activity <- a_home[0];
-				ageCategory <- rnd(22);
+				last_activity <-first(staying_home);
+				age <- rnd(0,max_student_age);
 				sex <- rnd(1);
 				home <- myself;
-				if (ageCategory <=  18) {
-					school <- (empty(schools) or flip(proba_go_outside)) ? the_outside :any(schools.keys[rnd_choice(schools.values)]) ;
-				} else {
-					school <- (empty(universities) or flip(proba_go_outside)) ? the_outside : any(schools.keys[rnd_choice(universities.values)]);
-				}
 			}
 
 		}
-
 		ask (N_grandfather * length(Building)) among homes {
 			create Individual {
-				last_activity <- a_home[0];
-				ageCategory <- 55 + rnd(50);
+				age <- rnd(retirement_age + 1, max_age);
 				sex <- 0;
 				home <- myself;
 			}
-
 		}
 
 		ask (M_grandmother * length(Building)) among homes {
 			create Individual {
-				last_activity <- a_home[0];
-				ageCategory <- 50 + rnd(50);
+				age <- rnd(retirement_age + 1, max_age);
 				sex <- 1;
 				home <- myself;
 				
 			}
 		}
 		ask Individual {
+			last_activity <-first(staying_home);
 			do enter_building(home);
 			status <- susceptible;
+			if (age >= min_student_age) {
+				if (age <= max_student_age) {
+					loop l over: schools.keys {
+						if (age >= min(l) and age <= max(l)) {
+							school <-schools[l].keys[rnd_choice(schools[l].values)];
+						}
+					}
+				} else if (age <= retirement_age) { 
+					working_place <-working_places.keys[rnd_choice(working_places.values)];
+				}
+			}
 		}
-		//list<Activity> possible_activities <- Activities.values where ((each.type_of_building = nil) or (each.type_of_building in buildings_per_activity.keys));
-		list<Activity> possible_activities_tot <- Activities.values - a_school - a_work - a_home;
-		list<Activity> possible_activities_without_rel <- possible_activities_tot - a_friends;
-		ask Individual where ((each.ageCategory < 55 and each.sex = 0) or (each.ageCategory < 50 and each.sex = 1)) {
+		Activity eating_act <- Activity first_with (each.name = act_eating);
+		list<Activity> possible_activities_tot <- Activities.values - studying - working - staying_home;
+		list<Activity> possible_activities_without_rel <- possible_activities_tot - visiting_friend;
+		ask Individual where ((each.age <= retirement_age) and (each.age >= min_student_age))  {
 			list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
 			int current_hour;
-			if (ageCategory < 23) {
-				current_hour <- rnd(7,9);
-				agenda_week[current_hour] <- a_school[0];
+			if (age <= max_student_age) {
+				current_hour <- rnd(school_hours[0][0],school_hours[0][1]);
+				agenda_week[current_hour] <- studying[0];
 			}
 			 else {
-				current_hour <- rnd(6,8);
-				agenda_week[current_hour] <- a_work[0];
+				current_hour <-rnd(work_hours[0][0],work_hours[0][1]);
+				agenda_week[current_hour] <- working[0];
 			}
 			if (flip(proba_lunch_outside_workplace)) {
 				
-				current_hour <- rnd(11,13);
-				if (not flip(proba_lunch_at_home) and (possible_activities first_with (each.type_of_building = t_restaurant)) != nil) {
-					agenda_week[current_hour] <- possible_activities first_with (each.type_of_building = t_restaurant);
+				current_hour <- rnd(lunch_hours[0],lunch_hours[1]);
+				if (not flip(proba_lunch_at_home) and (eating_act != nil) and not empty(eating_act.buildings)) {
+					agenda_week[current_hour] <- eating_act;
 				} else {
-					agenda_week[current_hour] <- a_home[0];
+					agenda_week[current_hour] <- staying_home[0];
 				}
 				current_hour <- current_hour + rnd(1,2);
-				if (ageCategory < 23) {
-					agenda_week[current_hour] <- a_school[0];
+				if (age <= max_student_age) {
+					agenda_week[current_hour] <- studying[0];
+					current_hour <- rnd(school_hours[1][0],school_hours[1][1]);
 				} else {
-					agenda_week[current_hour] <- a_work[0];
+					agenda_week[current_hour] <- working[0];
+					current_hour <-rnd(work_hours[1][0],work_hours[1][1]);
 				}
 			}
-			current_hour <- rnd(15,18);
-			agenda_week[current_hour] <- a_home[0];
-			current_hour <- current_hour + rnd(1,3);
-			if (ageCategory > 12) and flip(proba_activity_evening) {
+			agenda_week[current_hour] <- staying_home[0];
+			current_hour <- current_hour + rnd(1,max_duration_lunch);
+			if (age >= min_age_for_evening_act) and flip(proba_activity_evening) {
 				agenda_week[current_hour] <- any(possible_activities);
-				current_hour <- (current_hour + rnd(1,3)) mod 24;
+				current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
 			}
-			agenda_week[current_hour] <- a_home[0];
+			agenda_week[current_hour] <- staying_home[0];
 		}
-		ask Individual where empty(each.agenda_week) {
+		ask Individual where (each.age > retirement_age) {
 			list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
 			int num_activity <- rnd(0,max_num_activity_for_old_people);
-			int current_hour <- rnd(7,9);
+			int current_hour <- rnd(first_act_old_hours[0],first_act_old_hours[1]);
 			loop times: num_activity {
 				agenda_week[current_hour] <- any(possible_activities);
-				current_hour <- (current_hour + rnd(1,4)) mod 24;
-				agenda_week[current_hour] <- a_home[0];
-				current_hour <- (current_hour + rnd(1,4)) mod 24;
+				current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
+				agenda_week[current_hour] <- staying_home[0];
+				current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
 			}
 		
-		}
+		} 
 
 		ask num_infected_init among Individual {
 			do defineNewCase;

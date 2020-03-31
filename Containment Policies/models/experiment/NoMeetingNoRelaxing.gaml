@@ -11,7 +11,7 @@ import "Abstract Experiment.gaml"
 
 global {
 
-	init { 
+	action define_policy{   
 		ask Authority {
 			policies << noMeetingRelaxing;
 		}

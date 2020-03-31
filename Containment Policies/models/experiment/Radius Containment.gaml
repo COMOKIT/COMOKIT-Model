@@ -12,7 +12,7 @@ import "Abstract Experiment.gaml"
 
 global {
 
-	init {  
+	action define_policy{  
 		ask Authority {
 			loop i over: Individual where (each.status=asymptomatic or each.status=symptomatic_without_symptoms or each.status=symptomatic_with_symptoms){				
 				policies << createQuarantinePolicyAtRadius(i.location, 200#m);

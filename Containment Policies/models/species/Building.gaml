@@ -15,7 +15,7 @@ import "Individual.gaml"
 species Building {
 
 	float viralLoad <- 0.0;
-	string type_activity;
+	string type;
 	list<Building> neighbors;
 	list<Individual> individuals;
 	

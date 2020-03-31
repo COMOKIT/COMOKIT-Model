@@ -9,6 +9,8 @@
 
 model Authority
 
+import "../Parameters.gaml"
+
 import "Policy.gaml"
 
 global {
@@ -22,9 +24,13 @@ global {
 			noSchool <- createPolicy(false, true);
 			noMeetingRelaxing<-createNoMeetingPolicy();
 		}
+		
+		do define_policy;
 
 	}
-
+	
+	action define_policy{}
+ 
 }
 /* Describes the main authority in charge of the health policies to implement */
 species Authority {
@@ -36,8 +42,8 @@ species Authority {
 	
 	Policy createLockDownPolicy {
 		create Policy returns: result {
-			loop s over: Activity.subspecies {
-				allowed_activities[string(s)] <- false;
+			loop s over: Activities.keys {
+				allowed_activities[s] <- false;
 			}
 		}
 		return first(result);
@@ -46,8 +52,8 @@ species Authority {
 	PartialPolicy createLockDownPolicyWithToleranceOf(float p) {
 		create PartialPolicy returns: result {
 			tolerance <- p;
-			loop s over: Activity.subspecies {
-				allowed_activities[string(s)] <- false;
+			loop s over: Activities.keys {
+				allowed_activities[s] <- false;
 			}
 		}
 		return first(result);
@@ -55,10 +61,10 @@ species Authority {
 	
 	SpatialPolicy createQuarantinePolicyAtRadius(point loc, float radius){		
 		create SpatialPolicy returns: result {
-			loop s over: Activity.subspecies {
-				allowed_activities[string(s)] <- false;
+			loop s over: Activities.keys {
+				allowed_activities[s] <- false;
 			}
-		}
+		} 
 		SpatialPolicy p<-first(result);
 		p.application_area<-circle(radius) at_location loc;
 		return p;
@@ -66,15 +72,9 @@ species Authority {
 	
 	Policy createNoMeetingPolicy {
 		create Policy returns: result {
-			allowed_activities[a_school.name] <- false;
-			allowed_activities[a_work.name] <- false;
-			allowed_activities[a_supermarket.name] <- false;
-			allowed_activities[a_movie.name] <- false;
-			allowed_activities[a_game.name] <- false;
-			allowed_activities[a_karaoke.name] <- false;
-			allowed_activities[a_meeting.name] <- false;
-			allowed_activities[a_park.name] <- false;
-			allowed_activities[a_restaurant.name] <- false;
+			loop mp over: meeting_relaxing_act {
+				allowed_activities[mp] <- false;
+			}
 		}
 
 		return (first(result));
@@ -82,8 +82,8 @@ species Authority {
 
 	Policy createPolicy (bool school, bool work) {
 		create Policy returns: result {
-			allowed_activities[a_school.name] <- school;
-			allowed_activities[a_work.name] <- work;
+			allowed_activities[studying.name] <- school;
+			allowed_activities[working.name] <- work;
 		}
 
 		return (first(result));
@@ -94,9 +94,7 @@ species Authority {
 			if (!p.is_allowed(i, activity)) {
 				return false;
 			}
-
 		}
-
 		return true;
 	}
 
