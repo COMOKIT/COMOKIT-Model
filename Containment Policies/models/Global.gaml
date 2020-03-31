@@ -36,7 +36,6 @@ global {
 			create Road from: shp_roads;
 		}
 
-		road_network <- as_edge_graph(Road);
 		if (shp_buildings != nil) {
 			create Building from: shp_buildings with: [type::string(read("type"))];
 		}
