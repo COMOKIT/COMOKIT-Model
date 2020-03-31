@@ -60,6 +60,6 @@ global {
 	float proba_outside_contamination_per_hour <- 0.0; //proba per hour of being infected for Individual outside the study area 
 	
 	//Activity parameters
-	float building_neighbors_dist <- 500 #m; //used by visit to neighbors activity
+	float building_neighbors_dist <- 500 #m; //used by "visit to neighbors" activity (max distance of neighborhood).
 	
 }
