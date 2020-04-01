@@ -94,9 +94,9 @@ global {
 	float building_neighbors_dist <- 500 #m; //used by "visit to neighbors" activity (max distance of neighborhood).
 	
 	//list of activities, and for each activity type, the list of possible building type
-	map<string, list<string>> activities <- ["shopping"::["shop","market","supermarket", "store"], act_eating::["restaurant","coffeeshop", "caphe"],
-	"leisure"::["gamecenter", "karaoke", "cinema", "caphe-karaoke"], "outside activity"::["playground", "park"], "sport"::["sport"],
-	 "other activity"::["admin","meeting", "supplypoint","bookstore", "place_of_worship"]];
+	map<string, list<string>> activities <- [act_shopping::["shop","market","supermarket", "store"], act_eating::["restaurant","coffeeshop", "caphe"],
+	act_leisure::["gamecenter", "karaoke", "cinema", "caphe-karaoke"], act_outside::["playground", "park"], "sport"::["sport"],
+	 act_other::["admin","meeting", "supplypoint","bookstore", "place_of_worship"]];
 	
 	//Policy parameters
 	list<string> meeting_relaxing_act <- [act_working, act_studying,act_eating,"leisure","sport"]; //fordidden activity when choosing "no meeting, no relaxing" policy

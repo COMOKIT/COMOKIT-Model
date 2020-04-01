@@ -25,6 +25,9 @@ global {
 	string act_working <- "working";
 	string act_studying <- "studying";
 	string act_eating <- "eating";
-	
+	string act_shopping <- "shopping";
+	string act_leisure <- "leisure";
+	string act_outside <- "outside activity";
+	string act_other <- "other activity";
 
 }
