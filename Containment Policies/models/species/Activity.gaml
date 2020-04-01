@@ -48,8 +48,6 @@ species Activity {
 	list<string> types_of_building <- [];
 	list<Building> buildings;
 	bool chose_nearest <- false;
-	int duration_min <- 1;
-	int duration_max <- 8;
 	int nb_candidat <- 3;
 	
 	
