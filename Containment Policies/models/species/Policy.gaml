@@ -24,6 +24,30 @@ species Policy {
 }
 
 /**
+ * A realistic lockdown policy where a percentage of people is allowed to go out, shoppping is enabled for all, and positive cases are forbidden to move
+*/
+
+species LockdownPolicy parent: Policy {
+	float percentage_of_essential_workers <- 0.1;
+	list<Individual> allowed_workers <- nil;
+	
+	bool is_allowed (Individual i, Activity activity) {
+		if (allowed_workers = nil) {
+			allowed_workers <- (percentage_of_essential_workers * length(Individual)) among Individual;
+		}
+		if (i.report_status = tested_positive and activity.name != act_home) {
+			return false;
+		}
+		if (allowed_workers contains i) {
+			return true;
+		}
+		if (activity.name = act_shopping) {
+			return true;
+		}
+	}
+}
+
+/**
  * Same as Policy but a proportion of normally forbidden activities are allowed
  */
 species PartialPolicy parent: Policy {
