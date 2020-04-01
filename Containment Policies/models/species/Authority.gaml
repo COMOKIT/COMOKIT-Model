@@ -87,8 +87,9 @@ species Authority {
 		}
 		return (first(result));
 	}
-	Policy createConditionalContainmentPolicy (float nb_days, int min_cases)
-	{
+	
+	
+	Policy createConditionalContainmentPolicy (float nb_days, int min_cases) {
 		create TemporaryWithDetectedPolicy returns: result {
 			time_applied <- nb_days;
 			min_reported <- min_cases;
@@ -96,6 +97,13 @@ species Authority {
 			applying <- false;
 		}
 
+		return (first(result));
+	}
+	
+	Policy createLockDownPolicyWithPercentage(float p) {
+		create LockdownPolicy returns: result {
+			percentage_of_essential_workers <- p;
+		}
 		return (first(result));
 	}
 	
