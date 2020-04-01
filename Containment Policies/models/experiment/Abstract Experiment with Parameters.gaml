@@ -35,13 +35,13 @@ experiment "With parameters" parent: "Abstract Experiment" autorun: true {
 	 * Enabling environment contamination and infection
 	 */
 	parameter "Enables environmental transmission" category: "Epidemiology" var: transmission_building <- false enables:
-	[successful_contact_rate_building, basic_viral_release, viralLoadDecrease];
+	[successful_contact_rate_building, basic_viral_release, viral_load_decrease];
 	//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period
 	parameter "Successful contact rate from environment" category: "Epidemiology" var: successful_contact_rate_building <- 2.5 * 1 / (14.69973 * nb_step_for_one_day); 
 	//Viral load released in the environment by infectious individual
 	parameter "Viral load released by infection individuals" category: "Epidemiology" var: basic_viral_release <- 3.0; 
 	//Value to decrement the viral load in the environment
-	parameter "Viral load value removed from the environment" category: "Epidemiology" var: viralLoadDecrease <- 0.33 / nb_step_for_one_day; 
+	parameter "Viral load value removed from the environment" category: "Epidemiology" var: viral_load_decrease <- 0.33 / nb_step_for_one_day; 
 	
 	
 	/**

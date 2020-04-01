@@ -236,7 +236,7 @@ species Individual{
 		tick <- tick + 1;
 		if((self.is_infected()=false)and(self.bound!=nil)and(transmission_building))
 		{
-			if(flip(bound.viralLoad*successful_contact_rate_building))
+			if(flip(bound.viral_load*successful_contact_rate_building))
 			{
 				do defineNewCase();
 			}

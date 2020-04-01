@@ -14,7 +14,7 @@ import "Individual.gaml"
 
 species Building {
 
-	float viralLoad <- 0.0;
+	float viral_load <- 0.0;
 	string type;
 	list<Building> neighbors;
 	list<Individual> individuals;
@@ -33,11 +33,11 @@ species Building {
 	action addViralLoad(float value){
 		if(transmission_building)
 		{
-			viralLoad <- min(1.0,viralLoad+value);
+			viral_load <- min(1.0,viral_load+value);
 		}
 	}
 	reflex updateViralLoad when: transmission_building{
-		viralLoad <- max(0.0,viralLoad - viralLoadDecrease);
+		viral_load <- max(0.0,viral_load - viral_load_decrease);
 	}
 
 	aspect default {

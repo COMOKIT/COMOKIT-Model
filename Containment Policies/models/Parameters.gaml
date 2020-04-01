@@ -37,7 +37,7 @@ global {
 	float proportion_asymptomatic <- 0.3; //Proportion of asymptomatic infections
 	float proportion_dead_symptomatic <- 0.01; //Proportion of symptomatic infections dying
 	float basic_viral_release <- 3.0; //Viral load released in the environment by infectious individual
-	float viralLoadDecrease <- 0.33/nb_step_for_one_day; //Value to decrement the viral load in the environment
+	float viral_load_decrease <- 0.33/nb_step_for_one_day; //Value to decrement the viral load in the environment
 	float probability_true_positive <- 0.89; //Probability of successfully identifying an infected
 	float probability_true_negative <- 0.92; //Probability of successfully identifying a non infected
 	float proportion_wearing_mask <- 0.0; //Proportion of people wearing a mask
