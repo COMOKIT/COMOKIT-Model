@@ -24,26 +24,32 @@ global {
 	
 
 	//Epidemiological parameters
-	bool transmission_human <- true;
-	bool transmission_building <- false;
-	float R0 <- 2.5;
-	float contact_distance <- 2#m;
-	float successful_contact_rate_human <- R0 * 1/(14.69973*24);
-	float successful_contact_rate_building <- R0 * 1/(14.69973*24);
-	float factor_contact_rate_asymptomatic <- 0.55;
-	float proportion_asymptomatic <- 0.3;
-	float proportion_dead_symptomatic <- 0.01;
-	float proportion_symptomatic_using_mask <- 0.2;
-	float basic_viral_release <- 3.0;
-	float viralLoadDecrease <- 0.33/24;
+	float nb_step_for_one_day <- #day/step; //Used to define the different period used in the model
+	bool load_epidemiological_parameter_from_file <- false; //Allowing parameters being loaded from a csv file 
+	file csv_epidemiological_parameters <- csv_file("../parameters/Epidemiological_parameters.csv"); //File for the parameters
+	bool transmission_human <- true; //Allowing human to human transmission
+	bool transmission_building <- false; //Allowing environment contamination and infection
+	float successful_contact_rate_human <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
+	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period
+	float reduction_contact_rate_asymptomatic <- 0.55; //Factor of the reduction for successful contact rate for  human to human transmission for asymptomatic individual
+	float proportion_asymptomatic <- 0.3; //Proportion of asymptomatic infections
+	float proportion_dead_symptomatic <- 0.01; //Proportion of symptomatic infections dying
+	float basic_viral_release <- 3.0; //Viral load released in the environment by infectious individual
+	float viralLoadDecrease <- 0.33/nb_step_for_one_day; //Value to decrement the viral load in the environment
+	float probability_true_positive <- 0.89; //Probability of successfully identifying an infected
+	float probability_true_negative <- 0.92; //Probability of successfully identifying a non infected
+	float proportion_wearing_mask <- 0.0; //Proportion of people wearing a mask
+	float reduction_contact_rate_wearing_mask <- 0.5; //Factor of reduction for successful contact rate of an infectious individual wearing mask
+	string distribution_type_incubation <- "Lognormal"; //Type of distribution of the incubation period; Among normal, lognormal, weibull, gamma
+	float parameter_1_incubation <- 1.57; //First parameter of the incubation period distribution
+	float parameter_2_incubation <- 0.65; //Second parameter of the incubation period distribution
+	string distribution_type_serial_interval <- "Normal"; //Type of distribution of the serial interval
+	float parameter_1_serial_interval <- 3.96;//First parameter of the serial interval distribution
+	float parameter_2_serial_interval <- 3.75;//Second parameter of the serial interval distribution
+	string distribution_type_onset_to_recovery <- "Lognormal";//Type of distribution of the time from onset to recovery
+	float parameter_1_onset_to_recovery <- 3.034953;//First parameter of the time from onset to recovery distribution
+	float parameter_2_onset_to_recovery <- 0.34;//Second parameter of the time from onset to recovery distribution
 	
-	//Testing parameter
-	float probability_true_positive <- 0.89;
-	float probability_true_negative <- 0.92;
-	
-	//Mask parameters
-	float factor_contact_rate_wearing_mask <- 0.5; //Assumed
-	float proportion_wearing_mask <- 0.0;
 	
 	
 	//Population parameter

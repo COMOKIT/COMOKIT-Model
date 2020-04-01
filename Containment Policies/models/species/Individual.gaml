@@ -150,11 +150,11 @@ species Individual{
 		float reduction_factor <- 1.0;
 		if(self.is_asymptomatic())
 		{
-			reduction_factor <- reduction_factor * factor_contact_rate_asymptomatic;
+			reduction_factor <- reduction_factor * reduction_contact_rate_asymptomatic;
 		}
 		if(self.wearMask)
 		{
-			reduction_factor <- reduction_factor * factor_contact_rate_wearing_mask;
+			reduction_factor <- reduction_factor * reduction_contact_rate_wearing_mask;
 		}
 		if(bound!=nil)and(transmission_building)
 		{
