@@ -22,6 +22,7 @@ global {
 	outside the_outside;
 	
 	action global_init {
+		
 		write "global init";
 		if (shp_commune != nil) {
 			create Boundary from: shp_commune;
@@ -92,6 +93,26 @@ global {
 				
 			}
 		}
+		
+		do define_agenda(working_places,schools);
+		
+
+		ask num_infected_init among Individual {
+			do defineNewCase;
+		}
+		
+		total_number_individual <- length(Individual);
+
+	}
+	
+	action define_agenda(map<Building,float> working_places,map<list<int>,map<Building,float>> schools) {
+		int min_student_age <- retirement_age;
+			int max_student_age <- 0;
+			loop l over: possible_schools.keys {
+				max_student_age <- max(max_student_age, max(l));
+				min_student_age <- min(min_student_age, min(l));
+			}
+			
 		ask Individual {
 			last_activity <-first(staying_home);
 			do enter_building(home);
@@ -120,66 +141,80 @@ global {
 		Activity eating_act <- Activity first_with (each.name = act_eating);
 		list<Activity> possible_activities_tot <- Activities.values - studying - working - staying_home;
 		list<Activity> possible_activities_without_rel <- possible_activities_tot - visiting_friend;
+		
 		ask Individual where ((each.age <= retirement_age) and (each.age >= min_student_age))  {
-			list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
-			int current_hour;
-			if (age <= max_student_age) {
-				current_hour <- rnd(school_hours[0][0],school_hours[0][1]);
-				agenda_week[current_hour] <- studying[0];
-			}
-			 else {
-				current_hour <-rnd(work_hours[0][0],work_hours[0][1]);
-				agenda_week[current_hour] <- working[0];
-			}
-			if (flip(proba_lunch_outside_workplace)) {
-				
-				current_hour <- rnd(lunch_hours[0],lunch_hours[1]);
-				if (not flip(proba_lunch_at_home) and (eating_act != nil) and not empty(eating_act.buildings)) {
-					agenda_week[current_hour] <- eating_act;
-				} else {
-					agenda_week[current_hour] <- staying_home[0];
-				}
-				current_hour <- current_hour + rnd(1,2);
+			loop times: 6 {
+				map<int,Activity> agenda_day;
+				list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
+				int current_hour;
 				if (age <= max_student_age) {
-					agenda_week[current_hour] <- studying[0];
+					current_hour <- rnd(school_hours[0][0],school_hours[0][1]);
+					agenda_day[current_hour] <- studying[0];
 				} else {
-					agenda_week[current_hour] <- working[0];
+					current_hour <-rnd(work_hours[0][0],work_hours[0][1]);
+					agenda_day[current_hour] <- working[0];
 				}
+				if (flip(proba_lunch_outside_workplace)) {
+					current_hour <- rnd(lunch_hours[0],lunch_hours[1]);
+					if (not flip(proba_lunch_at_home) and (eating_act != nil) and not empty(eating_act.buildings)) {
+						agenda_day[current_hour] <- eating_act;
+					} else {
+						agenda_day[current_hour] <- staying_home[0];
+					}
+					current_hour <- current_hour + rnd(1,2);
+					if (age <= max_student_age) {
+						agenda_day[current_hour] <- studying[0];
+					} else {
+						agenda_day[current_hour] <- working[0];
+					}
+				}
+				if (age <= max_student_age) {
+						current_hour <- rnd(school_hours[1][0],school_hours[1][1]);
+				} else {
+					current_hour <-rnd(work_hours[1][0],work_hours[1][1]);
+				}
+				agenda_day[current_hour] <- staying_home[0];
+				current_hour <- current_hour + rnd(1,max_duration_lunch);
+				
+				if (age >= min_age_for_evening_act) and flip(proba_activity_evening) {
+					agenda_day[current_hour] <- any(possible_activities);
+					current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
+					agenda_day[current_hour] <- staying_home[0];
+				}
+				agenda_week << agenda_day;
 			}
-			if (age <= max_student_age) {
-					current_hour <- rnd(school_hours[1][0],school_hours[1][1]);
-			} else {
-				current_hour <-rnd(work_hours[1][0],work_hours[1][1]);
-			}
-			agenda_week[current_hour] <- staying_home[0];
-			current_hour <- current_hour + rnd(1,max_duration_lunch);
-			
-			if (age >= min_age_for_evening_act) and flip(proba_activity_evening) {
-				agenda_week[current_hour] <- any(possible_activities);
-				current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
-				agenda_week[current_hour] <- staying_home[0];
-			}
-			
-		}
-		ask Individual where (each.age > retirement_age) {
+			map<int,Activity> agenda_day;
 			list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
-			int num_activity <- rnd(0,max_num_activity_for_old_people);
+			int num_activity <- rnd(0,max_num_activity_for_non_working_day);
 			int current_hour <- rnd(first_act_old_hours[0],first_act_old_hours[1]);
 			loop times: num_activity {
-				agenda_week[current_hour] <- any(possible_activities);
+				agenda_day[current_hour] <- any(possible_activities);
 				current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
-				agenda_week[current_hour] <- staying_home[0];
+				agenda_day[current_hour] <- staying_home[0];
 				current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
 			}
-		
-		} 
-
-		ask num_infected_init among Individual {
-			do defineNewCase;
+			agenda_week << agenda_day;
 		}
-		
-		total_number_individual <- length(Individual);
-
+		ask Individual where (each.age > retirement_age) {
+			loop times: 7 {
+				map<int,Activity> agenda_day;
+				list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
+				int num_activity <- rnd(0,max_num_activity_for_old_people);
+				int current_hour <- rnd(first_act_old_hours[0],first_act_old_hours[1]);
+				loop times: num_activity {
+					agenda_day[current_hour] <- any(possible_activities);
+					current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
+					agenda_day[current_hour] <- staying_home[0];
+					current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
+				}
+				agenda_week << agenda_day;
+			}
+		}
+		ask Individual where empty(each.agenda_week) {
+			loop times:7 {
+				agenda_week<<[];
+			}
+		} 
 	}
 
 }

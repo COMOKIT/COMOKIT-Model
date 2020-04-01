@@ -19,6 +19,7 @@ global {
 
 	//simulation step
 	float step<-1#h;
+	date starting_date <- date([2020,3,1]);
 	
 	int num_infected_init <- 2; //number of infected individuals at the initialization of the simulation
 	
@@ -80,6 +81,7 @@ global {
 	int max_duration_default <- 3; // default duration (in hour) of activities
 	int min_age_for_evening_act <- 13; //min age of individual to have an activity after school
 	
+	int max_num_activity_for_non_working_day <- 4; //max number of activity for non working day
 	int max_num_activity_for_old_people <- 3; //max number of activity for old people ([0,max_num_activity_for_old_people])
 	float proba_activity_evening <- 0.7; //proba for people (except old ones) to have an activity after work
 	float proba_lunch_outside_workplace <- 0.5; //proba to have lunch outside the working place (home or restaurant)

@@ -43,7 +43,7 @@ species Individual{
 	float serial_interval;
 	
 	
-	map<int, Activity> agenda_week;
+	list<map<int, Activity>> agenda_week;
 	Activity last_activity;
 	bool free_rider <- false;
 	int tick <- 0;
@@ -221,7 +221,7 @@ species Individual{
 	
 	
 	reflex executeAgenda {
-		Activity act <- agenda_week[current_date.hour];
+		Activity act <- agenda_week[current_date.day_of_week - 1][current_date.hour];
 		if (act != nil) {
 			last_activity <- act;
 			if (Authority[0].allows(self, act)) {
