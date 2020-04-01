@@ -14,7 +14,6 @@ import "../Parameters.gaml"
 import "Policy.gaml"
 
 global {
-
 	action create_authority {
 		write "Create an authority ";
 		create Authority;
@@ -79,7 +78,27 @@ species Authority {
 
 		return (first(result));
 	}
+	Policy createDetectionPolicy(int nb_people_to_test, bool only_symptomatic, bool only_not_tested)
+	{
+		create DetectionPolicy returns: result{
+			nb_individual_tested_per_step <- nb_people_to_test;
+			symptomatic_only <- only_symptomatic;
+			not_tested_only <- only_not_tested;
+		}
+		return (first(result));
+	}
+	Policy createConditionalContainmentPolicy (float nb_days, int min_cases)
+	{
+		create TemporaryWithDetectedPolicy returns: result {
+			time_applied <- nb_days;
+			min_reported <- min_cases;
+			applied <- false;
+			applying <- false;
+		}
 
+		return (first(result));
+	}
+	
 	Policy createPolicy (bool school, bool work) {
 		create Policy returns: result {
 			allowed_activities[studying.name] <- school;

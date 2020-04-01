@@ -26,7 +26,8 @@ global {
 	//Epidemiological parameters
 	float nb_step_for_one_day <- #day/step; //Used to define the different period used in the model
 	bool load_epidemiological_parameter_from_file <- false; //Allowing parameters being loaded from a csv file 
-	file csv_epidemiological_parameters <- csv_file("../parameters/Epidemiological_parameters.csv"); //File for the parameters
+	string epidemiological_parameters <- "../parameters/Epidemiological_parameters.csv"; //File for the parameters
+	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
 	bool transmission_human <- true; //Allowing human to human transmission
 	bool transmission_building <- false; //Allowing environment contamination and infection
 	float successful_contact_rate_human <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
@@ -97,4 +98,5 @@ global {
 	
 	//Policy parameters
 	list<string> meeting_relaxing_act <- [act_working, act_studying,act_eating,"leisure","sport"]; //fordidden activity when choosing "no meeting, no relaxing" policy
+	int nb_days_apply_policy <- 0;
 }

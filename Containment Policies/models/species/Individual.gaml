@@ -37,7 +37,7 @@ species Individual{
 	
 	
 	string status; //S,E,Ua,Us,A,R,D
-	string report_status; //Not-tested, Negative, Positive
+	string report_status <- not_tested; //Not-tested, Negative, Positive
 	float incubation_time; 
 	float infectious_time;
 	float serial_interval;

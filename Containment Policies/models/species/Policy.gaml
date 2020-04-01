@@ -55,5 +55,47 @@ species SpatialPolicy parent: Policy {
 		}
 
 	}
+}
 
+species DetectionPolicy parent:Policy {
+	int nb_individual_tested_per_step;
+	bool symptomatic_only;
+	bool not_tested_only;
+	
+	reflex applyPolicy
+	{
+		list<Individual> individual_to_test <- symptomatic_only?(not_tested_only?Individual where(each.status=symptomatic_with_symptoms and each.report_status=not_tested)
+			:Individual where(each.status=symptomatic_with_symptoms)):(not_tested_only?Individual where(each.status!=dead and each.report_status=not_tested):Individual where(each.status!=dead));
+		ask nb_individual_tested_per_step among individual_to_test
+		{
+			do testIndividual;
+		}
+	}
+}
+species TemporaryWithDetectedPolicy parent: Policy {
+	float time_applied;
+	int min_reported;
+	bool applied;
+	bool applying; 
+	
+	reflex applyPolicy
+	{
+		if(applying)
+		{
+			time_applied <- time_applied - step;
+			if(time_applied<=0)
+			{
+				applying <- false;
+				applied <- true;
+			}
+		}
+		if(total_number_reported>min_reported)and(applying=false)and(applied=false)
+		{
+			applying <- true;
+		}
+	}
+	bool is_allowed (Individual i, Activity activity){
+		bool allowed <- applying? false:super.is_allowed(i, activity);
+		return allowed;
+	}
 }
