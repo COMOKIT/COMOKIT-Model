@@ -16,6 +16,7 @@ import "species/Authority.gaml"
 import "species/Activity.gaml"
 import "Constants.gaml"
 import "Parameters.gaml"
+import "Synthetic Population.gaml"
 
 global {
 	geometry shape <- envelope(shp_buildings);
@@ -55,46 +56,13 @@ global {
 			schools[l] <- (type in buildings_per_activity.keys) ? (buildings_per_activity[type] as_map (each:: each.shape.area)) : map<Building,float>([]);
 		}
 			
-		ask homes {
-			//father
-			create Individual {
-				age <- rnd(max_student_age + 1,retirement_age);
-				sex <- 0;
-				home <- myself;
-			} 
-			//mother
-			create Individual {
-				age <- rnd(max_student_age + 1,retirement_age);
-				sex <- 1;
-				home <- myself;
-			}
-			//children
-			create Individual number: rnd(3) {
-				last_activity <-first(staying_home);
-				age <- rnd(0,max_student_age);
-				sex <- rnd(1);
-				home <- myself;
-			}
-
-		}
-		ask (N_grandfather * length(Building)) among homes {
-			create Individual {
-				age <- rnd(retirement_age + 1, max_age);
-				sex <- 0;
-				home <- myself;
-			}
-		}
-
-		ask (M_grandmother * length(Building)) among homes {
-			create Individual {
-				age <- rnd(retirement_age + 1, max_age);
-				sex <- 1;
-				home <- myself;
-				
-			}
+		if(csv_population != nil) {
+			do create_population_from_file(working_places, schools, homes);
+		} else {
+			do create_population(working_places, schools, homes, min_student_age, max_student_age);
 		}
 		
-		do define_agenda(working_places,schools);
+		do define_agenda(working_places,schools, min_student_age, max_student_age);
 		
 
 		ask num_infected_init among Individual {
@@ -105,13 +73,7 @@ global {
 
 	}
 	
-	action define_agenda(map<Building,float> working_places,map<list<int>,map<Building,float>> schools) {
-		int min_student_age <- retirement_age;
-			int max_student_age <- 0;
-			loop l over: possible_schools.keys {
-				max_student_age <- max(max_student_age, max(l));
-				min_student_age <- min(min_student_age, min(l));
-			}
+	action define_agenda(map<Building,float> working_places,map<list<int>,map<Building,float>> schools, int min_student_age, int max_student_age) {
 			
 		ask Individual {
 			last_activity <-first(staying_home);

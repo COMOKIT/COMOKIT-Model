@@ -9,6 +9,7 @@
 @no_experiment
 
 model Species_Building
+
 import "Building.gaml"
 
 species Hospital parent:Building {

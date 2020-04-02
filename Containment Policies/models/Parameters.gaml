@@ -17,6 +17,9 @@ global {
 	file shp_commune <- file_exists(dataset+"commune.shp") ? shape_file(dataset+"commune.shp"):nil;
 	file shp_buildings <- file_exists(dataset+"buildings.shp") ? shape_file(dataset+"buildings.shp"):nil;
 
+	//Population data
+	file csv_population <- file_exists(dataset+"population.csv") ? csv_file(dataset+"population.csv"):nil;
+
 	//simulation step
 	float step<-1#h;
 	date starting_date <- date([2020,3,1]);

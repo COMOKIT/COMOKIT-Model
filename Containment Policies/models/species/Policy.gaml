@@ -10,6 +10,7 @@
 model Policy
 
 import "Individual.gaml"
+
 species Policy {
 	map<string, bool> allowed_activities;
 	bool is_allowed (Individual i, Activity activity) {
