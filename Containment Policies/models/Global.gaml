@@ -42,9 +42,9 @@ global {
 		loop wp over: possible_workplaces.keys {
 			if (wp in buildings_per_activity.keys) {
 					working_places <- working_places +  (buildings_per_activity[wp] as_map (each:: (possible_workplaces[wp] * each.shape.area)));  
-	
 			}
 		}
+		
 		int min_student_age <- retirement_age;
 		int max_student_age <- 0;
 		map<list<int>,map<Building,float>> schools;
@@ -56,7 +56,7 @@ global {
 		}
 			
 		ask homes {
-		//father
+			//father
 			create Individual {
 				age <- rnd(max_student_age + 1,retirement_age);
 				sex <- 0;

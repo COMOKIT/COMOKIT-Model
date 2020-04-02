@@ -24,12 +24,16 @@ global {
 	
 	action create_activities {
 		
+		// Create one Activity agent for each species inheriting from Activity
 		loop s over: Activity.subspecies { 
 			create s returns: new_activity;
 			Activities[first(new_activity).name] <- Activity(first(new_activity)) ;
 		}
+		
+		// Local variable sorting all the Building agents given their type
 		map<string,list<Building>> buildings_per_activity <- Building group_by (each.type);
 		
+		// Create in addition one Activity species for each meta-type of Activity as defined in the activities map
 		loop tb over: activities.keys { 
 			create Activity with:[name::tb, types_of_building::activities[tb]] {
 				Activities[tb] <-self ;
@@ -41,7 +45,6 @@ global {
 			}
 		}	
 	}
-
 }
 
 species Activity {
@@ -49,7 +52,6 @@ species Activity {
 	list<Building> buildings;
 	bool chose_nearest <- false;
 	int nb_candidat <- 3;
-	
 	
 	list<Building> find_target (Individual i) {
 		if flip(proba_go_outside) or  empty(buildings){
