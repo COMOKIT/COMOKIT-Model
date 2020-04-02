@@ -57,7 +57,7 @@ global {
 	
 	//Synthetic population parameters
 	string separator <- ";";
-	string header <- true; // If there is a header or not (must be true for now)
+	bool header <- true; // If there is a header or not (must be true for now)
 	string age_var <- "AGE"; // The variable name for "age" Individual attribute
 	map<string,float> age_map;  // The mapping of value for gama to translate, if nill then direct cast to int (Default behavior in Synthetic Population.gaml)
 	string gender_var <- "SEX"; // The variable name for "sex" Individual attribute

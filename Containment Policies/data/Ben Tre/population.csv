@@ -1,5 +1,4 @@
 ID;__type;MARSTD;SEX;MARST;AGE;RELATE;RELATED;parentId;parent__type;HHTYPE;NMOTHERS;NFATHERS;count_parent_children;count_children
-Individual;Type of the entity;null;null;null;null;null;null;ID of the parent entity;parent__type;null;null;null;count of children of this entity
  ; ;"200";"2";"2";"27";"2";"2000";"untyped_1084"; ;"10";"1";"1";4;0
  ; ;"200";"1";"2";"46";"3";"3100";"untyped_1369"; ;"10";"1";"2";5;0
  ; ;"100";"2";"1";"2";"3";"3100";"untyped_2442"; ;"10";"1";"1";4;0

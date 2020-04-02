@@ -28,10 +28,10 @@ global {
 		* 
 		*/
 		
-		create Individual from:/*csv_population*/csv_file(pop_ben_tre,true) with:[
+		create Individual from:csv_population with:[
 			age::convert_age(get(age_var)),
 			sex::convert_gender(get(gender_var)),
-			household_id::string(get(householdID))
+			household_id::string(get(householdID)) replace("\"","")
 		]{
 			if households contains_key household_id { households[household_id] <+ self; }
 			else { households[household_id] <- [self]; }
@@ -95,10 +95,16 @@ global {
 	}
 	
 	// Convert SP encoded age into gama model specification (float)
-	float convert_age(string input){ return (age_map=nil or empty(age_map)) ? int(input) : age_map[input]; }
+	float convert_age(string input){ 
+		input <- input replace("\"","");
+		return (age_map=nil or empty(age_map)) ? int(input) : age_map[input];
+	}
 	
 	// Convert SP encoded gender into gama model specification (0=men, 1=women)
-	int convert_gender(string input){ return (gender_map=nil or empty(gender_map)) ? int(input) : gender_map[input]; }
+	int convert_gender(string input){ 
+		input <- input replace("\"","");
+		return (gender_map=nil or empty(gender_map)) ? int(input) : gender_map[input]; 
+	}
 	
 }
 
