@@ -12,13 +12,13 @@ global {
 	
 	
 	//GIS data
-	//string dataset <- "../../data/Ben Tre/"; // default
-	string dataset <- "../../data/Vinh Phuc/"; // default
+	string dataset <- "../../data/Ben Tre/"; // default
+	//string dataset <- "../../data/Vinh Phuc/"; // default
 	file shp_commune <- file_exists(dataset+"commune.shp") ? shape_file(dataset+"commune.shp"):nil;
 	file shp_buildings <- file_exists(dataset+"buildings.shp") ? shape_file(dataset+"buildings.shp"):nil;
 
 	//Population data
-	file csv_population <- file_exists(dataset+"population.csv") ? csv_file(dataset+"population.csv"):nil;
+	csv_file csv_population <- file_exists(dataset+"population.csv") ? csv_file(dataset+"population.csv",separator,header):nil;
 
 	//simulation step
 	float step<-1#h;
@@ -55,7 +55,14 @@ global {
 	float parameter_1_onset_to_recovery <- 3.034953;//First parameter of the time from onset to recovery distribution
 	float parameter_2_onset_to_recovery <- 0.34;//Second parameter of the time from onset to recovery distribution
 	
-	
+	//Synthetic population parameters
+	string separator <- ";";
+	string header <- true; // If there is a header or not (must be true for now)
+	string age_var <- "AGE"; // The variable name for "age" Individual attribute
+	map<string,float> age_map;  // The mapping of value for gama to translate, if nill then direct cast to int (Default behavior in Synthetic Population.gaml)
+	string gender_var <- "SEX"; // The variable name for "sex" Individual attribute
+	map<string,int> gender_map <- ["1"::0,"2"::1]; // The mapping of value for gama to translate, if nill then cast to int
+	string householdID <- "parentId"; // The variable for household identification
 	
 	//Population parameter
 	float N_grandfather<-0.2; //rate of grandfathers (individual with age > retirement_age) - num of grandfathers = N_grandfather * num of possible homes

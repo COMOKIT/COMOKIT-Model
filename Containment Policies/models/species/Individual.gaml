@@ -27,7 +27,8 @@ global
 species Individual{
 	int age;
 	int sex; //0 M 1 F
-	bool wearMask;
+	string household_id;
+	
 	Building home;
 	Building school;
 	Building working_place;
@@ -35,6 +36,7 @@ species Individual{
 	Building bound;
 	bool is_outside <- false;
 	
+	bool wearMask;
 	
 	string status <- susceptible; //S,E,Ua,Us,A,R,D
 	string report_status <- not_tested; //Not-tested, Negative, Positive
