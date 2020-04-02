@@ -28,7 +28,7 @@ experiment "Realistic Lock Down" parent: "Abstract Experiment" {
 		create simulation {
 			name <- "No containment policy";
 			ask Authority {
-				policy <- createNoContainmentPolicy();
+				policy <- create_no_containment_policy();
 			}
 
 		}
@@ -37,8 +37,8 @@ experiment "Realistic Lock Down" parent: "Abstract Experiment" {
 			name <- "Realistic lockdown with " + int(percentage * 100) + "% of essential workers and " + number_of_tests + " daily tests";
 			transmission_building <- true;
 			ask Authority {
-				AbstractPolicy d <- createDetectionPolicy(number_of_tests, false, true);
-				AbstractPolicy l <- createLockDownPolicyWithPercentage(percentage);
+				AbstractPolicy d <- create_detection_policy(number_of_tests, false, true);
+				AbstractPolicy l <- create_lockdown_policy_with_percentage(percentage);
 				policy <- combination([d, l]);
 			}
 

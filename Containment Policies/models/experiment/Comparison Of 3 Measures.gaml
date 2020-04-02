@@ -29,7 +29,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 		create simulation with: [dataset::shape_path, seed::simulation_seed]{
 			name <- "No Containment";
 			ask Authority { 
-				policy <- createNoContainmentPolicy();
+				policy <- create_no_containment_policy();
 			}
 
 		}

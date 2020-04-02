@@ -19,7 +19,7 @@ experiment "Early containment" parent: "Abstract Experiment" autorun: true {
 			create simulation with: [color::(colors at int(color_browser)), dataset::shape_path, seed::simulation_seed] {
 				name <- string(nb_days) + " days of containment";
 				ask Authority {
-					policy <- combination([createDetectionPolicy(1,true,true), createConditionalContainmentPolicy(nb_days,1)]);
+					policy <- combination([create_detection_policy(1,true,true), createConditionalContainmentPolicy(nb_days,1)]);
 				}
 
 			}

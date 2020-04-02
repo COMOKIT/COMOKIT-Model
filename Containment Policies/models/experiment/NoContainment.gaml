@@ -13,7 +13,7 @@ global {
 
 	action define_policy{   
 		ask Authority {
-			policy <- createTotalLockDownPolicy();
+			policy <- create_lockdown_policy();
 		}
 	}
 }

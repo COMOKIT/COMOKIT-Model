@@ -21,7 +21,7 @@ experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 			create simulation with: [color::(colors at int(proportion*5)), reduction_contact_rate_wearing_mask::factor, dataset::shape_path, seed::simulation_seed, proportion_wearing_mask::proportion] {
 				name <- string(int(proportion*100)) + "% with mask";
 				ask Authority {
-					policy <- createNoContainmentPolicy();
+					policy <- create_no_containment_policy();
 				}
 
 			}

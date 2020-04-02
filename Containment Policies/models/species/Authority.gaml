@@ -26,7 +26,15 @@ global {
 }
 /* Describes the main authority in charge of the health policies to implement */
 species Authority {
-	AbstractPolicy policy;
+	AbstractPolicy policy <- create_no_containment_policy(); // default
+	
+	reflex apply_policy {
+		if (policy.can_be_applied()) {
+			ask policy {
+				do apply();
+			}
+		}
+	}
 
 	bool allows (Individual i, Activity activity) { 
 		if (policy = nil) {return true;}
@@ -68,7 +76,7 @@ species Authority {
 		return first(result);
 	}
 	
-	AbstractPolicy createTotalLockDownPolicy {
+	AbstractPolicy create_lockdown_policy {
 		create ActivitiesListingPolicy returns: result {
 			loop s over: Activities.keys {
 				allowed_activities[s] <- false;
@@ -76,14 +84,21 @@ species Authority {
 		}
 		return first(result);
 	}
+	
+	AbstractPolicy create_lockdown_policy_with_percentage(float p) {
+		create LockdownPolicy returns: result {
+			percentage_of_essential_workers <- p;
+		}
+		return (first(result));
+	}
 
 	
-	SpatialPolicy createQuarantinePolicyAtRadius(point loc, float radius){		
-		SpatialPolicy p <- in_area(createTotalLockDownPolicy(), circle(radius) at_location loc);
+	SpatialPolicy create_lockdown_policy_in_radius(point loc, float radius){		
+		SpatialPolicy p <- in_area(create_lockdown_policy(), circle(radius) at_location loc);
 		return p;
 	}
 	
-	AbstractPolicy createNoMeetingPolicy {
+	AbstractPolicy create_no_meeting_policy {
 		create ActivitiesListingPolicy returns: result {
 			loop s over: meeting_relaxing_act {
 				allowed_activities[s] <- false;
@@ -93,7 +108,7 @@ species Authority {
 	}
 	
 	
-	AbstractPolicy createDetectionPolicy(int nb_people_to_test, bool only_symptomatic, bool only_not_tested) {
+	AbstractPolicy create_detection_policy(int nb_people_to_test, bool only_symptomatic, bool only_not_tested) {
 		create DetectionPolicy returns: result {
 			nb_individual_tested_per_step <- nb_people_to_test;
 			symptomatic_only <- only_symptomatic;
@@ -104,18 +119,12 @@ species Authority {
 	
 	
 	AbstractPolicy createConditionalContainmentPolicy (int nb_days, int min_cases) {
-		AbstractPolicy p <- from_min_cases(during(createTotalLockDownPolicy(), current_date, int(nb_days #day)),min_cases);
+		AbstractPolicy p <- from_min_cases(during(create_lockdown_policy(), current_date, int(nb_days #day)),min_cases);
 		return p;
 	}
 	
-	AbstractPolicy createLockDownPolicyWithPercentage(float p) {
-		create LockdownPolicy returns: result {
-			percentage_of_essential_workers <- p;
-		}
-		return (first(result));
-	}
 	
-	AbstractPolicy createNoContainmentPolicy {
+	AbstractPolicy create_no_containment_policy {
 		return createPolicy(true, true);
 	}
 	

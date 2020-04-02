@@ -22,7 +22,7 @@ experiment "Datasets" parent: "Abstract Experiment" autorun: true {
 		create simulation with: [dataset::"../../data/" + s + "/", seed::simulation_seed] {
 			name <- s;
 			ask Authority {
-				policy <- createNoContainmentPolicy();
+				policy <- create_no_containment_policy();
 			}
 
 		}}

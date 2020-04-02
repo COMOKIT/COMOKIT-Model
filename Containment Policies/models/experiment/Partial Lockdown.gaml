@@ -24,7 +24,7 @@ experiment "Partial Lock Down" parent: "Abstract Experiment" {
 		create simulation {
 			name <- "Partial lockdown with " + int(tolerance * 100) + "% of tolerance";
 			ask Authority {
-				policy <- with_tolerance(createTotalLockDownPolicy(),tolerance);
+				policy <- with_tolerance(create_lockdown_policy(),tolerance);
 			}
 
 		}
