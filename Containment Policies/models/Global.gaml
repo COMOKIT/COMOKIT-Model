@@ -64,8 +64,8 @@ global {
 		
 		do assign_school_working_place(working_places,schools, min_student_age, max_student_age);
 		
-		do define_agenda(min_student_age, max_student_age);
-		
+		do define_agenda(min_student_age, max_student_age);	
+
 
 		ask num_infected_init among Individual {
 			do defineNewCase;
@@ -112,16 +112,25 @@ global {
 		}		
 	}
 	
+	
 	// Inputs
 	//   min_student_age : minimum age to be in a school
 	//   max_student_age : maximum age to go to a school
+	// 
+	// Principles: each individual has a week agenda composed by 7 daily agendas (maps of hour::Activity).
+	//             The agenda depends on the age (students/workers, retired and young children).
+	//             Students and workers have an agenda with 6 working days and one leisure days.
+	//             Retired have an agenda full of leisure days.
 	action define_agenda(int min_student_age, int max_student_age) {
 		
 		Activity eating_act <- Activity first_with (each.name = act_eating);
 		list<Activity> possible_activities_tot <- Activities.values - studying - working - staying_home;
 		list<Activity> possible_activities_without_rel <- possible_activities_tot - visiting_friend;
 		
+		// Initialization for students or workers
 		ask Individual where ((each.age <= retirement_age) and (each.age >= min_student_age))  {
+			
+			// Students and workers have an agenda similar for 6 days of the week ...
 			loop times: 6 {
 				map<int,Activity> agenda_day;
 				list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
@@ -162,6 +171,8 @@ global {
 				}
 				agenda_week << agenda_day;
 			}
+			
+			// ... but it is diferent for Sunday : they will pick activities among the ones that are not working, studying or staying home.
 			map<int,Activity> agenda_day;
 			list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
 			int num_activity <- rnd(0,max_num_activity_for_non_working_day);
@@ -174,6 +185,8 @@ global {
 			}
 			agenda_week << agenda_day;
 		}
+		
+		// Initialization for retired individuals
 		ask Individual where (each.age > retirement_age) {
 			loop times: 7 {
 				map<int,Activity> agenda_day;
@@ -189,6 +202,8 @@ global {
 				agenda_week << agenda_day;
 			}
 		}
+		
+		// Initialization for the young children (before going to school)
 		ask Individual where empty(each.agenda_week) {
 			loop times:7 {
 				agenda_week<<[];
