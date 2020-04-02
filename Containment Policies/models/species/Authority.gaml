@@ -33,13 +33,13 @@ global {
 }
 /* Describes the main authority in charge of the health policies to implement */
 species Authority {
-	list<Policy> policies;
-	Policy lockDown ;
-	Policy noContainment ;
-	Policy noSchool ;
-	Policy noMeetingRelaxing ;
+	list<AbstractPolicy> policies;
+	AbstractPolicy lockDown ;
+	AbstractPolicy noContainment ;
+	AbstractPolicy noSchool ;
+	AbstractPolicy noMeetingRelaxing ;
 	
-	Policy createLockDownPolicy {
+	AbstractPolicy createLockDownPolicy {
 		create Policy returns: result {
 			loop s over: Activities.keys {
 				allowed_activities[s] <- false;
@@ -69,7 +69,7 @@ species Authority {
 		return p;
 	}
 	
-	Policy createNoMeetingPolicy {
+	AbstractPolicy createNoMeetingPolicy {
 		create Policy returns: result {
 			loop mp over: meeting_relaxing_act {
 				allowed_activities[mp] <- false;
@@ -78,7 +78,7 @@ species Authority {
 
 		return (first(result));
 	}
-	Policy createDetectionPolicy(int nb_people_to_test, bool only_symptomatic, bool only_not_tested)
+	AbstractPolicy createDetectionPolicy(int nb_people_to_test, bool only_symptomatic, bool only_not_tested)
 	{
 		create DetectionPolicy returns: result{
 			nb_individual_tested_per_step <- nb_people_to_test;
@@ -89,7 +89,7 @@ species Authority {
 	}
 	
 	
-	Policy createConditionalContainmentPolicy (float nb_days, int min_cases) {
+	AbstractPolicy createConditionalContainmentPolicy (float nb_days, int min_cases) {
 		create TemporaryWithDetectedPolicy returns: result {
 			time_applied <- nb_days;
 			min_reported <- min_cases;
@@ -100,14 +100,14 @@ species Authority {
 		return (first(result));
 	}
 	
-	Policy createLockDownPolicyWithPercentage(float p) {
+	AbstractPolicy createLockDownPolicyWithPercentage(float p) {
 		create LockdownPolicy returns: result {
 			percentage_of_essential_workers <- p;
 		}
 		return (first(result));
 	}
 	
-	Policy createPolicy (bool school, bool work) {
+	AbstractPolicy createPolicy (bool school, bool work) {
 		create Policy returns: result {
 			allowed_activities[studying.name] <- school;
 			allowed_activities[working.name] <- work;

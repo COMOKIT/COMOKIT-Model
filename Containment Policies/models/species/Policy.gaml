@@ -11,7 +11,11 @@ model Policy
 
 import "Individual.gaml"
 
-species Policy {
+species AbstractPolicy virtual: true {
+	bool is_allowed (Individual i, Activity activity) virtual: true; 
+}
+
+species Policy parent: AbstractPolicy {
 	map<string, bool> allowed_activities;
 	bool is_allowed (Individual i, Activity activity) {
 		if (allowed_activities[activity.name] != nil) {
@@ -28,23 +32,32 @@ species Policy {
  * A realistic lockdown policy where a percentage of people is allowed to go out, shoppping is enabled for all, and positive cases are forbidden to move
 */
 
-species LockdownPolicy parent: Policy {
+species LockdownPolicy parent: AbstractPolicy {
 	float percentage_of_essential_workers <- 0.1;
-	list<Individual> allowed_workers <- nil;
+	list<Individual> allowed_workers <- [];
 	
-	bool is_allowed (Individual i, Activity activity) {
-		if (allowed_workers = nil) {
+	bool is_allowed (Individual i, Activity activity) { 
+		if empty(allowed_workers) and percentage_of_essential_workers > 0 {
 			allowed_workers <- (percentage_of_essential_workers * length(Individual)) among Individual;
 		}
 		if (i.report_status = tested_positive and activity.name != act_home) {
 			return false;
 		}
-		if (allowed_workers contains i) {
+		if (activity.name != act_studying and allowed_workers contains i) {
 			return true;
 		}
 		if (activity.name = act_shopping) {
 			return true;
 		}
+		return false;
+	}
+}
+
+species ForwardingPolicy parent: AbstractPolicy {
+	AbstractPolicy target;
+	
+	bool is_allowed (Individual i, Activity activity) {
+		return target.is_allowed(i, activity);
 	}
 }
 
