@@ -62,7 +62,9 @@ global {
 			do create_population(working_places, schools, homes, min_student_age, max_student_age);
 		}
 		
-		do define_agenda(working_places,schools, min_student_age, max_student_age);
+		do assign_school_working_place(working_places,schools, min_student_age, max_student_age);
+		
+		do define_agenda(min_student_age, max_student_age);
 		
 
 		ask num_infected_init among Individual {
@@ -72,14 +74,18 @@ global {
 		total_number_individual <- length(Individual);
 
 	}
-	
+
+
 	// Inputs
 	//   working_places : map associating to each Building a weight (= surface * coefficient for this type of building to be a working_place)
 	//   schools :  map associating with each school Building its area (as a weight of the number of students that can be in the school)
-	//   min_student_age :
-	//   max_student_age : 
-	action define_agenda(map<Building,float> working_places,map<list<int>,map<Building,float>> schools, int min_student_age, int max_student_age) {
-			
+	//   min_student_age : minimum age to be in a school
+	//   max_student_age : maximum age to go to a school
+	action assign_school_working_place(map<Building,float> working_places,map<list<int>,map<Building,float>> schools, int min_student_age, int max_student_age) {
+		
+		// Assign to each individual a school and working_place depending of its age.
+		// in addition, school and working_place can be outside.
+		// Individuals too young or too old, do not have any working_place or school 
 		ask Individual {
 			last_activity <-first(staying_home);
 			do enter_building(home);
@@ -103,7 +109,14 @@ global {
 					
 				}
 			}
-		}
+		}		
+	}
+	
+	// Inputs
+	//   min_student_age : minimum age to be in a school
+	//   max_student_age : maximum age to go to a school
+	action define_agenda(int min_student_age, int max_student_age) {
+		
 		Activity eating_act <- Activity first_with (each.name = act_eating);
 		list<Activity> possible_activities_tot <- Activities.values - studying - working - staying_home;
 		list<Activity> possible_activities_without_rel <- possible_activities_tot - visiting_friend;
