@@ -36,7 +36,7 @@ species Individual{
 	bool is_outside <- false;
 	
 	
-	string status; //S,E,Ua,Us,A,R,D
+	string status <- susceptible; //S,E,Ua,Us,A,R,D
 	string report_status <- not_tested; //Not-tested, Negative, Positive
 	float incubation_time; 
 	float infectious_time;

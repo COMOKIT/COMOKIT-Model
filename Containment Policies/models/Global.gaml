@@ -73,12 +73,16 @@ global {
 
 	}
 	
+	// Inputs
+	//   working_places : map associating to each Building a weight (= surface * coefficient for this type of building to be a working_place)
+	//   schools :  map associating with each school Building its area (as a weight of the number of students that can be in the school)
+	//   min_student_age :
+	//   max_student_age : 
 	action define_agenda(map<Building,float> working_places,map<list<int>,map<Building,float>> schools, int min_student_age, int max_student_age) {
 			
 		ask Individual {
 			last_activity <-first(staying_home);
 			do enter_building(home);
-			status <- susceptible;
 			if (age >= min_student_age) {
 				if (age <= max_student_age) {
 					loop l over: schools.keys {
