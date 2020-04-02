@@ -21,7 +21,7 @@ experiment "Comparison of tolerance levels" parent: "Abstract Experiment" autoru
 			create simulation with: [color::(colors at int(tolerance*5)), dataset::shape_path, seed::simulation_seed] {
 				name <- string(int(tolerance*100)) + "% of tolerance";
 				ask Authority {
-					policies << createLockDownPolicyWithToleranceOf(tolerance);
+					policy <- with_tolerance(createTotalLockDownPolicy(), tolerance);
 				}
 
 			}

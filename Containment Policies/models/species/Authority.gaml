@@ -17,13 +17,6 @@ global {
 	action create_authority {
 		write "Create an authority ";
 		create Authority;
-		ask Authority {
-			lockDown <- createLockDownPolicy();
-			noContainment <- createPolicy(true, true);
-			noSchool <- createPolicy(false, true);
-			noMeetingRelaxing<-createNoMeetingPolicy();
-		}
-		
 		do define_policy;
 
 	}
@@ -33,54 +26,75 @@ global {
 }
 /* Describes the main authority in charge of the health policies to implement */
 species Authority {
-	list<AbstractPolicy> policies;
-	AbstractPolicy lockDown ;
-	AbstractPolicy noContainment ;
-	AbstractPolicy noSchool ;
-	AbstractPolicy noMeetingRelaxing ;
+	AbstractPolicy policy;
+
+	bool allows (Individual i, Activity activity) { 
+		if (policy = nil) {return true;}
+		return policy.can_be_applied() and policy.is_allowed(i,activity);
+	}
 	
-	AbstractPolicy createLockDownPolicy {
-		create Policy returns: result {
+	/**
+ * Set of constructor functions used to build policies
+ */
+	
+	
+	SpatialPolicy in_area (AbstractPolicy p, geometry area) {
+		create SpatialPolicy with: [target::p, application_area::area] returns: result;
+		return first(result);
+	}
+	
+	TemporaryPolicy during (AbstractPolicy p, date start, int duration_in_seconds) {
+		create TemporaryPolicy with: [target::p, start:: start, duration::duration_in_seconds] returns: result;
+		return first(result);
+	}
+	
+	CaseRangePolicy from_min_cases (AbstractPolicy p, int min) {
+		create CaseRangePolicy with: [target::p, min::min] returns: result;
+		return first(result);
+	}
+	
+	CaseRangePolicy until_max_cases (AbstractPolicy p, int max) {
+		create CaseRangePolicy with: [target::p, max::max] returns: result;
+		return first(result);
+	}
+	
+	CompoundPolicy combination(list<AbstractPolicy> policies) {
+		create CompoundPolicy with: [targets::policies] returns: result;
+		return first(result);
+	}
+	
+	PartialPolicy with_tolerance(AbstractPolicy p, float tolerance) {
+		create PartialPolicy with: [target::p, tolerance::tolerance] returns: result;
+		return first(result);
+	}
+	
+	AbstractPolicy createTotalLockDownPolicy {
+		create ActivitiesListingPolicy returns: result {
 			loop s over: Activities.keys {
 				allowed_activities[s] <- false;
 			}
 		}
 		return first(result);
 	}
-	
-	PartialPolicy createLockDownPolicyWithToleranceOf(float p) {
-		create PartialPolicy returns: result {
-			tolerance <- p;
-			loop s over: Activities.keys {
-				allowed_activities[s] <- false;
-			}
-		}
-		return first(result);
-	}
+
 	
 	SpatialPolicy createQuarantinePolicyAtRadius(point loc, float radius){		
-		create SpatialPolicy returns: result {
-			loop s over: Activities.keys {
-				allowed_activities[s] <- false;
-			}
-		} 
-		SpatialPolicy p<-first(result);
-		p.application_area<-circle(radius) at_location loc;
+		SpatialPolicy p <- in_area(createTotalLockDownPolicy(), circle(radius) at_location loc);
 		return p;
 	}
 	
 	AbstractPolicy createNoMeetingPolicy {
-		create Policy returns: result {
-			loop mp over: meeting_relaxing_act {
-				allowed_activities[mp] <- false;
+		create ActivitiesListingPolicy returns: result {
+			loop s over: meeting_relaxing_act {
+				allowed_activities[s] <- false;
 			}
 		}
-
 		return (first(result));
 	}
-	AbstractPolicy createDetectionPolicy(int nb_people_to_test, bool only_symptomatic, bool only_not_tested)
-	{
-		create DetectionPolicy returns: result{
+	
+	
+	AbstractPolicy createDetectionPolicy(int nb_people_to_test, bool only_symptomatic, bool only_not_tested) {
+		create DetectionPolicy returns: result {
 			nb_individual_tested_per_step <- nb_people_to_test;
 			symptomatic_only <- only_symptomatic;
 			not_tested_only <- only_not_tested;
@@ -89,15 +103,9 @@ species Authority {
 	}
 	
 	
-	AbstractPolicy createConditionalContainmentPolicy (float nb_days, int min_cases) {
-		create TemporaryWithDetectedPolicy returns: result {
-			time_applied <- nb_days;
-			min_reported <- min_cases;
-			applied <- false;
-			applying <- false;
-		}
-
-		return (first(result));
+	AbstractPolicy createConditionalContainmentPolicy (int nb_days, int min_cases) {
+		AbstractPolicy p <- from_min_cases(during(createTotalLockDownPolicy(), current_date, int(nb_days #day)),min_cases);
+		return p;
 	}
 	
 	AbstractPolicy createLockDownPolicyWithPercentage(float p) {
@@ -107,22 +115,17 @@ species Authority {
 		return (first(result));
 	}
 	
+	AbstractPolicy createNoContainmentPolicy {
+		return createPolicy(true, true);
+	}
+	
 	AbstractPolicy createPolicy (bool school, bool work) {
-		create Policy returns: result {
+		create ActivitiesListingPolicy returns: result {
 			allowed_activities[studying.name] <- school;
 			allowed_activities[working.name] <- work;
 		}
 
 		return (first(result));
-	}
-
-	bool allows (Individual i, Activity activity) { 
-		loop p over: policies { 
-			if (!p.is_allowed(i, activity)) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 }  

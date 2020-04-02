@@ -8,6 +8,7 @@ model Corona
 
 import "../Global.gaml"
 import "Abstract Experiment.gaml"
+import "../species/Policy.gaml"
 
 
 
@@ -20,7 +21,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 		create simulation with: [dataset::shape_path, seed::simulation_seed] {
 			name <- "School closed";
 			ask Authority {
-				policies << noSchool;
+				policy <- createPolicy(false, true);
 			}
 
 		}
@@ -28,7 +29,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 		create simulation with: [dataset::shape_path, seed::simulation_seed]{
 			name <- "No Containment";
 			ask Authority { 
-				policies << noContainment;
+				policy <- createNoContainmentPolicy();
 			}
 
 		}
@@ -36,7 +37,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 		create simulation with: [dataset::shape_path, seed::simulation_seed]{
 			name <- "Home Containment";
 			ask Authority {
-				policies << lockDown;
+				policy <- createPolicy(false, false);
 			}
 
 		}

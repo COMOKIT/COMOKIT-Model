@@ -13,7 +13,7 @@ global {
 
 	action define_policy{   
 		ask Authority {
-			policies << noMeetingRelaxing;
+			policy <- createNoMeetingPolicy();
 		}
 
 	}

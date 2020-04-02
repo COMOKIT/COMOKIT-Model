@@ -20,7 +20,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 		create simulation with: [dataset::shape_path, seed::simulation_seed, transmission_building::false, transmission_human::false] {
 			name <- "No viral load, no human transmission";
 			ask Authority {
-				policies << noContainment;
+				policy <- createNoContainmentPolicy();
 			}
 
 		}
@@ -28,7 +28,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 		create simulation with: [dataset::shape_path, seed::simulation_seed, transmission_building::true, transmission_human::false]{
 			name <- "With viral load, no human transmission";
 			ask Authority { 
-				policies << noContainment;
+				policy <- createNoContainmentPolicy();
 			}
 
 		}
@@ -36,7 +36,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 		create simulation with: [dataset::shape_path, seed::simulation_seed, transmission_building::false, transmission_human::true] {
 			name <- "No viral load, with human transmission";
 			ask Authority {
-				policies << noContainment;
+				policy <- createNoContainmentPolicy();
 			}
 
 		}
@@ -44,7 +44,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 		create simulation with: [dataset::shape_path, seed::simulation_seed, transmission_building::true, transmission_human::true]{
 			name <- "With viral load and human transmission";
 			ask Authority { 
-				policies << noContainment;
+				policy <- createNoContainmentPolicy();
 			}
 
 		}

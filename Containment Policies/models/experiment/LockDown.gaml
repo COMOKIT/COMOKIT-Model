@@ -14,7 +14,7 @@ global {
 
 	action define_policy{  
 		ask Authority {
-			policies << lockDown;
+			policy <- createTotalLockDownPolicy();
 		}
 	}
 
