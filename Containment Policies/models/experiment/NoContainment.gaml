@@ -10,7 +10,7 @@ import "../Global.gaml"
 import "Abstract Experiment.gaml"
 
 global {
-
+ 
 	action define_policy{   
 		ask Authority {
 			policy <- create_lockdown_policy();

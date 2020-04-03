@@ -32,7 +32,6 @@ global {
 		if (shp_buildings != nil) {
 			create Building from: shp_buildings with: [type::string(read("type"))];
 		}
-		write remove_duplicates(Building collect each.type);
 		
 		create outside;
 		the_outside <- first(outside);

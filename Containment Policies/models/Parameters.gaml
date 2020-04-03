@@ -10,7 +10,7 @@ import "Constants.gaml"
 
 global {
 	
-	
+	 
 	//GIS data
 	string dataset <- "../../data/Ben Tre/"; // default
 	//string dataset <- "../../data/Vinh Phuc/"; // default
