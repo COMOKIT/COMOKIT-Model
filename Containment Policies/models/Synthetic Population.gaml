@@ -14,19 +14,9 @@ import "Parameters.gaml"
 
 global {
 	
-	string pop_ben_tre <- "../data/Ben Tre/population.csv";
-	
 	action create_population_from_file(map<Building,float> working_places,map<list<int>,map<Building,float>> schools, list<Building> homes) {
 		
 		map<string,list<Individual>> households <- [];
-		
-		/*
-		 * DOES NOT WORK WITH csv_population FILE FROM PARAMETERS 
-		 *  
-		write csv_population;
-		write file(pop_ben_tre);
-		* 
-		*/
 		
 		create Individual from:csv_population with:[
 			age::convert_age(get(age_var)),
