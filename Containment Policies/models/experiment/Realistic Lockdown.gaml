@@ -9,6 +9,7 @@ model Corona
 import "../Global.gaml"
 import "../species/Policy.gaml"
 import "Abstract Experiment.gaml"
+
 experiment "Realistic Lock Down" parent: "Abstract Experiment" {
 	map<string, unknown> ask_values {
 		float p <- -1.0;
@@ -73,4 +74,39 @@ experiment "Realistic Lock Down" parent: "Abstract Experiment" {
 
 	}
 
+}
+
+/*
+ * Init for the realistic lock down batch exploration
+ */
+global { 
+	float percentage; int number_of_tests; 
+	init {
+		ask Authority { 
+			transmission_building <- true;
+			AbstractPolicy d <- create_detection_policy(number_of_tests, false, true);
+			AbstractPolicy l <- create_lockdown_policy_with_percentage(percentage);
+			policy <- combination([d, l]);
+		} 
+		dataset <- "../../data/Test dataset 1/";
+	} 
+	
+	bool sim_stop { return time > 2#week and total_number_of_infected = 0; }
+	
+	list<int> nb_infected;
+	reflex look_at_infected { nb_infected <+ total_number_of_infected; }
+	string output_folder <- "../../output/test.csv";
+}
+
+experiment "Realistic Lock Down Batch" parent:"Abstract Experiment" type:batch 
+	repeat: 30 keep_seed: true until: world.sim_stop() {
+	
+	parameter "percentage" var:percentage init:0 min:0 max:1 step:0.5;
+	parameter "number of tests" var:number_of_tests init:10 min:0 max:10000 among:[10,100]; 
+	
+	method exhaustive;
+	
+	reflex nbi { ask simulations { 
+		save [percentage,number_of_tests,nb_infected] type:csv to:output_folder rewrite:false;
+	} }
 }
