@@ -14,6 +14,9 @@ global {
 	//GIS data
 	string dataset <- "../../data/Ben Tre/"; // default
 	//string dataset <- "../../data/Vinh Phuc/"; // default
+//	string dataset <- "../../data/Castanet Tolosan/"; // default
+	
+	
 	file shp_commune <- file_exists(dataset+"commune.shp") ? shape_file(dataset+"commune.shp"):nil;
 	file shp_buildings <- file_exists(dataset+"buildings.shp") ? shape_file(dataset+"buildings.shp"):nil;
 
@@ -70,19 +73,20 @@ global {
 	int retirement_age <- 55; //an individual older than (retirement_age + 1) are not working anymore
 	int max_age <- 90; //max age of individual
 	
-	list<string> possible_homes <- ["", "home", "hostel"];  //building type that will be considered as home
+	list<string> possible_homes <- remove_duplicates(OSM_home + ["", "home", "hostel"]);  //building type that will be considered as home
 	
 	 //building type that will be considered as home - for each type, the coefficient to apply to this type for this choice of working place
 	 //weight of a working place = area * this coefficient
-	map<string, float> possible_workplaces <-  ["office"::3.0, "admin"::2.0, "industry"::1.0, ""::0.5,"home"::0.5,"store"::1.0, "shop"::1.0,"bookstore"::1.0,
+	map<string, float> possible_workplaces <- (OSM_work_place as_map (each::2.0)) + map(["office"::3.0, "admin"::2.0, "industry"::1.0, ""::0.5,"home"::0.5,"store"::1.0, "shop"::1.0,"bookstore"::1.0,
 		"gamecenter"::1.0, "restaurant"::1.0,"coffeeshop"::1.0,"caphe"::1.0, "caphe-karaoke"::1.0,"farm"::0.1, "repairshop"::1.0,"hostel"::1.0
-	];
+	]);
 	
 	// building type that will considered as school (ou university) - for each type, the min and max age to go to this type of school.
 	map<list<int>,string> possible_schools <- (dataset = "../../data/Ben Tre/") ? [[3,18]::"school"]: [[3,18]::"school", [19,23]::"university"]; 
 	
 	
 	//Agenda paramaters
+	list<int> non_working_days <- [7]; //list of non working days (1 = monday; 7 = sunday)
 	list<list<int>> work_hours <- [[6,8], [15,18]]; //working hours: [[interval for beginning work],[interval for ending work]]
 	list<list<int>> school_hours <- [[7,9], [15,18]]; //studying hours: [[interval for beginning study],[interval for ending study]]
 	list<int> first_act_old_hours <- [7,10]; //for old people, interval for the beginning of the first activity 
@@ -104,11 +108,16 @@ global {
 	float building_neighbors_dist <- 500 #m; //used by "visit to neighbors" activity (max distance of neighborhood).
 	
 	//list of activities, and for each activity type, the list of possible building type
-	map<string, list<string>> activities <- [act_shopping::["shop","market","supermarket", "store"], act_eating::["restaurant","coffeeshop", "caphe"],
-	act_leisure::["gamecenter", "karaoke", "cinema", "caphe-karaoke"], act_outside::["playground", "park"], "sport"::["sport"],
-	 act_other::["admin","meeting", "supplypoint","bookstore", "place_of_worship"]];
+	map<string, list<string>> activities <- [
+		act_shopping::remove_duplicates(OSM_shop + ["shop","market","supermarket", "store"]), 
+		act_eating::remove_duplicates(OSM_eat + ["restaurant","coffeeshop", "caphe"]),
+		act_leisure::remove_duplicates(OSM_leisure + ["gamecenter", "karaoke", "cinema", "caphe-karaoke"]), 
+		act_outside::remove_duplicates(OSM_shop + ["playground", "park"]), 
+		act_sport::remove_duplicates(OSM_sport + ["sport"]),
+	 	act_other::remove_duplicates(OSM_other_activity + ["admin","meeting", "supplypoint","bookstore", "place_of_worship"])
+	 ];
 	
 	//Policy parameters
-	list<string> meeting_relaxing_act <- [act_working, act_studying,act_eating,"leisure","sport"]; //fordidden activity when choosing "no meeting, no relaxing" policy
+	list<string> meeting_relaxing_act <- [act_working, act_studying,act_eating,act_leisure,act_sport]; //fordidden activity when choosing "no meeting, no relaxing" policy
 	int nb_days_apply_policy <- 0;
 }

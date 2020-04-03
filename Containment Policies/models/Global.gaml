@@ -32,6 +32,7 @@ global {
 		if (shp_buildings != nil) {
 			create Building from: shp_buildings with: [type::string(read("type"))];
 		}
+		write remove_duplicates(Building collect each.type);
 		
 		create outside;
 		the_outside <- first(outside);
@@ -130,9 +131,9 @@ global {
 		
 		// Initialization for students or workers
 		ask Individual where ((each.age <= retirement_age) and (each.age >= min_student_age))  {
-			
+			loop times: 7 {agenda_week<<[];}
 			// Students and workers have an agenda similar for 6 days of the week ...
-			loop times: 6 {
+			loop i over: ([1,2,3,4,5,6,7] - non_working_days) {
 				map<int,Activity> agenda_day;
 				list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
 				int current_hour;
@@ -170,21 +171,24 @@ global {
 					current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
 					agenda_day[current_hour] <- staying_home[0];
 				}
-				agenda_week << agenda_day;
+				agenda_week[i-1] <- agenda_day;
 			}
 			
-			// ... but it is diferent for Sunday : they will pick activities among the ones that are not working, studying or staying home.
-			map<int,Activity> agenda_day;
-			list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
-			int num_activity <- rnd(0,max_num_activity_for_non_working_day);
-			int current_hour <- rnd(first_act_old_hours[0],first_act_old_hours[1]);
-			loop times: num_activity {
-				agenda_day[current_hour] <- any(possible_activities);
-				current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
-				agenda_day[current_hour] <- staying_home[0];
-				current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
+			// ... but it is diferent for non working days : they will pick activities among the ones that are not working, studying or staying home.
+			loop i over: non_working_days {
+				map<int,Activity> agenda_day;
+				list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
+				int num_activity <- rnd(0,max_num_activity_for_non_working_day);
+				int current_hour <- rnd(first_act_old_hours[0],first_act_old_hours[1]);
+				loop times: num_activity {
+					agenda_day[current_hour] <- any(possible_activities);
+					current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
+					agenda_day[current_hour] <- staying_home[0];
+					current_hour <- (current_hour + rnd(1,max_duration_default)) mod 24;
+				}
+				agenda_week[i-1] <- agenda_day;
 			}
-			agenda_week << agenda_day;
+			
 		}
 		
 		// Initialization for retired individuals
