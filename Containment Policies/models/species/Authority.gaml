@@ -29,16 +29,13 @@ species Authority {
 	AbstractPolicy policy <- create_no_containment_policy(); // default
 	
 	reflex apply_policy {
-		if (policy.can_be_applied()) {
-			ask policy {
-				do apply();
-			}
+		ask policy {
+			do apply();
 		}
 	}
 
 	bool allows (Individual i, Activity activity) { 
-		if (policy = nil) {return true;}
-		return policy.can_be_applied() and policy.is_allowed(i,activity);
+		return  policy.is_allowed(i,activity);
 	}
 	
 	/**
@@ -51,8 +48,8 @@ species Authority {
 		return first(result);
 	}
 	
-	TemporaryPolicy during (AbstractPolicy p, date start, int duration_in_seconds) {
-		create TemporaryPolicy with: [target::p, start:: start, duration::duration_in_seconds] returns: result;
+	TemporaryPolicy during (AbstractPolicy p, int nb_days) {
+		create TemporaryPolicy with: [target::p, duration::(nb_days #day)] returns: result;
 		return first(result);
 	}
 	
@@ -119,13 +116,14 @@ species Authority {
 	
 	
 	AbstractPolicy createConditionalContainmentPolicy (int nb_days, int min_cases) {
-		AbstractPolicy p <- from_min_cases(during(create_lockdown_policy(), current_date, int(nb_days #day)),min_cases);
+		AbstractPolicy p <- from_min_cases(during(create_lockdown_policy(), nb_days),min_cases);
 		return p;
 	}
 	
 	
 	AbstractPolicy create_no_containment_policy {
-		return createPolicy(true, true);
+		create NoPolicy returns: result;
+		return first(result);
 	}
 	
 	AbstractPolicy createPolicy (bool school, bool work) {

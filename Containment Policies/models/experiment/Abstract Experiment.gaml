@@ -91,7 +91,7 @@ experiment "Abstract Experiment" virtual:true{
 		}
 		
 		
-		display "simple_display" parent: default_display synchronized: false type: opengl background: #black virtual: true draw_env: false camera_pos: {1279.4829,1684.2932,3227.1738} camera_look_pos: {1279.4829,1684.2369,0.0084} camera_up_vector: {0.0,1.0,0.0} {
+		display "simple_display" parent: default_display synchronized: false type: opengl background: #black virtual: true draw_env: false {
 			
 			species Building {
 				draw shape color:  #lightgrey empty: true width: 2;

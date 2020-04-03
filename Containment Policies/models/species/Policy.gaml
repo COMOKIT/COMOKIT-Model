@@ -14,13 +14,12 @@ import "Individual.gaml"
 
 species AbstractPolicy virtual: true {
 
-/**
-	 * This action returns true if the policy can be applied or invoked (e.g. if the time has come, it is has not ended, etc.). It is called before apply() and is_allowed()
-	 */
-	bool can_be_applied virtual: true;
+	bool is_active {
+		return true;
+	}
 
 	/**
-	 * This action is called by the authority every step when can_be_applied returns true
+	 * This action is called by the authority every step 
 	 */
 	action apply virtual: true;
 
@@ -30,14 +29,25 @@ species AbstractPolicy virtual: true {
 	bool is_allowed (Individual i, Activity activity) virtual: true;
 }
 
+
+species NoPolicy parent: AbstractPolicy {
+
+
+	action apply {
+	// Nothing to do
+	}
+	
+	bool is_allowed (Individual i, Activity activity){
+		return true;
+	}
+}
+
 /**
  * A policy described by a listing of allowed or disallowed activities. Not explicitly disallowed activities are considered as allowed
  */
 species ActivitiesListingPolicy parent: AbstractPolicy {
 	map<string, bool> allowed_activities;
-	bool can_be_applied {
-		return true;
-	}
+
 
 	action apply {
 	// Nothing to do
@@ -60,20 +70,21 @@ species ActivitiesListingPolicy parent: AbstractPolicy {
 species LockdownPolicy parent: AbstractPolicy {
 	float percentage_of_essential_workers <- 0.1;
 	list<Individual> allowed_workers <- [];
-	bool can_be_applied {
-		return true;
-	}
 
 	action apply {
+	if empty(allowed_workers) and percentage_of_essential_workers > 0 {
+			allowed_workers <- (percentage_of_essential_workers * length(Individual)) among Individual;
+	}
 	// Nothing to do
 	}
 
 	bool is_allowed (Individual i, Activity activity) {
-		if empty(allowed_workers) and percentage_of_essential_workers > 0 {
-			allowed_workers <- (percentage_of_essential_workers * length(Individual)) among Individual;
+		
+		if (activity.name = act_home) {
+			return true;
 		}
 
-		if (i.report_status = tested_positive and activity.name != act_home) {
+		if (i.report_status = tested_positive) {
 			return false;
 		}
 
@@ -84,6 +95,8 @@ species LockdownPolicy parent: AbstractPolicy {
 		if (activity.name = act_shopping) {
 			return true;
 		}
+		
+
 
 		return false;
 	}
@@ -94,22 +107,17 @@ species LockdownPolicy parent: AbstractPolicy {
  * This policy represents a list of policies. */
 species CompoundPolicy parent: AbstractPolicy {
 	list<AbstractPolicy> targets;
-	
-	bool can_be_applied {
-		return true;
-	}
+
 	
 	action apply {
 		ask targets {
-			if (self.can_be_applied()) {
-				do apply;
-			}
+			do apply;
 		}
 	}
 	
 	bool is_allowed(Individual i, Activity activity) {
 		loop p over: targets {
-			if (p.can_be_applied() and !p.is_allowed(i, activity)) {
+			if ( !p.is_allowed(i, activity)) {
 				return false;
 			}
 		}
@@ -122,25 +130,24 @@ species CompoundPolicy parent: AbstractPolicy {
   */
 species ForwardingPolicy parent: AbstractPolicy {
 	AbstractPolicy target;
-	bool can_be_applied {
-		return target != nil and target.can_be_applied();
+	
+	bool is_active {
+		return target.is_active();
 	}
 
 	action apply {
-		if (target != nil) {
-			ask target {
-				do apply();
-			}
-
+		ask target {
+			do apply();
 		}
-
 	}
 
 	bool is_allowed (Individual i, Activity activity) {
-		return target = nil ? true : target.is_allowed(i, activity);
+		return target.is_allowed(i, activity);
 	}
 
 }
+
+
 
 /**
  * A policy that accepts a proportion of normally forbidden activities
@@ -165,6 +172,7 @@ species PartialPolicy parent: ForwardingPolicy {
 */
 species SpatialPolicy parent: ForwardingPolicy {
 	geometry application_area;
+	
 	bool is_allowed (Individual i, Activity activity) {
 		if (application_area overlaps i) {
 			return super.is_allowed(i, activity);
@@ -177,17 +185,39 @@ species SpatialPolicy parent: ForwardingPolicy {
 }
 
 /**
- * A policy that restricts the duration of another policy. If before, or after, nothing is allowed */
+ * A policy that restricts the duration of another policy. If before, or after, everything is allowed */
  
 species TemporaryPolicy parent: ForwardingPolicy {
 	date start <- starting_date;
+	bool started;
+	bool finished;
 	int duration; // in seconds
 	
-	bool can_be_applied {
-		if not (current_date between(start, start + duration)) {
-			return false;
+	
+	bool is_active {
+		return started and !finished;
+	}
+	
+	action apply {
+		invoke apply();
+		if (!started and !finished) {
+			if (target.is_active()) {
+				started <- true;
+				finished <- false;
+				start <- current_date;
+			}
+		} else {
+			if (current_date >= start + duration) {
+				finished <- true;
+			}
 		}
-		return super.can_be_applied();
+	}
+	
+	bool is_allowed (Individual i, Activity activity) {
+		if (!is_active()) {
+			return true;
+		}
+		return super.is_allowed(i, activity);
 	}
 
 	
@@ -201,11 +231,16 @@ species CaseRangePolicy parent: ForwardingPolicy {
 	int min <- -1;
 	int max <- int(#max_int);
 	
-	bool can_be_applied {
-		if not(total_number_reported between (min, max)) {
-			return false;
+	
+	bool is_active {
+		return total_number_reported between (min -1, max);
+	}
+	
+	bool is_allowed(Individual i, Activity activity){
+		if (!is_active()) {
+			return true;
 		}
-		return super.can_be_applied();
+		return super.is_allowed(i, activity);
 	}
 }
 
@@ -215,9 +250,6 @@ species DetectionPolicy parent: AbstractPolicy {
 	int nb_individual_tested_per_step;
 	bool symptomatic_only;
 	bool not_tested_only;
-	bool can_be_applied {
-		return true;
-	}
 
 	action apply {
 		list<Individual> individual_to_test <- symptomatic_only ? (not_tested_only ? Individual where (each.status = symptomatic_with_symptoms and
