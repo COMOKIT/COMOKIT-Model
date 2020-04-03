@@ -2,16 +2,16 @@
 * Name: generateGISdata
 * Author: Patrick TAILLANDIER
 * Description: Generate your data for the model
-* Tags: Tag1, Tag2, TagN
+* Tags: environment generation, GIS data, buildings, satellite image
 ***/
 
 model generateGISdata
 
 global {
 	//define the bounds of the studied area
-	file data_file <-shape_file("../../data/Castanet Tolosan/Castanet Tolosan.shp");
+	file data_file <-shape_file("../../data/commune.shp");
 	
-	//define the path to the output foleder
+	//define the path to the output folder
 	string output_path <- "../../data/Castanet Tolosan";
 	
 	
@@ -81,7 +81,7 @@ global {
 		ask Building where (each.type = nil or each.type = "") {
 			do die;
 		}
-		save Building to:output_path +"/building.shp" type: shp attributes: ["type"::type, "flats"::flats,"height"::height, "levels"::levels];
+		save Building to:output_path +"/buildings.shp" type: shp attributes: ["type"::type, "flats"::flats,"height"::height, "levels"::levels];
 		
 		map<string, list<Building>> buildings <- Building group_by (each.type);
 		loop ll over: buildings {
@@ -171,13 +171,9 @@ species Boundary {
 }
 
 experiment generateGISdata type: gui {
-	/** Insert here the definition of the input and output of the model */
 	output {
 		display map type: opengl draw_env: false{
-			//grid cell;
-			//image static_map_request;
 			image  output_path +"/satellite.png" transparency: 0.2;
-			//species Boundary;
 			species Building;
 		}
 	}
