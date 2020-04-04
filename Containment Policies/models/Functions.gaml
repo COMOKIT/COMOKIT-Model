@@ -44,11 +44,11 @@ global
 	{
 		if(map_epidemiological_parameters[age][epidemiological_basic_viral_release][0]=epidemiological_fixed)
 		{
-			return float(map_epidemiological_parameters[age][epidemiological_basic_viral_release][1])*nb_step_for_one_day;
+			return float(map_epidemiological_parameters[age][epidemiological_basic_viral_release][1])/nb_step_for_one_day;
 		}
 		else
 		{
-			return get_rnd_from_distribution(map_epidemiological_parameters[age][epidemiological_basic_viral_release][0],float(map_epidemiological_parameters[age][epidemiological_basic_viral_release][1]),float(map_epidemiological_parameters[age][epidemiological_basic_viral_release][2]))*nb_step_for_one_day;
+			return get_rnd_from_distribution(map_epidemiological_parameters[age][epidemiological_basic_viral_release][0],float(map_epidemiological_parameters[age][epidemiological_basic_viral_release][1]),float(map_epidemiological_parameters[age][epidemiological_basic_viral_release][2]))/nb_step_for_one_day;
 		}
 	}
 	

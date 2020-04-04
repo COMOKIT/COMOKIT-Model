@@ -10,6 +10,7 @@
 model Species_Building 
 import "../Parameters.gaml"
 import "Individual.gaml"
+import "../Global.gaml"
 
 
 species Building {
@@ -37,7 +38,7 @@ species Building {
 		}
 	}
 	reflex updateViralLoad when: transmission_building{
-		viral_load <- max(0.0,viral_load - viral_load_decrease);
+		viral_load <- max(0.0,viral_load - basic_viral_decrease/nb_step_for_one_day);
 	}
 
 	aspect default {
