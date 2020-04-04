@@ -7,7 +7,8 @@
 
 
 @no_experiment
-model Species_Individual
+model Species_Individual 
+
 
 import "../Constants.gaml"
 import "../Parameters.gaml"
@@ -40,6 +41,10 @@ species Individual{
 	
 	string status <- susceptible; //S,E,Ua,Us,A,R,D
 	string report_status <- not_tested; //Not-tested, Negative, Positive
+	bool is_infectious <- define_is_infectious();
+	bool is_infected <- define_is_infected();
+	bool is_asymptomatic <- define_is_asymptomatic();
+	
 	float incubation_time; 
 	float infectious_time;
 	float serial_interval;
@@ -50,6 +55,19 @@ species Individual{
 	bool free_rider <- false;
 	int tick <- 0;
 	
+	float reduction_contact_rate_asymptomatic;
+	float reduction_contact_rate_wearing_mask;
+	float basic_viral_release;
+	float contact_rate_human;
+	float proba_wearing_mask;
+	
+	action initialize {
+		reduction_contact_rate_asymptomatic <- world.get_reduction_contact_rate_asymptomatic(age);
+		reduction_contact_rate_wearing_mask <- world.get_reduction_contact_rate_wearing_mask(age);
+		basic_viral_release <- world.get_basic_viral_release(age);
+		contact_rate_human <- world.get_contact_rate_human(age);
+		proba_wearing_mask <- world.get_proba_wearing_mask(age);
+	}
 	
 	action enter_building(Building b) {
 		if (bound != nil ){
@@ -63,7 +81,7 @@ species Individual{
 	
 	action testIndividual
 	{
-		if(self.is_infected())
+		if(self.is_infected)
 		{
 			if(world.is_true_positive(self.age))
 			{
@@ -97,7 +115,7 @@ species Individual{
 		}
 		else
 		{
-			if(world.is_wearing_mask(self.age))
+			if(flip(proba_wearing_mask))
 			{
 				wearMask <- true;
 			}
@@ -111,7 +129,7 @@ species Individual{
 	action defineNewCase
 	{
 		total_number_of_infected <- total_number_of_infected +1;
-		self.status <- exposed;
+		do set_status(exposed);
 		self.incubation_time <- world.get_incubation_time(self.age);
 		self.serial_interval <- world.get_serial_interval(self.age);
 		self.infectious_time <- world.get_infectious_time(self.age);
@@ -125,7 +143,7 @@ species Individual{
 		self.tick <- 0;
 	}
 	
-	bool is_infectious {
+	bool define_is_infectious {
 		return [asymptomatic,symptomatic_without_symptoms, symptomatic_with_symptoms ] contains status;
 	}
 	
@@ -133,12 +151,19 @@ species Individual{
 		return status = exposed;
 	}
 	
-	bool is_infected {
-		return self.is_infectious() or self.is_exposed();
+	bool define_is_infected {
+		return is_infectious or self.is_exposed();
 	}
 	
-	bool is_asymptomatic {
+	bool define_is_asymptomatic {
 		return [asymptomatic,symptomatic_without_symptoms] contains status;
+	}
+	
+	action set_status(string new_status) {
+		status <- new_status;
+		is_infectious <- define_is_infectious();
+		is_infected <- define_is_infected();
+		is_asymptomatic <- define_is_asymptomatic();
 	}
 
 	reflex become_infected_outside when: is_outside {
@@ -147,50 +172,50 @@ species Individual{
 		}
 	}
 	
-	reflex infectOthers when: not is_outside and self.is_infectious()
+	reflex infectOthers when: not is_outside and is_infectious
 	{
 		float reduction_factor <- 1.0;
-		if(self.is_asymptomatic())
+		if(is_asymptomatic)
 		{
-			reduction_factor <- reduction_factor * world.get_reduction_contact_rate_asymptomatic(self.age);
+			reduction_factor <- reduction_factor * reduction_contact_rate_asymptomatic;
 		}
-		if(self.wearMask)
+		if(wearMask)
 		{
-			reduction_factor <- reduction_factor * world.get_reduction_contact_rate_wearing_mask(self.age);
+			reduction_factor <- reduction_factor * reduction_contact_rate_wearing_mask;
 		}
 		if(bound!=nil)and(transmission_building)
 		{
 			ask bound
 			{
-				do addViralLoad(reduction_factor*world.get_basic_viral_release(myself.age));
+				do addViralLoad(reduction_factor*myself.basic_viral_release);
 			}
 		}
 		if transmission_human {
-			ask bound.individuals where (flip(world.get_contact_rate_human(self.age)*reduction_factor) and (each.status = susceptible))
+				
+			ask bound.individuals where (flip(contact_rate_human*reduction_factor) and (each.status = susceptible))
 	 		{
-				do defineNewCase;
+	 			do defineNewCase;
 	 		}
 		}
-		
 	}
 	
 	reflex becomeInfectious when: self.is_exposed() and(tick >= incubation_time)
 	{
 		if(world.is_asymptomatic(self.age))
 		{
-			status <- asymptomatic;
+			do set_status(asymptomatic);
 			tick <- 0;
 		}
 		else
 		{
 			if(serial_interval<0)
 			{
-				status <- symptomatic_without_symptoms;
+				do set_status(symptomatic_without_symptoms);
 				tick <- 0;
 			}
 			else
 			{
-				status <- symptomatic_with_symptoms;
+				do set_status(symptomatic_with_symptoms);
 				tick <- 0;
 			}
 		}
@@ -199,7 +224,7 @@ species Individual{
 	
 
 	reflex becomeSymptomatic when: status=symptomatic_without_symptoms and self.tick>=self.serial_interval {
-		self.status <- symptomatic_with_symptoms;
+		do set_status(symptomatic_with_symptoms);
 	}
 	
 	reflex becomesNotInfectious when: ((status=symptomatic_with_symptoms) or (status=asymptomatic))and(tick>=infectious_time)
@@ -208,16 +233,16 @@ species Individual{
 		{
 			if(world.is_fatal(self.age))
 			{
-				self.status <- dead;
+				do set_status(dead);
 			}
 			else
 			{
-				self.status <- recovered;
+				do set_status(recovered);
 			}
 		}
 		else
 		{
-			self.status <- recovered;
+			do set_status(recovered);
 		}
 	}
 	
@@ -236,7 +261,7 @@ species Individual{
 
 	reflex updateDiseaseCycle when:(status!=recovered)and(status!=dead) {
 		tick <- tick + 1;
-		if((self.is_infected()=false)and(self.bound!=nil)and(transmission_building))
+		if(transmission_building and (not is_infected)and(self.bound!=nil))
 		{
 			if(flip(bound.viral_load*successful_contact_rate_building))
 			{

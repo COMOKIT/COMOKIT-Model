@@ -12,7 +12,7 @@ global {
 	font default <- font("Helvetica", 18, #bold);
 	rgb text_color <- world.color.brighter.brighter;
 	rgb background <- world.color.darker.darker;
-	int number_of_infectious <- 0 update: length(Individual where (each.is_infectious()));
+	int number_of_infectious <- 0 update: length(Individual where (each.is_infectious));
 
 	init { 
 		do init_epidemiological_parameters;
@@ -65,7 +65,7 @@ experiment "Abstract Experiment" virtual:true{
 				draw shape color:  viral_load>0?rgb(255*viral_load,0,0):#lightgrey empty: true width: 2;
 			}
 			agents "Individual"  value: Individual where not (each.is_outside){
-				draw square(status=susceptible or status=recovered? 10: 20) color: status = exposed ? #yellow : (self.is_infectious() ? #orangered : (status = recovered?#blue:#green)) ;	
+				draw square(status=susceptible or status=recovered? 10: 20) color: status = exposed ? #yellow : (self.is_infectious ? #orangered : (status = recovered?#blue:#green)) ;	
 			}
 
 		}
@@ -85,7 +85,7 @@ experiment "Abstract Experiment" virtual:true{
 				draw sphere(30) color: #yellow at: location - {0,0,30};
 			}
 			
-			agents "Infectious" value: Individual where (not each.is_outside and each.is_infectious()) transparency: 0.5 {
+			agents "Infectious" value: Individual where (not each.is_outside and each.is_infectious) transparency: 0.5 {
 				draw sphere(50) color: #red at: location - {0,0,50};
 			}
 
@@ -98,7 +98,7 @@ experiment "Abstract Experiment" virtual:true{
 				draw shape color:  #lightgrey empty: true width: 2;
 			}
 			agents "Individual" value:Individual where not (each.is_outside) {
-				draw square(self.is_infectious() ? 30:10) color: status = exposed ? #yellow : (self.is_infectious() ? #orangered : (status = recovered?#blue:#green));
+				draw square(self.is_infectious ? 30:10) color: status = exposed ? #yellow : (self.is_infectious ? #orangered : (status = recovered?#blue:#green));
 			}
 			
 
@@ -109,7 +109,7 @@ experiment "Abstract Experiment" virtual:true{
 			chart "sir" background: #white axes: #black {
 				data "susceptible" value: length(Individual where (each.status=susceptible)) color: #green marker: false style: line;
 				data "exposed" value: length(Individual where (each.is_exposed())) color: #orange marker: false style: line;
-				data "infected" value: length(Individual where (each.is_infectious())) color: #red marker: false style: line;
+				data "infected" value: length(Individual where (each.is_infectious)) color: #red marker: false style: line;
 				data "recovered" value: length(Individual where (each.status = recovered)) color: #blue marker: false style: line;
 				data "dead" value: length(Individual where (each.status = dead)) color: #black marker: false style: line;
 			}

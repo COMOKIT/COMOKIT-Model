@@ -17,8 +17,8 @@ global
 	geometry shape <- square(1000#m);
 	int max_age <- 90;
 	bool load_epidemiological_parameter_from_file <- false;
-	int nb_infected <- 0 update: length(pseudo_individual where (each.is_infected()));
-	int nb_infectious <- 0 update: length(pseudo_individual where (each.is_infectious()));
+	int nb_infected <- 0 update: length(pseudo_individual where (each.is_infected));
+	int nb_infectious <- 0 update: length(pseudo_individual where (each.is_infectious));
 	int nb_perma_asymptomatic <- 0 update: length(pseudo_individual where (each.status=asymptomatic));
 	int nb_temp_asymptomatic <- 0 update: length(pseudo_individual where (each.status=symptomatic_without_symptoms));
 	int nb_symptomatic<- 0 update: length(pseudo_individual where (each.status=symptomatic_with_symptoms));
@@ -49,7 +49,7 @@ global
 		{
 			age <- rnd(0,90);
 			age_category <- get_age_category();
-			
+			do initialize;
 			ask world 
 			{
 				do add_to_map(age_distribution,myself.age_category,1);
@@ -61,9 +61,9 @@ global
 			do defineNewCase;
 		}
 		
-		ask num_recovered_init among pseudo_individual where(each.is_infected()=false)
+		ask num_recovered_init among pseudo_individual where(each.is_infected=false)
 		{
-			self.status <- recovered;
+			do set_status(recovered);
 		}
 		
 		total_number_individual <- length(pseudo_individual);
@@ -101,6 +101,10 @@ species pseudo_individual parent:Individual
 	
 	string status <- susceptible; //S,E,Ua,Us,A,R,D
 	string report_status <- not_tested; //Not-tested, Negative, Positive
+	bool is_infectious <- define_is_infectious();
+	bool is_infected <- define_is_infected();
+	bool is_asymptomatic <- define_is_asymptomatic();
+	
 	float incubation_time; 
 	float infectious_time;
 	float serial_interval;
@@ -125,7 +129,7 @@ species pseudo_individual parent:Individual
 		return length(age_categories)-1;
 	}
 	
-	reflex update_counted_infected when:self.is_infected()=true and self.counted_as_infected=false
+	reflex update_counted_infected when:self.is_infected=true and self.counted_as_infected=false
 	{
 		if(counted_as_infected=false)
 		{
@@ -194,7 +198,7 @@ experiment check_epidemiology type:gui
 				draw shape color:  viral_load>0?rgb(255*viral_load,0,0):#lightgrey empty: true width: 2;
 			}
 			agents pseudo_individual  value: pseudo_individual{
-				draw square(status=susceptible or status=recovered? 10: 20) color: status = exposed ? #yellow : (self.is_infectious() ? #orangered : (status = recovered?#blue: (status=dead?#black:#green))) ;	
+				draw square(status=susceptible or status=recovered? 10: 20) color: status = exposed ? #yellow : (self.is_infectious ? #orangered : (status = recovered?#blue: (status=dead?#black:#green))) ;	
 			}
 		}
 		

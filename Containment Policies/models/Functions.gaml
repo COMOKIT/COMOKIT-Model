@@ -12,7 +12,7 @@ import "Parameters.gaml"
 import "Global.gaml"
 
 /* Insert your model definition here */
-
+ 
 global
 {
 	//Function to get a value from a random distribution (among Normal, Lognormal, Weibull, Gamma and Uniform)
@@ -134,9 +134,9 @@ global
 	}
 	
 	//Give a boolean to say if an individual of a given age should be wearing a mask - MUST BE FIXED (i.e. not following a distribution)
-	bool is_wearing_mask(int age)
+	float get_proba_wearing_mask(int age)
 	{
-		return flip(float(map_epidemiological_parameters[age][epidemiological_proportion_wearing_mask][1]));
+		return (float(map_epidemiological_parameters[age][epidemiological_proportion_wearing_mask][1]));
 	}
 	
 	

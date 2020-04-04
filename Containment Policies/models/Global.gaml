@@ -62,6 +62,10 @@ global {
 		} else {
 			do create_population(working_places, schools, homes, min_student_age, max_student_age);
 		}
+		ask Individual {
+			do initialize;
+		}
+		
 		
 		do assign_school_working_place(working_places,schools, min_student_age, max_student_age);
 		
