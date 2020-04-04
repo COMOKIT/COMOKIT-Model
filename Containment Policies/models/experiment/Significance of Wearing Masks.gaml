@@ -17,8 +17,8 @@ experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 		float simulation_seed <- rnd(2000.0);
 		list<rgb> colors <- brewer_colors("Paired");
 		
-		loop proportion over: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0] {
-			create simulation with: [color::(colors at int(proportion*5)), reduction_contact_rate_wearing_mask::factor, dataset::shape_path, seed::simulation_seed, proportion_wearing_mask::proportion] {
+		loop proportion over: [0.0,0.2,0.4,0.6,0.8,1.0] {
+			create simulation with: [color::(colors at int(proportion*5)), reduction_contact_rate_wearing_mask::factor, dataset::shape_path, seed::simulation_seed, proportion_wearing_mask::proportion, force_parameters::list(epidemiological_csv_proportion_wearing_mask, epidemiological_csv_reduction_wearing_mask)] {
 				name <- string(int(proportion*100)) + "% with mask";
 				ask Authority {
 					policy <- create_no_containment_policy();
@@ -48,7 +48,7 @@ experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 
 	output {
 		
-		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
+		//layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
 		display "Main" parent: simple_display {
 			graphics title {
 				draw world.name font: default at: {0, world.shape.height/2 - 30#px} color:world.color anchor: #top_left;

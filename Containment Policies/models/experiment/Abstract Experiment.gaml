@@ -15,6 +15,7 @@ global {
 	int number_of_infectious <- 0 update: length(Individual where (each.is_infectious()));
 
 	init { 
+		do init_epidemiological_parameters;
 		do global_init;
 		do create_authority;
 	}

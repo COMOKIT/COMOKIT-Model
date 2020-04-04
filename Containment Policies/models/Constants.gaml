@@ -44,4 +44,34 @@ global {
 	list<string> OSM_work_place <- ['office',"estate_agent","public","civic","government","manufacture","company"];
 	list<string> OSM_school <- ["school"];
 	
+	int epidemiological_csv_column_name <- 0;
+	int epidemiological_csv_column_age <- 1;
+	int epidemiological_csv_column_detail <- 2;
+	int epidemiological_csv_column_parameter_one <- 3;
+	int epidemiological_csv_column_parameter_two <- 4;
+	string epidemiological_csv_transmission_human <- "Transmission_human";
+	string epidemiological_csv_transmission_building <- "Transmission_building";
+	string epidemiological_csv_basic_viral_decrease <- "Basic_viral_decrease";
+	string epidemiological_csv_fixed <- "Fixed";
+	string epidemiological_csv_lognormal <- "Lognormal";
+	string epidemiological_csv_normal <- "Normal";
+	string epidemiological_csv_weibull <- "Weibull";
+	string epidemiological_csv_gamma <- "Gamma";
+	string epidemiological_csv_uniform <- "Uniform";
+	string epidemiological_csv_successful_contact_rate_human <- "Successful_contact_rate_human";
+	string epidemiological_csv_successful_contact_rate_building <- "Successful_contact_rate_building";
+	string epidemiological_csv_reduction_asymptomatic <-"Reduction_asymptomatic";
+	string epidemiological_csv_proportion_asymptomatic <- "Proportion_asymptomatic";
+	string epidemiological_csv_basic_viral_release <- "Basic_viral_release";
+	string epidemiological_csv_probability_true_positive <- "Probability_true_positive";
+	string epidemiological_csv_probability_true_negative <- "Probability_true_negative";
+	string epidemiological_csv_proportion_wearing_mask <- "Proportion_wearing_mask";
+	string epidemiological_csv_reduction_wearing_mask <- "Reduction_wearing_mask";
+	string epidemiological_csv_incubation_period <-"Incubation_period";
+	string epidemiological_csv_serial_interval <- "Serial_interval";
+	string epidemiological_csv_proportion_hospitalization <- "Proportion_hospitalization";
+	string epidemiological_csv_proportion_icu <- "Proportion_icu";
+	string epidemiological_csv_proportion_death_symptomatic <- "Proportion_death_symptomatic";
+	string epidemiological_csv_onset_to_recovery <- "Onset_to_recovery";
+	
 }

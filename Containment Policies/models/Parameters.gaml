@@ -27,16 +27,16 @@ global {
 	date starting_date <- date([2020,3,1]);
 	
 	int num_infected_init <- 2; //number of infected individuals at the initialization of the simulation
-	
+	int num_recovered_init <- 0;
 
 	//Epidemiological parameters
 	float nb_step_for_one_day <- #day/step; //Used to define the different period used in the model
 	bool load_epidemiological_parameter_from_file <- false; //Allowing parameters being loaded from a csv file 
-	string epidemiological_parameters <- "../parameters/Epidemiological_parameters.csv"; //File for the parameters
+	string epidemiological_parameters <- "../../data/parameters/Epidemiological_parameters.csv"; //File for the parameters
 	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
 	bool transmission_human <- true; //Allowing human to human transmission
-	bool transmission_building <- false; //Allowing environment contamination and infection
-	float successful_contact_rate_human <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
+	bool transmission_building <- true; //Allowing environment contamination and infection
+	float successful_contact_rate_human <- 2.5 * 1/(14.69973);//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
 	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period
 	float reduction_contact_rate_asymptomatic <- 0.55; //Factor of the reduction for successful contact rate for  human to human transmission for asymptomatic individual
 	float proportion_asymptomatic <- 0.3; //Proportion of asymptomatic infections
@@ -56,6 +56,9 @@ global {
 	string distribution_type_onset_to_recovery <- "Lognormal";//Type of distribution of the time from onset to recovery
 	float parameter_1_onset_to_recovery <- 3.034953;//First parameter of the time from onset to recovery distribution
 	float parameter_2_onset_to_recovery <- 0.34;//Second parameter of the time from onset to recovery distribution
+	float proportion_hospitalization <- 0.2; //Proportion of symptomatic cases hospitalized
+	float proportion_icu <- 0.1; //Proportion of symptomatic cases going through ICU
+	list<string> force_parameters;
 	
 	//Synthetic population parameters
 	string separator <- ";";
@@ -70,7 +73,7 @@ global {
 	float N_grandfather<-0.2; //rate of grandfathers (individual with age > retirement_age) - num of grandfathers = N_grandfather * num of possible homes
 	float M_grandmother<-0.3; //rate of grandmothers (individual with age > retirement_age) - num of grandmothers = M_grandmother * num of possible homes
 	int retirement_age <- 55; //an individual older than (retirement_age + 1) are not working anymore
-	int max_age <- 90; //max age of individual
+	int max_age <- 100; //max age of individual
 	
 	list<string> possible_homes <- remove_duplicates(OSM_home + ["", "home", "hostel"]);  //building type that will be considered as home
 	

@@ -15,7 +15,7 @@ experiment "With parameters" parent: "Abstract Experiment" autorun: true {
 	*/
 	parameter "Epidemiological from file" category: "Epidemiology" var: load_epidemiological_parameter_from_file <- false enables: [epidemiological_parameters];
 	//File for the parameters
-	parameter "Path of Epidemiological from file" category: "Epidemiology" var: epidemiological_parameters <- "../parameters/Epidemiological_parameters.csv";
+	parameter "Path of Epidemiological from file" category: "Epidemiology" var: epidemiological_parameters <- "../../data/parameters/Epidemiological_parameters.csv";
 
 	/** 
 	 * Enabling human to human transmission
