@@ -24,8 +24,8 @@ experiment "Realistic Lock Down" parent: "Abstract Experiment" {
 
 	action _init_ {
 		map<string, unknown> input <- ask_values();
-		float percentage <- float(input["Proportion (between 0 and 1) of essential workers allowed to go out"]);
-		int number_of_tests <- int(input["Daily number of tests"]);
+		float percentage_ <- float(input["Proportion (between 0 and 1) of essential workers allowed to go out"]);
+		int number_of_tests_ <- int(input["Daily number of tests"]);
 		create simulation {
 			name <- "No containment policy";
 			ask Authority {
@@ -35,11 +35,11 @@ experiment "Realistic Lock Down" parent: "Abstract Experiment" {
 		}
 
 		create simulation {
-			name <- "Realistic lockdown with " + int(percentage * 100) + "% of essential workers and " + number_of_tests + " daily tests";
+			name <- "Realistic lockdown with " + int(percentage_ * 100) + "% of essential workers and " + number_of_tests_ + " daily tests";
 			transmission_building <- true;
 			ask Authority {
-				AbstractPolicy d <- create_detection_policy(number_of_tests, false, true);
-				AbstractPolicy l <- create_lockdown_policy_with_percentage(percentage);
+				AbstractPolicy d <- create_detection_policy(number_of_tests_, false, true);
+				AbstractPolicy l <- create_lockdown_policy_with_percentage(percentage_);
 				policy <- combination([d, l]);
 			}
 
@@ -80,7 +80,8 @@ experiment "Realistic Lock Down" parent: "Abstract Experiment" {
  * Init for the realistic lock down batch exploration
  */
 global { 
-	float percentage; int number_of_tests; 
+	float percentage; 
+	int number_of_tests; 
 	init {
 		ask Authority { 
 			transmission_building <- true;
@@ -101,7 +102,7 @@ global {
 experiment "Realistic Lock Down Batch" parent:"Abstract Experiment" type:batch 
 	repeat: 30 keep_seed: true until: world.sim_stop() {
 	
-	parameter "percentage" var:percentage init:0 min:0 max:1 step:0.5;
+	parameter "percentage" var:percentage init:0.0 min:0.0 max:1.0 step:0.5;
 	parameter "number of tests" var:number_of_tests init:10 min:0 max:10000 among:[10,100]; 
 	
 	method exhaustive;
