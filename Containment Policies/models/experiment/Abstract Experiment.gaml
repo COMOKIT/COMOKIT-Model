@@ -29,10 +29,10 @@ experiment "Abstract Experiment" virtual:true{
 
 	string ask_dataset_path {
 		int index <- -1;
-		string question <- "Available datasets : ";
+		string question <- "Available datasets :\n ";
 		list<string> dirs <- self.gather_dataset_names();
 		loop i from: 0 to: length(dirs) - 1 {
-			question <- question + (i+1) + "- " + dirs[i] + " | ";
+			question <- question + (i+1) + "- " + dirs[i] + " \n ";
 		}
 
 		loop while: (index < 0) or (index > length(dirs) - 1) {
