@@ -18,7 +18,7 @@ experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 		list<rgb> colors <- brewer_colors("Paired");
 		
 		loop proportion over: [0.0,0.2,0.4,0.6,0.8,1.0] {
-			create simulation with: [color::(colors at int(proportion*5)), reduction_contact_rate_wearing_mask::factor, dataset::shape_path, seed::simulation_seed, proportion_wearing_mask::proportion, force_parameters::list(epidemiological_csv_proportion_wearing_mask, epidemiological_csv_reduction_wearing_mask)] {
+			create simulation with: [color::(colors at int(proportion*5)), reduction_contact_rate_wearing_mask::factor, dataset::shape_path, seed::simulation_seed, proportion_wearing_mask::proportion, force_parameters::list(epidemiological_proportion_wearing_mask, epidemiological_reduction_wearing_mask)] {
 				name <- string(int(proportion*100)) + "% with mask";
 				ask Authority {
 					policy <- create_no_containment_policy();
