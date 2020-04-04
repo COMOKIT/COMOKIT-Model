@@ -1,6 +1,6 @@
 Parameter,Age,Detail,Parameter_1,Parameter_2
 Transmission_human,,Fixed,true,
-Transmission_building,,Fixed,false,
+Transmission_building,,Fixed,true,
 Successful_contact_rate_human,0,Fixed,0.1700711,
 Successful_contact_rate_building,,Fixed,0.1700711,
 Reduction_asymptomatic,0,Fixed,0.45,
