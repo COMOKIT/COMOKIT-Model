@@ -1,7 +1,7 @@
 /***
 * Part of the GAMA CoVid19 Modeling Kit
 * see http://gama-platform.org/covid19
-* Author: Huynh Quang Nghi, Benoit Gaudou, Damien Philippon
+* Author: Huynh Quang Nghi, Benoit Gaudou, Damien Philippon, Patrick Taillandier
 * Tags: covid19,epidemiology
 ***/
 
