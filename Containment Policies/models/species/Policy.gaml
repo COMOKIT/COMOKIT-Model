@@ -65,43 +65,24 @@ species ActivitiesListingPolicy parent: AbstractPolicy {
 }
 
 /**
- * A realistic lockdown policy where a percentage of people is allowed to go out, shoppping is enabled for all, and positive cases are forbidden to move
+ * A lockdown policy that forbids people tested positive to move away from home
 */
-species LockdownPolicy parent: AbstractPolicy {
-	float percentage_of_essential_workers <- 0.1;
-	list<Individual> allowed_workers <- [];
-
+species PositiveAtHome parent: AbstractPolicy {
+	
 	action apply {
-	if empty(allowed_workers) and percentage_of_essential_workers > 0 {
-			allowed_workers <- (percentage_of_essential_workers * length(Individual)) among Individual;
-	}
 	// Nothing to do
 	}
 
 	bool is_allowed (Individual i, Activity activity) {
-		
-		if (activity.name = act_home) {
-			return true;
-		}
-
-		if (i.report_status = tested_positive) {
+		if (i.report_status = tested_positive and activity.name != act_home) {
 			return false;
 		}
-
-		if (activity.name != act_studying and allowed_workers contains i) {
-			return true;
-		}
-
-		if (activity.name = act_shopping) {
-			return true;
-		}
-		
-
-
-		return false;
+		return true;
 	}
 
 }
+
+
 
 /**
  * This policy represents a list of policies. */
@@ -180,6 +161,30 @@ species SpatialPolicy parent: ForwardingPolicy {
 			return true;
 		}
 
+	}
+
+}
+
+/**
+ * A policy that allows certain people ("allowed_workers") to undertake any activity. They are initially determined as a percentage of the population
+ */
+species AllowedIndividualsPolicy parent: ForwardingPolicy {
+	float percentage_of_essential_workers <- 0.1;
+	map<Individual,bool> allowed_workers <- [];
+
+	action apply {
+		invoke apply();
+		if empty(allowed_workers) and percentage_of_essential_workers > 0 {
+			allowed_workers <- ((percentage_of_essential_workers * length(Individual)) among Individual) as_map (each::true);
+		}
+	}
+
+	bool is_allowed (Individual i, Activity activity) {
+		if (allowed_workers contains_key i) {
+			return true;
+		} else {
+			return super.is_allowed(i, activity);
+		}
 	}
 
 }

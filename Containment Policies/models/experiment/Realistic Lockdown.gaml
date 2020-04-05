@@ -10,7 +10,7 @@ import "../Global.gaml"
 import "../species/Policy.gaml"
 import "Abstract Experiment.gaml"
 
-experiment "Realistic Lock Down" parent: "Abstract Experiment" {
+experiment "Realistic Lockdown" parent: "Abstract Experiment" {
 	map<string, unknown> ask_values {
 		float p <- -1.0;
 		map<string, unknown> result;
@@ -39,8 +39,10 @@ experiment "Realistic Lock Down" parent: "Abstract Experiment" {
 			transmission_building <- true;
 			ask Authority {
 				AbstractPolicy d <- create_detection_policy(number_of_tests_, false, true);
-				AbstractPolicy l <- create_lockdown_policy_with_percentage(percentage_);
-				policy <- combination([d, l]);
+				AbstractPolicy l <- create_lockdown_policy_except([act_home, act_shopping]);
+				AbstractPolicy p <- create_positive_at_home_policy();
+				l <- with_percentage_of_allowed_individual(l, percentage_);
+				policy <- combination([d, p, l]);
 			}
 
 		}
@@ -76,38 +78,3 @@ experiment "Realistic Lock Down" parent: "Abstract Experiment" {
 
 }
 
-/*
- * Init for the realistic lock down batch exploration
- */
-global { 
-	float percentage; 
-	int number_of_tests; 
-	init {
-		ask Authority { 
-			transmission_building <- true;
-			AbstractPolicy d <- create_detection_policy(number_of_tests, false, true);
-			AbstractPolicy l <- create_lockdown_policy_with_percentage(percentage);
-			policy <- combination([d, l]);
-		} 
-		dataset <- "../../data/Test dataset 1/";
-	} 
-	
-	bool sim_stop { return time > 2#week and total_number_of_infected = 0; }
-	
-	list<int> nb_infected;
-	reflex look_at_infected { nb_infected <+ total_number_of_infected; }
-	string output_folder <- "../../output/test.csv";
-}
-
-experiment "Realistic Lock Down Batch" parent:"Abstract Experiment" type:batch 
-	repeat: 30 keep_seed: true until: world.sim_stop() {
-	
-	parameter "percentage" var:percentage init:0.0 min:0.0 max:1.0 step:0.5;
-	parameter "number of tests" var:number_of_tests init:10 min:0 max:10000 among:[10,100]; 
-	
-	method exhaustive;
-	
-	reflex nbi { ask simulations { 
-		save [percentage,number_of_tests,nb_infected] type:csv to:output_folder rewrite:false;
-	} }
-}

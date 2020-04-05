@@ -30,30 +30,30 @@ experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 	}
 
 	permanent {
-		display "charts" toolbar: false background: #black  refresh: every(24 #cycle) {
-			chart "Infected cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {
-				loop s over: simulations {
-					data s.name value: s.number_of_infectious color: s.color marker: false style: line	 thickness: 2;
-				}
-
-			}
-			graphics "title" {
-				draw ("Day " + int((current_date - starting_date) /  #day))  font: default at: {100#px, 0} color:#white anchor: #top_left;
-				draw  "Mask Efficiency " + round(100 - (factor * 100)) + "%" font: default at: {100#px, 30#px}  color: #white anchor: #top_left;
-			}
-
-		}
+//		display "charts" toolbar: false background: #black  refresh: every(24 #cycle) {
+//			chart "Infected cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {
+//				loop s over: simulations {
+//					data s.name value: s.number_of_infectious color: s.color marker: false style: line	 thickness: 2;
+//				}
+//
+//			}
+//			graphics "title" {
+//				draw ("Day " + int((current_date - starting_date) /  #day))  font: default at: {100#px, 0} color:#white anchor: #top_left;
+//				draw  "Mask Efficiency " + round(factor * 100) + "%" font: default at: {100#px, 30#px}  color: #white anchor: #top_left;
+//			}
+//
+//		}
 
 	}
 
 	output {
 		
-		//layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
-		display "Main" parent: simple_display {
-			graphics title {
-				draw world.name font: default at: {0, world.shape.height/2 - 30#px} color:world.color anchor: #top_left;
-			}
-		}
+//		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
+//		display "Main" parent: simple_display {
+//			graphics title {
+//				draw world.name font: default at: {0, world.shape.height/2 - 30#px} color:world.color anchor: #top_left;
+//			}
+//		}
 
 	}
 

@@ -73,7 +73,7 @@ species Authority {
 		return first(result);
 	}
 	
-	AbstractPolicy create_lockdown_policy {
+	ActivitiesListingPolicy create_lockdown_policy {
 		create ActivitiesListingPolicy returns: result {
 			loop s over: Activities.keys {
 				allowed_activities[s] <- false;
@@ -82,12 +82,23 @@ species Authority {
 		return first(result);
 	}
 	
-	AbstractPolicy create_lockdown_policy_with_percentage(float p) {
-		create LockdownPolicy returns: result {
-			percentage_of_essential_workers <- p;
+	PositiveAtHome create_positive_at_home_policy {
+		create PositiveAtHome  returns: result;
+		return first(result);
+	}
+	
+	ActivitiesListingPolicy create_lockdown_policy_except(list<string> allowed) {
+		create ActivitiesListingPolicy returns: result {
+			allowed_activities <- Activities.keys as_map (each::allowed contains each);
 		}
+		return first(result);
+	}
+	
+	AllowedIndividualsPolicy with_percentage_of_allowed_individual(AbstractPolicy a, float p) {
+		create AllowedIndividualsPolicy with: [target::a, percentage_of_essential_workers::p]  returns: result;
 		return (first(result));
 	}
+
 
 	
 	SpatialPolicy create_lockdown_policy_in_radius(point loc, float radius){		
