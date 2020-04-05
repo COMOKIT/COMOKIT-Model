@@ -28,8 +28,8 @@ global {
 	action global_init {
 		
 		write "global init";
-		if (shp_commune != nil) {
-			create Boundary from: shp_commune;
+		if (shp_boundary != nil) {
+			create Boundary from: shp_boundary;
 		}
 		if (shp_buildings != nil) {
 			create Building from: shp_buildings with: [type::string(read("type"))];

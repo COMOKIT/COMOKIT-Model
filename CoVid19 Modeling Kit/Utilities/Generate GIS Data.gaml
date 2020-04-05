@@ -9,7 +9,7 @@ model CoVid19
 
 global {
 	//define the bounds of the studied area
-	file data_file <-shape_file("../Datasets/commune.shp");
+	file data_file <-shape_file("../Datasets/boundary.shp");
 	
 	//define the path to the output folder
 	string output_path <- "../Datasets/Castanet Tolosan";

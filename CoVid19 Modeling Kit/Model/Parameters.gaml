@@ -19,7 +19,7 @@ global {
 	//string dataset <- "../Datasets/Vinh Phuc/"; // default
 	//string dataset <- "../Datasets/Castanet Tolosan/"; // default
 	
-	file shp_commune <- file_exists(dataset+"commune.shp") ? shape_file(dataset+"commune.shp"):nil;
+	file shp_boundary <- file_exists(dataset+"boundary.shp") ? shape_file(dataset+"boundary.shp"):nil;
 	file shp_buildings <- file_exists(dataset+"buildings.shp") ? shape_file(dataset+"buildings.shp"):nil;
 
 	//Population data
