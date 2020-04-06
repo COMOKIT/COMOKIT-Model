@@ -41,6 +41,7 @@ global {
 	bool transmission_building <- true; //Allowing environment contamination and infection
 	float successful_contact_rate_human <- 2.5 * 1/(14.69973);//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
 	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period
+	float reduction_coeff_other_household <- 0.01; //reduction of the contact rate for individuals belonging to different households leaving in the same building
 	float reduction_contact_rate_asymptomatic <- 0.55; //Factor of the reduction for successful contact rate for  human to human transmission for asymptomatic individual
 	float proportion_asymptomatic <- 0.3; //Proportion of asymptomatic infections
 	float proportion_dead_symptomatic <- 0.01; //Proportion of symptomatic infections dying
@@ -77,6 +78,8 @@ global {
 	float M_grandmother<-0.3; //rate of grandmothers (individual with age > retirement_age) - num of grandmothers = M_grandmother * num of possible homes
 	int retirement_age <- 55; //an individual older than (retirement_age + 1) are not working anymore
 	int max_age <- 100; //max age of individual
+	float nb_friends_mean <- 3.0; //Mean number of friends living in the considered area
+	float nb_friends_std <- 2.0;//Stand deviation of the number of friends living in the considered area
 	
 	list<string> possible_homes <- remove_duplicates(OSM_home + ["", "home", "hostel"]);  //building type that will be considered as home
 	

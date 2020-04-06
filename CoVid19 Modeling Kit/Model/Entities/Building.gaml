@@ -18,7 +18,7 @@ species Building {
 	string type;
 	list<Building> neighbors;
 	list<Individual> individuals;
-	
+	int nb_households;
 	
 	list<Building> get_neighbors {
 		if empty(neighbors) {

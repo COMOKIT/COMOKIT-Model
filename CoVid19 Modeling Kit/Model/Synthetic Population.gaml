@@ -45,44 +45,61 @@ global {
 	action create_population(map<Building,float> working_places,map<list<int>,map<Building,float>> schools, list<Building> homes, 
 		int min_student_age, int max_student_age
 	) {
+		list<list<Individual>> households;
 		ask homes {
-			//father
-			create Individual {
-				age <- rnd(max_student_age + 1,retirement_age);
-				sex <- 0;
-				home <- myself;
-			} 
-			//mother
-			create Individual {
-				age <- rnd(max_student_age + 1,retirement_age);
-				sex <- 1;
-				home <- myself;
-			}
-			//children
-			create Individual number: rnd(3) {
-				last_activity <-first(staying_home);
-				age <- rnd(0,max_student_age);
-				sex <- rnd(1);
-				home <- myself;
-			}
-
-		}
-		ask (N_grandfather * length(Building)) among homes {
-			create Individual {
-				age <- rnd(retirement_age + 1, max_age);
-				sex <- 0;
-				home <- myself;
-			}
-		}
-
-		ask (M_grandmother * length(Building)) among homes {
-			create Individual {
-				age <- rnd(retirement_age + 1, max_age);
-				sex <- 1;
-				home <- myself;
+			loop times: nb_households {
+				list<Individual> household;
+				//father
+				create Individual {
+					age <- rnd(max_student_age + 1,retirement_age);
+					sex <- 0;
+					home <- myself;
+					household << self;
+				} 
+				//mother
+				create Individual {
+					age <- rnd(max_student_age + 1,retirement_age);
+					sex <- 1;
+					home <- myself;
+					household << self;
 				
+				}
+				//children
+				create Individual number: rnd(3) {
+					last_activity <-first(staying_home);
+					age <- rnd(0,max_student_age);
+					sex <- rnd(1);
+					home <- myself;
+					household << self;
+				}
+				ask household {
+					relatives <- household - self;
+				}  
+				households << household;
 			}
-		}		
+		}
+		loop l over: (N_grandfather * length(households)) among households {
+			create Individual {
+				age <- rnd(retirement_age + 1, max_age);
+				sex <- 0;
+				home <- first(l).home;
+				relatives <- l;
+				ask l {
+					relatives << self;
+				}
+			}
+		}
+		loop l over: (M_grandmother * length(households)) among households {
+			create Individual {
+				age <- rnd(retirement_age + 1, max_age);
+				sex <- 1;
+				home <- first(l).home;
+				relatives <- l;
+				ask l {
+					relatives << self;
+				}
+			}
+		}	
 	}
 	
 	// Convert SP encoded age into gama model specification (float)

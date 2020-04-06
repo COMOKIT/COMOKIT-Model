@@ -32,7 +32,7 @@ global {
 			create Boundary from: shp_boundary;
 		}
 		if (shp_buildings != nil) {
-			create Building from: shp_buildings with: [type::string(read("type"))];
+			create Building from: shp_buildings with: [type::string(read("type")), nb_households::max(1,int(read("flats")))];
 		}
 		
 		create outside;
@@ -133,14 +133,13 @@ global {
 		Activity eating_act <- Activity first_with (each.name = act_eating);
 		list<Activity> possible_activities_tot <- Activities.values - studying - working - staying_home;
 		list<Activity> possible_activities_without_rel <- possible_activities_tot - visiting_friend;
-		
 		// Initialization for students or workers
 		ask Individual where ((each.age <= retirement_age) and (each.age >= min_student_age))  {
 			loop times: 7 {agenda_week<<[];}
 			// Students and workers have an agenda similar for 6 days of the week ...
 			loop i over: ([1,2,3,4,5,6,7] - non_working_days) {
 				map<int,Activity> agenda_day;
-				list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
+				list<Activity> possible_activities <- empty(friends) ? possible_activities_without_rel : possible_activities_tot;
 				int current_hour;
 				if (age <= max_student_age) {
 					current_hour <- rnd(school_hours[0][0],school_hours[0][1]);
@@ -182,7 +181,7 @@ global {
 			// ... but it is diferent for non working days : they will pick activities among the ones that are not working, studying or staying home.
 			loop i over: non_working_days {
 				map<int,Activity> agenda_day;
-				list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
+				list<Activity> possible_activities <- empty(friends) ? possible_activities_without_rel : possible_activities_tot;
 				int num_activity <- rnd(0,max_num_activity_for_non_working_day);
 				int current_hour <- rnd(first_act_old_hours[0],first_act_old_hours[1]);
 				loop times: num_activity {
@@ -200,7 +199,7 @@ global {
 		ask Individual where (each.age > retirement_age) {
 			loop times: 7 {
 				map<int,Activity> agenda_day;
-				list<Activity> possible_activities <- empty(relatives) ? possible_activities_without_rel : possible_activities_tot;
+				list<Activity> possible_activities <- empty(friends) ? possible_activities_without_rel : possible_activities_tot;
 				int num_activity <- rnd(0,max_num_activity_for_old_people);
 				int current_hour <- rnd(first_act_old_hours[0],first_act_old_hours[1]);
 				loop times: num_activity {

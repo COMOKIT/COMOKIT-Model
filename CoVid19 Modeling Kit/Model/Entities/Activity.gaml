@@ -74,7 +74,7 @@ species visiting_neighbor parent: Activity {
 species visiting_friend parent: Activity {
 	string name <- act_friend;
 	list<Building> find_target (Individual i) {
-		return nb_candidat among (i.relatives collect (each.home));
+		return nb_candidat among (i.friends collect (each.home));
 	}
 }
 

@@ -22,16 +22,16 @@ global
 	int total_number_individual <- 0;
 }
 
-
 species Individual{
 	int age;
 	int sex; //0 M 1 F
 	string household_id;
-	
+	bool is_at_home <- true;
 	Building home;
 	Building school;
 	Building working_place;
 	list<Individual> relatives;
+	list<Individual> friends;
 	Building bound;
 	bool is_outside <- false;
 	
@@ -65,6 +65,7 @@ species Individual{
 		basic_viral_release <- world.get_basic_viral_release(age);
 		contact_rate_human <- world.get_contact_rate_human(age);
 		proba_wearing_mask <- world.get_proba_wearing_mask(age);
+		friends <- max(0,round(gauss(nb_friends_mean,nb_friends_std))) among (Individual - relatives);
 	}
 	
 	action enter_building(Building b) {
@@ -72,6 +73,7 @@ species Individual{
 			bound.individuals >> self;
 		}	
 		bound <- b;
+		is_at_home <- bound = home;
 		bound.individuals << self;
 		location <- any_location_in(bound);
 	}
@@ -190,10 +192,29 @@ species Individual{
 		}
 		if transmission_human {
 				
-			ask bound.individuals where (flip(contact_rate_human*reduction_factor) and (each.status = susceptible))
-	 		{
-	 			do defineNewCase;
-	 		}
+			if (is_at_home) {
+				float proba <- contact_rate_human*reduction_factor;
+				ask relatives where (flip(proba) and (each.status = susceptible)) {
+					do defineNewCase;
+				}
+				if (bound.nb_households > 1) {
+					
+					proba <- proba * reduction_coeff_other_household;
+					
+					ask bound.individuals where (flip(proba) and (each.status = susceptible) and not (self in relatives))
+			 		{
+			 			do defineNewCase;
+			 		}
+				}
+				
+			}
+			else {
+				float proba <- contact_rate_human*reduction_factor;
+				ask bound.individuals where (flip(proba) and (each.status = susceptible))
+		 		{
+		 			do defineNewCase;
+		 		}
+		 	}
 		}
 	}
 	
