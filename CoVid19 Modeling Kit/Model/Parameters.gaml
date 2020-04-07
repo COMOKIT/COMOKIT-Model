@@ -15,8 +15,8 @@ global {
 	
 	 
 	//GIS data
-	string dataset <- "../Datasets/Ben Tre/"; // default
-	//string dataset <- "../Datasets/Vinh Phuc/"; // default
+	//string dataset <- "../Datasets/Ben Tre/"; // default
+	string dataset <- "../Datasets/Vinh Phuc/"; // default
 	//string dataset <- "../Datasets/Castanet Tolosan/"; // default
 	
 	file shp_boundary <- file_exists(dataset+"boundary.shp") ? shape_file(dataset+"boundary.shp"):nil;
@@ -74,12 +74,16 @@ global {
 	string householdID <- "parentId"; // The variable for household identification
 	
 	//Population parameter
-	float N_grandfather<-0.2; //rate of grandfathers (individual with age > retirement_age) - num of grandfathers = N_grandfather * num of possible homes
-	float M_grandmother<-0.3; //rate of grandmothers (individual with age > retirement_age) - num of grandmothers = M_grandmother * num of possible homes
-	int retirement_age <- 55; //an individual older than (retirement_age + 1) are not working anymore
+	float proba_active_family <- (dataset = "../Datasets/Castanet Tolosan/") ? 0.6: 0.95;
+	float number_children_mean <- 2.0;
+	float number_children_std <- 0.5;
+	int number_children_max <- 3;
+	float proba_grandfather<- (dataset = "../Datasets/Castanet Tolosan/")  ? 0.1 : 0.2; //rate of grandfathers (individual with age > retirement_age) - num of grandfathers = N_grandfather * num of possible homes
+	float proba_grandmother<- (dataset = "../Datasets/Castanet Tolosan/")  ? 0.1 :0.3; //rate of grandmothers (individual with age > retirement_age) - num of grandmothers = M_grandmother * num of possible homes
+	int retirement_age <- (dataset = "../Datasets/Castanet Tolosan/")  ? 65 :55; //an individual older than (retirement_age + 1) are not working anymore
 	int max_age <- 100; //max age of individual
-	float nb_friends_mean <- 3.0; //Mean number of friends living in the considered area
-	float nb_friends_std <- 2.0;//Stand deviation of the number of friends living in the considered area
+	float nb_friends_mean <- 2.0; //Mean number of friends living in the considered area
+	float nb_friends_std <- 1.0;//Stand deviation of the number of friends living in the considered area
 	
 	list<string> possible_homes <- remove_duplicates(OSM_home + ["", "home", "hostel"]);  //building type that will be considered as home
 	
