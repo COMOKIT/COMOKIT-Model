@@ -9,7 +9,7 @@
 model CoVid19
 
 import "../Model/Global.gaml"
-import "Abstract Experiment.gaml"
+import "Abstract Batch Experiment.gaml"
 /*
  * Init for the realistic lock down batch exploration
  */
@@ -30,30 +30,19 @@ global {
 		dataset <- "../Datasets/Test 1/";
 	}
 
-	bool sim_stop {
-		return time > 2 #week and total_number_of_infected = 0;
-	}
-
 	list<int> nb_infected;
 
 	reflex look_at_infected {
 		nb_infected <+ total_number_of_infected;
 	}
 
-	string output_folder <- "../Outputs/test.csv";
 }
 
-experiment "Realistic Lock Down Batch" parent: "Abstract Experiment" type: batch repeat: 30 keep_seed: true until: world.sim_stop() {
+experiment "Realistic Lock Down Batch" parent: "Abstract Batch Experiment" 
+	type: batch repeat: 30 keep_seed: true until:world.sim_stop() {
 	parameter "percentage" var: percentage init: 0.0 min: 0.0 max: 1.0 step: 0.5;
 	parameter "number of tests" var: number_of_tests init: 10 min: 0 max: 10000 among: [10, 100];
 	method exhaustive;
-
-	reflex nbi {
-		ask simulations {
-			save [percentage, number_of_tests, nb_infected] type: csv to: output_folder rewrite: false;
-		}
-
-	}
 	
 	permanent {
 		

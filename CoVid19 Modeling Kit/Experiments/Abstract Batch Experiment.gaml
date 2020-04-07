@@ -25,6 +25,8 @@ global{
 	string modelName <- self.host.name;
 	list<string> list_shape_path <- [];
 	
+	bool sim_stop { return (Individual count each.is_infected = 0) and had_infected_Individual; }
+	
 	/***************/
 	/* SAVING DATA */
 	/***************/
@@ -50,7 +52,7 @@ global{
 	}
 }
 
-experiment "Abstract Batch Experiment" type:batch repeat: 2 until: (Individual count each.is_infected = 0) and had_infected_Individual
+experiment "Abstract Batch Experiment" type:batch repeat: 2 until: world.sim_stop()
 		 virtual:true  parent: "Abstract Experiment"
 {
 	// @Override			
