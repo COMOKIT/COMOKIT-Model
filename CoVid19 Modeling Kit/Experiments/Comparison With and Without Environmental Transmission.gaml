@@ -9,6 +9,7 @@ model CoVid19
 
 import "../Model/Global.gaml"
 import "Abstract Experiment.gaml"
+import "Abstract Batch Experiment.gaml"
 
 experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
@@ -77,4 +78,11 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 		display "Main" parent: default_display {}
 	}
 
+}
+
+experiment "BatchComparison" parent: "Abstract Batch Experiment" 
+	type: batch repeat: 2 until: cycle=10 //(Individual count each.is_infected = 0) and had_infected_Individual 
+{		
+	parameter var:transmission_building among: [false, true];
+	parameter var:transmission_human	among: [false, true];
 }
