@@ -14,7 +14,8 @@ global {
 	//define the path to the output folder
 	string output_path <- "../Datasets/Castanet Tolosan";
 	
-	float mean_area_flats <- 100.0;
+	float mean_area_flats <- 200.0;
+	float min_area_buildings <- 40.0;
 	
 	//-----------------------------------------------------------------------------------------------------------------------------
 	
@@ -55,6 +56,9 @@ global {
 			}
 			do die; 
 		}
+		ask Building where (each.shape.area < min_area_buildings) {
+			do die;
+		}
 		ask Building {
 			if (amenity_att != nil) {
 				type <- amenity_att;
@@ -83,7 +87,7 @@ global {
 		}
 		ask Building {
 			if (flats = 0) {
-				if type in ["apartments","hotel", "residential"] {
+				if type in ["apartments","hotel"] {
 					if (levels = 0) {levels <- 1;}
 					flats <- int(shape.area / mean_area_flats) * levels;
 				} else {
@@ -91,6 +95,8 @@ global {
 				}
 			}
 		}
+		write "nb: " + (Building sum_of each.flats);
+	
 		save Building to:output_path +"/buildings.shp" type: shp attributes: ["type"::type, "flats"::flats,"height"::height, "levels"::levels];
 		
 		map<string, list<Building>> buildings <- Building group_by (each.type);

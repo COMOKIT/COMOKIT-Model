@@ -49,55 +49,62 @@ global {
 		ask homes {
 			loop times: nb_households {
 				list<Individual> household;
+				if flip(proba_active_family) {
 				//father
-				create Individual {
-					age <- rnd(max_student_age + 1,retirement_age);
-					sex <- 0;
-					home <- myself;
-					household << self;
-				} 
-				//mother
-				create Individual {
-					age <- rnd(max_student_age + 1,retirement_age);
-					sex <- 1;
-					home <- myself;
-					household << self;
+					create Individual {
+						age <- rnd(max_student_age + 1,retirement_age);
+						sex <- 0;
+						home <- myself;
+						household << self;
+					} 
+					//mother
+					create Individual {
+						age <- rnd(max_student_age + 1,retirement_age);
+						sex <- 1;
+						home <- myself;
+						household << self;
+					
+					}
+					//children
+					int number <- min(number_children_max, round(gauss(number_children_mean,number_children_std)));
+					if (number > 0) {
+						create Individual number: number {
+							//last_activity <-first(staying_home);
+							age <- rnd(0,max_student_age);
+							sex <- rnd(1);
+							home <- myself;
+							household << self;
+						}
+					}
+					if (flip(proba_grandfather)) {
+						create Individual {
+							age <- rnd(retirement_age + 1, max_age);
+							sex <- 0;
+							home <- myself;
+							household << self;
+						}
+					}	
+					if (flip(proba_grandmother)) {
+						create Individual {
+							age <- rnd(retirement_age + 1, max_age);
+							sex <- 1;
+							home <- myself;
+							household << self;
+						}
+					}
+				} else {
+					create Individual {
+						age <- rnd(min_student_age + 1,max_age);
+						sex <- rnd(1);
+						home <- myself;
+						household << self;
+					} 
+				}
 				
-				}
-				//children
-				create Individual number: rnd(3) {
-					last_activity <-first(staying_home);
-					age <- rnd(0,max_student_age);
-					sex <- rnd(1);
-					home <- myself;
-					household << self;
-				}
 				ask household {
 					relatives <- household - self;
 				}  
 				households << household;
-			}
-		}
-		loop l over: (N_grandfather * length(households)) among households {
-			create Individual {
-				age <- rnd(retirement_age + 1, max_age);
-				sex <- 0;
-				home <- first(l).home;
-				relatives <- l;
-				ask l {
-					relatives << self;
-				}
-			}
-		}
-		loop l over: (M_grandmother * length(households)) among households {
-			create Individual {
-				age <- rnd(retirement_age + 1, max_age);
-				sex <- 1;
-				home <- first(l).home;
-				relatives <- l;
-				ask l {
-					relatives << self;
-				}
 			}
 		}	
 	}

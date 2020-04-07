@@ -65,8 +65,14 @@ species Individual{
 		basic_viral_release <- world.get_basic_viral_release(age);
 		contact_rate_human <- world.get_contact_rate_human(age);
 		proba_wearing_mask <- world.get_proba_wearing_mask(age);
-		friends <- max(0,round(gauss(nb_friends_mean,nb_friends_std))) among (Individual - relatives);
-	}
+		int nb_friends <- min(length(Individual) - length(relatives) - 1, max(0,round(gauss(nb_friends_mean,nb_friends_std))));
+		loop while: length(friends) < nb_friends {
+			friends <-  friends + (nb_friends among Individual);
+			friends <- friends - self - relatives;
+		}
+		
+		
+ 	}
 	
 	action enter_building(Building b) {
 		if (current_place != nil ){

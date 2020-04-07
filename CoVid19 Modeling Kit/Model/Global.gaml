@@ -34,7 +34,6 @@ global {
 		if (shp_buildings != nil) {
 			create Building from: shp_buildings with: [type::string(read("type")), nb_households::max(1,int(read("flats")))];
 		}
-		
 		create outside;
 		the_outside <- first(outside);
 		do create_activities;
@@ -64,15 +63,14 @@ global {
 		} else {
 			do create_population(working_places, schools, homes, min_student_age, max_student_age);
 		}
+	
 		ask Individual {
 			do initialize;
 		}
 		
-		
 		do assign_school_working_place(working_places,schools, min_student_age, max_student_age);
 		
 		do define_agenda(min_student_age, max_student_age);	
-
 
 		ask num_infected_init among Individual {
 			do defineNewCase;
