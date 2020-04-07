@@ -15,4 +15,11 @@
 		<nature>org.eclipse.xtext.ui.shared.xtextNature</nature>
 		<nature>msi.gama.application.gamaNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>external/xapi_meta</name>
+			<type>1</type>
+			<locationURI>CACHE_LOC/overpass.openstreetmap.ru+_++_+cgi+_+xapi_meta</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

@@ -1,5 +1,5 @@
 #Mac os
 .DS_Store
 
-#Do not commit the outputs of the model
-*/output/*
+#Batch
+CoVid19 Modeling Kit/batch_output

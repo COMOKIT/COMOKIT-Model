@@ -32,7 +32,7 @@ species Individual{
 	Building working_place;
 	list<Individual> relatives;
 	list<Individual> friends;
-	Building bound;
+	Building current_place;
 	bool is_outside <- false;
 	
 	bool wearMask;
@@ -69,13 +69,13 @@ species Individual{
 	}
 	
 	action enter_building(Building b) {
-		if (bound != nil ){
-			bound.individuals >> self;
+		if (current_place != nil ){
+			current_place.individuals >> self;
 		}	
-		bound <- b;
-		is_at_home <- bound = home;
-		bound.individuals << self;
-		location <- any_location_in(bound);
+		current_place <- b;
+		is_at_home <- current_place = home;
+		current_place.individuals << self;
+		location <- any_location_in(current_place);
 	}
 	
 	
@@ -183,9 +183,9 @@ species Individual{
 		{
 			reduction_factor <- reduction_factor * reduction_contact_rate_wearing_mask;
 		}
-		if(bound!=nil)and(transmission_building)
+		if(current_place!=nil)and(transmission_building)
 		{
-			ask bound
+			ask current_place
 			{
 				do addViralLoad(reduction_factor*myself.basic_viral_release);
 			}
@@ -197,11 +197,11 @@ species Individual{
 				ask relatives where (flip(proba) and (each.status = susceptible)) {
 					do defineNewCase;
 				}
-				if (bound.nb_households > 1) {
+				if (current_place.nb_households > 1) {
 					
 					proba <- proba * reduction_coeff_other_household;
 					
-					ask bound.individuals where (flip(proba) and (each.status = susceptible) and not (self in relatives))
+					ask current_place.individuals where (flip(proba) and (each.status = susceptible) and not (self in relatives))
 			 		{
 			 			do defineNewCase;
 			 		}
@@ -210,7 +210,7 @@ species Individual{
 			}
 			else {
 				float proba <- contact_rate_human*reduction_factor;
-				ask bound.individuals where (flip(proba) and (each.status = susceptible))
+				ask current_place.individuals where (flip(proba) and (each.status = susceptible))
 		 		{
 		 			do defineNewCase;
 		 		}
@@ -272,7 +272,7 @@ species Individual{
 			last_activity <- act;
 			if (Authority[0].allows(self, act)) {
 				do enter_building(any(act.find_target(self)));
-				is_outside <- bound = the_outside;
+				is_outside <- current_place = the_outside;
 				
 			}
 		}
@@ -280,9 +280,9 @@ species Individual{
 
 	reflex updateDiseaseCycle when:(status!=recovered)and(status!=dead) {
 		tick <- tick + 1;
-		if(transmission_building and (not is_infected)and(self.bound!=nil))
+		if(transmission_building and (not is_infected)and(self.current_place!=nil))
 		{
-			if(flip(bound.viral_load*successful_contact_rate_building))
+			if(flip(current_place.viral_load*successful_contact_rate_building))
 			{
 				do defineNewCase();
 			}

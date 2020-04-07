@@ -67,7 +67,7 @@ species Activity {
 species visiting_neighbor parent: Activity {
 	string name <- act_neighbor;
 	list<Building> find_target (Individual i) {
-		return i.bound.get_neighbors();
+		return i.current_place.get_neighbors();
 	}
 }
 

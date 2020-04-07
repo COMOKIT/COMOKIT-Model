@@ -9,12 +9,12 @@ model CoVid19
 
 global {
 	//define the bounds of the studied area
-	file data_file <-shape_file("../Datasets/boundary.shp");
+	file data_file <-shape_file("../Datasets/Castanet Tolosan/boundary.shp");
 	
 	//define the path to the output folder
 	string output_path <- "../Datasets/Castanet Tolosan";
 	
-	
+	float mean_area_flats <- 100.0;
 	
 	//-----------------------------------------------------------------------------------------------------------------------------
 	
@@ -80,6 +80,16 @@ global {
 		
 		ask Building where (each.type = nil or each.type = "") {
 			do die;
+		}
+		ask Building {
+			if (flats = 0) {
+				if type in ["apartments","hotel", "residential"] {
+					if (levels = 0) {levels <- 1;}
+					flats <- int(shape.area / mean_area_flats) * levels;
+				} else {
+					flats <- 1;
+				}
+			}
 		}
 		save Building to:output_path +"/buildings.shp" type: shp attributes: ["type"::type, "flats"::flats,"height"::height, "levels"::levels];
 		
@@ -160,7 +170,7 @@ species Building {
 	int levels;
 	rgb color;
 	aspect default {
-		draw shape color: color border: #black;
+		draw shape color: color border: #black depth: (1 + flats) * 3;
 	}
 }
 
