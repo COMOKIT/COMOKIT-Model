@@ -1,2 +1,5 @@
 #Mac os
 .DS_Store
+
+#Do not commit the outputs of the model
+*/output/*
