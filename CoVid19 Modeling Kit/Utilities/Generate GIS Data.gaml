@@ -23,8 +23,9 @@ global {
 	string googlemap_path <- dataset_path + "/googlemap.png";
 	
 	float simplication_dist <- 1.0;
-	float tolerance_dist <- 0.1;
-	int tolerance_color <- 1;
+	float tolerance_dist <- 0.2;
+	int tolerance_color_bd <- 1;
+	int tolerance_color_type <- 7;
 	float convex_hull_coeff <- 0.05;
 	float buffer_coeff <- 0.5;
 	
@@ -38,9 +39,9 @@ global {
 	
 	//-----------------------------------------------------------------------------------------------------------------------------
 	
-	int red_g <- 241;
-	int green_g <- 243;
-	int blue_g <- 244;
+	list<rgb> color_bds <- [rgb(241,243,244), rgb(255,250,241)];
+	
+	map<string,rgb> google_map_type <- ["restaurant"::rgb(255,159,104), "shop"::rgb(73,149,244)];
 	
 	geometry shape <- envelope(data_file);
 	map filtering <- ["building"::[], "shop"::[], "historic"::[], "amenity"::[], "sport"::[], "military"::[], "leisure"::[], "office"::[]];
@@ -138,7 +139,7 @@ global {
 		}
 		write "OSM data clean: type of buildings: " +  buildings.keys;
 		
-		do load_satellite_image;
+		//do load_satellite_image;
 	}
 	
 	
@@ -148,7 +149,19 @@ global {
 			color <-rgb( (image) at {grid_x ,grid_y }) ;
 		}
 		
-		list<cell_google> cells <- cell_google where ((abs(each.color.red - red_g)+abs(each.color.green - green_g) + abs(each.color.blue - blue_g)) < tolerance_color);
+		list<cell_google> cells ;
+		ask cell_google {
+			loop col over: color_bds {
+				if ((abs(color.red - col.red)+abs(color.green - col.green) + abs(color.blue - col.blue)) < tolerance_color_bd) {
+					cells << self;
+					break;
+				}
+			}
+		}
+		//<- cell_google where (
+			
+			
+		//);
 		geometry geom <- union(cells collect (each.shape + tolerance_dist));
 		
 		list<geometry> gs <- geom.geometries collect clean(each);
@@ -179,6 +192,29 @@ global {
 		gs <- gs where (each.area >= min_area_buildings);
 		
 		create Building from: gs with: [type::""];
+		
+		loop type over: google_map_type.keys {
+			rgb col <- google_map_type[type];
+			list<cell_google> cells <- cell_google where ((abs(each.color.red - col.red)+abs(each.color.green - col.green) + abs(each.color.blue - col.blue)) <= tolerance_color_type);
+			list<geometry> gs <- union(cells collect (each.shape + tolerance_dist)).geometries;
+			if (buffer_coeff > 0) {
+				float buffer_dist <- first(cell_google).shape.width * buffer_coeff;
+				gs <- gs collect (each + buffer_dist);
+			}
+			create marker from: gs with: [type::type];
+			float min_area <- marker mean_of each.shape.area;
+			
+			ask marker {	
+				if (shape.area < (min_area * 0.5)) {do die;}
+				else {
+					point loc <- shape.points with_max_of (each.y);
+					Building bd <- Building closest_to loc;
+					bd.type <- type;
+				}
+			}
+		}
+		
+		
 		write "google image vectorized";
 	}
 	
@@ -230,6 +266,13 @@ global {
 	
 }
 
+species marker {
+	string type;
+	aspect default{
+		draw shape color: google_map_type[type];
+	}
+}
+
 grid cell_google width: nb_pixels_x height: nb_pixels_y use_individual_shapes: false use_regular_agents: false neighbors:8;
 
 grid cell width: 1500 height:1500 use_individual_shapes: false use_regular_agents: false use_neighbors_cache: false;
@@ -269,6 +312,7 @@ experiment generateGISdata type: gui {
 				}
 			}
 			species Building;
+			species marker;
 		}
 	}
 }
