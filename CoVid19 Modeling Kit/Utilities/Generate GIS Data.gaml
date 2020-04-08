@@ -8,11 +8,26 @@
 model CoVid19
 
 global {
-	//define the bounds of the studied area
-	file data_file <-shape_file("../Datasets/Castanet Tolosan/boundary.shp");
 	
-	//define the path to the output folder
-	string output_path <- "../Datasets/Castanet Tolosan";
+	//define the path to the dataset folder
+	//string dataset_path <- "../Datasets/Castanet Tolosan";
+	string dataset_path <- "../Datasets/Ha Loi - Me Linh";
+	
+	
+	//define the bounds of the studied area
+	file data_file <-shape_file(dataset_path + "/boundary.shp");
+	
+	
+	//optional
+	string osm_file_path <- dataset_path + "/map.osm";
+	string googlemap_path <- dataset_path + "/googlemap.png";
+	
+	float simplication_dist <- 1.0;
+	float min_area_google_map <- 10.0;
+	float tolerance_dist <- 0.1;
+	
+	int nb_pixels_x <- file_exists(googlemap_path) ? 1338 :1;
+	int nb_pixels_y <- file_exists(googlemap_path) ? 1706 :1;
 	
 	float mean_area_flats <- 200.0;
 	float min_area_buildings <- 40.0;
@@ -25,13 +40,17 @@ global {
 	init {
 		write "Start the pre-processing process";
 		create Boundary from: data_file;
-		point top_left <- CRS_transform({0,0}, "EPSG:4326").location;
-		point bottom_right <- CRS_transform({shape.width, shape.height}, "EPSG:4326").location;
-		string adress <-"http://overpass.openstreetmap.ru/cgi/xapi_meta?*[bbox="+top_left.x+"," + bottom_right.y + ","+ bottom_right.x + "," + top_left.y+"]";
-	
-		//file osmfile <- osm_file("../../data/Castanet Tolosan/xapi_meta.osm", filtering);
-		file osmfile <- osm_file<geometry> (adress, filtering);
-	
+		
+		osm_file osmfile;
+		if (file_exists(osm_file_path)) {
+			osmfile  <- osm_file(osm_file_path, filtering);
+		} else {
+			point top_left <- CRS_transform({0,0}, "EPSG:4326").location;
+			point bottom_right <- CRS_transform({shape.width, shape.height}, "EPSG:4326").location;
+			string adress <-"http://overpass.openstreetmap.ru/cgi/xapi_meta?*[bbox="+top_left.x+"," + bottom_right.y + ","+ bottom_right.x + "," + top_left.y+"]";
+			osmfile <- osm_file<geometry> (adress, filtering);
+		}
+		
 		write "OSM data retrieved";
 		list<geometry> geom <- osmfile  where (each != nil and not empty(Boundary overlapping each));
 		
@@ -95,9 +114,12 @@ global {
 				}
 			}
 		}
-		write "nb: " + (Building sum_of each.flats);
 	
-		save Building to:output_path +"/buildings.shp" type: shp attributes: ["type"::type, "flats"::flats,"height"::height, "levels"::levels];
+		if (file_exists(googlemap_path)) {
+			do load_google_image;
+		}
+	
+		save Building to:dataset_path +"/buildings.shp" type: shp attributes: ["type"::type, "flats"::flats,"height"::height, "levels"::levels];
 		
 		map<string, list<Building>> buildings <- Building group_by (each.type);
 		loop ll over: buildings {
@@ -108,10 +130,31 @@ global {
 		}
 		write "OSM data clean: type of buildings: " +  buildings.keys;
 		
-		do load_image;
+		do load_satellite_image;
 	}
 	
-	action load_image
+	
+	action load_google_image {
+		image_file image <- image_file(googlemap_path);
+		ask cell_google {		
+			color <-rgb( (image) at {grid_x ,grid_y }) ;
+		}
+		
+		list<cell_google> cells <- cell_google where (each.color = rgb(241,243,244));
+		
+		write "Found "+length(cells)+" pixels";
+		geometry geom <- union(cells collect (each.shape + tolerance_dist));
+		list<geometry> gs <- geom.geometries collect clean(each);
+		gs <- geom.geometries where (each.area >= min_area_google_map);
+		ask Building {
+			list<geometry> ggs <- gs overlapping self;
+			gs <- gs - ggs;
+		}
+		gs <- gs collect (each simplification simplication_dist);
+		create Building from: gs with: [type::""];
+	}
+	
+	action load_satellite_image
 	{ 
 		point top_left <- CRS_transform({0,0}, "EPSG:4326").location;
 		point bottom_right <- CRS_transform({shape.width, shape.height}, "EPSG:4326").location;
@@ -125,7 +168,7 @@ global {
 		ask cell {		
 			color <-rgb( (static_map_request) at {grid_x,1500 - (grid_y + 1) }) ;
 		}
-		save cell to: output_path +"/satellite.png" type: image;
+		save cell to: dataset_path +"/satellite.png" type: image;
 		
 		string rest_link2<- "https://dev.virtualearth.net/REST/v1/Imagery/Map/Aerial/?mapArea="+bottom_right.y+"," + top_left.x + ","+ top_left.y + "," + bottom_right.x + "&mmd=1&mapSize="+int(size_x)+","+int(size_y)+ "&key=AvZ5t7w-HChgI2LOFoy_UF4cf77ypi2ctGYxCgWOLGFwMGIGrsiDpCDCjliUliln" ;
 		file f <- json_file(rest_link2);
@@ -149,7 +192,7 @@ global {
 		float height <- abs(pt1.y - pt2.y)/1500;
 		
 		string info <- ""  + width +"\n0.0\n0.0\n"+height+"\n"+min(pt1.x,pt2.x)+"\n"+min(pt1.y,pt2.y);
-		save info to: output_path +"/satellite.pgw";
+		save info to: dataset_path +"/satellite.pgw";
 		
 		write "Satellite image saved with the right meta-data";
 		 
@@ -158,6 +201,8 @@ global {
 	
 	
 }
+
+grid cell_google width: nb_pixels_x height: nb_pixels_y use_individual_shapes: false use_regular_agents: false use_neighbors_cache: false;
 
 grid cell width: 1500 height:1500 use_individual_shapes: false use_regular_agents: false use_neighbors_cache: false;
 
@@ -189,7 +234,7 @@ species Boundary {
 experiment generateGISdata type: gui {
 	output {
 		display map type: opengl draw_env: false{
-			image  output_path +"/satellite.png" transparency: 0.2;
+			image  dataset_path +"/satellite.png" transparency: 0.2;
 			species Building;
 		}
 	}
