@@ -23,16 +23,24 @@ global {
 	string googlemap_path <- dataset_path + "/googlemap.png";
 	
 	float simplication_dist <- 1.0;
-	float min_area_google_map <- 10.0;
 	float tolerance_dist <- 0.1;
+	int tolerance_color <- 1;
+	float convex_hull_coeff <- 0.05;
+	float buffer_coeff <- 0.5;
 	
-	int nb_pixels_x <- file_exists(googlemap_path) ? 1338 :1;
-	int nb_pixels_y <- file_exists(googlemap_path) ? 1706 :1;
+	int nb_pixels_x <- file_exists(googlemap_path) ? matrix(image_file(googlemap_path)).columns :1;
+	int nb_pixels_y <- file_exists(googlemap_path) ? matrix(image_file(googlemap_path)).rows :1;
 	
 	float mean_area_flats <- 200.0;
-	float min_area_buildings <- 40.0;
+	float min_area_buildings <- 20.0;
+	
+	bool display_google_map <- true parameter:"Display google map image";
 	
 	//-----------------------------------------------------------------------------------------------------------------------------
+	
+	int red_g <- 241;
+	int green_g <- 243;
+	int blue_g <- 244;
 	
 	geometry shape <- envelope(data_file);
 	map filtering <- ["building"::[], "shop"::[], "historic"::[], "amenity"::[], "sport"::[], "military"::[], "leisure"::[], "office"::[]];
@@ -140,18 +148,38 @@ global {
 			color <-rgb( (image) at {grid_x ,grid_y }) ;
 		}
 		
-		list<cell_google> cells <- cell_google where (each.color = rgb(241,243,244));
-		
-		write "Found "+length(cells)+" pixels";
+		list<cell_google> cells <- cell_google where ((abs(each.color.red - red_g)+abs(each.color.green - green_g) + abs(each.color.blue - blue_g)) < tolerance_color);
 		geometry geom <- union(cells collect (each.shape + tolerance_dist));
+		
 		list<geometry> gs <- geom.geometries collect clean(each);
-		gs <- geom.geometries where (each.area >= min_area_google_map);
+		gs <- gs where (not empty(Boundary overlapping each));
 		ask Building {
 			list<geometry> ggs <- gs overlapping self;
 			gs <- gs - ggs;
 		}
-		gs <- gs collect (each simplification simplication_dist);
+		if (buffer_coeff > 0) {
+			float buffer_dist <- first(cell_google).shape.width * buffer_coeff;
+			gs <- gs collect (each + buffer_dist);
+		}
+		if simplication_dist > 0 {
+			gs <- gs collect (each simplification simplication_dist);
+		}
+		if (convex_hull_coeff > 0.0) {
+			list<geometry> gs2;
+			loop g over: gs {
+				geometry ch <- convex_hull(g);
+				if (g.area/ch.area > (1 - convex_hull_coeff)) {
+					gs2 << ch;
+				} else {
+					gs2 << g;
+				}
+			}
+			gs <- gs2;
+		}
+		gs <- gs where (each.area >= min_area_buildings);
+		
 		create Building from: gs with: [type::""];
+		write "google image vectorized";
 	}
 	
 	action load_satellite_image
@@ -202,7 +230,7 @@ global {
 	
 }
 
-grid cell_google width: nb_pixels_x height: nb_pixels_y use_individual_shapes: false use_regular_agents: false use_neighbors_cache: false;
+grid cell_google width: nb_pixels_x height: nb_pixels_y use_individual_shapes: false use_regular_agents: false neighbors:8;
 
 grid cell width: 1500 height:1500 use_individual_shapes: false use_regular_agents: false use_neighbors_cache: false;
 
@@ -234,7 +262,12 @@ species Boundary {
 experiment generateGISdata type: gui {
 	output {
 		display map type: opengl draw_env: false{
-			image  dataset_path +"/satellite.png" transparency: 0.2;
+			image dataset_path +"/satellite.png"  refresh: false;
+			graphics "google image"  refresh: false{
+				if display_google_map and file_exists(googlemap_path) {
+					draw image_file(googlemap_path) ;
+				}
+			}
 			species Building;
 		}
 	}
