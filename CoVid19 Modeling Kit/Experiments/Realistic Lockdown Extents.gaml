@@ -9,6 +9,42 @@ model CoVid19
 
 import "../Model/Global.gaml"
 import "Abstract Experiment.gaml"
+import "Abstract Batch Experiment.gaml"
+
+global{
+	// +==================
+	// | Batch exploration variable
+	// | Set with default values, but overwritten if the parameter is explored
+	
+	// CONFINMENT POLICY
+	float percentage_of_people_allowed;
+	int nb_cases <- 20;
+	int nb_days <- 60;
+	
+	// COVID TEST POLICY
+	int number_of_tests_per_step <- 100;
+	bool only_untested_ones <- true;
+	bool only_symptomatic_ones <- true;
+	
+	// See Constant.gaml for the list of activities
+	list<string> allowed_activities <- [act_home, act_shopping];
+
+	// 			==================+
+
+	//@Override
+	action define_policy{
+		ask Authority {
+			AbstractPolicy d <- create_detection_policy(number_of_tests_per_step, only_symptomatic_ones, only_untested_ones);
+			AbstractPolicy l <- create_lockdown_policy_except(allowed_activities);
+			AbstractPolicy p <- create_positive_at_home_policy();
+			l <- with_percentage_of_allowed_individual(l, percentage_of_people_allowed);
+			l <- from_min_cases(l, nb_cases);
+			l <- during(l, nb_days);
+			policy <- combination([d, p, l]);
+		}
+	}
+	
+}
 experiment "Unconfined Individuals" parent: "Abstract Experiment" autorun: true {
 
 	action _init_ {
@@ -16,21 +52,13 @@ experiment "Unconfined Individuals" parent: "Abstract Experiment" autorun: true 
 		float simulation_seed <- rnd(10000.0);
 		list<rgb> colors <- brewer_colors("Paired");
 		int color_browser <- 0;
-		int nb_cases <- 20;
-		int nb_days <- 60;
+		
 		loop percentage over: [0.05, 0.1, 0.2, 0.3, 0.4] {
 			create simulation with: [color::(colors at int(color_browser)), dataset::shape_path, seed::simulation_seed] {
 				name <-  string(int(percentage*100)) + "% of unconfined people";
-				ask Authority {
-					AbstractPolicy d <- create_detection_policy(100, true, true);
-					AbstractPolicy l <- create_lockdown_policy_except([act_home, act_shopping]);
-					AbstractPolicy p <- create_positive_at_home_policy();
-					l <- with_percentage_of_allowed_individual(l, percentage);
-					l <- from_min_cases(l, nb_cases);
-					l <- during(l, nb_days);
-					policy <- combination([d, p, l]);
-				}
-
+				
+				percentage_of_people_allowed <- percentage;
+				do define_policy();
 			}
 
 			color_browser <- color_browser + 1;
@@ -57,7 +85,7 @@ experiment "Unconfined Individuals" parent: "Abstract Experiment" autorun: true 
 	}
 
 	output {
-		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
+		layout #split consoles: true editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
 		display "Main" parent: simple_display {
 			graphics title {
 				draw world.name font: default at: {5 #px, 5 #px} color: world.color anchor: #top_left;
@@ -66,5 +94,23 @@ experiment "Unconfined Individuals" parent: "Abstract Experiment" autorun: true 
 		}
 
 	}
+
+}
+
+
+experiment "Realistic Lock Down Batch" parent: "Abstract Batch Experiment" 
+	type: batch repeat: 500 until: (Individual count each.is_infected = 0) and had_infected_Individual 
+{
+	method exhaustive;
+	
+	// CONFINMENT POLICY
+	parameter "Percentage of people allowed" var: percentage_of_people_allowed init: 0.0 min: 0.0 max: 0.5 step: 0.05;
+	parameter "Nbr of cases needed to start the policy" var:nb_cases init:0 min:0 max: 100 step: 5;
+	parameter "Nbr of days of lockdown" var:nb_days init: 7 min: 7 max: 182 step: 7; // Max ~6months	
+	
+	// COVID TEST POLICY
+	//parameter "number of tests" var: number_of_tests_per_step init: 10 min: 0 max: 10000 among: [10, 100];
+	//parameter var:only_untested_ones among: [true, false];
+	//parameter var:only_symptomatic_ones among: [true, false];
 
 }

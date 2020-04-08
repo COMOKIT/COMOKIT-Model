@@ -1,7 +1,7 @@
 /***
 * Part of the GAMA CoVid19 Modeling Kit
 * see http://gama-platform.org/covid19
-* Author: Kevin Chapuis
+* Author: Kevin Chapuis <chapuisk>, Arthur Brugiere <RoiArthurB>
 * Tags: covid19,epidemiology
 ***/
 
