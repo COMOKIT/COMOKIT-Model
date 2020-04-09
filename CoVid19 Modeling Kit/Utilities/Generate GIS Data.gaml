@@ -60,6 +60,7 @@ global {
 			osmfile <- osm_file<geometry> (adress, filtering);
 		}
 		
+
 		write "OSM data retrieved";
 		list<geometry> geom <- osmfile  where (each != nil and not empty(Boundary overlapping each));
 		
@@ -139,7 +140,7 @@ global {
 		}
 		write "OSM data clean: type of buildings: " +  buildings.keys;
 		
-		//do load_satellite_image;
+		do load_satellite_image;
 	}
 	
 	
@@ -303,6 +304,10 @@ species Boundary {
 }
 
 experiment generateGISdata type: gui {
+	init {
+		gama.pref_gis_auto_crs <- false;
+		gama.pref_gis_default_crs <- 3857;
+	}
 	output {
 		display map type: opengl draw_env: false{
 			image dataset_path +"/satellite.png"  refresh: false;
