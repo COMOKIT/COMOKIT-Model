@@ -260,7 +260,8 @@ global {
 		save info to: dataset_path +"/satellite.pgw";
 		
 		write "Satellite image saved with the right meta-data";
-		 
+		gama.pref_gis_auto_crs <- bool(experiment get "pref_gis" );
+		gama.pref_gis_default_crs <- int(experiment get "crs");
 		
 	}
 	
@@ -304,9 +305,12 @@ species Boundary {
 }
 
 experiment generateGISdata type: gui {
-	init {
+	bool pref_gis <- gama.pref_gis_auto_crs ;
+	int crs <- gama.pref_gis_default_crs;
+	action _init_ {
 		gama.pref_gis_auto_crs <- false;
 		gama.pref_gis_default_crs <- 3857;
+		create simulation;
 	}
 	output {
 		display map type: opengl draw_env: false{
