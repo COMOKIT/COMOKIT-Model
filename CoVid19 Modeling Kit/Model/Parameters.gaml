@@ -15,8 +15,8 @@ global {
 	
 	 
 	//GIS data
-	string dataset <- "../Datasets/Ben Tre/"; // default
-	//string dataset <- "../Datasets/Vinh Phuc/"; // default
+	//string dataset <- "../Datasets/Ben Tre/"; // default
+	string dataset <- "../Datasets/Vinh Phuc/"; // default
 	//string dataset <- "../Datasets/Castanet Tolosan/"; // default
 	
 	file shp_boundary <- file_exists(dataset+"boundary.shp") ? shape_file(dataset+"boundary.shp"):nil;
@@ -87,14 +87,20 @@ global {
 	
 	list<string> possible_homes <- remove_duplicates(OSM_home + ["", "home", "hostel"]);  //building type that will be considered as home
 	
+	float work_at_home_unemployed <- 0.1; // probability for an individual to work at home (or not working).
 	 //building type that will be considered as home - for each type, the coefficient to apply to this type for this choice of working place
 	 //weight of a working place = area * this coefficient
-	map<string, float> possible_workplaces <- (OSM_work_place as_map (each::2.0)) + map(["office"::3.0, "admin"::2.0, "industry"::1.0, ""::0.5,"home"::0.5,"store"::1.0, "shop"::1.0,"bookstore"::1.0,
+	map<string, float> possible_workplaces <- (OSM_work_place as_map (each::2.0)) + map(["office"::3.0, "admin"::2.0, "industry"::1.0, "store"::1.0, "shop"::1.0,"bookstore"::1.0,
 		"gamecenter"::1.0, "restaurant"::1.0,"coffeeshop"::1.0,"caphe"::1.0, "caphe-karaoke"::1.0,"farm"::0.1, "repairshop"::1.0,"hostel"::1.0
 	]);
 	
 	// building type that will considered as school (ou university) - for each type, the min and max age to go to this type of school.
 	map<list<int>,string> possible_schools <- (dataset = "../Datasets/Ben Tre/") ? [[3,18]::"school"]: [[3,18]::"school", [19,23]::"university"]; 
+	
+	//Acvitity parameters 
+	string choice_of_target_mode <- random among: ["random", "gravity","closest"]; // model used for the choice of building for an activity 
+	int nb_candidates <- 4; // number of building considered for the choice of building for a particular activity
+	float gravity_power <- 0.5;  // power used for the gravity model: weight_of_building <- area of the building / (distance to it)^gravity_power
 	
 	
 	//Agenda paramaters

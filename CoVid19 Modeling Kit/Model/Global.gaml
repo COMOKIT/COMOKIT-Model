@@ -44,18 +44,18 @@ global {
 		map<Building,float> working_places;
 		loop wp over: possible_workplaces.keys {
 			if (wp in buildings_per_activity.keys) {
-					working_places <- working_places +  (buildings_per_activity[wp] as_map (each:: (possible_workplaces[wp] * each.shape.area)));  
+					working_places <- working_places +  (buildings_per_activity[wp] as_map (each:: (each.shape.area * possible_workplaces[wp])));  
 			}
 		}
 		
 		int min_student_age <- retirement_age;
 		int max_student_age <- 0;
-		map<list<int>,map<Building,float>> schools;
+		map<list<int>,list<Building>> schools;
 		loop l over: possible_schools.keys {
 			max_student_age <- max(max_student_age, max(l));
 			min_student_age <- min(min_student_age, min(l));
 			string type <- possible_schools[l];
-			schools[l] <- (type in buildings_per_activity.keys) ? (buildings_per_activity[type] as_map (each:: each.shape.area)) : map<Building,float>([]);
+			schools[l] <- (type in buildings_per_activity.keys) ? buildings_per_activity[type] : list<Building>([]);
 		}
 			
 		if(csv_population != nil) {
@@ -86,7 +86,7 @@ global {
 	//   schools :  map associating with each school Building its area (as a weight of the number of students that can be in the school)
 	//   min_student_age : minimum age to be in a school
 	//   max_student_age : maximum age to go to a school
-	action assign_school_working_place(map<Building,float> working_places,map<list<int>,map<Building,float>> schools, int min_student_age, int max_student_age) {
+	action assign_school_working_place(map<Building,float> working_places,map<list<int>,list<Building>> schools, int min_student_age, int max_student_age) {
 		
 		// Assign to each individual a school and working_place depending of its age.
 		// in addition, school and working_place can be outside.
@@ -101,15 +101,50 @@ global {
 							if (flip(proba_go_outside) or empty(schools[l])) {
 								school <- the_outside;	
 							} else {
-								school <-schools[l].keys[rnd_choice(schools[l].values)];
+								switch choice_of_target_mode {
+									match random {
+										school <- one_of(schools[l]);
+									}
+									match closest {
+										school <- schools[l] closest_to self;
+									}
+									match gravity {
+										list<float> proba_per_building;
+										loop b over: schools[l] {
+											float dist <- max(20,b.location distance_to home.location);
+											proba_per_building << (b.shape.area / dist ^ gravity_power);
+										}
+										school <- schools[l][rnd_choice(proba_per_building)];	
+									}
+								}
+								
 							}
 						}
 					}
 				} else if (age <= retirement_age) { 
-					if (flip(proba_go_outside) or empty(working_places)) {
+					if flip(work_at_home_unemployed) {
+						working_place <- home;
+					}
+					else if (flip(proba_go_outside) or empty(working_places)) {
 						working_place <- the_outside;	
 					} else {
-						working_place <-working_places.keys[rnd_choice(working_places.values)];
+						switch choice_of_target_mode {
+							match random {
+								working_place <- working_places.keys[rnd_choice(working_places.values)];
+								
+							}
+							match closest {
+								working_place <- working_places.keys closest_to self;
+							}
+							match gravity {
+								list<float> proba_per_building;
+								loop b over: working_places.keys {
+									float dist <-  max(20,b.location distance_to home.location);
+									proba_per_building << (working_places[b]  / (dist ^ gravity_power));
+								}
+								working_place <- working_places.keys[rnd_choice(proba_per_building)];	
+							}
+						}
 					}
 					
 				}
@@ -216,6 +251,30 @@ global {
 				agenda_week<<[];
 			}
 		} 
+		
+		if (choice_of_target_mode = gravity) {
+			ask Individual {
+				list<Activity> acts <- remove_duplicates(agenda_week accumulate each.values) inter list(Activity) ;
+				loop act over: acts {
+					if length(act.buildings) <= nb_candidates {
+						building_targets[act] <- act.buildings;
+					} else {
+						list<Building> bds;
+						list<float> proba_per_building;
+						loop b over: act.buildings {
+							float dist <- max(20,b.location distance_to home.location);
+							proba_per_building << (b.shape.area / dist ^ gravity_power);
+						}
+						loop while: length(bds) < nb_candidates {
+							bds << act.buildings[rnd_choice(proba_per_building)];
+							bds <- remove_duplicates(bds);
+						}
+						building_targets[act] <- bds;
+					}
+				}
+			}
+		}
+		
 	}
 	
 	action init_epidemiological_parameters

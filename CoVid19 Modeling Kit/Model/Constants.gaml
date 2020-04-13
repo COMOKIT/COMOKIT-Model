@@ -37,7 +37,10 @@ global {
 	string act_sport <- "sport";
 	string act_other <- "other activity";
 	
-	
+	//Type of model for building choice during activity
+	string random <- "random";
+	string gravity <- "gravity";
+	string closest <- "closest";
 	
 	// OSM Constant (type of building)
 	list<string> OSM_eat <- ["restaurant","bakery"];

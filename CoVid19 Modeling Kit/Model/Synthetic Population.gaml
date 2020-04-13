@@ -15,7 +15,7 @@ import "Parameters.gaml"
 
 global {
 	
-	action create_population_from_file(map<Building,float> working_places,map<list<int>,map<Building,float>> schools, list<Building> homes) {
+	action create_population_from_file(map<Building,float> working_places,map<list<int>,list<Building>> schools, list<Building> homes) {
 		
 		map<string,list<Individual>> households <- [];
 		
@@ -42,7 +42,7 @@ global {
 		
 	}
 	
-	action create_population(map<Building,float> working_places,map<list<int>,map<Building,float>> schools, list<Building> homes, 
+	action create_population(map<Building,float> working_places,map<list<int>,list<Building>> schools, list<Building> homes, 
 		int min_student_age, int max_student_age
 	) {
 		list<list<Individual>> households;
