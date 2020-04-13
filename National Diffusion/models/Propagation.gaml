@@ -8,7 +8,7 @@ model Provinces
 
 global {
 	shape_file provinces_shp_file <- shape_file("../includes/gadm36_VNM_shp/gadm36_VNM_1.shp");
-	file pop_csv_file <- csv_file("../includes/pop.csv");
+	file pop_csv_file <- csv_file("../includes/VNpop.csv");
 	geometry shape <- envelope(provinces_shp_file);
 
 	init {
@@ -46,8 +46,8 @@ species Province {
 	float sigma <- 0.05;
 	float mu <- 0.01;
 	string VARNAME_1;
-	rgb mycolor -> {hsb(0, (I > 25?0.1:0)+(I > 25 ? 25 : I) / 29, 1)};
-//	rgb mycolor -> {hsb(0, I/N, 1)};
+	rgb mycolor -> {hsb(0, (I > 25 ? 0.1 : 0) + (I > 25 ? 25 : I) / 29, 1)};
+	//	rgb mycolor -> {hsb(0, I/N, 1)};
 
 	// must be followed with exact order S, E, I, R, t  and N,beta,gamma,sigma,mu
 	equation eqSEIR type: SEIR vars: [S, E, I, R, t] params: [N, beta, gamma, sigma, mu];
@@ -82,7 +82,6 @@ species Province {
 
 				}
 
-
 			}
 
 		}
@@ -97,10 +96,11 @@ species Province {
 
 experiment Pandemic2020 type: gui {
 	output {
-			layout horizontal([0::5000, 1::5000]) tabs: true editors: false;
-//		layout horizontal([0::5000, 1::5000]) tabs: true editors: false;
-		display "provinces" synchronized:true{
-			species Province;
+		layout horizontal([0::5000, 1::5000]) tabs: true editors: false;
+		//		layout horizontal([0::5000, 1::5000]) tabs: true editors: false;
+		display "provinces" synchronized: true {
+			image file: "../includes/satellite_VNM_1.png" refresh: false;
+			species Province transparency:0.5;
 		}
 
 		display "Statistic" {
