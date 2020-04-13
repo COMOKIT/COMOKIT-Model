@@ -7,6 +7,8 @@
 model Provinces
 
 global {
+	float step <- 1 #day;
+	date starting_date <- date([2020, 3, 1, 0, 0]);
 	shape_file provinces_shp_file <- shape_file("../includes/gadm36_VNM_shp/gadm36_VNM_1.shp");
 	file pop_csv_file <- csv_file("../includes/VNpop.csv");
 	geometry shape <- envelope(provinces_shp_file);
@@ -17,7 +19,7 @@ global {
 	rgb background <- world.color.darker.darker;
 
 	init {
-		create Province from: provinces_shp_file with: [h::0.1, N::500, I::1.0];
+		create Province from: provinces_shp_file with: [h::10000, N::500, I::1.0];
 		ask Province {
 			neighbours <- Province where (each touches self);
 		}
@@ -55,10 +57,17 @@ species Province {
 	//	rgb mycolor -> {hsb(0, I/N, 1)};
 
 	// must be followed with exact order S, E, I, R, t  and N,beta,gamma,sigma,mu
-	equation eqSEIR type: SEIR vars: [S, E, I, R, t] params: [N, beta, gamma, sigma, mu];
+	equation eqSEIR {
+		diff(S, t) = (mu * N - beta * S * I / N - mu * S)/step;
+		diff(E, t) = (beta * S * I / N - mu * E - sigma * E)/step;
+		diff(I, t) = (sigma * E - mu * I - gamma * I)/step;
+		diff(R, t) = (gamma * I - mu * R)/step;
+	}
+
 	list<Province> neighbours <- [];
 
 	reflex solving {
+		t<-t/step;
 		solve eqSEIR method: "rk4" step_size: h;
 	}
 
@@ -99,22 +108,21 @@ species Province {
 
 }
 
-experiment Pandemic2020 type: gui {
+experiment Pandemic2020 type: gui autorun:true{
 	output {
 		layout horizontal([0::5000, 1::5000]) tabs: true editors: false;
 		//		layout horizontal([0::5000, 1::5000]) tabs: true editors: false;
 		display "provinces" synchronized: true {
 			image file: "../includes/satellite_VNM_1.png" refresh: false;
-//			overlay position: {100, 0} size: {270 #px, 420 #px} transparency: 1 {
-//				draw ("Xếp hạng nguy cơ:") font: default at: {20 #px, 110 #px} anchor: #top_left color: text_color;
-//			}
-
+						overlay position: {100, 0} size: {220 #px, 50 #px} transparency: 0.7 {
+							draw (""+current_date) font: default at: {20 #px, 10 #px} anchor: #top_left color: text_color;
+						}
 			species Province transparency: 0.1;
 		}
 
 		display "Statistic" {
 			chart 'SEIR' type: series {
-				data "S" value: sum(Province collect each.S) color: #green;
+//				data "S" value: sum(Province collect each.S) color: #green;
 				data "E" value: sum(Province collect each.E) color: #yellow;
 				data "I" value: sum(Province collect each.I) color: #red;
 				data "R" value: sum(Province collect each.R) color: #blue;
