@@ -10,6 +10,11 @@ global {
 	shape_file provinces_shp_file <- shape_file("../includes/gadm36_VNM_shp/gadm36_VNM_1.shp");
 	file pop_csv_file <- csv_file("../includes/VNpop.csv");
 	geometry shape <- envelope(provinces_shp_file);
+	float max_I -> {Province max_of each.I};
+	font default <- font("Helvetica", 20, #bold);
+	font info <- font("Helvetica", 18, #bold);
+	rgb text_color <- world.color.brighter.brighter;
+	rgb background <- world.color.darker.darker;
 
 	init {
 		create Province from: provinces_shp_file with: [h::0.1, N::500, I::1.0];
@@ -46,7 +51,7 @@ species Province {
 	float sigma <- 0.05;
 	float mu <- 0.01;
 	string VARNAME_1;
-	rgb mycolor -> {hsb(0, (I > 25 ? 0.1 : 0) + (I > 25 ? 25 : I) / 29, 1)};
+	rgb mycolor -> {hsb(0, I / max_I, 1)};
 	//	rgb mycolor -> {hsb(0, I/N, 1)};
 
 	// must be followed with exact order S, E, I, R, t  and N,beta,gamma,sigma,mu
@@ -100,7 +105,11 @@ experiment Pandemic2020 type: gui {
 		//		layout horizontal([0::5000, 1::5000]) tabs: true editors: false;
 		display "provinces" synchronized: true {
 			image file: "../includes/satellite_VNM_1.png" refresh: false;
-			species Province transparency:0.5;
+//			overlay position: {100, 0} size: {270 #px, 420 #px} transparency: 1 {
+//				draw ("Xếp hạng nguy cơ:") font: default at: {20 #px, 110 #px} anchor: #top_left color: text_color;
+//			}
+
+			species Province transparency: 0.1;
 		}
 
 		display "Statistic" {
