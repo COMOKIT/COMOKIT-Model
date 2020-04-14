@@ -17,7 +17,7 @@ global {
 }
 
 experiment Sensitivity parent: "Abstract Batch Experiment" 
-	type: batch repeat: 500 keep_seed: true until: ((Individual count each.is_infected = 0) and had_infected_Individual) or world.sim_stop() 
+	type: batch repeat: 500 keep_seed: false until: ((Individual count each.is_infected = 0) and had_infected_Individual) or world.sim_stop() 
 {
 	method exhaustive;
 	
