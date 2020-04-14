@@ -80,13 +80,28 @@ experiment "Abstract Batch Experiment" type:batch repeat: 2 until: world.sim_sto
 	// @Override			
 	reflex end_of_runs {		
 		save [
-			cycle,
-			simulations mean_of length(each.Individual where (each.status=susceptible)), 
-			simulations mean_of length(each.Individual where (each.is_exposed())), 
-			simulations mean_of length(each.Individual where (each.is_infectious)), 
-			simulations mean_of length(each.Individual where (each.status = recovered)),
-			simulations mean_of length(each.Individual where (each.status = dead)),
-			simulations mean_of each.total_number_of_infected
+			// Number of new cases (incidence) per step per age category
+			simulations mean_of each.total_number_of_infected,
+			// Number of new cases per step per building (or building type) and age category
+			
+			// Number of hospitalizations per step per age category
+			
+			// Number of ICU per step per age category
+			
+			// Number of susceptible per step per age category
+			simulations mean_of length(each.Individual where (each.status=susceptible)),
+			// Number of exposed per step per age category
+			simulations mean_of length(each.Individual where (each.is_exposed())),
+			// Number of asymptomatic permanent per step per age category
+			simulations mean_of length(each.Individual where (each.status = asymptomatic)),
+			// Number of asymptomatic temporary per step per age category
+			simulations mean_of length(each.Individual where (each.status = symptomatic_without_symptoms)),
+			// Number of symptomatic per step per age category
+			simulations mean_of length(each.Individual where (each.status = symptomatic_with_symptoms)),
+			// Number of recovered per step per age category
+			simulations mean_of length(each.Individual where (each.status = recovered)),			
+			// Number of dead per step per age category
+			simulations mean_of length(each.Individual where (each.status = dead))
 		] type: "csv" to: result_folder + "batchResult-" + modelName + "_" + cpt + ".csv" rewrite:false;
 		cpt <- cpt +1;
 	}
