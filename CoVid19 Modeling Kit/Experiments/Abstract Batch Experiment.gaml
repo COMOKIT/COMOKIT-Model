@@ -65,6 +65,13 @@ global{
 			length(Individual where (each.status = dead))
 		] type: "csv" to: result_folder + "batchDetailed-" + modelName + "-" + int(self) + "_" + cpt + ".csv" rewrite:false;
 	}
+	
+	/***************/
+	/*  OVERRIDES  */
+	/***************/
+	
+	// @Override	
+	string shape_path <- "../Datasets/Vinh Phuc/";
 }
 
 experiment "Abstract Batch Experiment" type:batch repeat: 2 until: world.sim_stop()
