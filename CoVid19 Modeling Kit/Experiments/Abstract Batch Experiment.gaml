@@ -41,13 +41,28 @@ global{
 	// Save data at every cycle on the simulation
 	reflex observerPattern when: batch_enable_detailedCSV {
 		save [
-			cycle, 
-			length(Individual where (each.status=susceptible)), 
-			length(Individual where (each.is_exposed())), 
-			length(Individual where (each.is_infectious)), 
-			length(Individual where (each.status = recovered)),
-			length(Individual where (each.status = dead)),
-			total_number_of_infected
+			// Number of new cases (incidence) per step per age category
+			total_number_of_infected,			
+			// Number of new cases per step per building (or building type) and age category
+			
+			// Number of hospitalizations per step per age category
+			
+			// Number of ICU per step per age category
+			
+			// Number of susceptible per step per age category
+			length(Individual where (each.status=susceptible)),
+			// Number of exposed per step per age category
+			length(Individual where (each.is_exposed())),
+			// Number of asymptomatic permanent per step per age category
+			length(Individual where (each.status = asymptomatic)),
+			// Number of asymptomatic temporary per step per age category
+			length(Individual where (each.status = symptomatic_without_symptoms)),
+			// Number of symptomatic per step per age category
+			length(Individual where (each.status = symptomatic_with_symptoms)),
+			// Number of recovered per step per age category
+			length(Individual where (each.status = recovered)),			
+			// Number of dead per step per age category
+			length(Individual where (each.status = dead))
 		] type: "csv" to: result_folder + "batchDetailed-" + modelName + "-" + int(self) + "_" + cpt + ".csv" rewrite:false;
 	}
 }
