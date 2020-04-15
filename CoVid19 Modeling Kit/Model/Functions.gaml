@@ -21,7 +21,14 @@ global
 	//Function to get a value from a random distribution (among Normal, Lognormal, Weibull, Gamma and Uniform)
 	float get_rnd_from_distribution(string type, float param_1, float param_2)
 	{
-		return type=epidemiological_lognormal?lognormal_rnd(param_1,param_2):(type=epidemiological_weibull?weibull_rnd(param_1,param_2):(type=epidemiological_gamma?gamma_rnd(param_1,param_2):(type=epidemiological_normal?gauss_rnd(param_1,param_2):rnd(param_1,param_2))));
+		switch type {
+			match (epidemiological_lognormal) { return lognormal_rnd(param_1,param_2); }
+			match (epidemiological_weibull) { return weibull_rnd(param_1,param_2); }
+			match (epidemiological_gamma) { return gamma_rnd(param_1,param_2); }
+			match (epidemiological_normal) { return gauss_rnd(param_1,param_2); }
+			default {return rnd(param_1,param_2);}
+		}
+		// return type=epidemiological_lognormal?lognormal_rnd(param_1,param_2):(type=epidemiological_weibull?weibull_rnd(param_1,param_2):(type=epidemiological_gamma?gamma_rnd(param_1,param_2):(type=epidemiological_normal?gauss_rnd(param_1,param_2):rnd(param_1,param_2))));
 	}
 	
 	//Successful contact rate of an infectious individual, expect the age in the case we want to represent different contact rates for different age categories - MUST BE FIXED (i.e not relying on a distribution)
