@@ -31,7 +31,29 @@ global
 		// return type=epidemiological_lognormal?lognormal_rnd(param_1,param_2):(type=epidemiological_weibull?weibull_rnd(param_1,param_2):(type=epidemiological_gamma?gamma_rnd(param_1,param_2):(type=epidemiological_normal?gauss_rnd(param_1,param_2):rnd(param_1,param_2))));
 	}
 	
-	//Successful contact rate of an infectious individual, expect the age in the case we want to represent different contact rates for different age categories - MUST BE FIXED (i.e not relying on a distribution)
+	//Function to get a value from a random distribution (among Normal, Lognormal, Weibull, Gamma and Uniform)
+	float get_rnd_from_distribution_with_threshold(string type, float param_1, float param_2, float threshold, bool threshold_is_max)
+	{
+		switch type {
+			match (epidemiological_lognormal) { return lognormal_trunc_rnd(param_1,param_2,threshold,threshold_is_max); }
+			match (epidemiological_weibull) { return weibull_trunc_rnd(param_1,param_2,threshold,threshold_is_max); }
+			match (epidemiological_gamma) { return gamma_trunc_rnd(param_1,param_2,threshold,threshold_is_max); }
+			match (epidemiological_normal) { return truncated_gauss(param_1,param_2,threshold,threshold_is_max); }
+			default {
+				if(threshold_is_max)
+				{
+					return rnd(param_1,threshold);
+				}
+				else
+				{
+					return rnd(threshold,param_2);
+				}
+			}
+		}
+		// return type=epidemiological_lognormal?lognormal_rnd(param_1,param_2):(type=epidemiological_weibull?weibull_rnd(param_1,param_2):(type=epidemiological_gamma?gamma_rnd(param_1,param_2):(type=epidemiological_normal?gauss_rnd(param_1,param_2):rnd(param_1,param_2))));
+	}
+	
+//Successful contact rate of an infectious individual, expect the age in the case we want to represent different contact rates for different age categories - MUST BE FIXED (i.e not relying on a distribution)
 	float get_contact_rate_human(int age)
 	{
 		return float(map_epidemiological_parameters[age][epidemiological_successful_contact_rate_human][1])/nb_step_for_one_day;
@@ -76,7 +98,7 @@ global
 	}
 	
 	//Time between onset of a primary case of a given age and onset of secondary case 
-	float get_serial_interval(int age)
+	float get_serial_interval(int age, float min_value)
 	{
 		if(map_epidemiological_parameters[age][epidemiological_serial_interval][0]=epidemiological_fixed)
 		{
@@ -84,7 +106,7 @@ global
 		}
 		else
 		{
-			return get_rnd_from_distribution(map_epidemiological_parameters[age][epidemiological_serial_interval][0],float(map_epidemiological_parameters[age][epidemiological_serial_interval][1]),float(map_epidemiological_parameters[age][epidemiological_serial_interval][2]))*nb_step_for_one_day;
+			return get_rnd_from_distribution_with_threshold(map_epidemiological_parameters[age][epidemiological_serial_interval][0],float(map_epidemiological_parameters[age][epidemiological_serial_interval][1]),float(map_epidemiological_parameters[age][epidemiological_serial_interval][2]),min_value/nb_step_for_one_day,false)*nb_step_for_one_day;
 		}
 	}
 	
@@ -104,7 +126,7 @@ global
 	//Reduction of the successful contact rate of an infectious individual of a given age
 	float get_reduction_contact_rate_wearing_mask(int age)
 	{
-		return float(map_epidemiological_parameters[age][epidemiological_reduction_wearing_mask][1]);
+	return float(map_epidemiological_parameters[age][epidemiological_reduction_wearing_mask][1]);
 	}
 	
 	//Give a boolean to say if an individual of a given age should be asymptomatic - MUST BE FIXED (i.e. not following a distribution)
@@ -131,12 +153,50 @@ global
 		return flip(float(map_epidemiological_parameters[age][epidemiological_proportion_hospitalization][1]));
 	}
 	
+	//Give the number of steps between onset of symptoms and time for hospitalization
+	float get_time_onset_to_hospitalization(int age, float max_value)
+	{
+		if(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalization][0]=epidemiological_fixed)
+		{
+			return float(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalization][1])*nb_step_for_one_day;
+		}
+		else
+		{
+			return get_rnd_from_distribution_with_threshold(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalization][0],float(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalization][1]),float(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalization][2]),max_value/nb_step_for_one_day, true)*nb_step_for_one_day;
+		}
+	}
+	
 	//Give a boolean to say if an individual of a given age should be in intensive care unit - MUST BE FIXED (i.e. not following a distribution)
 	bool is_ICU(int age)
 	{
 		return flip(float(map_epidemiological_parameters[age][epidemiological_proportion_icu][1]));
 	}
 	
+	//Give the number of steps between hospitalization and ICU
+	float get_time_hospitalization_to_ICU(int age, float max_value)
+	{
+		if(map_epidemiological_parameters[age][epidemiological_hospitalization_to_ICU][0]=epidemiological_fixed)
+		{
+			return float(map_epidemiological_parameters[age][epidemiological_hospitalization_to_ICU][1])*nb_step_for_one_day;
+		}
+		else
+		{
+			return get_rnd_from_distribution_with_threshold(map_epidemiological_parameters[age][epidemiological_hospitalization_to_ICU][0],float(map_epidemiological_parameters[age][epidemiological_hospitalization_to_ICU][1]),float(map_epidemiological_parameters[age][epidemiological_hospitalization_to_ICU][2]), max_value/nb_step_for_one_day, true)*nb_step_for_one_day;
+		}
+	}
+	
+	//Give the number of steps in ICU
+	float get_time_ICU(int age)
+	{
+		if(map_epidemiological_parameters[age][epidemiological_stay_ICU][0]=epidemiological_fixed)
+		{
+			return float(map_epidemiological_parameters[age][epidemiological_stay_ICU][1])*nb_step_for_one_day;
+		}
+	else
+		{
+			return get_rnd_from_distribution(map_epidemiological_parameters[age][epidemiological_stay_ICU][0],float(map_epidemiological_parameters[age][epidemiological_stay_ICU][1]),float(map_epidemiological_parameters[age][epidemiological_stay_ICU][2]))*nb_step_for_one_day;
+		}
+	}
 	//Give a boolean to say if an individual of a given age would die - MUST BE FIXED (i.e. not following a distribution)
 	bool is_fatal(int age)
 	{

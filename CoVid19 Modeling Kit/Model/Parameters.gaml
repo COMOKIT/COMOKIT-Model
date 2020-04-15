@@ -35,8 +35,8 @@ global {
 
 	//Epidemiological parameters
 	float nb_step_for_one_day <- #day/step; //Used to define the different period used in the model
-	bool load_epidemiological_parameter_from_file <- false; //Allowing parameters being loaded from a csv file 
-	string epidemiological_parameters <- "../Parameters/Epidemiological_parameters.csv"; //File for the parameters
+	bool load_epidemiological_parameter_from_file <- true; //Allowing parameters being loaded from a csv file 
+	string epidemiological_parameters <- "../Parameters/Epidemiological Parameters.csv"; //File for the parameters
 	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
 	bool transmission_human <- true; //Allowing human to human transmission
 	bool transmission_building <- true; //Allowing environment contamination and infection
@@ -62,8 +62,17 @@ global {
 	float parameter_1_onset_to_recovery <- 3.034953;//First parameter of the time from onset to recovery distribution
 	float parameter_2_onset_to_recovery <- 0.34;//Second parameter of the time from onset to recovery distribution
 	float proportion_hospitalization <- 0.2; //Proportion of symptomatic cases hospitalized
-	float proportion_icu <- 0.1; //Proportion of symptomatic cases going through ICU
-	list<string> force_parameters;
+	string distribution_type_onset_to_hospitalization <- "Lognormal";//Type of distribution of the time from onset to hospitalization
+	float parameter_1_onset_to_hospitalization  <- 3.034953;//First parameter of the time from onset to hospitalization distribution
+	float parameter_2_onset_to_hospitalization  <- 0.34;//Second parameter of the time from onset to hospitalization distribution
+	float proportion_icu <- 0.1; //Proportion of hospitalized cases going through ICU
+	string distribution_type_hospitalization_to_ICU <- "Lognormal";//Type of distribution of the time from hospitalization to ICU
+	float parameter_1_hospitalization_to_ICU  <- 3.034953;//First parameter of the time from hospitalization to ICU
+	float parameter_2_hospitalization_to_ICU  <- 0.34;//Second parameter of the time from hospitalization to ICU
+	string distribution_type_stay_ICU <- "Lognormal";//Type of distribution of the time to stay in ICU
+	float parameter_1_stay_ICU <- 3.034953;//First parameter of the time to stay in ICU
+	float parameter_2_stay_ICU <- 0.34;//Second parameter of the time to stay in ICU
+list<string> force_parameters;
 	
 	//Synthetic population parameters
 	string separator <- ";";

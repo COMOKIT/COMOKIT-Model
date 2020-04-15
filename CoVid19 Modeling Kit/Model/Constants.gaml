@@ -25,6 +25,12 @@ global {
 	string tested_positive <- "Positive";
 	string tested_negative <- "Negative";
 	
+	//Hospitalized status of the individual
+	string healthy <- "Healthy";
+	string need_hospitalization <- "Need hospitalization";
+	string need_ICU <- "Need ICU";
+
+	
 	string act_neighbor <- "visiting neighbor";
 	string act_friend <- "visiting friend";
 	string act_home <- "staying at home";
@@ -82,7 +88,10 @@ global {
 	string epidemiological_incubation_period <-"Incubation_period";
 	string epidemiological_serial_interval <- "Serial_interval";
 	string epidemiological_proportion_hospitalization <- "Proportion_hospitalization";
+	string epidemiological_onset_to_hospitalization <- "Onset_to_hospitalization";
 	string epidemiological_proportion_icu <- "Proportion_icu";
+	string epidemiological_hospitalization_to_ICU <- "Hospitalization_to_ICU";
+	string epidemiological_stay_ICU <- "Stay_ICU";
 	string epidemiological_proportion_death_symptomatic <- "Proportion_death_symptomatic";
 	string epidemiological_onset_to_recovery <- "Onset_to_recovery";
 	

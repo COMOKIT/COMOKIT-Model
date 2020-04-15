@@ -35,30 +35,38 @@ species Individual{
 	Building current_place;
 	bool is_outside <- false;
 	
-	bool wearMask;
 	
+	//Epidemiologial attributes
 	string status <- susceptible; //S,E,Ua,Us,A,R,D
 	string report_status <- not_tested; //Not-tested, Negative, Positive
 	bool is_infectious <- define_is_infectious();
 	bool is_infected <- define_is_infected();
 	bool is_asymptomatic <- define_is_asymptomatic();
-	
 	float incubation_time; 
 	float infectious_time;
 	float serial_interval;
+	float contact_rate_human;
+	float basic_viral_release;
+	int tick <- 0;
 	
 	
 	list<map<int, Activity>> agenda_week;
 	Activity last_activity;
-	bool free_rider <- false;
-	int tick <- 0;
 	
+	//Intervention related attributes
 	float reduction_contact_rate_asymptomatic;
 	float reduction_contact_rate_wearing_mask;
-	float basic_viral_release;
-	float contact_rate_human;
+	bool free_rider <- false;
 	float proba_wearing_mask;
+	bool wearMask;
 	
+	//Hospitalization related attributes
+	string hospitalization_status <- healthy;
+	bool is_hospitalized <- false;
+	bool is_ICU <- false;
+	float time_before_hospitalization;
+	float time_before_ICU;
+	float time_stay_ICU;	
 	map<Activity, list<Building>> building_targets;
 	
 	action initialize {
@@ -139,12 +147,16 @@ species Individual{
 		total_number_of_infected <- total_number_of_infected +1;
 		do set_status(exposed);
 		self.incubation_time <- world.get_incubation_time(self.age);
-		self.serial_interval <- world.get_serial_interval(self.age);
+		self.serial_interval <- world.get_serial_interval(self.age,-self.incubation_time);
 		self.infectious_time <- world.get_infectious_time(self.age);
 		
 		
 		if(serial_interval<0)
 		{
+			if(abs(serial_interval)>incubation_time)
+			{
+				serial_interval <- -incubation_time;
+			}
 			self.infectious_time <- max(0,self.infectious_time - self.serial_interval);
 			self.incubation_time <- max(0,self.incubation_time + self.serial_interval);
 		}
@@ -165,6 +177,26 @@ species Individual{
 	
 	bool define_is_asymptomatic {
 		return [asymptomatic,symptomatic_without_symptoms] contains status;
+	}
+	
+	action set_hospitalization_time{
+		if(world.is_hospitalized(self.age))
+		{
+			time_before_hospitalization <- status=symptomatic_without_symptoms? abs(self.serial_interval)+world.get_time_onset_to_hospitalization(self.age,self.infectious_time):world.get_time_onset_to_hospitalization(self.age,self.infectious_time);
+			if(time_before_hospitalization>infectious_time)
+			{
+				time_before_hospitalization <- infectious_time;
+			}
+			if(world.is_ICU(self.age))
+			{
+				time_before_ICU <- world.get_time_hospitalization_to_ICU(self.age, self.time_before_hospitalization);
+				time_stay_ICU <- world.get_time_ICU(self.age);
+				if(time_before_hospitalization+time_before_ICU>=infectious_time)
+				{
+					time_before_hospitalization <- infectious_time-time_before_ICU;
+				}
+			}
+		}
 	}
 	
 	action set_status(string new_status) {
@@ -199,11 +231,11 @@ species Individual{
 			}
 		}
 		if transmission_human {
-				
+			
 			if (is_at_home) {
 				float proba <- contact_rate_human*reduction_factor;
 				ask relatives where (flip(proba) and (each.status = susceptible)) {
-					do defineNewCase;
+		 			do defineNewCase;
 				}
 				if (current_place.nb_households > 1) {
 					
@@ -220,7 +252,7 @@ species Individual{
 				float proba <- contact_rate_human*reduction_factor;
 				ask current_place.individuals where (flip(proba) and (each.status = susceptible))
 		 		{
-		 			do defineNewCase;
+					do defineNewCase;
 		 		}
 		 	}
 		}
@@ -239,40 +271,52 @@ species Individual{
 			{
 				do set_status(symptomatic_without_symptoms);
 				tick <- 0;
+				do set_hospitalization_time;
 			}
 			else
 			{
 				do set_status(symptomatic_with_symptoms);
 				tick <- 0;
+				do set_hospitalization_time;
 			}
 		}
 	}
 	
 	
 
-	reflex becomeSymptomatic when: status=symptomatic_without_symptoms and self.tick>=self.serial_interval {
+	reflex becomeSymptomatic when: status=symptomatic_without_symptoms and self.tick>=abs(self.serial_interval) {
 		do set_status(symptomatic_with_symptoms);
 	}
 	
 	reflex becomesNotInfectious when: ((status=symptomatic_with_symptoms) or (status=asymptomatic))and(tick>=infectious_time)
 	{
-		if(status = symptomatic_with_symptoms)
+		if(self.status = symptomatic_with_symptoms)
 		{
-			if(world.is_fatal(self.age))
+			if(self.hospitalization_status=need_ICU)and(self.is_ICU=false)
 			{
+				write "Dead, ICU needed but not available";
 				do set_status(dead);
 			}
 			else
 			{
-				do set_status(recovered);
+				if(self.hospitalization_status=need_ICU)and(self.is_ICU=true)and(world.is_fatal(self.age))
+				{
+					write "Dead, ICU needed and available but not enough";
+					do set_status(dead);
+				}
+				else
+				{
+					do set_status(recovered);
+					self.hospitalization_status <- healthy;
+				}
 			}
 		}
 		else
 		{
 			do set_status(recovered);
+			self.hospitalization_status <- healthy;
 		}
 	}
-	
 	
 	reflex executeAgenda {
 		Activity act <- agenda_week[current_date.day_of_week - 1][current_date.hour];
@@ -285,9 +329,46 @@ species Individual{
 			}
 		}
 	}
-
+	
+	reflex update_before_hospitalization when: (time_before_hospitalization>0)
+	{
+		if(time_before_hospitalization>0)
+		{
+			time_before_hospitalization <-time_before_hospitalization -1;
+			if(time_before_hospitalization<=0)
+			{
+				hospitalization_status <- need_hospitalization;
+			}
+		}
+	}
+	
+	reflex update_before_ICU when: (hospitalization_status = need_hospitalization) and (time_before_ICU>0)
+	{
+		if(time_before_ICU>0)
+		{
+			time_before_ICU <-time_before_ICU -1;
+			if(time_before_ICU<=0)
+			{
+				self.hospitalization_status <- need_ICU;
+			}
+		}
+	}
+	
+	reflex update_stay_ICU when: (time_before_ICU<=0)and(time_stay_ICU>0)and(self.is_ICU=true)
+	{
+		if(time_stay_ICU>0)
+		{
+			time_stay_ICU <-time_stay_ICU -1;
+			if(time_stay_ICU<=0)
+			{
+				hospitalization_status <- need_hospitalization;
+			}
+		}
+	}
+	
 	reflex updateDiseaseCycle when:(status!=recovered)and(status!=dead) {
 		tick <- tick + 1;
+		
 		if(transmission_building and (not is_infected)and(self.current_place!=nil))
 		{
 			if(flip(current_place.viral_load*successful_contact_rate_building))
@@ -298,8 +379,6 @@ species Individual{
 		do updateWearMask();
 	}
 
-
-	
 	aspect default {
 		if not is_outside {
 			draw shape color: status = exposed ? #pink : ((status = symptomatic_with_symptoms)or(status=asymptomatic)or(status=symptomatic_without_symptoms)? #red : #green);

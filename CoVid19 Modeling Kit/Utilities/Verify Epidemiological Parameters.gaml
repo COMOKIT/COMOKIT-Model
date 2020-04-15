@@ -16,7 +16,15 @@ global
 {
 	geometry shape <- square(1000#m);
 	int max_age <- 90;
-	bool load_epidemiological_parameter_from_file <- false;
+	bool load_epidemiological_parameter_from_file <- true;
+	string epidemiological_parameters <- "../Parameters/Epidemiological Parameters.csv"; //File for the parameters
+	
+	string dataset <- "../Datasets/Vinh Phuc/"; // default
+	file shp_boundary <- file_exists(dataset+"boundary.shp") ? shape_file(dataset+"boundary.shp"):nil;
+	file shp_buildings <- file_exists(dataset+"buildings.shp") ? shape_file(dataset+"buildings.shp"):nil;
+
+	
+	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
 	int nb_infected <- 0 update: length(pseudo_individual where (each.is_infected));
 	int nb_infectious <- 0 update: length(pseudo_individual where (each.is_infectious));
 	int nb_perma_asymptomatic <- 0 update: length(pseudo_individual where (each.status=asymptomatic));
@@ -26,20 +34,12 @@ global
 	int nb_susceptible<- 0 update: length(pseudo_individual where (each.status=susceptible));
 	int nb_recovered<- 0 update: length(pseudo_individual where (each.status=recovered));
 	int nb_dead<- 0 update: length(pseudo_individual where (each.status=dead));
-	list<int> age_categories <- list(0,15,30,45,60,75);
-	map<int,int> nb_cases_incubation;
-	map<int,int> nb_cases_serial_interval;
-	map<int,int> nb_cases_recovery;
-	map<int,int> nb_cases_death_symptomatic;
-	map<int,int> nb_cases_symptomatic;
-	map<int,int> nb_cases;
-	map<int,int> age_distribution;
 	int nb_individual <- 1000;
+	int num_infected_init <- 1;
 	list<int> test <- list(0,1,2,3,4,5,6,7,8,9,10);
 	bool stop <- false;
 	init { 
 		do init_epidemiological_parameters;
-		
 		create pseudo_bound number:1
 		{
 			shape <- world.shape;
@@ -47,13 +47,9 @@ global
 		
 		create pseudo_individual number:nb_individual
 		{
+			is_at_home <- false;
 			age <- rnd(0,90);
-			age_category <- get_age_category();
 			do initialize;
-			ask world 
-			{
-				do add_to_map(age_distribution,myself.age_category,1);
-			}
 			bound <- first(pseudo_bound);
 		}
 		
@@ -67,22 +63,20 @@ global
 		}
 		
 		total_number_individual <- length(pseudo_individual);
+		
+		save ["NAME","AGE","VALUE"] to: "recovery.csv" type:"csv" header:false rewrite:true;
+		save ["NAME","AGE","VALUE"] to: "serial.csv" type:"csv" header:false rewrite:true;
+		save ["NAME","AGE","VALUE"] to: "incubation.csv" type:"csv" header:false rewrite:true;
+		save ["NAME","AGE","VALUE"] to: "hospitalization.csv" type:"csv" header:false rewrite:true;
+		save ["NAME","AGE","VALUE"] to: "ICU.csv" type:"csv" header:false rewrite:true;
+		save ["NAME","AGE","VALUE"] to: "stay_ICU.csv" type:"csv" header:false rewrite:true;
 	}
 	
-	action add_to_map(map<int,int> a_map,int key,int value)
-	{
-		if(a_map.keys contains key)
-		{
-			a_map[key] <- a_map[key]+value;
-		}
-		else
-		{
-			add value to: a_map at: key;
-		}
-	}
+	
 	reflex stop{
-		if(length(pseudo_individual where(each.counted_as_infected))=nb_individual){
+		if(nb_infected=0){
 			stop <- true;
+			do pause;
 		}
 	}
 }
@@ -117,53 +111,52 @@ species pseudo_individual parent:Individual
 	bool counted_as_dead <- false;
 	bool counted_as_symptomatic <- false;
 	
-	int get_age_category
+	action defineNewCase
 	{
-		loop aCategory from:0 to: length(age_categories)-2
+		total_number_of_infected <- total_number_of_infected +1;
+		do set_status(exposed);
+		self.incubation_time <- world.get_incubation_time(self.age);
+		self.serial_interval <- world.get_serial_interval(self.age,-self.incubation_time);
+		self.infectious_time <- world.get_infectious_time(self.age);
+		
+		save [self.name, self.age,self.infectious_time] to: "recovery.csv" type:"csv" header:false rewrite:false;
+		save [self.name, self.age,self.incubation_time] to: "incubation.csv" type:"csv" header:false rewrite:false;
+		
+		if(serial_interval<0)
 		{
-			if(self.age>=age_categories[aCategory] and self.age<age_categories[aCategory+1])
+			if(abs(serial_interval)>incubation_time)
 			{
-				return aCategory;
+				serial_interval <- -incubation_time;
 			}
+			self.infectious_time <- max(0,self.infectious_time - self.serial_interval);
+			self.incubation_time <- max(0,self.incubation_time + self.serial_interval);
 		}
-		return length(age_categories)-1;
+		
+		save [self.name, self.age,self.serial_interval] to: "serial.csv" type:"csv" header:false rewrite:false;
+		self.tick <- 0;
 	}
 	
-	reflex update_counted_infected when:self.is_infected=true and self.counted_as_infected=false
-	{
-		if(counted_as_infected=false)
+	action set_hospitalization_time{
+		if(world.is_hospitalized(self.age))
 		{
-			ask world
+			time_before_hospitalization <- status=symptomatic_without_symptoms? abs(self.serial_interval)+world.get_time_onset_to_hospitalization(self.age,self.infectious_time):world.get_time_onset_to_hospitalization(self.age,self.infectious_time);
+			if(time_before_hospitalization>infectious_time)
 			{
-				do add_to_map(nb_cases,myself.age_category,1);
-				do add_to_map(nb_cases_incubation,round(myself.incubation_time),1);
-				do add_to_map(nb_cases_serial_interval,round(myself.serial_interval),1);
-				do add_to_map(nb_cases_recovery,round(myself.infectious_time),1);
+				time_before_hospitalization <- infectious_time;
 			}
-			counted_as_infected <- true;
-		}
-	}
-	
-	reflex update_symptomatic when: self.status=symptomatic_with_symptoms and self.counted_as_symptomatic=false
-	{
-		if(counted_as_symptomatic=false)
-		{
-			ask world
+			save [self.name, self.age,self.time_before_hospitalization] to: "hospitalization.csv" type:"csv" header:false rewrite:false;
+		
+			if(world.is_ICU(self.age))
 			{
-				do add_to_map(nb_cases_symptomatic,myself.age_category,1);
+				time_before_ICU <- world.get_time_hospitalization_to_ICU(self.age, self.time_before_hospitalization);
+				save [self.name, self.age,self.time_before_ICU] to: "ICU.csv" type:"csv" header:false rewrite:false;
+				time_stay_ICU <- world.get_time_ICU(self.age);
+				save [self.name, self.age,self.time_stay_ICU] to: "stay_ICU.csv" type:"csv" header:false rewrite:false;
+				if(time_before_hospitalization+time_before_ICU>=infectious_time)
+				{
+					time_before_hospitalization <- infectious_time-time_before_ICU;
+				}
 			}
-			counted_as_symptomatic <- true;
-		}
-	}
-	reflex update_counted_dead when:self.status=dead and self.counted_as_dead=false
-	{
-		if(counted_as_dead=false)
-		{
-			ask world
-			{
-				do add_to_map(nb_cases_death_symptomatic,myself.age_category,1);
-			}
-			counted_as_dead <- true;
 		}
 	}
 	
@@ -177,8 +170,6 @@ species pseudo_individual parent:Individual
 			is_outside <- true;
 		}
 	}
-	
-
 	aspect default {
 		if not is_outside {
 			draw shape color: status = exposed ? #pink : ((status = symptomatic_with_symptoms)or(status=asymptomatic)or(status=symptomatic_without_symptoms)? #red : #green);
@@ -213,97 +204,6 @@ experiment check_epidemiology type:gui
 				data "Symptomatic" value: nb_symptomatic color:#silver marker:false;
 				data "Recovered" value: nb_recovered color:#blue marker:false;
 				data "Dead" value: nb_dead color:#white marker:false;
-			}
-		}
-		
-		display "age_distribution"
-		{
-			chart "Age distribution" type:histogram background:#white  color: #black
-			{
-				loop anAgeIndex from:0 to: length(age_categories)-1
-				{
-					if(anAgeIndex=length(age_categories)-1)
-					{
-						data string(">"+age_categories[anAgeIndex]) value:age_distribution[anAgeIndex] color:#grey;
-					}
-					else
-					{
-						data string(""+age_categories[anAgeIndex]+"-"+age_categories[anAgeIndex+1]) value:age_distribution[anAgeIndex]  color:#grey;
-					}
-				}
-			}
-		}
-		
-		display "cases age distribution"
-		{
-			chart "Cases age distribution" type:histogram background:#white  color: #black
-			{
-				loop anAgeIndex from:0 to: length(age_categories)-1
-				{
-					if(anAgeIndex=length(age_categories)-1)
-					{
-						data string(">"+age_categories[anAgeIndex]) value:nb_cases[anAgeIndex] color:#grey;
-					}
-					else
-					{
-						data string(""+age_categories[anAgeIndex]+"-"+age_categories[anAgeIndex+1]) value:nb_cases[anAgeIndex] color:#grey;
-					}
-				}
-			}
-		}
-		
-		display "deaths age distribution"
-		{
-			chart "SIFR age distribution" type:histogram background:#white  color: #black
-			{
-				loop anAgeIndex from:0 to: length(age_categories)-1
-				{
-					if(anAgeIndex=length(age_categories)-1)
-					{
-						data string(">"+age_categories[anAgeIndex]) value:nb_cases_symptomatic[anAgeIndex]>0?nb_cases_death_symptomatic[anAgeIndex]/nb_cases_symptomatic[anAgeIndex]:0 color:#grey;
-					}
-					else
-					{
-						data string(""+age_categories[anAgeIndex]+"-"+age_categories[anAgeIndex+1]) value:nb_cases_symptomatic[anAgeIndex]>0?nb_cases_death_symptomatic[anAgeIndex]/nb_cases_symptomatic[anAgeIndex]:0 color:#grey;
-					}
-				}
-			}
-		}
-		
-		display "incubation period distribution"
-		{
-			chart "incubation period distribution" type:histogram background:#white  color: #black
-			{
-				loop anIncubationTime over: nb_cases_incubation.keys
-				{
-					data string(anIncubationTime) value:nb_cases_incubation[anIncubationTime] color:#grey;
-				}
-			}
-		}
-		
-		display "serial interval distribution"
-		{
-			chart "serial interval distribution" type:histogram background:#white  color: #black
-			{
-				loop aSerialInterval over: nb_cases_serial_interval.keys
-				{
-					if(aSerialInterval = 0)
-					{
-						data "Zero" value:100 color:#red;
-					}
-					data string(aSerialInterval) value:nb_cases_serial_interval contains aSerialInterval?nb_cases_serial_interval[aSerialInterval]:0 color:#grey;
-				}
-			}
-		}
-		
-		display "time recovery distribution"
-		{
-			chart "time recovery distribution" type:histogram background:#white  color: #black
-			{
-				loop aRecovery over: nb_cases_recovery.keys
-				{
-					data string(aRecovery) value:nb_cases_recovery[aRecovery] color:#grey;
-				}
 			}
 		}
 	}

@@ -372,6 +372,9 @@ global {
 				add list(epidemiological_fixed,string(proportion_hospitalization)) to: tmp_map at: epidemiological_proportion_hospitalization;
 				add list(epidemiological_fixed,string(proportion_icu)) to: tmp_map at: epidemiological_proportion_icu;
 				add list(distribution_type_onset_to_recovery,string(parameter_1_onset_to_recovery),string(parameter_2_onset_to_recovery)) to: tmp_map at: epidemiological_onset_to_recovery;
+				add list(distribution_type_onset_to_hospitalization,string(parameter_1_onset_to_hospitalization),string(parameter_2_onset_to_hospitalization)) to: tmp_map at: epidemiological_onset_to_hospitalization;
+				add list(distribution_type_hospitalization_to_ICU,string(parameter_1_hospitalization_to_ICU),string(parameter_2_hospitalization_to_ICU)) to: tmp_map at: epidemiological_hospitalization_to_ICU;
+				add list(distribution_type_stay_ICU,string(parameter_1_stay_ICU),string(parameter_2_stay_ICU)) to: tmp_map at: epidemiological_stay_ICU;
 				add tmp_map to: map_epidemiological_parameters at: aYear;
 			}
 		}
@@ -420,8 +423,17 @@ global {
 				match epidemiological_proportion_hospitalization{
 					list_value <- list<string>(epidemiological_fixed,proportion_hospitalization);
 				}
+				match epidemiological_onset_to_hospitalization{
+					list_value <- list<string>(distribution_type_onset_to_hospitalization,string(parameter_1_onset_to_hospitalization),string(parameter_2_onset_to_hospitalization));
+				}
 				match epidemiological_proportion_icu{
 					list_value <- list<string>(epidemiological_fixed,proportion_icu);
+				}
+				match epidemiological_hospitalization_to_ICU{
+					list_value <- list<string>(distribution_type_hospitalization_to_ICU,string(parameter_1_hospitalization_to_ICU),string(parameter_2_hospitalization_to_ICU));
+				}
+				match epidemiological_stay_ICU{
+					list_value <- list<string>(distribution_type_stay_ICU,string(parameter_1_stay_ICU),string(parameter_2_stay_ICU));
 				}
 				default{
 					
