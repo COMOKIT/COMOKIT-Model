@@ -7,8 +7,9 @@
 
 model CoVid19
 
-import "../Model/Global.gaml"
-import "Abstract Experiment.gaml"
+import "../../Model/Global.gaml"
+import "../Abstract Experiment.gaml"
+
 experiment "Early containment" parent: "Abstract Experiment" autorun: true {
 
 	action _init_ {

@@ -21,7 +21,7 @@ global{
 	int cpt <- 0;
 	
 	// Batch data export
-	string result_folder <- "../batch_output/";
+	string result_folder <- "../../batch_output/";
 	string modelName <- self.host.name;
 	list<string> list_shape_path <- [];
 	

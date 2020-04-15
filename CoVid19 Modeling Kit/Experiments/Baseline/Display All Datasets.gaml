@@ -7,8 +7,8 @@
 
 model CoVid19
 
-import "../Model/Global.gaml"
-import "Abstract Experiment.gaml"
+import "../../Model/Global.gaml"
+import "../Abstract Experiment.gaml"
 
 experiment "Datasets" parent: "Abstract Experiment" autorun: true {
 
@@ -17,7 +17,7 @@ experiment "Datasets" parent: "Abstract Experiment" autorun: true {
 
 		float simulation_seed <- rnd(2000.0);
 		loop s over:  dirs {
-		create simulation with: [dataset::"../Datasets/" + s + "/", seed::simulation_seed] {
+		create simulation with: [dataset::dataset_folder + s + "/", seed::simulation_seed] {
 			name <- s;
 			ask Authority {
 				policy <- create_no_containment_policy();

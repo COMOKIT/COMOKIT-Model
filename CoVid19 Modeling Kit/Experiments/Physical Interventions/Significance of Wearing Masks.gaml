@@ -7,8 +7,9 @@
 
 model CoVid19
 
-import "../Model/Global.gaml"
-import "Abstract Experiment.gaml"
+import "../../Model/Global.gaml"
+import "../Abstract Experiment.gaml"
+
 experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 	
 	float factor <- 0.9;

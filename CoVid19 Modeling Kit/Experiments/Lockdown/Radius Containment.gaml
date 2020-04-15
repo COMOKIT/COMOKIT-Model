@@ -7,8 +7,8 @@
 
 model CoVid19
 
-import "../Model/Global.gaml"
-import "Abstract Experiment.gaml"
+import "../../Model/Global.gaml"
+import "../Abstract Experiment.gaml"
 
 global {
 	list<Individual> sources <- [];

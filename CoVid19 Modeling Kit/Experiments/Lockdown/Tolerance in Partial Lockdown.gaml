@@ -7,8 +7,8 @@
 
 model CoVid19
 
-import "../Model/Global.gaml"
-import "Abstract Experiment.gaml"
+import "../../Model/Global.gaml"
+import "../Abstract Experiment.gaml"
 experiment "Comparison of tolerance levels" parent: "Abstract Experiment" autorun: true {
 	
 	float factor <- 0.1;

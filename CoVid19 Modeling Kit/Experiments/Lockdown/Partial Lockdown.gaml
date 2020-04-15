@@ -7,8 +7,9 @@
 
 model CoVid19
 
-import "../Model/Global.gaml"
-import "Abstract Experiment.gaml"
+import "../../Model/Global.gaml"
+import "../Abstract Experiment.gaml"
+
 experiment "Partial Lock Down" parent: "Abstract Experiment" {
 	
 	float ask_tolerance {
@@ -34,7 +35,10 @@ experiment "Partial Lock Down" parent: "Abstract Experiment" {
 	output {
 		display "Main" parent: default_display {
 		}
-
+		display "Chart" parent: default_white_chart {
+		}
+		display "Cumulative incidence" parent: cumulative_incidence {
+		}
 	}
 
 }

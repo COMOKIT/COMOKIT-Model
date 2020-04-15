@@ -7,10 +7,10 @@
 * Tags: Batch, sensitivity, extract data
 ***/
 
-model Sensitivity
+model ReplicationSensitivity
 
-import "../Model/Global.gaml"
-import "Abstract Batch Experiment.gaml"
+import "../../Model/Global.gaml"
+import "../Abstract Batch Experiment.gaml"
 
 global {
 	/** Insert the global definitions, variables and actions here */

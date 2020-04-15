@@ -5,24 +5,28 @@
 * Tags: covid19,epidemiology
 ***/
 
+
 model CoVid19
 
-import "../Model/Global.gaml"
-import "Abstract Experiment.gaml"
+import "../../Model/Global.gaml"
+import "../Abstract Experiment.gaml"
 
 global {
 
-	action define_policy{  
-			ask Authority {
-			policy <- createPolicy(false, true); 
+	action define_policy{   
+		ask Authority {
+			policy <- create_no_meeting_policy();
 		}
 
 	}
+
 }
 
-experiment "School Off" parent: "Abstract Experiment" {
+experiment "No Meeting No Relaxing" parent: "Abstract Experiment" {
 	output {
 		display "Main" parent: default_display {
 		}
+
 	}
+
 }

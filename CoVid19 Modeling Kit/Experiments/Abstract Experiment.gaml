@@ -14,6 +14,7 @@ global {
 	rgb text_color <- world.color.brighter.brighter;
 	rgb background <- world.color.darker.darker;
 	int number_of_infectious <- 0 update: length(Individual where (each.is_infectious));
+	string dataset_folder <- "../../Datasets/"; // Need to be overwritten if the caller is not in a sub-directory
 
 	init { 
 		do init_epidemiological_parameters;
@@ -39,13 +40,14 @@ experiment "Abstract Experiment" virtual:true{
 		loop while: (index < 0) or (index > length(dirs) - 1) {
 			index <- int(user_input(question, ["Your choice"::1])["Your choice"]) - 1;
 		}
-		return "../Datasets/" + dirs[index] + "/";
+		return dataset_folder + dirs[index] + "/";
 	}
 	
 	
 	list<string> gather_dataset_names {
-		list<string> dirs <- folder("../Datasets").contents  ;
-		dirs <- dirs where folder_exists("../Datasets/" + each);
+		list<string> dirs <- folder(dataset_folder).contents  ;
+		//list<string> dirs <- folder("../Datasets").contents  ;
+		dirs <- dirs where folder_exists(dataset_folder + each);
 		return dirs;
 	}
 	
@@ -60,7 +62,7 @@ experiment "Abstract Experiment" virtual:true{
            		draw world.name  font: default at: { 20#px, 20#px} anchor: #top_left color:text_color;
            		draw ("Day " + int((current_date - starting_date) /  #day)) + " | " + ("Cases " + world.number_of_infectious)  font: default at: { 20#px, 50#px} anchor: #top_left color:text_color;
             }
-			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../Datasets/Default/satellite.png" transparency: 0.5 refresh: false;
+			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): dataset_folder+"Default/satellite.png" transparency: 0.5 refresh: false;
 			
 			species Building {
 				draw shape color:  viral_load>0?rgb(255*viral_load,0,0):#lightgrey empty: true width: 2;
@@ -72,7 +74,7 @@ experiment "Abstract Experiment" virtual:true{
 		}
 		
 		display "default_3D_display" synchronized: false type: opengl background: #black draw_env: false virtual: true {
-			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../Datasets/Default/satellite.png" transparency: 0.5 refresh: false;
+			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): dataset_folder+"Default/satellite.png" transparency: 0.5 refresh: false;
 			
 			species Building transparency: 0.7 refresh:false{
 				draw shape depth: rnd(50) color:  #lightgrey empty: false width: 2;
