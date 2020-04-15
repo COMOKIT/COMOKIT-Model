@@ -59,6 +59,8 @@ species Individual{
 	float contact_rate_human;
 	float proba_wearing_mask;
 	
+	map<Activity, list<Building>> building_targets;
+	
 	action initialize {
 		reduction_contact_rate_asymptomatic <- world.get_reduction_contact_rate_asymptomatic(age);
 		reduction_contact_rate_wearing_mask <- world.get_reduction_contact_rate_wearing_mask(age);

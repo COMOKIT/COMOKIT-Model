@@ -43,19 +43,22 @@ global {
 species Activity {
 	list<string> types_of_building <- [];
 	list<Building> buildings;
-	bool chose_nearest <- false;
-	int nb_candidat <- 3;
 	
 	list<Building> find_target (Individual i) {
 		if flip(proba_go_outside) or  empty(buildings){
 			return [the_outside];
 		}
-		if (chose_nearest) {
-			return [buildings closest_to self];
-		} else {
-			return nb_candidat among buildings;
+		switch choice_of_target_mode {
+			match closest {
+				return [buildings closest_to self];
+			}
+			match gravity {
+				return i.building_targets[self];
+			}
+			match random {
+				return nb_candidates among buildings;
+			}
 		}
-
 	}
 
 	aspect default {
@@ -74,7 +77,7 @@ species visiting_neighbor parent: Activity {
 species visiting_friend parent: Activity {
 	string name <- act_friend;
 	list<Building> find_target (Individual i) {
-		return nb_candidat among (i.friends collect (each.home));
+		return nb_candidates among (i.friends collect (each.home));
 	}
 }
 

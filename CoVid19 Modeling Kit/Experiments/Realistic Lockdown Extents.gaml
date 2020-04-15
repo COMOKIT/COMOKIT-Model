@@ -28,7 +28,6 @@ global{
 	
 	// See Constant.gaml for the list of activities
 	list<string> allowed_activities <- [act_home, act_shopping];
-
 	// 			==================+
 
 	//@Override
@@ -85,7 +84,7 @@ experiment "Unconfined Individuals" parent: "Abstract Experiment" autorun: true 
 	}
 
 	output {
-		layout #split consoles: true editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
 		display "Main" parent: simple_display {
 			graphics title {
 				draw world.name font: default at: {5 #px, 5 #px} color: world.color anchor: #top_left;
@@ -99,7 +98,7 @@ experiment "Unconfined Individuals" parent: "Abstract Experiment" autorun: true 
 
 
 experiment "Realistic Lock Down Batch" parent: "Abstract Batch Experiment" 
-	type: batch repeat: 500 until: (Individual count each.is_infected = 0) and had_infected_Individual 
+	type: batch repeat: 500 keep_seed: true until: ((Individual count each.is_infected = 0) and had_infected_Individual) or world.sim_stop() 
 {
 	method exhaustive;
 	
@@ -112,5 +111,24 @@ experiment "Realistic Lock Down Batch" parent: "Abstract Batch Experiment"
 	//parameter "number of tests" var: number_of_tests_per_step init: 10 min: 0 max: 10000 among: [10, 100];
 	//parameter var:only_untested_ones among: [true, false];
 	//parameter var:only_symptomatic_ones among: [true, false];
+	
+	permanent {
+		
+		display "charts" toolbar: false background: #black{
+			chart "Infected cases" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
+			loop s over: simulations {
+				data s.name value: s.number_of_infectious color: s.color marker: false style: line thickness: 2; 
+				
+			}}
+		}
+		
+		display "Cumulative incidence" toolbar: false background: #black{
+			chart "Cumulative incidence" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
+			loop s over: simulations {
+				data s.name value: s.total_number_of_infected color: s.color marker: false style: line thickness: 2; 
+				
+			}}
+		}
+	}
 
 }
