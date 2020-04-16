@@ -10,6 +10,7 @@ model CoVid19
 import "../../Model/Global.gaml"
 import "../Abstract Experiment.gaml"
 
+
 experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
 	action _init_ {

@@ -71,7 +71,7 @@ global{
 	/***************/
 	
 	// @Override	
-	string shape_path <- "../Datasets/Vinh Phuc/";
+	//string shape_path <- "../Datasets/Vinh Phuc/";
 }
 
 experiment "Abstract Batch Experiment" type:batch repeat: 2 until: world.sim_stop()
