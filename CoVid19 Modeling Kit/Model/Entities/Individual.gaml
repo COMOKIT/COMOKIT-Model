@@ -294,14 +294,12 @@ species Individual{
 		{
 			if(self.hospitalization_status=need_ICU)and(self.is_ICU=false)
 			{
-				write "Dead, ICU needed but not available";
 				do set_status(dead);
 			}
 			else
 			{
 				if(self.hospitalization_status=need_ICU)and(self.is_ICU=true)and(world.is_fatal(self.age))
 				{
-					write "Dead, ICU needed and available but not enough";
 					do set_status(dead);
 				}
 				else
