@@ -75,6 +75,8 @@ global {
 list<string> force_parameters;
 	
 	//Synthetic population parameters
+	
+	// ------ From file
 	string separator <- ";";
 	bool header <- true; // If there is a header or not (must be true for now)
 	string age_var <- "AGE"; // The variable name for "age" Individual attribute
@@ -82,8 +84,9 @@ list<string> force_parameters;
 	string gender_var <- "SEX"; // The variable name for "sex" Individual attribute
 	map<string,int> gender_map <- ["1"::0,"2"::1]; // The mapping of value for gama to translate, if nill then cast to int
 	string householdID <- "parentId"; // The variable for household identification
+	int number_of_individual <- -1; // Control the number of Individual agent in the simulation from the file: if <0 or more than record in the file, takes the exact number of individual in the file
 	
-	//Population parameter
+	// ------ From default Gaml generator
 	float proba_active_family <- (dataset = "../Datasets/Castanet Tolosan/") ? 0.6: 0.95;
 	float number_children_mean <- 2.0;
 	float number_children_std <- 0.5;

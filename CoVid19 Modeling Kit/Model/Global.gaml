@@ -32,7 +32,7 @@ global {
 			create Boundary from: shp_boundary;
 		}
 		if (shp_buildings != nil) {
-			create Building from: shp_buildings with: [type::string(read("type")), nb_households::max(1,int(read("flats")))];
+			create Building from: shp_buildings with: [type::string(read(type_shp_attribute)), nb_households::max(1,int(read(flat_shp_attribute)))];
 		}
 		create outside;
 		the_outside <- first(outside);

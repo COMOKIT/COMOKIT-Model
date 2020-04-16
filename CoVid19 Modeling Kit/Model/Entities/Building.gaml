@@ -11,6 +11,15 @@ model CoVid19
 
 import "Individual.gaml"
 
+global {
+	
+	// TODO : turn it into parameters, more generaly it may require to smoothly init building attribute
+	// from shape_file not using only OSM standard (might be the internal standard though), but relying also on custom bindings
+	// i.e. make it possible to say : the feature "type" in my shapefile is "typo" and "school" are "kindergarden"
+	string type_shp_attribute <- "type";
+	string flat_shp_attribute <- "flats";
+	
+}
 
 species Building {
 

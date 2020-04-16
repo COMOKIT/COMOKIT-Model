@@ -15,11 +15,13 @@ import "Parameters.gaml"
 
 global {
 	
-	action create_population_from_file(map<Building,float> working_places,map<list<int>,list<Building>> schools, list<Building> homes) {
+	action create_population_from_file(map<Building,float> working_places,map<list<int>,list<Building>> schools, list<Building> homes
+	) {
 		
 		map<string,list<Individual>> households <- [];
 		
-		create Individual from:csv_population with:[
+		create Individual from:csv_population number: (number_of_individual <= 0 ? length(csv_population) : number_of_individual)
+		with:[
 			age::convert_age(get(age_var)),
 			sex::convert_gender(get(gender_var)),
 			household_id::string(get(householdID)) replace("\"","")
@@ -46,6 +48,7 @@ global {
 		int min_student_age, int max_student_age
 	) {
 		list<list<Individual>> households;
+		
 		ask homes {
 			loop times: nb_households {
 				list<Individual> household;
