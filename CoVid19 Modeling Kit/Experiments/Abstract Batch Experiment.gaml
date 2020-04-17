@@ -46,9 +46,9 @@ global{
 			// Number of new cases per step per building (or building type) and age category
 			
 			// Number of hospitalizations per step per age category
-			
+			length(Individual where(each.hospitalization_status=need_hospitalization)),
 			// Number of ICU per step per age category
-			
+			length(Individual where(each.hospitalization_status=need_ICU)),
 			// Number of susceptible per step per age category
 			length(Individual where (each.status=susceptible)),
 			// Number of exposed per step per age category
