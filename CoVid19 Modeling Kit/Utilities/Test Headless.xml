@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Experiment_plan>
+	<Simulation id="1" sourcePath="../Experiments/Baseline/NoContainment.gaml" finalStep="50" experiment="No Containment" seed="3"> 
+	  <Outputs>
+	    <Output id="1" name="Main" framerate="5" />
+	  </Outputs>
+	</Simulation>
+</Experiment_plan>
