@@ -66,6 +66,7 @@ global
 		
 		save ["NAME","AGE","VALUE"] to: "recovery.csv" type:"csv" header:false rewrite:true;
 		save ["NAME","AGE","VALUE"] to: "serial.csv" type:"csv" header:false rewrite:true;
+		save ["NAME","AGE","VALUE"] to: "true_serial.csv" type:"csv" header:false rewrite:true;
 		save ["NAME","AGE","VALUE"] to: "incubation.csv" type:"csv" header:false rewrite:true;
 		save ["NAME","AGE","VALUE"] to: "hospitalization.csv" type:"csv" header:false rewrite:true;
 		save ["NAME","AGE","VALUE"] to: "ICU.csv" type:"csv" header:false rewrite:true;
@@ -116,12 +117,13 @@ species pseudo_individual parent:Individual
 		total_number_of_infected <- total_number_of_infected +1;
 		do set_status(exposed);
 		self.incubation_time <- world.get_incubation_time(self.age);
-		self.serial_interval <- world.get_serial_interval(self.age,-self.incubation_time);
+		self.serial_interval <- world.get_serial_interval(self.age);
 		self.infectious_time <- world.get_infectious_time(self.age);
 		
 		save [self.name, self.age,self.infectious_time] to: "recovery.csv" type:"csv" header:false rewrite:false;
 		save [self.name, self.age,self.incubation_time] to: "incubation.csv" type:"csv" header:false rewrite:false;
 		
+		save [self.name, self.age,self.serial_interval] to: "serial.csv" type:"csv" header:false rewrite:false;
 		if(serial_interval<0)
 		{
 			if(abs(serial_interval)>incubation_time)
@@ -132,7 +134,7 @@ species pseudo_individual parent:Individual
 			self.incubation_time <- max(0,self.incubation_time + self.serial_interval);
 		}
 		
-		save [self.name, self.age,self.serial_interval] to: "serial.csv" type:"csv" header:false rewrite:false;
+		save [self.name, self.age,self.serial_interval] to: "true_serial.csv" type:"csv" header:false rewrite:false;
 		self.tick <- 0;
 	}
 	

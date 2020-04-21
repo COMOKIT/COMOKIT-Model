@@ -147,7 +147,7 @@ species Individual{
 		total_number_of_infected <- total_number_of_infected +1;
 		do set_status(exposed);
 		self.incubation_time <- world.get_incubation_time(self.age);
-		self.serial_interval <- world.get_serial_interval(self.age,-self.incubation_time);
+		self.serial_interval <- world.get_serial_interval(self.age);
 		self.infectious_time <- world.get_infectious_time(self.age);
 		
 		
