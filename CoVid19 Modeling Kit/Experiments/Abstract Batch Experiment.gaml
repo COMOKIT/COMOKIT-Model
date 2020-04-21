@@ -74,6 +74,7 @@ global{
 	//string shape_path <- "../Datasets/Vinh Phuc/";
 }
 
+// This experiment is needed to run batch within GAMA
 experiment "Abstract Batch Experiment" type:batch repeat: 2 until: world.sim_stop()
 		 virtual:true  parent: "Abstract Experiment"
 {
@@ -106,3 +107,8 @@ experiment "Abstract Batch Experiment" type:batch repeat: 2 until: world.sim_sto
 		cpt <- cpt +1;
 	}
 }
+
+// This experiment is needed to run headless experiments
+experiment "Abstract Batch Headless" type:gui
+		 virtual:true  parent: "Abstract Experiment"
+{}
