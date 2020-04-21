@@ -17,7 +17,7 @@ global{
 
 	// Parameters for batch experiment
 	bool had_infected_Individual <- false;
-	bool batch_enable_detailedCSV <- true;
+	bool batch_enable_detailedCSV <- false;
 	int cpt <- 0;
 	
 	// Batch data export
