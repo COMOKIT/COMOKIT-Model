@@ -96,7 +96,11 @@ experiment "Unconfined Individuals" parent: "Abstract Experiment" autorun: true 
 
 }
 
-
+/*
+ *
+ *	HEADLESS/BATCH !
+ *
+ */
 experiment "Realistic Lock Down Batch" parent: "Abstract Batch Experiment" 
 	type: batch repeat: 500 keep_seed: true until: ((Individual count each.is_infected = 0) and had_infected_Individual) or world.sim_stop() 
 {
@@ -131,4 +135,10 @@ experiment "Realistic Lock Down Batch" parent: "Abstract Batch Experiment"
 		}
 	}
 
+}
+
+experiment "Unconfined Individuals Headless" parent: "Abstract Batch Headless" {
+	parameter "Percentage of people allowed" var: percentage_of_people_allowed init: 0.0 min: 0.0 max: 0.5 step: 0.05;
+	parameter "Nbr of cases needed to start the policy" var:nb_cases init:0 min:0 max: 100 step: 5;
+	parameter "Nbr of days of lockdown" var:nb_days init: 7 min: 7 max: 182 step: 7; // Max ~6months	
 }
