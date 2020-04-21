@@ -159,40 +159,40 @@ global {
 				}
 			}
 		}
-		//<- cell_google where (
+		if empty(cells) {
+			write "No building found in the google map image"; 
+		} else {
+			geometry geom <- union(cells collect (each.shape + tolerance_dist));
 			
-			
-		//);
-		geometry geom <- union(cells collect (each.shape + tolerance_dist));
-		
-		list<geometry> gs <- geom.geometries collect clean(each);
-		gs <- gs where (not empty(Boundary overlapping each));
-		ask Building {
-			list<geometry> ggs <- gs overlapping self;
-			gs <- gs - ggs;
-		}
-		if (buffer_coeff > 0) {
-			float buffer_dist <- first(cell_google).shape.width * buffer_coeff;
-			gs <- gs collect (each + buffer_dist);
-		}
-		if simplication_dist > 0 {
-			gs <- gs collect (each simplification simplication_dist);
-		}
-		if (convex_hull_coeff > 0.0) {
-			list<geometry> gs2;
-			loop g over: gs {
-				geometry ch <- convex_hull(g);
-				if (g.area/ch.area > (1 - convex_hull_coeff)) {
-					gs2 << ch;
-				} else {
-					gs2 << g;
-				}
+			list<geometry> gs <- geom.geometries collect clean(each);
+			gs <- gs where (not empty(Boundary overlapping each));
+			ask Building {
+				list<geometry> ggs <- gs overlapping self;
+				gs <- gs - ggs;
 			}
-			gs <- gs2;
+			if (buffer_coeff > 0) {
+				float buffer_dist <- first(cell_google).shape.width * buffer_coeff;
+				gs <- gs collect (each + buffer_dist);
+			}
+			if simplication_dist > 0 {
+				gs <- gs collect (each simplification simplication_dist);
+			}
+			if (convex_hull_coeff > 0.0) {
+				list<geometry> gs2;
+				loop g over: gs {
+					geometry ch <- convex_hull(g);
+					if (g.area/ch.area > (1 - convex_hull_coeff)) {
+						gs2 << ch;
+					} else {
+						gs2 << g;
+					}
+				}
+				gs <- gs2;
+			}
+			gs <- gs where (each.area >= min_area_buildings);
+			
+			create Building from: gs with: [type::""];
 		}
-		gs <- gs where (each.area >= min_area_buildings);
-		
-		create Building from: gs with: [type::""];
 		
 		loop type over: google_map_type.keys {
 			rgb col <- google_map_type[type];

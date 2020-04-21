@@ -83,6 +83,23 @@ species PositiveAtHome parent: AbstractPolicy {
 }
 
 
+/**
+ * A lockdown policy that forbids people tested positive and its family to move away from home
+*/
+species FamilyOfPositiveAtHome parent: AbstractPolicy {
+	
+	action apply {
+	// Nothing to do
+	}
+
+	bool is_allowed (Individual i, Activity activity) {
+		if( ((i.relatives + i) one_matches (each.report_status = tested_positive)) and activity.name != act_home) {
+			return false;
+		}
+		return true;
+	}
+
+}
 
 /**
  * This policy represents a list of policies. */
@@ -146,6 +163,30 @@ species PartialPolicy parent: ForwardingPolicy {
 		return allowed;
 	}
 
+}
+
+/**
+ * A policy that restricts the application of another policy to a given geographical area. If outside, it allows everything
+ * The area is recomputed everyday, given the infected people. 
+ */
+
+species DynamicSpatialPolicy parent: CompoundPolicy {
+	AbstractPolicy target;
+	float radius ;
+	
+	action apply {
+		if(every(1#day)) {
+			list<Individual> infecteds <- Individual where(each.report_status = tested_positive);
+			write length(infecteds);
+			ask targets {do die;}
+			targets <- [];
+			loop i over: infecteds {
+				create SpatialPolicy with: [target::target, application_area::(circle(radius) at_location i.location)] returns: result;
+								
+				targets << first(result);
+			}
+		}
+	}
 }
 
 /**
