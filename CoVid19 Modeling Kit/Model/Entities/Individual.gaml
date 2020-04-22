@@ -52,7 +52,8 @@ species Individual{
 	int tick <- 0;
 	
 	
-	list<map<int, Activity>> agenda_week;
+	list<map<int, pair<Activity,list<Individual>>>> agenda_week;
+	list<Individual> activity_fellows;
 	Activity last_activity;
 	
 	//Intervention related attributes
@@ -82,8 +83,6 @@ species Individual{
 			friends <-  friends + (nb_friends among Individual);
 			friends <- friends - self - relatives;
 		}
-		
-		
  	}
 	
 	action enter_building(Building b) {
@@ -327,13 +326,13 @@ species Individual{
 	}
 	
 	reflex executeAgenda {
-		Activity act <- agenda_week[current_date.day_of_week - 1][current_date.hour];
-		if (act != nil) {
-			last_activity <- act;
-			if (Authority[0].allows(self, act)) {
-				do enter_building(any(act.find_target(self)));
+		pair<Activity,list<Individual>> act <- agenda_week[current_date.day_of_week - 1][current_date.hour];
+		if (act.key != nil) {
+			last_activity <- act.key;
+			if (Authority[0].allows(self, act.key)) {
+				activity_fellows <- act.value;
+				do enter_building(any(last_activity.find_target(self)));
 				is_outside <- current_place = the_outside;
-				
 			}
 		}
 	}
