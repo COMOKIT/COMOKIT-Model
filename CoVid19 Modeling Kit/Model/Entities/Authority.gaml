@@ -10,8 +10,10 @@
 model CoVid19
 
 import "Policy.gaml"
+import "ActivitiesMonitor.gaml"
 
 global {
+
 	action create_authority {
 		write "Create an authority ";
 		create Authority;
@@ -22,9 +24,13 @@ global {
 	action define_policy{}
  
 }
-/* Describes the main authority in charge of the health policies to implement */
+
+/* 
+ * Describes the main authority in charge of the health policies to implement
+ */
 species Authority {
 	AbstractPolicy policy <- create_no_containment_policy(); // default
+	ActivitiesMonitor act_monitor;
 	
 	reflex apply_policy {
 		ask policy {
@@ -32,11 +38,25 @@ species Authority {
 		}
 	}
 
-	bool allows (Individual i, Activity activity) { 
-		return  policy.is_allowed(i,activity);
+	reflex init_stats when: every(#day) and (act_monitor != nil) {
+		ask act_monitor { do restart_day;}
 	}
 	
-	/**
+	action update_monitor(Activity act, bool allowed) {
+		if(act_monitor != nil){
+			ask act_monitor { 
+				do update_stat(act, allowed);
+			}			
+		} 
+	}
+
+	bool allows (Individual i, Activity activity) { 
+		bool allowed <- policy.is_allowed(i,activity);
+		do update_monitor(activity, allowed);
+		return allowed ;
+	}
+	
+/**
  * Set of constructor functions used to build policies
  */
 	
@@ -85,6 +105,11 @@ species Authority {
 		return first(result);
 	}
 	
+	FamilyOfPositiveAtHome create_family_of_positive_at_home_policy {
+		create FamilyOfPositiveAtHome returns: result;				
+		return first(result);
+	}
+	
 	ActivitiesListingPolicy create_lockdown_policy_except(list<string> allowed) {
 		create ActivitiesListingPolicy returns: result {
 			allowed_activities <- Activities.keys as_map (each::allowed contains each);
@@ -96,7 +121,6 @@ species Authority {
 		create AllowedIndividualsPolicy with: [target::a, percentage_of_essential_workers::p]  returns: result;
 		return (first(result));
 	}
-
 
 	
 	SpatialPolicy create_lockdown_policy_in_radius(point loc, float radius){		
