@@ -20,6 +20,8 @@ global
 	int total_number_of_infected <- 0;
 	int total_number_reported <- 0;
 	int total_number_individual <- 0;
+	
+	map<string, int> building_infections;
 }
 
 species Individual{
@@ -150,6 +152,14 @@ species Individual{
 		self.serial_interval <- world.get_serial_interval(self.age);
 		self.infectious_time <- world.get_infectious_time(self.age);
 		
+		if(building_infections.keys contains(current_place.type))
+		{
+			building_infections[current_place.type] <- building_infections[current_place.type] +1;
+		}
+		else
+		{
+			add 1 to: building_infections at: current_place.type;
+		}
 		
 		if(serial_interval<0)
 		{

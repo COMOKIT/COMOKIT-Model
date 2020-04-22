@@ -32,6 +32,7 @@ global{
 		if (idSimulation = -1){
 			idSimulation <- int(self);
 		}
+		
 	}
 	/***************/
 	/* SAVING DATA */
@@ -46,10 +47,15 @@ global{
 	
 	// Save data at every cycle on the simulation
 	reflex observerPattern when: batch_enable_detailedCSV {
+		if(cycle=0)
+		{
+			save building_infections.keys type:"csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_building.csv" rewrite:true;
+		}
+		save building_infections.values type:"csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_building.csv" rewrite:false;
+			
 		loop i from: ageCategory to: 100 step: ageCategory{
 			// Get corresponding age category
 			list<Individual> subIndividual <- Individual where(each.age < i and each.age >= (i - ageCategory));
-			
 			save [
 				// Number of new cases (incidence) per step per age category
 				length(subIndividual where (each.is_infected)),
