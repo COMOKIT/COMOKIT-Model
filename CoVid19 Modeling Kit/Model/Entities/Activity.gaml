@@ -44,19 +44,25 @@ species Activity {
 	list<string> types_of_building <- [];
 	list<Building> buildings;
 	
-	list<Building> find_target (Individual i) {
+	map<Building,list<Individual>> find_target (Individual i) {
 		if flip(proba_go_outside) or  empty(buildings){
-			return [the_outside];
+			return [the_outside::[]];
+		}
+		if not empty(i.activity_fellows ) {
+			Individual fellow <- i.activity_fellows first_with (each.last_activity = self);
+			if (fellow!= nil) {
+				return [fellow.current_place::[]];
+			} 
 		}
 		switch choice_of_target_mode {
 			match closest {
-				return [buildings closest_to self];
+				return [buildings closest_to self::[]];
 			}
 			match gravity {
-				return i.building_targets[self];
+				return i.building_targets[self] as_map (each::[]);
 			}
 			match random {
-				return nb_candidates among buildings;
+				return (nb_candidates among buildings) as_map(each::[]);
 			}
 		}
 	}
@@ -69,37 +75,46 @@ species Activity {
 
 species visiting_neighbor parent: Activity {
 	string name <- act_neighbor;
-	list<Building> find_target (Individual i) {
-		return i.current_place.get_neighbors();
+	map<Building,list<Individual>> find_target (Individual i) {
+		map<Building,list<Individual>> targets;
+		loop neigh over: i.current_place.get_neighbors() where not empty(each.individuals) {
+			Individual i <- one_of(neigh.individuals);
+			targets[neigh] <- i.relatives + i;
+		}
+		return targets;
 	}
 }
 
 species visiting_friend parent: Activity {
 	string name <- act_friend;
-	list<Building> find_target (Individual i) {
-		return nb_candidates among (i.friends collect (each.home));
+	map<Building,list<Individual>> find_target (Individual i) {
+		map<Building,list<Individual>> targets;
+		loop friend over: (i.friends where each.is_at_home) {
+			targets[i.home] <- i.relatives + i;
+		}
+		return targets;
 	}
 }
 
 species working parent: Activity {
 	string name <- act_working;
-	list<Building> find_target (Individual i) {
-		return [i.working_place];
+	map<Building,list<Individual>> find_target (Individual i) {
+		return [i.working_place::i.colleagues];
 	}
 
 }
 
 species studying parent: Activity {
 	string name <- act_studying;
-	list<Building> find_target (Individual i) {
-		return [i.school];
+	map<Building,list<Individual>> find_target (Individual i) {
+		return [i.school::i.colleagues];
 	}
 
 }
 
 species staying_home parent: Activity {
 	string name <- act_home;
-	list<Building> find_target (Individual i) {
-		return [i.home];
+	map<Building,list<Individual>> find_target (Individual i) {
+		return [i.home::i.relatives];
 	}
 }

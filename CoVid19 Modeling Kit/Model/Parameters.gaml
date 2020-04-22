@@ -42,7 +42,8 @@ global {
 	bool transmission_building <- true; //Allowing environment contamination and infection
 	float successful_contact_rate_human <- 2.5 * 1/(14.69973);//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
 	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period
-	float reduction_coeff_other_household <- 0.01; //reduction of the contact rate for individuals belonging to different households leaving in the same building
+	float reduction_coeff_all_buildings_inhabitants <- 0.01; //reduction of the contact rate for individuals belonging to different households leaving in the same building
+	float reduction_coeff_all_buildings_individuals <- 0.05; //reduction of the contact rate for individuals belonging to different households leaving in the same building
 	float reduction_contact_rate_asymptomatic <- 0.55; //Factor of the reduction for successful contact rate for  human to human transmission for asymptomatic individual
 	float proportion_asymptomatic <- 0.3; //Proportion of asymptomatic infections
 	float proportion_dead_symptomatic <- 0.01; //Proportion of symptomatic infections dying
@@ -72,7 +73,7 @@ global {
 	string distribution_type_stay_ICU <- "Lognormal";//Type of distribution of the time to stay in ICU
 	float parameter_1_stay_ICU <- 3.034953;//First parameter of the time to stay in ICU
 	float parameter_2_stay_ICU <- 0.34;//Second parameter of the time to stay in ICU
-list<string> force_parameters;
+	list<string> force_parameters;
 	
 	//Synthetic population parameters
 	
@@ -97,6 +98,10 @@ list<string> force_parameters;
 	int max_age <- 100; //max age of individual
 	float nb_friends_mean <- 2.0; //Mean number of friends living in the considered area
 	float nb_friends_std <- 1.0;//Stand deviation of the number of friends living in the considered area
+	float nb_classmates_mean <- 10.0; //Mean number of classmates with which an Individual will have close contact
+	float nb_classmates_std <- 5.0;//Stand deviation of the number of classmates with which an Individual will have close contact
+	float nb_work_colleagues_mean <- 5.0; //Mean number of work colleagures with which an Individual will have close contact
+	float nb_work_colleagues_std <- 3.0;//Stand deviation of the number of work colleagures with which an Individual will have close contact
 	
 	list<string> possible_homes <- remove_duplicates(OSM_home + ["", "home", "hostel"]);  //building type that will be considered as home
 	
@@ -120,11 +125,13 @@ list<string> force_parameters;
 	list<int> non_working_days <- [7]; //list of non working days (1 = monday; 7 = sunday)
 	list<list<int>> work_hours <- [[6,8], [15,18]]; //working hours: [[interval for beginning work],[interval for ending work]]
 	list<list<int>> school_hours <- [[7,9], [15,18]]; //studying hours: [[interval for beginning study],[interval for ending study]]
-	list<int> first_act_old_hours <- [7,10]; //for old people, interval for the beginning of the first activity 
+	list<int> first_act_hour_non_working <- [7,10]; //for non working day, interval for the beginning of the first activity 
 	list<int> lunch_hours <- [11,13]; //interval for the begining of the lunch time
 	int max_duration_lunch <- 2; // max duration (in hour) of the lunch time
 	int max_duration_default <- 3; // default duration (in hour) of activities
 	int min_age_for_evening_act <- 13; //min age of individual to have an activity after school
+	float nb_activity_fellows_mean <- 2.0;
+	float nb_activity_fellows_std <- 1.0;
 	
 	int max_num_activity_for_non_working_day <- 4; //max number of activity for non working day
 	int max_num_activity_for_old_people <- 3; //max number of activity for old people ([0,max_num_activity_for_old_people])

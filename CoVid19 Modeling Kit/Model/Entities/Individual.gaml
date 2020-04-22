@@ -34,6 +34,7 @@ species Individual{
 	Building working_place;
 	list<Individual> relatives;
 	list<Individual> friends;
+	list<Individual> colleagues;
 	Building current_place;
 	bool is_outside <- false;
 	
@@ -72,7 +73,7 @@ species Individual{
 	float time_stay_ICU;	
 	map<Activity, list<Building>> building_targets;
 	
-	action initialize {
+	action initialize(map<Building,list<Individual>> working_places, map<Building,list<Individual>> schools) {
 		reduction_contact_rate_asymptomatic <- world.get_reduction_contact_rate_asymptomatic(age);
 		reduction_contact_rate_wearing_mask <- world.get_reduction_contact_rate_wearing_mask(age);
 		basic_viral_release <- world.get_basic_viral_release(age);
@@ -82,6 +83,18 @@ species Individual{
 		loop while: length(friends) < nb_friends {
 			friends <-  friends + (nb_friends among Individual);
 			friends <- friends - self - relatives;
+		}
+		if (working_place != nil) {
+			int nb_colleagues <- max(0,int(gauss(nb_classmates_mean,nb_classmates_std)));
+			if nb_colleagues > 0 {
+				colleagues <- nb_colleagues among (working_places[working_place] - self);
+			}
+		} 
+		if (school != nil) {
+			int nb_classmates <- max(0,int(gauss(nb_classmates_mean,nb_classmates_std)));
+			if nb_classmates > 0 {
+				colleagues <- nb_classmates among (schools[school] - self);
+			}
 		}
  	}
 	
@@ -240,17 +253,14 @@ species Individual{
 			}
 		}
 		if transmission_human {
-			
 			if (is_at_home) {
 				float proba <- contact_rate_human*reduction_factor;
-				ask relatives where (flip(proba) and (each.status = susceptible)) {
+				ask relatives where (each.is_at_home and flip(proba) and (each.status = susceptible)) {
 		 			do defineNewCase;
 				}
 				if (current_place.nb_households > 1) {
-					
-					proba <- proba * reduction_coeff_other_household;
-					
-					ask current_place.individuals where (flip(proba) and (each.status = susceptible) and not (self in relatives))
+					proba <- proba * reduction_coeff_all_buildings_inhabitants;
+					ask current_place.individuals where (flip(proba) and (each.status = susceptible))
 			 		{
 			 			do defineNewCase;
 			 		}
@@ -259,6 +269,11 @@ species Individual{
 			}
 			else {
 				float proba <- contact_rate_human*reduction_factor;
+				ask activity_fellows where (flip(proba) and (each.status = susceptible) and (each.current_place = current_place)){
+					do defineNewCase;
+				}
+				
+				proba <- proba * reduction_coeff_all_buildings_individuals;
 				ask current_place.individuals where (flip(proba) and (each.status = susceptible))
 		 		{
 					do defineNewCase;
@@ -328,11 +343,17 @@ species Individual{
 	reflex executeAgenda {
 		pair<Activity,list<Individual>> act <- agenda_week[current_date.day_of_week - 1][current_date.hour];
 		if (act.key != nil) {
-			last_activity <- act.key;
 			if (Authority[0].allows(self, act.key)) {
 				activity_fellows <- act.value;
-				do enter_building(any(last_activity.find_target(self)));
-				is_outside <- current_place = the_outside;
+				map<Building,list<Individual>> bds_ind <-  act.key.find_target(self);
+				if not empty(bds_ind) {
+					Building bd <- any(bds_ind.keys);
+					list<Individual> inds <- bds_ind[bd];
+					activity_fellows <- activity_fellows + inds;
+					last_activity <- act.key;
+					do enter_building(bd);
+					is_outside <- current_place = the_outside;
+				}
 			}
 		}
 	}
