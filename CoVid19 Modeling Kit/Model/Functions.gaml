@@ -98,7 +98,7 @@ global
 	}
 	
 	//Time between onset of a primary case of a given age and onset of secondary case 
-	float get_serial_interval(int age, float min_value)
+	float get_serial_interval(int age)
 	{
 		if(map_epidemiological_parameters[age][epidemiological_serial_interval][0]=epidemiological_fixed)
 		{
@@ -106,7 +106,7 @@ global
 		}
 		else
 		{
-			return get_rnd_from_distribution_with_threshold(map_epidemiological_parameters[age][epidemiological_serial_interval][0],float(map_epidemiological_parameters[age][epidemiological_serial_interval][1]),float(map_epidemiological_parameters[age][epidemiological_serial_interval][2]),min_value/nb_step_for_one_day,false)*nb_step_for_one_day;
+			return get_rnd_from_distribution(map_epidemiological_parameters[age][epidemiological_serial_interval][0],float(map_epidemiological_parameters[age][epidemiological_serial_interval][1]),float(map_epidemiological_parameters[age][epidemiological_serial_interval][2]))*nb_step_for_one_day;
 		}
 	}
 	
