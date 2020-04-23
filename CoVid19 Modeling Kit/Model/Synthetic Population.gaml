@@ -1,7 +1,7 @@
 /***
 * Part of the GAMA CoVid19 Modeling Kit
-* see http://gama-platform.org/covid19
-* Author: Benoit Gaudou, Kevin Chapuis
+* see http://gama-platform.org/covid19 </br>
+* Author: Benoit Gaudou, Kevin Chapuis </br>
 * Tags: covid19,epidemiology
 ***/
 
@@ -12,9 +12,26 @@ model CoVid19
 import "Entities/Building.gaml"
 import "Parameters.gaml"
 
-
+/*
+ * All functions to initialize demographic attribute of the agent. It feature two type of initialization:
+ * - use a file with #create_population_from_file to create a synthetic population from given attributes
+ * - use the default algorithm provided in the toolkit: see #create_population for more info
+ */
 global {
 	
+	/*
+	 * Uses the provided population.csv (in Datasets folder) to initialize the population of agent with. The required
+	 * arguments are: </br>
+	 * - age COMOKIT variable : age_var in Parameters.gaml </br>
+	 * - sex COMOKIT variable : gender_var in Parameters.gaml </br>
+	 * - household_id COMOKIT variable : householdIF in Parameters.gaml </p>
+	 * 
+	 * It might also require to define a way to convert values; e.g. gender can be coded using integers, so you will have to
+	 * translate encoding into the proper variable, i.e. 0 for male and 1 for female in for COMOKIT. You can do so using,
+	 * age_map and gender_map in Parameters.gaml </p>
+	 * 
+	 * The algorithm also bound agent with working places, schools and homes using related methods in Global.gaml #assign_school_working_place </p>
+	 */
 	action create_population_from_file(map<Building,float> working_places,map<list<int>,list<Building>> schools, list<Building> homes
 	) {
 		
@@ -44,6 +61,21 @@ global {
 		
 	}
 	
+	/*
+	 * The default algorithm to create a population of agent from simple rules. </p>
+	 * 
+	 * The <b> arguments </b> includes: </br> 
+	 * - min_student_age :: minimum age for lone individual </br>
+	 * - max_student_age :: age that makes the separation between adults and children </p>
+	 * 
+	 * The <b> parameter </b> to adjust the process: </br>
+	 * - nb_households :: the number of household per building (can be set using feature 'flat' from the shapefile of buildings) </br>
+	 * - proba_active_family :: the probability to build a father+mother classical household rather than a lonely individual </br>
+	 * - retirement_age :: the age that makes the separation between active and retired adults (will have a great impact on the agenda) </br>
+	 * - number_children_max, number_children_mean, number_children_std :: assign a given number of children between 0 and max using gaussian mean and std </br>
+	 * - proba_grandfather, proba_grandmother :: assign grand mother/father to the household
+	 * </p>
+	 */
 	action create_population(map<Building,float> working_places,map<list<int>,list<Building>> schools, list<Building> homes, 
 		int min_student_age, int max_student_age
 	) {
