@@ -85,7 +85,7 @@ species Individual{
 			friends <- friends - self - relatives;
 		}
 		if (working_place != nil) {
-			int nb_colleagues <- max(0,int(gauss(nb_classmates_mean,nb_classmates_std)));
+			int nb_colleagues <- max(0,int(gauss(nb_work_colleagues_mean,nb_work_colleagues_std)));
 			if nb_colleagues > 0 {
 				colleagues <- nb_colleagues among (working_places[working_place] - self);
 			}
