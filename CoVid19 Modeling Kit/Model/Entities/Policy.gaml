@@ -13,7 +13,8 @@ import "Individual.gaml"
 
 
 species AbstractPolicy virtual: true {
-
+	int max_number_individual_group <- int(#max_int);
+	
 	bool is_active {
 		return true;
 	}
@@ -27,6 +28,13 @@ species AbstractPolicy virtual: true {
 	 * This action returns whether or not a given Individual is allowed to undertake a given Activity
 	 */
 	bool is_allowed (Individual i, Activity activity) virtual: true;
+	
+	/**
+	 * This action returns the max number of Individual is allowed to undertake a given Activity in group
+	 */
+	int max_allowed (Individual i, Activity activity) {
+		return max_number_individual_group;
+	}
 }
 
 
@@ -59,8 +67,9 @@ species ActivitiesListingPolicy parent: AbstractPolicy {
 		} else {
 			return true;
 		}
-
 	}
+	
+	
 
 }
 

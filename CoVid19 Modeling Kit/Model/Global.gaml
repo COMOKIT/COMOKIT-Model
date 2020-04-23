@@ -72,8 +72,24 @@ global {
 		
 		map<Building, list<Individual>> WP<- (Individual where (each.working_place != nil)) group_by each.working_place;
 		map<Building, list<Individual>> Sc<- (Individual where (each.school != nil)) group_by each.school;
+		map<int,list<Individual>> ind_per_age_cat;
+		ind_per_age_cat[min_age_for_evening_act] <- [];
+		ind_per_age_cat[min_student_age] <- [];
+		ind_per_age_cat[max_student_age] <- [];
+		ind_per_age_cat[retirement_age] <- [];
+		ind_per_age_cat[max_age] <- [];
+		
+		loop p over: Individual {
+			loop cat over: ind_per_age_cat.keys {
+				if p.age < cat {
+					ind_per_age_cat[cat]<<p;
+					break;
+				}  
+			}
+		}
+		
 		ask Individual {
-			do initialize(WP, Sc);
+			do initialize(WP, Sc,ind_per_age_cat);
 		}
 		
 		do define_agenda(min_student_age, max_student_age);	
@@ -101,7 +117,7 @@ global {
 			last_activity <-first(staying_home);
 			do enter_building(home);
 			if (age >= min_student_age) {
-				if (age <= max_student_age) {
+				if (age < max_student_age) {
 					loop l over: schools.keys {
 						if (age >= min(l) and age <= max(l)) {
 							if (flip(proba_go_outside) or empty(schools[l])) {
@@ -127,7 +143,7 @@ global {
 							}
 						}
 					}
-				} else if (age <= retirement_age) { 
+				} else if (age < retirement_age) { 
 					if flip(work_at_home_unemployed) {
 						working_place <- home;
 					}
@@ -175,13 +191,13 @@ global {
 			loop times: 7 {agenda_week<<[];}
 		}
 		// Initialization for students or workers
-		ask Individual where ((each.age <= retirement_age) and (each.age >= min_student_age))  {
+		ask Individual where ((each.age < retirement_age) and (each.age >= min_student_age))  {
 			// Students and workers have an agenda similar for 6 days of the week ...
 			loop i over: ([1,2,3,4,5,6,7] - non_working_days) {
 				map<int,pair<Activity,list<Individual>>> agenda_day <- agenda_week[i - 1];
 				list<Activity> possible_activities <- empty(friends) ? possible_activities_without_rel : possible_activities_tot;
 				int current_hour;
-				if (age <= max_student_age) {
+				if (age < max_student_age) {
 					current_hour <- rnd(school_hours[0][0],school_hours[0][1]);
 					agenda_day[current_hour] <- studying[0]::[];
 				} else {
@@ -204,7 +220,7 @@ global {
 							loop ind over: inds {
 								map<int,pair<Activity,list<Individual>>> agenda_day_ind <- ind.agenda_week[i - 1];
 								agenda_day_ind[current_hour] <- eating_act::(inds - ind + self);
-								if (ind.age <= max_student_age) {
+								if (ind.age < max_student_age) {
 									agenda_day_ind[current_hour + dur] <- studying[0]::[];
 								} else {
 									agenda_day_ind[current_hour + dur] <- working[0]::[];
@@ -215,14 +231,14 @@ global {
 							agenda_day[current_hour] <- staying_home[0]::[];
 						}
 						current_hour <- current_hour + dur;
-						if (age <= max_student_age) {
+						if (age < max_student_age) {
 							agenda_day[current_hour] <- studying[0]::[];
 						} else {
 							agenda_day[current_hour] <- working[0]::[];
 						}
 					}
 				}
-				if (age <= max_student_age) {
+				if (age < max_student_age) {
 					current_hour <- rnd(school_hours[1][0],school_hours[1][1]);
 				} else {
 					current_hour <-rnd(work_hours[1][0],work_hours[1][1]);
@@ -242,11 +258,18 @@ global {
 					int current_hour <- min(23,current_hour + rnd(1,max_duration_default));
 					int end_hour <- min(23,current_hour + rnd(1,max_duration_default));
 					if (species(act) = Activity) {
-						list<Individual> inds <- max(0,gauss(nb_activity_fellows_mean,nb_activity_fellows_std)) among friends;
+						list<Individual> cands <- friends where ((each.agenda_week[i - 1][current_hour]) = nil);
+						list<Individual> inds <- max(0,gauss(nb_activity_fellows_mean,nb_activity_fellows_std)) among cands;
 						loop ind over: inds {
 							map<int,pair<Activity,list<Individual>>> agenda_day_ind <- ind.agenda_week[i - 1];
 							agenda_day_ind[current_hour] <- act::(inds - ind + self);
-							agenda_day[end_hour] <- staying_home[0]::[];
+							bool return_home <- true;
+							loop h from: current_hour + 1 to: end_hour {
+								return_home <- agenda_day_ind[h] = nil;
+								if (not return_home) {break;}
+							}
+							if (return_home) {agenda_day_ind[end_hour] <- staying_home[0]::[];}
+							
 						}
 						agenda_day[current_hour] <- act::inds;
 					} else {
@@ -265,7 +288,7 @@ global {
 		}
 		
 		// Initialization for retired individuals
-		loop ind over: Individual where (each.age > retirement_age) {
+		loop ind over: Individual where (each.age >= retirement_age) {
 			loop i from:1 to: 7 {
 				do manag_day_off(ind,i,possible_activities_without_rel,possible_activities_tot);
 			}
@@ -337,11 +360,20 @@ global {
 				}
 				Activity act <- any(possible_activities);
 				if (species(act) = Activity) {
-					list<Individual> inds <- max(0,gauss(nb_activity_fellows_mean,nb_activity_fellows_std)) among current_ind.friends;
+					
+					list<Individual> cands <- current_ind.friends where ((each.agenda_week[day - 1][current_hour]) = nil);
+					list<Individual> inds <- max(0,gauss(nb_activity_fellows_mean,nb_activity_fellows_std)) among cands;
+					//write  current_ind.name + " : " + current_ind.age + " nb friends: " + length(current_ind.friends) + " inds: "+ length(inds) + " friend age: "+ (current_ind.friends collect each.age);
 					loop ind over: inds {
 						map<int,pair<Activity,list<Individual>>> agenda_day_ind <- ind.agenda_week[day - 1];
 						agenda_day_ind[current_hour] <- act::(inds - ind + current_ind);
-						agenda_day[end_hour] <- staying_home[0]::[];
+						bool return_home <- true;
+						loop h from: current_hour + 1 to: end_hour {
+							return_home <- agenda_day_ind[h] = nil;
+							if not (return_home) {break;}
+						}
+						if (return_home) {agenda_day_ind[end_hour] <- staying_home[0]::[];}
+						//write "ind.agenda_week: " + day + " -> "+ ind.agenda_week[day - 1];
 					}
 					agenda_day[current_hour] <- act::inds;
 				} else {

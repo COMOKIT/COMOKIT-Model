@@ -96,8 +96,8 @@ global {
 	float proba_grandmother<- (dataset = "../Datasets/Castanet Tolosan/")  ? 0.1 :0.3; //rate of grandmothers (individual with age > retirement_age) - num of grandmothers = M_grandmother * num of possible homes
 	int retirement_age <- (dataset = "../Datasets/Castanet Tolosan/")  ? 65 :55; //an individual older than (retirement_age + 1) are not working anymore
 	int max_age <- 100; //max age of individual
-	float nb_friends_mean <- 2.0; //Mean number of friends living in the considered area
-	float nb_friends_std <- 1.0;//Stand deviation of the number of friends living in the considered area
+	float nb_friends_mean <- 5.0; //Mean number of friends living in the considered area
+	float nb_friends_std <- 3.0;//Stand deviation of the number of friends living in the considered area
 	float nb_classmates_mean <- 10.0; //Mean number of classmates with which an Individual will have close contact
 	float nb_classmates_std <- 5.0;//Stand deviation of the number of classmates with which an Individual will have close contact
 	float nb_work_colleagues_mean <- 5.0; //Mean number of work colleagures with which an Individual will have close contact
@@ -130,8 +130,8 @@ global {
 	int max_duration_lunch <- 2; // max duration (in hour) of the lunch time
 	int max_duration_default <- 3; // default duration (in hour) of activities
 	int min_age_for_evening_act <- 13; //min age of individual to have an activity after school
-	float nb_activity_fellows_mean <- 2.0;
-	float nb_activity_fellows_std <- 1.0;
+	float nb_activity_fellows_mean <- 3.0;
+	float nb_activity_fellows_std <- 2.0;
 	
 	int max_num_activity_for_non_working_day <- 4; //max number of activity for non working day
 	int max_num_activity_for_old_people <- 3; //max number of activity for old people ([0,max_num_activity_for_old_people])

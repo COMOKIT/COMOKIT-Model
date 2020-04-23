@@ -24,7 +24,7 @@ global
 	map<string, int> building_infections;
 }
 
-species Individual{
+species Individual schedules: shuffle(Individual){
 	int age;
 	int sex; //0 M 1 F
 	string household_id;
@@ -73,17 +73,22 @@ species Individual{
 	float time_stay_ICU;	
 	map<Activity, list<Building>> building_targets;
 	
-	action initialize(map<Building,list<Individual>> working_places, map<Building,list<Individual>> schools) {
+	action initialize(map<Building,list<Individual>> working_places, map<Building,list<Individual>> schools, map<int,list<Individual>> ind_per_age_cat) {
 		reduction_contact_rate_asymptomatic <- world.get_reduction_contact_rate_asymptomatic(age);
 		reduction_contact_rate_wearing_mask <- world.get_reduction_contact_rate_wearing_mask(age);
 		basic_viral_release <- world.get_basic_viral_release(age);
 		contact_rate_human <- world.get_contact_rate_human(age);
 		proba_wearing_mask <- world.get_proba_wearing_mask(age);
-		int nb_friends <- min(length(Individual) - length(relatives) - 1, max(0,round(gauss(nb_friends_mean,nb_friends_std))));
-		loop while: length(friends) < nb_friends {
-			friends <-  friends + (nb_friends among Individual);
-			friends <- friends - self - relatives;
+		
+		int nb_friends <- max(0,round(gauss(nb_friends_mean,nb_friends_std)));
+		loop i over: ind_per_age_cat.keys {
+			if age < i {
+				friends <- nb_friends among ind_per_age_cat[i];
+				friends <- friends - self;
+				break;
+			}
 		}
+		
 		if (working_place != nil) {
 			int nb_colleagues <- max(0,int(gauss(nb_work_colleagues_mean,nb_work_colleagues_std)));
 			if nb_colleagues > 0 {
@@ -269,7 +274,12 @@ species Individual{
 			}
 			else {
 				float proba <- contact_rate_human*reduction_factor;
-				ask activity_fellows where (flip(proba) and (each.status = susceptible) and (each.current_place = current_place)){
+				list<Individual> fellows <- activity_fellows where (flip(proba) and (each.status = susceptible));
+				if (species(last_activity) != Activity) {
+					fellows <- fellows where (each.current_place = current_place); 
+				}
+				
+				ask fellows {
 					do defineNewCase;
 				}
 				
@@ -344,7 +354,13 @@ species Individual{
 		pair<Activity,list<Individual>> act <- agenda_week[current_date.day_of_week - 1][current_date.hour];
 		if (act.key != nil) {
 			if (Authority[0].allows(self, act.key)) {
-				activity_fellows <- act.value;
+				int nb_fellows <- Authority[0].limitGroupActivity(self, act.key) - 1;
+					if (nb_fellows > 0) {
+					activity_fellows <-nb_fellows among act.value;
+				} else {
+					activity_fellows <- [];
+				}
+				
 				map<Building,list<Individual>> bds_ind <-  act.key.find_target(self);
 				if not empty(bds_ind) {
 					Building bd <- any(bds_ind.keys);
@@ -353,6 +369,8 @@ species Individual{
 					last_activity <- act.key;
 					do enter_building(bd);
 					is_outside <- current_place = the_outside;
+				} else {
+					activity_fellows <- [];
 				}
 			}
 		}

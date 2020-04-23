@@ -56,6 +56,11 @@ species Authority {
 		return allowed ;
 	}
 	
+	int limitGroupActivity (Individual i, Activity activity) { 
+		return policy.max_allowed(i,activity);
+	}
+	
+	
 /**
  * Set of constructor functions used to build policies
  */
