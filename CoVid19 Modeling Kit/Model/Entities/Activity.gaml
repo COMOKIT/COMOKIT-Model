@@ -79,7 +79,10 @@ species visiting_neighbor parent: Activity {
 		map<Building,list<Individual>> targets;
 		loop neigh over: i.current_place.get_neighbors() where not empty(each.individuals) {
 			Individual i <- one_of(neigh.individuals);
-			targets[neigh] <- i.relatives + i;
+			if (i != nil) {
+				targets[neigh] <- i.relatives + i;
+			}
+			
 		}
 		return targets;
 	}
