@@ -39,6 +39,7 @@ global
 	list<int> test <- list(0,1,2,3,4,5,6,7,8,9,10);
 	bool stop <- false;
 	init { 
+		do create_authority;
 		do init_epidemiological_parameters;
 		create pseudo_bound number:1
 		{
@@ -49,7 +50,7 @@ global
 		{
 			is_at_home <- false;
 			age <- rnd(0,90);
-			do initialize;
+			do initialize_epidemio;
 			bound <- first(pseudo_bound);
 		}
 		
