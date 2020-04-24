@@ -24,7 +24,7 @@ global
 	map<string, int> building_infections;
 }
 
-species Individual schedules: shuffle(Individual){
+species Individual schedules: shuffle(Individual where (each.status != dead)){
 	int age;
 	int sex; //0 M 1 F
 	string household_id;
