@@ -16,8 +16,8 @@ global {
 	 
 	//GIS data
 	//TODO : make it less dependant on the hierarchical organization of experiment
-	//string dataset <- "../../Datasets/Ben Tre/"; // default
-	string dataset <- "../../Datasets/Vinh Phuc/"; // default
+	string dataset <- "../../Datasets/Ben Tre/"; // default
+	//string dataset <- "../../Datasets/Vinh Phuc/"; // default
 	//string dataset <- "../../Datasets/Castanet Tolosan/"; // default
 	
 	file shp_boundary <- file_exists(dataset+"boundary.shp") ? shape_file(dataset+"boundary.shp"):nil;
@@ -25,6 +25,7 @@ global {
 
 	//Population data
 	csv_file csv_population <- file_exists(dataset+"population.csv") ? csv_file(dataset+"population.csv",separator,header):nil;
+	csv_file csv_parameter_population <- file_exists(dataset+"Population parameter.csv") ? csv_file(dataset+"Population parameter.csv",",",true):nil;
 
 	//simulation step
 	float step<-1#h;
@@ -88,13 +89,13 @@ global {
 	int number_of_individual <- -1; // Control the number of Individual agent in the simulation from the file: if <0 or more than record in the file, takes the exact number of individual in the file
 	
 	// ------ From default Gaml generator
-	float proba_active_family <- (dataset = "../Datasets/Castanet Tolosan/") ? 0.6: 0.95;
+	float proba_active_family <- 0.95;
 	float number_children_mean <- 2.0;
 	float number_children_std <- 0.5;
 	int number_children_max <- 3;
-	float proba_grandfather<- (dataset = "../Datasets/Castanet Tolosan/")  ? 0.1 : 0.2; //rate of grandfathers (individual with age > retirement_age) - num of grandfathers = N_grandfather * num of possible homes
-	float proba_grandmother<- (dataset = "../Datasets/Castanet Tolosan/")  ? 0.1 :0.3; //rate of grandmothers (individual with age > retirement_age) - num of grandmothers = M_grandmother * num of possible homes
-	int retirement_age <- (dataset = "../Datasets/Castanet Tolosan/")  ? 65 :55; //an individual older than (retirement_age + 1) are not working anymore
+	float proba_grandfather<-  0.2; //rate of grandfathers (individual with age > retirement_age) - num of grandfathers = N_grandfather * num of possible homes
+	float proba_grandmother<- 0.3; //rate of grandmothers (individual with age > retirement_age) - num of grandmothers = M_grandmother * num of possible homes
+	int retirement_age <- 55; //an individual older than (retirement_age + 1) are not working anymore
 	int max_age <- 100; //max age of individual
 	float nb_friends_mean <- 5.0; //Mean number of friends living in the considered area
 	float nb_friends_std <- 3.0;//Stand deviation of the number of friends living in the considered area
@@ -102,10 +103,10 @@ global {
 	float nb_classmates_std <- 5.0;//Stand deviation of the number of classmates with which an Individual will have close contact
 	float nb_work_colleagues_mean <- 5.0; //Mean number of work colleagures with which an Individual will have close contact
 	float nb_work_colleagues_std <- 3.0;//Stand deviation of the number of work colleagures with which an Individual will have close contact
+	float work_at_home_unemployed <- 0.1; // probability for an individual to work at home (or not working).
 	
 	list<string> possible_homes <- remove_duplicates(OSM_home + ["", "home", "hostel"]);  //building type that will be considered as home
 	
-	float work_at_home_unemployed <- 0.1; // probability for an individual to work at home (or not working).
 	 //building type that will be considered as home - for each type, the coefficient to apply to this type for this choice of working place
 	 //weight of a working place = area * this coefficient
 	map<string, float> possible_workplaces <- (OSM_work_place as_map (each::2.0)) + map(["office"::3.0, "admin"::2.0, "industry"::1.0, "store"::1.0, "shop"::1.0,"bookstore"::1.0,

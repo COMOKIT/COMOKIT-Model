@@ -79,6 +79,15 @@ global {
 	action create_population(map<Building,float> working_places,map<list<int>,list<Building>> schools, list<Building> homes, 
 		int min_student_age, int max_student_age
 	) {
+		
+		if (csv_parameter_population != nil) {
+			loop i from: 0 to: csv_parameter_population.contents.rows - 1 {
+				string parameter_name <- csv_parameter_population.contents[0,i];
+				float value <- float(csv_parameter_population.contents[1,i]);
+				world.shape.attributes[parameter_name] <- value;
+				
+			}
+		}
 		list<list<Individual>> households;
 		
 		ask homes {

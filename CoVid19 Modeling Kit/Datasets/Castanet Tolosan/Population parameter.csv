@@ -1,0 +1,16 @@
+Parameter,Value
+proba_active_family, 0.6
+number_children_mean,2.0
+number_children_std,0.5
+number_children_max,3
+proba_grandfather,0.1
+proba_grandmother,0.1
+retirement_age,65
+max_age,100
+nb_friends_mean,5.0
+nb_friends_std,3.0
+nb_classmates_mean,10.0 
+nb_classmates_std,5.0
+nb_work_colleagues_mean,5.0
+nb_work_colleagues_std,3.0
+work_at_home_unemployed,0.1
