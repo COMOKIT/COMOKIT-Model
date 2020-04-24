@@ -73,12 +73,15 @@ species Individual schedules: shuffle(Individual where (each.status != dead)){
 	float time_stay_ICU;	
 	map<Activity, list<Building>> building_targets;
 	
-	action initialize(map<Building,list<Individual>> working_places, map<Building,list<Individual>> schools, map<int,list<Individual>> ind_per_age_cat) {
+	action initialize_epidemio {
 		reduction_contact_rate_asymptomatic <- world.get_reduction_contact_rate_asymptomatic(age);
 		reduction_contact_rate_wearing_mask <- world.get_reduction_contact_rate_wearing_mask(age);
 		basic_viral_release <- world.get_basic_viral_release(age);
 		contact_rate_human <- world.get_contact_rate_human(age);
 		proba_wearing_mask <- world.get_proba_wearing_mask(age);
+	}
+	
+	action initialize_social_network(map<Building,list<Individual>> working_places, map<Building,list<Individual>> schools, map<int,list<Individual>> ind_per_age_cat) {
 		
 		int nb_friends <- max(0,round(gauss(nb_friends_mean,nb_friends_std)));
 		loop i over: ind_per_age_cat.keys {
