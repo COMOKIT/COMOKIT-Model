@@ -22,6 +22,7 @@ global
 	int total_number_individual <- 0;
 	
 	map<string, int> building_infections;
+	map<int,int> total_incidence_age;
 }
 
 species Individual schedules: shuffle(Individual where (each.status != dead)){
@@ -228,6 +229,15 @@ species Individual schedules: shuffle(Individual where (each.status != dead)){
 		else
 		{
 			add 1 to: building_infections at: current_place.type;
+		}
+		//Add the infection to the infections of the same age
+		if(total_incidence_age.keys contains(self.age))
+		{
+			total_incidence_age[self.age] <- total_incidence_age[self.age] +1;
+		}
+		else
+		{
+			add 1 to: total_incidence_age at: self.age;
 		}
 		
 		
