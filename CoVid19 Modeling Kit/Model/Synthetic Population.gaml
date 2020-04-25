@@ -291,6 +291,26 @@ global {
 	//             Students and workers have an agenda with 6 working days and one leisure days.
 	//             Retired have an agenda full of leisure days.
 	action define_agenda(int min_student_age, int max_student_age) {
+		if (csv_parameter_agenda != nil) {
+			loop i from: 0 to: csv_parameter_agenda.contents.rows - 1 {
+				string parameter_name <- csv_parameter_agenda.contents[0,i];
+				if (parameter_name in world.shape.attributes.keys) {
+					if (parameter_name = "non_working_days" ) {
+						non_working_days <- [];
+						loop j from: 1 to: csv_parameter_agenda.contents.columns - 1 {
+							int value <- int(csv_parameter_agenda.contents[j,i]);
+							if (value >= 1 and value <= 7 and not(value in non_working_days)) {
+								non_working_days << value;
+							}
+						}
+					}
+					else {
+						float value <- float(csv_parameter_agenda.contents[1,i]);
+						world.shape.attributes[parameter_name] <- value;
+					}
+				} 
+			}
+		}	
 		list<Activity> possible_activities_tot <- Activities.values - studying - working - staying_home;
 		list<Activity> possible_activities_without_rel <- possible_activities_tot - visiting_friend;
 		Activity eating_act <- Activity first_with (each.name = act_eating);
@@ -305,14 +325,14 @@ global {
 				list<Activity> possible_activities <- empty(friends) ? possible_activities_without_rel : possible_activities_tot;
 				int current_hour;
 				if (age < max_student_age) {
-					current_hour <- rnd(school_hours[0][0],school_hours[0][1]);
+					current_hour <- rnd(school_hours_begin_min,school_hours_begin_max);
 					agenda_day[current_hour] <- studying[0]::[];
 				} else {
-					current_hour <-rnd(work_hours[0][0],work_hours[0][1]);
+					current_hour <-rnd(work_hours_begin_min,work_hours_begin_max);
 					agenda_day[current_hour] <- working[0]::[];
 				}
 				bool already <- false;
-				loop h from: lunch_hours[0] to: lunch_hours[1] {
+				loop h from: lunch_hours_min to: lunch_hours_max {
 					if (h in agenda_day.keys) {
 						already <- true;
 						break;
@@ -320,7 +340,7 @@ global {
 				}
 				if not already {
 					if (flip(proba_lunch_outside_workplace)) {
-						current_hour <- rnd(lunch_hours[0],lunch_hours[1]);
+						current_hour <- rnd(lunch_hours_min,lunch_hours_max);
 						int dur <- rnd(1,2);
 						if (not flip(proba_lunch_at_home) and (eating_act != nil) and not empty(eating_act.buildings)) {
 							list<Individual> inds <- max(0,gauss(nb_activity_fellows_mean,nb_activity_fellows_std)) among colleagues;
@@ -346,9 +366,9 @@ global {
 					}
 				}
 				if (age < max_student_age) {
-					current_hour <- rnd(school_hours[1][0],school_hours[1][1]);
+					current_hour <- rnd(school_hours_end_min,school_hours_end_max);
 				} else {
-					current_hour <-rnd(work_hours[1][0],work_hours[1][1]);
+					current_hour <-rnd(work_hours_end_min,work_hours_end_max);
 				}
 				agenda_day[current_hour] <- staying_home[0]::[];
 				
@@ -449,7 +469,7 @@ global {
 					}
 				}
 			}
-			int current_hour <- rnd(first_act_hour_non_working[0],first_act_hour_non_working[1]);
+			int current_hour <- rnd(first_act_hour_non_working_min,first_act_hour_non_working_max);
 			loop times: num_activity {
 				if (current_hour in forbiden_hours) {
 					current_hour <- current_hour + 1;

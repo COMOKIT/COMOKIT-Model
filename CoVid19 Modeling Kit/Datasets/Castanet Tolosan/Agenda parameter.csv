@@ -1,0 +1,28 @@
+Parameter,Value
+proba_active_family,0.6
+non_working_days,6,7
+work_hours_begin_min,7
+work_hours_begin_max,10 
+work_hours_end_min,15
+work_hours_end_max,18
+school_hours_begin_min,7
+school_hours_begin_max,9 
+school_hours_end_min,15
+school_hours_end_max,18
+first_act_hour_non_working_min,7
+first_act_hour_non_working_max,10
+lunch_hours_min,11 //interval for the begining of the lunch time
+lunch_hours_max,13
+max_duration_lunch,2
+max_duration_default,3
+min_age_for_evening_act, 13
+nb_activity_fellows_mean,3.0
+nb_activity_fellows_std,2.0
+max_num_activity_for_non_working_day,4
+max_num_activity_for_old_people,3
+proba_activity_evening,0.7
+proba_lunch_outside_workplace,0.5
+proba_lunch_at_home,0.5
+proba_go_outside,0.2
+proba_outside_contamination_per_hour,0.0
+building_neighbors_dist,500

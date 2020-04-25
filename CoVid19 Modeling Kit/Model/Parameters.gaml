@@ -26,6 +26,7 @@ global {
 	//Population data
 	csv_file csv_population <- file_exists(dataset+"population.csv") ? csv_file(dataset+"population.csv",separator,header):nil;
 	csv_file csv_parameter_population <- file_exists(dataset+"Population parameter.csv") ? csv_file(dataset+"Population parameter.csv",",",true):nil;
+	csv_file csv_parameter_agenda <- file_exists(dataset+"Agenda parameter.csv") ? csv_file(dataset+"Agenda parameter.csv",",",true):nil;
 
 	//simulation step
 	float step<-1#h;
@@ -127,10 +128,18 @@ global {
 	
 	//Agenda paramaters
 	list<int> non_working_days <- [7]; //list of non working days (1 = monday; 7 = sunday)
-	list<list<int>> work_hours <- [[6,8], [15,18]]; //working hours: [[interval for beginning work],[interval for ending work]]
-	list<list<int>> school_hours <- [[7,9], [15,18]]; //studying hours: [[interval for beginning study],[interval for ending study]]
-	list<int> first_act_hour_non_working <- [7,10]; //for non working day, interval for the beginning of the first activity 
-	list<int> lunch_hours <- [11,13]; //interval for the begining of the lunch time
+	int work_hours_begin_min <- 6; //beginning working hour: min value
+	int work_hours_begin_max <- 8; //beginning working hour: max value 
+	int work_hours_end_min <- 15; //ending working hour: min value
+	int work_hours_end_max <- 18; //ending working hour: max value
+	int school_hours_begin_min <- 7; //beginning studying hour: min value
+	int school_hours_begin_max <- 9; //beginning studying hour: max value
+	int school_hours_end_min <- 15; //ending studying hour: min value
+	int school_hours_end_max <- 18; //ending studying hour: max value
+	int first_act_hour_non_working_min <- 7; //for non working day, min hour for the beginning of the first activity 
+	int first_act_hour_non_working_max <- 10; //for non working day, max hour for the beginning of the first activity 
+	int lunch_hours_min <- 11; //min hour for the begining of the lunch time
+	int lunch_hours_max <- 13; //max hour for the begining of the lunch time
 	int max_duration_lunch <- 2; // max duration (in hour) of the lunch time
 	int max_duration_default <- 3; // default duration (in hour) of activities
 	int min_age_for_evening_act <- 13; //min age of individual to have an activity after school
