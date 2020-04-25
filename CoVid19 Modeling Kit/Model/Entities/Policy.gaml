@@ -306,11 +306,11 @@ species DetectionPolicy parent: AbstractPolicy {
 	bool not_tested_only;
 
 	action apply {
-		list<Individual> individual_to_test <- symptomatic_only ? (not_tested_only ? Individual where (each.status = symptomatic_with_symptoms and
-		each.report_status = not_tested) : Individual where (each.status = symptomatic_with_symptoms)) : (not_tested_only ? Individual where (each.status != dead and
+		list<Individual> individual_to_test <- symptomatic_only ? (not_tested_only ? Individual where (each.status = symptomatic and
+		each.report_status = not_tested) : Individual where (each.status = symptomatic)) : (not_tested_only ? Individual where (each.status != dead and
 		each.report_status = not_tested) : Individual where (each.status != dead));
 		ask nb_individual_tested_per_step among individual_to_test {
-			do testIndividual;
+			do test_individual;
 		}
 
 	}

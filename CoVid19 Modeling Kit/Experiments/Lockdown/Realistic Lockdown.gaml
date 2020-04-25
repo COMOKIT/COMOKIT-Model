@@ -36,7 +36,7 @@ experiment "Realistic Lockdown" parent: "Abstract Experiment" {
 
 		create simulation {
 			name <- "Realistic lockdown with " + int(percentage_ * 100) + "% of essential workers and " + number_of_tests_ + " daily tests";
-			transmission_building <- true;
+			allow_transmission_building <- true;
 			ask Authority {
 				AbstractPolicy d <- create_detection_policy(number_of_tests_, false, true);
 				AbstractPolicy l <- create_lockdown_policy_except([act_home, act_shopping]);

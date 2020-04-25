@@ -33,7 +33,7 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 			float percentage_ <- 0.1;			
 			
 			name <- "Realistic lockdown with " + int(percentage_ * 100) + "% of essential workers and " + number_of_tests_ + " daily tests";
-			transmission_building <- true;
+			allow_transmission_building <- true;
 			
 			ask Authority {
 				AbstractPolicy d <- create_detection_policy(number_of_tests_, false, true);
@@ -51,7 +51,7 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 			int number_of_tests_ <- 20;
 			
 			name <- "Family ";
-			transmission_building <- true;
+			allow_transmission_building <- true;
 			
 			ask Authority {
 				AbstractPolicy d <- create_detection_policy(number_of_tests_, false, false);
@@ -68,7 +68,7 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 			int number_of_tests_ <- 20;
 			
 			name <- "Dynamic spacial lockdown";
-			transmission_building <- true;
+			allow_transmission_building <- true;
 			ask Authority {
 				AbstractPolicy d <- create_detection_policy(number_of_tests_, false, false);
 				AbstractPolicy lock <- create_lockdown_policy()	;

@@ -28,9 +28,9 @@ global
 	int nb_infected <- 0 update: length(pseudo_individual where (each.is_infected));
 	int nb_infectious <- 0 update: length(pseudo_individual where (each.is_infectious));
 	int nb_perma_asymptomatic <- 0 update: length(pseudo_individual where (each.status=asymptomatic));
-	int nb_temp_asymptomatic <- 0 update: length(pseudo_individual where (each.status=symptomatic_without_symptoms));
-	int nb_symptomatic<- 0 update: length(pseudo_individual where (each.status=symptomatic_with_symptoms));
-	int nb_exposed<- 0 update: length(pseudo_individual where (each.status=exposed));
+	int nb_temp_asymptomatic <- 0 update: length(pseudo_individual where (each.status=presymptomatic));
+	int nb_symptomatic<- 0 update: length(pseudo_individual where (each.status=symptomatic));
+	int nb_exposed<- 0 update: length(pseudo_individual where (each.status=latent));
 	int nb_susceptible<- 0 update: length(pseudo_individual where (each.status=susceptible));
 	int nb_recovered<- 0 update: length(pseudo_individual where (each.status=recovered));
 	int nb_dead<- 0 update: length(pseudo_individual where (each.status=dead));
@@ -50,7 +50,7 @@ global
 		{
 			is_at_home <- false;
 			age <- rnd(0,90);
-			do initialize_epidemio;
+			do initialise_epidemio;
 			bound <- first(pseudo_bound);
 		}
 		
@@ -116,7 +116,7 @@ species pseudo_individual parent:Individual
 	action defineNewCase
 	{
 		total_number_of_infected <- total_number_of_infected +1;
-		do set_status(exposed);
+		do set_status(latent);
 		self.incubation_time <- world.get_incubation_time(self.age);
 		self.serial_interval <- world.get_serial_interval(self.age);
 		self.infectious_time <- world.get_infectious_time(self.age);
@@ -139,31 +139,31 @@ species pseudo_individual parent:Individual
 		self.tick <- 0;
 	}
 	
-	action set_hospitalization_time{
-		if(world.is_hospitalized(self.age))
+	action set_hospitalisation_time{
+		if(world.is_hospitalised(self.age))
 		{
-			time_before_hospitalization <- status=symptomatic_without_symptoms? abs(self.serial_interval)+world.get_time_onset_to_hospitalization(self.age,self.infectious_time):world.get_time_onset_to_hospitalization(self.age,self.infectious_time);
-			if(time_before_hospitalization>infectious_time)
+			time_before_hospitalisation <- status=presymptomatic? abs(self.serial_interval)+world.get_time_onset_to_hospitalisation(self.age,self.infectious_time):world.get_time_onset_to_hospitalisation(self.age,self.infectious_time);
+			if(time_before_hospitalisation>infectious_time)
 			{
-				time_before_hospitalization <- infectious_time;
+				time_before_hospitalisation <- infectious_time;
 			}
-			save [self.name, self.age,self.time_before_hospitalization] to: "hospitalization.csv" type:"csv" header:false rewrite:false;
+			save [self.name, self.age,self.time_before_hospitalisation] to: "hospitalisation.csv" type:"csv" header:false rewrite:false;
 		
 			if(world.is_ICU(self.age))
 			{
-				time_before_ICU <- world.get_time_hospitalization_to_ICU(self.age, self.time_before_hospitalization);
+				time_before_ICU <- world.get_time_hospitalisation_to_ICU(self.age, self.time_before_hospitalisation);
 				save [self.name, self.age,self.time_before_ICU] to: "ICU.csv" type:"csv" header:false rewrite:false;
 				time_stay_ICU <- world.get_time_ICU(self.age);
 				save [self.name, self.age,self.time_stay_ICU] to: "stay_ICU.csv" type:"csv" header:false rewrite:false;
-				if(time_before_hospitalization+time_before_ICU>=infectious_time)
+				if(time_before_hospitalisation+time_before_ICU>=infectious_time)
 				{
-					time_before_hospitalization <- infectious_time-time_before_ICU;
+					time_before_hospitalisation <- infectious_time-time_before_ICU;
 				}
 			}
 		}
 	}
 	
-	reflex executeAgenda when: status!=dead{
+	reflex execute_agenda when: status!=dead{
 		if(stop=false)
 		{
 			do enter_building(one_of(pseudo_bound));
@@ -175,7 +175,7 @@ species pseudo_individual parent:Individual
 	}
 	aspect default {
 		if not is_outside {
-			draw shape color: status = exposed ? #pink : ((status = symptomatic_with_symptoms)or(status=asymptomatic)or(status=symptomatic_without_symptoms)? #red : #green);
+			draw shape color: status = latent ? #pink : ((status = symptomatic)or(status=asymptomatic)or(status=presymptomatic)? #red : #green);
 		}
 	}
 }
@@ -192,7 +192,7 @@ experiment check_epidemiology type:gui
 				draw shape color:  viral_load>0?rgb(255*viral_load,0,0):#lightgrey empty: true width: 2;
 			}
 			agents pseudo_individual  value: pseudo_individual{
-				draw square(status=susceptible or status=recovered? 10: 20) color: status = exposed ? #yellow : (self.is_infectious ? #orangered : (status = recovered?#blue: (status=dead?#black:#green))) ;	
+				draw square(status=susceptible or status=recovered? 10: 20) color: status = latent ? #yellow : (self.is_infectious ? #orangered : (status = recovered?#blue: (status=dead?#black:#green))) ;	
 			}
 		}
 		

@@ -61,20 +61,20 @@ global{
 				length(subIndividual where (each.is_infected)),
 				// Number of new cases per step per building (or building type) and age category
 				
-				// Number of hospitalizations per step per age category
-				length(subIndividual where(each.hospitalization_status=need_hospitalization)),
+				// Number of hospitalisations per step per age category
+				length(subIndividual where(each.hospitalisation_status=need_hospitalisation)),
 				// Number of ICU per step per age category
-				length(subIndividual where(each.hospitalization_status=need_ICU)),
+				length(subIndividual where(each.hospitalisation_status=need_ICU)),
 				// Number of susceptible per step per age category
 				length(subIndividual where (each.status=susceptible)),
 				// Number of exposed per step per age category
-				length(subIndividual where (each.is_exposed())),
+				length(subIndividual where (each.is_latent())),
 				// Number of asymptomatic permanent per step per age category
 				length(subIndividual where (each.status = asymptomatic)),
 				// Number of asymptomatic temporary per step per age category
-				length(subIndividual where (each.status = symptomatic_without_symptoms)),
+				length(subIndividual where (each.status = presymptomatic)),
 				// Number of symptomatic per step per age category
-				length(subIndividual where (each.status = symptomatic_with_symptoms)),
+				length(subIndividual where (each.status = symptomatic)),
 				// Number of recovered per step per age category
 				length(subIndividual where (each.status = recovered)),			
 				// Number of dead per step per age category
@@ -114,13 +114,13 @@ experiment "Abstract Batch Experiment" type:batch repeat: 2 until: world.sim_sto
 			// Number of susceptible per step per age category
 			simulations mean_of length(each.Individual where (each.status=susceptible)),
 			// Number of exposed per step per age category
-			simulations mean_of length(each.Individual where (each.is_exposed())),
+			simulations mean_of length(each.Individual where (each.is_latent())),
 			// Number of asymptomatic permanent per step per age category
 			simulations mean_of length(each.Individual where (each.status = asymptomatic)),
 			// Number of asymptomatic temporary per step per age category
-			simulations mean_of length(each.Individual where (each.status = symptomatic_without_symptoms)),
+			simulations mean_of length(each.Individual where (each.status = presymptomatic)),
 			// Number of symptomatic per step per age category
-			simulations mean_of length(each.Individual where (each.status = symptomatic_with_symptoms)),
+			simulations mean_of length(each.Individual where (each.status = symptomatic)),
 			// Number of recovered per step per age category
 			simulations mean_of length(each.Individual where (each.status = recovered)),			
 			// Number of dead per step per age category

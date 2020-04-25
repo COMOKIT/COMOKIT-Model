@@ -39,41 +39,44 @@ global {
 	bool load_epidemiological_parameter_from_file <- true; //Allowing parameters being loaded from a csv file 
 	string epidemiological_parameters <- "../Parameters/Epidemiological Parameters.csv"; //File for the parameters
 	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
-	bool transmission_human <- true; //Allowing human to human transmission
-	bool transmission_building <- true; //Allowing environment contamination and infection
-	float successful_contact_rate_human <- 2.5 * 1/(14.69973);//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
+	bool allow_transmission_human <- true; //Allowing human to human transmission
+	bool allow_transmission_building <- true; //Allowing environment contamination and infection
 	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period
 	float reduction_coeff_all_buildings_inhabitants <- 0.01; //reduction of the contact rate for individuals belonging to different households leaving in the same building
 	float reduction_coeff_all_buildings_individuals <- 0.05; //reduction of the contact rate for individuals belonging to different households leaving in the same building
-	float reduction_contact_rate_asymptomatic <- 0.55; //Factor of the reduction for successful contact rate for  human to human transmission for asymptomatic individual
-	float proportion_asymptomatic <- 0.3; //Proportion of asymptomatic infections
-	float proportion_dead_symptomatic <- 0.01; //Proportion of symptomatic infections dying
 	float basic_viral_release <- 3.0; //Viral load released in the environment by infectious individual
 	float basic_viral_decrease <- 0.33; //Value to decrement the viral load in the environment
-	float probability_true_positive <- 0.89; //Probability of successfully identifying an infected
-	float probability_true_negative <- 0.92; //Probability of successfully identifying a non infected
-	float proportion_wearing_mask <- 0.0; //Proportion of people wearing a mask
-	float reduction_contact_rate_wearing_mask <- 0.5; //Factor of reduction for successful contact rate of an infectious individual wearing mask
-	string distribution_type_incubation <- "Lognormal"; //Type of distribution of the incubation period; Among normal, lognormal, weibull, gamma
-	float parameter_1_incubation <- 1.57; //First parameter of the incubation period distribution
-	float parameter_2_incubation <- 0.65; //Second parameter of the incubation period distribution
-	string distribution_type_serial_interval <- "Normal"; //Type of distribution of the serial interval
-	float parameter_1_serial_interval <- 3.96;//First parameter of the serial interval distribution
-	float parameter_2_serial_interval <- 3.75;//Second parameter of the serial interval distribution
-	string distribution_type_onset_to_recovery <- "Lognormal";//Type of distribution of the time from onset to recovery
-	float parameter_1_onset_to_recovery <- 3.034953;//First parameter of the time from onset to recovery distribution
-	float parameter_2_onset_to_recovery <- 0.34;//Second parameter of the time from onset to recovery distribution
-	float proportion_hospitalization <- 0.2; //Proportion of symptomatic cases hospitalized
-	string distribution_type_onset_to_hospitalization <- "Lognormal";//Type of distribution of the time from onset to hospitalization
-	float parameter_1_onset_to_hospitalization  <- 3.034953;//First parameter of the time from onset to hospitalization distribution
-	float parameter_2_onset_to_hospitalization  <- 0.34;//Second parameter of the time from onset to hospitalization distribution
-	float proportion_icu <- 0.1; //Proportion of hospitalized cases going through ICU
-	string distribution_type_hospitalization_to_ICU <- "Lognormal";//Type of distribution of the time from hospitalization to ICU
-	float parameter_1_hospitalization_to_ICU  <- 3.034953;//First parameter of the time from hospitalization to ICU
-	float parameter_2_hospitalization_to_ICU  <- 0.34;//Second parameter of the time from hospitalization to ICU
-	string distribution_type_stay_ICU <- "Lognormal";//Type of distribution of the time to stay in ICU
-	float parameter_1_stay_ICU <- 3.034953;//First parameter of the time to stay in ICU
-	float parameter_2_stay_ICU <- 0.34;//Second parameter of the time to stay in ICU
+	
+	
+	//These parameters are used when no CSV is loaded to build the matrix of parameters per age
+	float init_all_ages_successful_contact_rate_human <- 2.5 * 1/(14.69973);//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
+	float init_all_ages_factor_contact_rate_asymptomatic <- 0.55; //Factor of the reduction for successful contact rate for  human to human transmission for asymptomatic individual
+	float init_all_ages_proportion_asymptomatic <- 0.3; //Proportion of asymptomatic infections
+	float init_all_ages_proportion_dead_symptomatic <- 0.01; //Proportion of symptomatic infections dying
+	float init_all_ages_probability_true_positive <- 0.89; //Probability of successfully identifying an infected
+	float init_all_ages_probability_true_negative <- 0.92; //Probability of successfully identifying a non infected
+	float init_all_ages_proportion_wearing_mask <- 0.0; //Proportion of people wearing a mask
+	float init_all_ages_factor_contact_rate_wearing_mask <- 0.5; //Factor of reduction for successful contact rate of an infectious individual wearing mask
+	string init_all_ages_distribution_type_incubation <- "Lognormal"; //Type of distribution of the incubation period; Among normal, lognormal, weibull, gamma
+	float init_all_ages_parameter_1_incubation <- 1.57; //First parameter of the incubation period distribution
+	float init_all_ages_parameter_2_incubation <- 0.65; //Second parameter of the incubation period distribution
+	string init_all_ages_distribution_type_serial_interval <- "Normal"; //Type of distribution of the serial interval
+	float init_all_ages_parameter_1_serial_interval <- 3.96;//First parameter of the serial interval distribution
+	float init_all_ages_parameter_2_serial_interval <- 3.75;//Second parameter of the serial interval distribution
+	string init_all_ages_distribution_type_onset_to_recovery <- "Lognormal";//Type of distribution of the time from onset to recovery
+	float init_all_ages_parameter_1_onset_to_recovery <- 3.034953;//First parameter of the time from onset to recovery distribution
+	float init_all_ages_parameter_2_onset_to_recovery <- 0.34;//Second parameter of the time from onset to recovery distribution
+	float init_all_ages_proportion_hospitalisation <- 0.2; //Proportion of symptomatic cases hospitalized
+	string init_all_ages_distribution_type_onset_to_hospitalisation <- "Lognormal";//Type of distribution of the time from onset to hospitalization
+	float init_all_ages_parameter_1_onset_to_hospitalisation  <- 3.034953;//First parameter of the time from onset to hospitalization distribution
+	float init_all_ages_parameter_2_onset_to_hospitalisation  <- 0.34;//Second parameter of the time from onset to hospitalization distribution
+	float init_all_ages_proportion_icu <- 0.1; //Proportion of hospitalized cases going through ICU
+	string init_all_ages_distribution_type_hospitalisation_to_ICU <- "Lognormal";//Type of distribution of the time from hospitalization to ICU
+	float init_all_ages_parameter_1_hospitalisation_to_ICU  <- 3.034953;//First parameter of the time from hospitalization to ICU
+	float init_all_ages_parameter_2_hospitalisation_to_ICU  <- 0.34;//Second parameter of the time from hospitalization to ICU
+	string init_all_ages_distribution_type_stay_ICU <- "Lognormal";//Type of distribution of the time to stay in ICU
+	float init_all_ages_parameter_1_stay_ICU <- 3.034953;//First parameter of the time to stay in ICU
+	float init_all_ages_parameter_2_stay_ICU <- 0.34;//Second parameter of the time to stay in ICU
 	list<string> force_parameters;
 	
 	//Synthetic population parameters

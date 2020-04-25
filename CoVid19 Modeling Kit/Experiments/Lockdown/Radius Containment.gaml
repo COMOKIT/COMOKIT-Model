@@ -17,7 +17,7 @@ global {
 		ask Authority {
 			ask 2 among Individual {
 				sources << self;
-				status <- symptomatic_with_symptoms;
+				status <- symptomatic;
 			}
 
 			list<AbstractPolicy> policies <- [];

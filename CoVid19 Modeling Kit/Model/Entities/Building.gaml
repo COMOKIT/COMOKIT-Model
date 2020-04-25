@@ -22,13 +22,18 @@ global {
 }
 
 species Building {
-
+	//Viral load of the building
 	float viral_load <- 0.0;
+	//Type of the building
 	string type;
+	//Building surrounding
 	list<Building> neighbors;
+	//Individuals present in the building
 	list<Individual> individuals;
+	//Number of households in the building
 	int nb_households;
 	
+	//Action to return the neighbouring buildings
 	list<Building> get_neighbors {
 		if empty(neighbors) {
 			neighbors <- Building at_distance building_neighbors_dist;
@@ -39,13 +44,15 @@ species Building {
 		return neighbors;
 	}
 	
-	action addViralLoad(float value){
-		if(transmission_building)
+	//Action to add viral load to the building
+	action add_viral_load(float value){
+		if(allow_transmission_building)
 		{
 			viral_load <- min(1.0,viral_load+value);
 		}
 	}
-	reflex updateViralLoad when: transmission_building{
+	//Action to update the viral load (i.e. trigger decreases)
+	reflex update_viral_load when: allow_transmission_building{
 		viral_load <- max(0.0,viral_load - basic_viral_decrease/nb_step_for_one_day);
 	}
 

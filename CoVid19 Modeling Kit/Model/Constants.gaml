@@ -13,10 +13,10 @@ model CoVid19
 global {
 	//Epidemiological status of the individual
 	string susceptible <- "S";
-	string exposed <- "E";
-	string asymptomatic <- "A";
-	string symptomatic_without_symptoms <- "Ua";
-	string symptomatic_with_symptoms <- "Us";
+	string latent <- "L";
+	string asymptomatic <- "Ia";
+	string presymptomatic <- "Ip";
+	string symptomatic <- "Is";
 	string recovered <- "R";
 	string dead <- "D";
 	
@@ -26,8 +26,8 @@ global {
 	string tested_negative <- "Negative";
 	
 	//Hospitalized status of the individual
-	string healthy <- "Healthy";
-	string need_hospitalization <- "Need hospitalization";
+	string no_need_hospitalisation <- "Not needed";
+	string need_hospitalisation <- "Need hospitalisation";
 	string need_ICU <- "Need ICU";
 
 	
@@ -78,19 +78,19 @@ global {
 	string epidemiological_uniform <- "Uniform";
 	string epidemiological_successful_contact_rate_human <- "Successful_contact_rate_human";
 	string epidemiological_successful_contact_rate_building <- "Successful_contact_rate_building";
-	string epidemiological_reduction_asymptomatic <-"Reduction_asymptomatic";
+	string epidemiological_factor_asymptomatic <-"Factor_asymptomatic";
 	string epidemiological_proportion_asymptomatic <- "Proportion_asymptomatic";
 	string epidemiological_basic_viral_release <- "Basic_viral_release";
 	string epidemiological_probability_true_positive <- "Probability_true_positive";
 	string epidemiological_probability_true_negative <- "Probability_true_negative";
 	string epidemiological_proportion_wearing_mask <- "Proportion_wearing_mask";
-	string epidemiological_reduction_wearing_mask <- "Reduction_wearing_mask";
+	string epidemiological_factor_wearing_mask <- "Factor_wearing_mask";
 	string epidemiological_incubation_period <-"Incubation_period";
 	string epidemiological_serial_interval <- "Serial_interval";
-	string epidemiological_proportion_hospitalization <- "Proportion_hospitalization";
-	string epidemiological_onset_to_hospitalization <- "Onset_to_hospitalization";
+	string epidemiological_proportion_hospitalisation <- "Proportion_hospitalisation";
+	string epidemiological_onset_to_hospitalisation <- "Onset_to_hospitalisation";
 	string epidemiological_proportion_icu <- "Proportion_icu";
-	string epidemiological_hospitalization_to_ICU <- "Hospitalization_to_ICU";
+	string epidemiological_hospitalisation_to_ICU <- "Hospitalisation_to_ICU";
 	string epidemiological_stay_ICU <- "Stay_ICU";
 	string epidemiological_proportion_death_symptomatic <- "Proportion_death_symptomatic";
 	string epidemiological_onset_to_recovery <- "Onset_to_recovery";

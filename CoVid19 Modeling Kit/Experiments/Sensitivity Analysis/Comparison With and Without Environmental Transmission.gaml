@@ -16,7 +16,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 	action _init_ {
 		string shape_path <- self.ask_dataset_path();
 		float simulation_seed <- rnd(2000.0);
-		create simulation with: [dataset::shape_path, seed::simulation_seed, transmission_building::false, transmission_human::false] {
+		create simulation with: [dataset::shape_path, seed::simulation_seed, allow_transmission_building::false, allow_transmission_human::false] {
 			name <- "No viral load, no human transmission";
 			ask Authority {
 				policy <- create_no_containment_policy();
@@ -24,7 +24,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
 		}
 
-		create simulation with: [dataset::shape_path, seed::simulation_seed, transmission_building::true, transmission_human::false]{
+		create simulation with: [dataset::shape_path, seed::simulation_seed, allow_transmission_building::true, allow_transmission_human::false]{
 			name <- "With viral load, no human transmission";
 			ask Authority { 
 				policy <- create_no_containment_policy();
@@ -32,7 +32,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
 		}
 		
-		create simulation with: [dataset::shape_path, seed::simulation_seed, transmission_building::false, transmission_human::true] {
+		create simulation with: [dataset::shape_path, seed::simulation_seed, allow_transmission_building::false, allow_transmission_human::true] {
 			name <- "No viral load, with human transmission";
 			ask Authority {
 				policy <- create_no_containment_policy();
@@ -40,7 +40,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
 		}
 
-		create simulation with: [dataset::shape_path, seed::simulation_seed, transmission_building::true, transmission_human::true]{
+		create simulation with: [dataset::shape_path, seed::simulation_seed, allow_transmission_building::true, allow_transmission_human::true]{
 			name <- "With viral load and human transmission";
 			ask Authority { 
 				policy <- create_no_containment_policy();
@@ -83,6 +83,6 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 experiment "BatchComparison" parent: "Abstract Batch Experiment" 
 	type: batch repeat: 500 until: (Individual count each.is_infected = 0) and had_infected_Individual 
 {		
-	parameter var:transmission_building among: [false, true];
-	parameter var:transmission_human	among: [false, true];
+	parameter var:allow_transmission_building among: [false, true];
+	parameter var:allow_transmission_human	among: [false, true];
 }

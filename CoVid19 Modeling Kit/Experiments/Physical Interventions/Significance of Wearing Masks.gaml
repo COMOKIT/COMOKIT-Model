@@ -12,15 +12,15 @@ import "../Abstract Experiment.gaml"
 
 experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 	
-	float factor <- 0.9;
+	float factor <- 0.1;
 
 	action _init_ {
 		string shape_path <- self.ask_dataset_path();
 		float simulation_seed <- rnd(2000.0);
 		list<rgb> colors <- brewer_colors("Paired");
 		
-		loop proportion over: [0.0,0.2,0.4,0.6,0.8,1.0] {
-			create simulation with: [color::(colors at int(proportion*5)), reduction_contact_rate_wearing_mask::factor, dataset::shape_path, seed::simulation_seed, proportion_wearing_mask::proportion, force_parameters::list(epidemiological_proportion_wearing_mask, epidemiological_reduction_wearing_mask)] {
+		loop proportion over: [0.0,1.0] {
+			create simulation with: [color::(colors at int(proportion*5)), init_all_ages_factor_contact_rate_wearing_mask::factor, dataset::shape_path, seed::simulation_seed, init_all_ages_proportion_wearing_mask::proportion, force_parameters::list(epidemiological_proportion_wearing_mask, epidemiological_factor_wearing_mask)] {
 				name <- string(int(proportion*100)) + "% with mask";
 				ask Authority {
 					policy <- create_no_containment_policy();

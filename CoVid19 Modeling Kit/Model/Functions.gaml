@@ -66,9 +66,9 @@ global
 	}
 	
 	//Reduction of the successful contact rate for asymptomatic infectious individual of a given age - MUST BE FIXED (i.e not relying on a distribution)
-	float get_reduction_contact_rate_asymptomatic(int age)
+	float get_factor_contact_rate_asymptomatic(int age)
 	{
-		return float(map_epidemiological_parameters[age][epidemiological_reduction_asymptomatic][1]);
+		return float(map_epidemiological_parameters[age][epidemiological_factor_asymptomatic][1]);
 	}
 	
 	//Basic viral release in the environment of an infectious individual of a given age
@@ -124,9 +124,9 @@ global
 	}
 	
 	//Reduction of the successful contact rate of an infectious individual of a given age
-	float get_reduction_contact_rate_wearing_mask(int age)
+	float get_factor_contact_rate_wearing_mask(int age)
 	{
-	return float(map_epidemiological_parameters[age][epidemiological_reduction_wearing_mask][1]);
+	return float(map_epidemiological_parameters[age][epidemiological_factor_wearing_mask][1]);
 	}
 	
 	//Give a boolean to say if an individual of a given age should be asymptomatic - MUST BE FIXED (i.e. not following a distribution)
@@ -147,22 +147,22 @@ global
 		return flip(float(map_epidemiological_parameters[age][epidemiological_probability_true_negative][1]));
 	}
 	
-	//Give a boolean to say if an individual of a given age should be hospitalized - MUST BE FIXED (i.e. not following a distribution)
-	bool is_hospitalized(int age)
+	//Give a boolean to say if an individual of a given age should be hospitalised - MUST BE FIXED (i.e. not following a distribution)
+	bool is_hospitalised(int age)
 	{
-		return flip(float(map_epidemiological_parameters[age][epidemiological_proportion_hospitalization][1]));
+		return flip(float(map_epidemiological_parameters[age][epidemiological_proportion_hospitalisation][1]));
 	}
 	
 	//Give the number of steps between onset of symptoms and time for hospitalization
-	float get_time_onset_to_hospitalization(int age, float max_value)
+	float get_time_onset_to_hospitalisation(int age, float max_value)
 	{
-		if(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalization][0]=epidemiological_fixed)
+		if(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalisation][0]=epidemiological_fixed)
 		{
-			return float(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalization][1])*nb_step_for_one_day;
+			return float(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalisation][1])*nb_step_for_one_day;
 		}
 		else
 		{
-			return get_rnd_from_distribution_with_threshold(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalization][0],float(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalization][1]),float(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalization][2]),max_value/nb_step_for_one_day, true)*nb_step_for_one_day;
+			return get_rnd_from_distribution_with_threshold(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalisation][0],float(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalisation][1]),float(map_epidemiological_parameters[age][epidemiological_onset_to_hospitalisation][2]),max_value/nb_step_for_one_day, true)*nb_step_for_one_day;
 		}
 	}
 	
@@ -173,15 +173,15 @@ global
 	}
 	
 	//Give the number of steps between hospitalization and ICU
-	float get_time_hospitalization_to_ICU(int age, float max_value)
+	float get_time_hospitalisation_to_ICU(int age, float max_value)
 	{
-		if(map_epidemiological_parameters[age][epidemiological_hospitalization_to_ICU][0]=epidemiological_fixed)
+		if(map_epidemiological_parameters[age][epidemiological_hospitalisation_to_ICU][0]=epidemiological_fixed)
 		{
-			return float(map_epidemiological_parameters[age][epidemiological_hospitalization_to_ICU][1])*nb_step_for_one_day;
+			return float(map_epidemiological_parameters[age][epidemiological_hospitalisation_to_ICU][1])*nb_step_for_one_day;
 		}
 		else
 		{
-			return get_rnd_from_distribution_with_threshold(map_epidemiological_parameters[age][epidemiological_hospitalization_to_ICU][0],float(map_epidemiological_parameters[age][epidemiological_hospitalization_to_ICU][1]),float(map_epidemiological_parameters[age][epidemiological_hospitalization_to_ICU][2]), max_value/nb_step_for_one_day, true)*nb_step_for_one_day;
+			return get_rnd_from_distribution_with_threshold(map_epidemiological_parameters[age][epidemiological_hospitalisation_to_ICU][0],float(map_epidemiological_parameters[age][epidemiological_hospitalisation_to_ICU][1]),float(map_epidemiological_parameters[age][epidemiological_hospitalisation_to_ICU][2]), max_value/nb_step_for_one_day, true)*nb_step_for_one_day;
 		}
 	}
 	

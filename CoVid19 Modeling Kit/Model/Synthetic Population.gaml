@@ -206,7 +206,7 @@ global {
 		}
 		
 		ask Individual {
-			do initialize_social_network(WP, Sc,ind_per_age_cat);
+			do initialise_social_network(WP, Sc,ind_per_age_cat);
 		}
 	}
 	
