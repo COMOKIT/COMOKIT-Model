@@ -57,7 +57,7 @@ experiment "Abstract Experiment" virtual:true{
 	output {
 		display "default_display" synchronized: false type: opengl background: background virtual: true draw_env: false {
 			
-			overlay position: { 5, 5 } size: { 700 #px, 200 #px }  transparency: 0 
+			overlay position: { 5, 5 } size: { 700 #px, 200 #px }  transparency: 1
             {
            		draw world.name  font: default at: { 20#px, 20#px} anchor: #top_left color:text_color;
            		draw ("Day " + int((current_date - starting_date) /  #day)) + " | " + ("Cases " + world.number_of_infectious)  font: default at: { 20#px, 50#px} anchor: #top_left color:text_color;
