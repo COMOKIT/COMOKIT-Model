@@ -54,15 +54,23 @@ global{
 		save building_infections.values type:"csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_building.csv" rewrite:false;
 			
 		loop i from: ageCategory to: 100 step: ageCategory{
+			
+			// Calculate sub_incidence per age category
 			int total_incidence <- 0;
 			loop min_age from: i-ageCategory to: i-1{
 				if(total_incidence_age.keys contains min_age)
 				{
 					total_incidence <- total_incidence+total_incidence_age[min_age];
 				}
+			}			
+			// Get corresponding Individual in age category
+			list<Individual> subIndividual;
+			if (i = ageCategory){ // Include age 100 in last CSV
+				subIndividual <- Individual where(each.age <= i and each.age >= (i - ageCategory));
+			}else{
+				subIndividual <- Individual where(each.age < i and each.age >= (i - ageCategory));	
 			}
-			// Get corresponding age category
-			list<Individual> subIndividual <- Individual where(each.age < i and each.age >= (i - ageCategory));
+			
 			save [
 				// Number of new cases (incidence) per step per age category
 				total_incidence,
