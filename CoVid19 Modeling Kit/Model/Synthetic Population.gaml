@@ -381,7 +381,7 @@ global {
 				}
 				if not already and (age >= min_age_for_evening_act) and flip(proba_activity_evening) {
 					current_hour <- current_hour + rnd(1,max_duration_lunch);
-					Activity act <- any(possible_activities);
+					Activity act <- myself.activity_choice(self, possible_activities);
 					int current_hour <- min(23,current_hour + rnd(1,max_duration_default));
 					int end_hour <- min(23,current_hour + rnd(1,max_duration_default));
 					if (species(act) = Activity) {
@@ -427,18 +427,23 @@ global {
 			ask Individual {
 				list<Activity> acts <- remove_duplicates((agenda_week accumulate each.values) collect each.key) inter list(Activity) ;
 				loop act over: acts {
-					if length(act.buildings) <= nb_candidates {
-						building_targets[act] <- act.buildings;
-					} else {
-						list<Building> bds;
-						list<float> proba_per_building;
-						loop b over: act.buildings {
-							float dist <- max(20,b.location distance_to home.location);
-							proba_per_building << (b.shape.area / dist ^ gravity_power);
-						}
-						loop while: length(bds) < nb_candidates {
-							bds << act.buildings[rnd_choice(proba_per_building)];
-							bds <- remove_duplicates(bds);
+					map<string, list<Building>> bds;
+					loop type over: act.types_of_building {
+						list<Building> buildings <- act.buildings[type];
+						if length(buildings) <= nb_candidates {
+							bds[type] <- buildings;
+						} else {
+							list<Building> bds_;
+							list<float> proba_per_building;
+							loop b over: buildings {
+								float dist <- max(20,b.location distance_to home.location);
+								proba_per_building << (b.shape.area / dist ^ gravity_power);
+							}
+							loop while: length(bds_) < nb_candidates {
+								bds_<< buildings[rnd_choice(proba_per_building)];
+								bds_ <- remove_duplicates(bds_);
+							}
+							bds[type] <- bds_;
 						}
 						building_targets[act] <- bds;
 					}
@@ -448,6 +453,24 @@ global {
 		
 		
 	}
+	
+	Activity activity_choice(Individual ind, list<Activity> possible_activities) {
+		if (proba_activity_per_age_sex_class = nil ) or empty(proba_activity_per_age_sex_class) {
+			return any(possible_activities);
+		}
+		loop a over: proba_activity_per_age_sex_class.keys {
+			if (ind.age < a) {
+				map<string, float> weight_act <-  proba_activity_per_age_sex_class[a][ind.sex];
+				list<float> proba_activity <- possible_activities collect ((each.name in weight_act.keys) ? weight_act[each.name]:1.0 );
+				if (sum(proba_activity) = 0) {return any(possible_activities);}
+				return possible_activities[rnd_choice(proba_activity)];
+			}
+		}
+		return any(possible_activities);
+		
+	}
+	
+	
 	
 	//specific construction of a "day off" (without work or school)
 	action manag_day_off(Individual current_ind, int day, list<Activity> possible_activities_without_rel, list<Activity> possible_activities_tot) {
@@ -485,7 +508,7 @@ global {
 				if (current_hour >= end_hour) {
 					break;
 				}
-				Activity act <- any(possible_activities);
+				Activity act <-activity_choice(current_ind, possible_activities);
 				if (species(act) = Activity) {
 					
 					list<Individual> cands <- current_ind.friends where ((each.agenda_week[day - 1][current_hour]) = nil);

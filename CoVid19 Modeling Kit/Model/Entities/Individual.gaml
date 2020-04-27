@@ -88,7 +88,7 @@ species Individual schedules: shuffle(Individual where (each.status != dead)){
 	list<map<int, pair<Activity,list<Individual>>>> agenda_week;
 	list<Individual> activity_fellows;
 	Activity last_activity;
-	map<Activity, list<Building>> building_targets;
+	map<Activity, map<string,list<Building>>> building_targets;
 	
 	//#############################################################
 	//Intervention related attributes

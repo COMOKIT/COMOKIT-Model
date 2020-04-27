@@ -121,7 +121,7 @@ global {
 	map<list<int>,string> possible_schools <- (dataset = "../Datasets/Ben Tre/") ? [[3,18]::"school"]: [[3,18]::"school", [19,23]::"university"]; 
 	
 	//Acvitity parameters 
-	string choice_of_target_mode <- random among: ["random", "gravity","closest"]; // model used for the choice of building for an activity 
+	string choice_of_target_mode <- gravity among: ["random", "gravity","closest"]; // model used for the choice of building for an activity 
 	int nb_candidates <- 4; // number of building considered for the choice of building for a particular activity
 	float gravity_power <- 0.5;  // power used for the gravity model: weight_of_building <- area of the building / (distance to it)^gravity_power
 	
@@ -145,7 +145,7 @@ global {
 	int min_age_for_evening_act <- 13; //min age of individual to have an activity after school
 	float nb_activity_fellows_mean <- 3.0;
 	float nb_activity_fellows_std <- 2.0;
-	
+
 	int max_num_activity_for_non_working_day <- 4; //max number of activity for non working day
 	int max_num_activity_for_old_people <- 3; //max number of activity for old people ([0,max_num_activity_for_old_people])
 	float proba_activity_evening <- 0.7; //proba for people (except old ones) to have an activity after work
@@ -163,10 +163,50 @@ global {
 		act_shopping::remove_duplicates(OSM_shop + ["shop","market","supermarket", "store"]), 
 		act_eating::remove_duplicates(OSM_eat + ["restaurant","coffeeshop", "caphe"]),
 		act_leisure::remove_duplicates(OSM_leisure + ["gamecenter", "karaoke", "cinema", "caphe-karaoke"]), 
-		act_outside::remove_duplicates(OSM_shop + ["playground", "park"]), 
+		act_outside::remove_duplicates(OSM_outside_activity + ["playground", "park"]), 
 		act_sport::remove_duplicates(OSM_sport + ["sport"]),
 	 	act_other::remove_duplicates(OSM_other_activity + ["admin","meeting", "supplypoint","bookstore", "place_of_worship"])
 	 ];
+	
+		
+	map<int,map<int,map<string,float>>> proba_activity_per_age_sex_class <- [
+		10 :: 
+		[0::[act_neighbor::1.0,act_friend::1.0, act_eating::0.5, act_shopping::0.5,act_leisure::1.0,act_outside::2.0,act_sport::1.0,act_other::0.1 ], 
+		1::[act_neighbor::1.0,act_friend::1.0, act_eating::0.5, act_shopping::0.5,act_leisure::1.0,act_outside::2.0,act_sport::1.0,act_other::0.1 ]],
+	
+		18 :: 
+		[0::[act_neighbor::0.2,act_friend::0.5, act_eating::2.0, act_shopping::1.0,act_leisure::3.0,act_outside::2.0,act_sport::3.0,act_other::0.5 ], 
+		1::[act_neighbor::0.2,act_friend::0.5, act_eating::2.0, act_shopping::1.0,act_leisure::3.0,act_outside::2.0,act_sport::1.0,act_other::0.5 ]],
+	
+		60 :: 
+		[0::[act_neighbor::1.0,act_friend::1.0, act_eating::1.0, act_shopping::1.0,act_leisure::1.0,act_outside::1.0,act_sport::1.0,act_other::1.0 ], 
+		1::[act_neighbor::2.0,act_friend::2.0, act_eating::0.2, act_shopping::3.0,act_leisure::0.5,act_outside::1.0,act_sport::0.5,act_other::1.0 ]],
+	
+		100 :: 
+		[0::[act_neighbor::3.0,act_friend::2.0, act_eating::0.5, act_shopping::0.5,act_leisure::0.5,act_outside::2.0,act_sport::0.2,act_other::2.0 ], 
+		1::[act_neighbor::3.0,act_friend::2.0, act_eating::0.1, act_shopping::1.0,act_leisure::0.2,act_outside::2.0,act_sport::0.1,act_other::2.0 ]]
+	
+	];
+	
+	map<int,map<int,map<string,float>>> proba_bd_type_per_age_sex_class <- [
+		10 :: 
+		[0::["playground"::5.0, "park"::3.0, "gamecenter"::2.0], 
+		1::["playground"::5.0, "park"::3.0, "gamecenter"::3.0]],
+	
+		18 :: 
+		[0::["playground"::2.0, "park"::2.0, "gamecenter"::3.0], 
+		1::["playground"::2.0, "park"::2.0, "gamecenter"::1.0, "karaoke"::3.0, "cinema"::3.0, "caphe-karaoke"::3.0]],
+	
+		60 :: 
+		[0::["playground"::0.5, "park"::2.0, "gamecenter"::1.0], 
+		1::["playground"::5.0, "park"::3.0, "gamecenter"::3.0]],
+	
+		100 :: 
+		[0::["playground"::0.0, "park"::3.0, "gamecenter"::0.1, "place_of_worship"::2.0, "cinema"::2.0], 
+		1::["playground"::0.0, "park"::3.0, "gamecenter"::0.0, "place_of_worship"::3.0,"cinema"::2.0]]
+	
+	];
+	
 	
 	//Policy parameters
 	list<string> meeting_relaxing_act <- [act_working, act_studying,act_eating,act_leisure,act_sport]; //fordidden activity when choosing "no meeting, no relaxing" policy

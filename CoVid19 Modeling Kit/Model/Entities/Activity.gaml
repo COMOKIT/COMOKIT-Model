@@ -32,37 +32,58 @@ global {
 				Activities[tb] <-self ;
 				loop type over: types_of_building {
 					if (type in buildings_per_activity.keys) {
-						buildings <- buildings + buildings_per_activity[type];
+						buildings[type] <-  buildings_per_activity[type];
 					}
 				}
 			}
 		}	
 	}
+	
+	string building_type_choice(Individual ind, list<string> possible_building_types) {
+		if (proba_bd_type_per_age_sex_class = nil ) or empty(proba_bd_type_per_age_sex_class) {
+			return any(possible_building_types);
+		}
+		loop a over: proba_bd_type_per_age_sex_class.keys {
+			if (ind.age < a) {
+				map<string, float> weight_bds <-  proba_bd_type_per_age_sex_class[a][ind.sex];
+				list<float> proba_bds <- possible_building_types collect ((each in weight_bds.keys) ? weight_bds[each]:1.0 );
+				if (sum(proba_bds) = 0) {return any(possible_building_types);}
+				return possible_building_types[rnd_choice(proba_bds)];
+			}
+		}
+		return any(possible_building_types);
+		
+	}
 }
 
 species Activity {
 	list<string> types_of_building <- [];
-	list<Building> buildings;
+	map<string,list<Building>> buildings;
 	
 	map<Building,list<Individual>> find_target (Individual i) {
-		if flip(proba_go_outside) or  empty(buildings){
-			return [the_outside::[]];
-		}
 		if not empty(i.activity_fellows ) {
 			Individual fellow <- i.activity_fellows first_with (each.last_activity = self);
 			if (fellow!= nil) {
 				return [fellow.current_place::[]];
 			} 
 		}
+		if flip(proba_go_outside) {
+			return [the_outside::[]];
+		}
+		string type <- world.building_type_choice(i,types_of_building);
+		list<Building> bds <- buildings[type];
+		if (empty(bds)) {
+			return [the_outside::[]];
+		}	
 		switch choice_of_target_mode {
 			match closest {
-				return [buildings closest_to self::[]];
+				return [bds closest_to self::[]];
 			}
 			match gravity {
-				return i.building_targets[self] as_map (each::[]);
+				return i.building_targets[self][type] as_map (each::[]);
 			}
 			match random {
-				return (nb_candidates among buildings) as_map(each::[]);
+				return (nb_candidates among bds) as_map(each::[]);
 			}
 		}
 	}

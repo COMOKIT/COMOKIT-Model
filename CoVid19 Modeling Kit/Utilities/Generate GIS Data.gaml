@@ -36,6 +36,8 @@ global {
 	float min_area_buildings <- 20.0;
 	
 	bool display_google_map <- true parameter:"Display google map image";
+	geometry bounds_tile;
+	int ind <- 0;
 	
 	
 	int TILE_SIZE <- 256;
@@ -302,8 +304,6 @@ global {
 		float originShift <- 2 * #pi * 6378137 / 2.0;
 		return { px * res - originShift,  - py * res + originShift};
 	}
-	geometry bounds_tile;
-	int ind <- 0;
 	
 	reflex vectorization {
 		if (ind < length(data_google)) {
