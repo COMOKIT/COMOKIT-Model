@@ -29,7 +29,7 @@ jobs:
       run: mkdir COMOKIT && mv * COMOKIT/
 
     - name: Download latest GAMA Continuous version
-      run: curl -o gama.zip -fSL $(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_Linux | cut -d : -f 2,3 | tr -d \")
+      run: curl -o gama.zip -fSL $(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_Linux | cut -d ':' -f 2,3 | tr -d \")
     
     - name: Prepare GAMA
       run: unzip gama.zip -d $GITHUB_WORKSPACE/GAMA && rm gama.zip
