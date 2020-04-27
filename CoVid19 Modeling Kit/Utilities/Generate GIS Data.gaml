@@ -138,21 +138,24 @@ global {
 			if (file_exists(googlemap_path)) {
 				do load_google_image;
 			} else {
-				point bottom_right <- CRS_transform({shape.width, shape.height}, "EPSG:4326").location;
-				point top_left <- bottom_right - (bottom_right - CRS_transform(location, "EPSG:4326").location) * 2;
-				list<int> indtl <- index_tile(top_left);
-				list<int> indbr <- index_tile(bottom_right);
-				
-				int resolution_x <- abs(indbr[2] - indtl[2])  ;
-				int resolution_y <- abs(indbr[3] - indtl[3]);	
-				int id_x <- 0;
-				int id_y <- 0;
-				int offset_x <- min(indbr[0],indtl[0]);
-				int offset_y <- min(indbr[1],indtl[1]);
-				loop ind_tile_x from: 0 to: abs(indbr[0] - indtl[0])  {
-					loop ind_tile_y from: 0 to:abs(indtl[1] - indbr[1]) {
-						string img <- "http://mt2.google.com/vt/lyrs=m&x=" +(ind_tile_x + offset_x)+"&y="+ (ind_tile_y  + offset_y)+"&z="+zoom;
-						data_google[img] <- ["ind_tile_x":: (ind_tile_x + offset_x) ,  "ind_tile_y"::(ind_tile_y + offset_y)];
+				map input_values <- user_input("Do you want to download google maps to fill in the data?",["Download data" :: true]);
+				if bool(input_values["Download data"]) {
+						point bottom_right <- CRS_transform({shape.width, shape.height}, "EPSG:4326").location;
+					point top_left <- bottom_right - (bottom_right - CRS_transform(location, "EPSG:4326").location) * 2;
+					list<int> indtl <- index_tile(top_left);
+					list<int> indbr <- index_tile(bottom_right);
+					
+					int resolution_x <- abs(indbr[2] - indtl[2])  ;
+					int resolution_y <- abs(indbr[3] - indtl[3]);	
+					int id_x <- 0;
+					int id_y <- 0;
+					int offset_x <- min(indbr[0],indtl[0]);
+					int offset_y <- min(indbr[1],indtl[1]);
+					loop ind_tile_x from: 0 to: abs(indbr[0] - indtl[0])  {
+						loop ind_tile_y from: 0 to:abs(indtl[1] - indbr[1]) {
+							string img <- "http://mt2.google.com/vt/lyrs=m&x=" +(ind_tile_x + offset_x)+"&y="+ (ind_tile_y  + offset_y)+"&z="+zoom;
+							data_google[img] <- ["ind_tile_x":: (ind_tile_x + offset_x) ,  "ind_tile_y"::(ind_tile_y + offset_y)];
+						}
 					}
 				}
 			}
