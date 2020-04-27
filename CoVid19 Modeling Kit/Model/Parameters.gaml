@@ -16,9 +16,9 @@ global {
 	 
 	//GIS data
 	//TODO : make it less dependant on the hierarchical organization of experiment
-	//string dataset <- "../../Datasets/Ben Tre/"; // default
+	string dataset <- "../../Datasets/Ben Tre/"; // default
 	//string dataset <- "../../Datasets/Vinh Phuc/"; // default
-	string dataset <- "../../Datasets/Castanet Tolosan/"; // default
+	//string dataset <- "../../Datasets/Castanet Tolosan/"; // default
 	
 	file shp_boundary <- file_exists(dataset+"boundary.shp") ? shape_file(dataset+"boundary.shp"):nil;
 	file shp_buildings <- file_exists(dataset+"buildings.shp") ? shape_file(dataset+"buildings.shp"):nil;
