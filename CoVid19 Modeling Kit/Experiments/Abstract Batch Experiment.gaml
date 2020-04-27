@@ -65,7 +65,7 @@ global{
 			}			
 			// Get corresponding Individual in age category
 			list<Individual> subIndividual;
-			if (i = ageCategory){ // Include age 100 in last CSV
+			if (i = 100){ // Include age 100 in last CSV
 				subIndividual <- Individual where(each.age <= i and each.age >= (i - ageCategory));
 			}else{
 				subIndividual <- Individual where(each.age < i and each.age >= (i - ageCategory));	
