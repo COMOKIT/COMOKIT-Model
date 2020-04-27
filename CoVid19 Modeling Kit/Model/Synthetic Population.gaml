@@ -310,6 +310,26 @@ global {
 					}
 				} 
 			}
+		}
+		if (csv_activity_weights != nil) {
+			matrix data <- matrix(csv_activity_weights);
+			weight_activity_per_age_sex_class <- [];
+			list<string> act_type;
+			loop i from: 3 to: data.columns - 1 {
+				act_type <<string(data[i,0]);
+			}
+			loop i from: 1 to: data.rows - 1 {
+				list<int> cat <- [ int(data[0,i]),int(data[1,i])];
+				map<int,map<string, float>> weights <- (cat in weight_activity_per_age_sex_class.keys) ? weight_activity_per_age_sex_class[cat] : map([]);
+				int sex <- int(data[2,i]);
+				map<string, float> weights_sex;
+				loop j from: 0 to: length(act_type) - 1 {
+					weights_sex[act_type[j]] <- float(data[j+3,i]); 
+				}
+				
+				weights[sex] <- weights_sex;
+				weight_activity_per_age_sex_class[cat] <- weights;
+			}
 		}	
 		list<Activity> possible_activities_tot <- Activities.values - studying - working - staying_home;
 		list<Activity> possible_activities_without_rel <- possible_activities_tot - visiting_friend;
@@ -455,12 +475,12 @@ global {
 	}
 	
 	Activity activity_choice(Individual ind, list<Activity> possible_activities) {
-		if (proba_activity_per_age_sex_class = nil ) or empty(proba_activity_per_age_sex_class) {
+		if (weight_activity_per_age_sex_class = nil ) or empty(weight_activity_per_age_sex_class) {
 			return any(possible_activities);
 		}
-		loop a over: proba_activity_per_age_sex_class.keys {
-			if (ind.age < a) {
-				map<string, float> weight_act <-  proba_activity_per_age_sex_class[a][ind.sex];
+		loop a over: weight_activity_per_age_sex_class.keys {
+			if (ind.age >= a[0]) and (ind.age <= a[1]) {
+				map<string, float> weight_act <-  weight_activity_per_age_sex_class[a][ind.sex];
 				list<float> proba_activity <- possible_activities collect ((each.name in weight_act.keys) ? weight_act[each.name]:1.0 );
 				if (sum(proba_activity) = 0) {return any(possible_activities);}
 				return possible_activities[rnd_choice(proba_activity)];

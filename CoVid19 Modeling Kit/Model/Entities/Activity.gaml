@@ -33,19 +33,52 @@ global {
 				loop type over: types_of_building {
 					if (type in buildings_per_activity.keys) {
 						buildings[type] <-  buildings_per_activity[type];
-					}
+					} 
 				}
+				
 			}
-		}	
+		}
+		
+		if (csv_building_type_weights != nil) {
+			weight_bd_type_per_age_sex_class <- [];
+			matrix data <- matrix(csv_building_type_weights);
+			list<string> types;
+			loop i from: 3 to: data.columns - 1 {
+				types <<string(data[i,0]);
+			}
+			loop i from: 1 to: data.rows - 1 {
+				list<int> cat <- [ int(data[0,i]),int(data[1,i])];
+				map<int,map<string, float>> weights <- (cat in weight_bd_type_per_age_sex_class.keys) ? weight_bd_type_per_age_sex_class[cat] : map([]);
+				int sex <- int(data[2,i]);
+				map<string, float> weights_sex;
+				loop j from: 0 to: length(types) - 1 {
+					weights_sex[types[j]] <- float(data[j+3,i]); 
+				}
+				
+				weights[sex] <- weights_sex;
+				weight_bd_type_per_age_sex_class[cat] <- weights;
+			}
+		}
+		list<string> existing_bd_type;
+		loop type over: weight_bd_type_per_age_sex_class.values {
+			loop type_s over: type.values {
+				existing_bd_type <- existing_bd_type + type_s.keys;
+			}
+		}
+		existing_bd_type <- remove_duplicates(existing_bd_type);
+		ask Activity {
+			types_of_building <- types_of_building where ((each in existing_bd_type) or (each in buildings.keys));
+		}
+				
 	}
 	
 	string building_type_choice(Individual ind, list<string> possible_building_types) {
-		if (proba_bd_type_per_age_sex_class = nil ) or empty(proba_bd_type_per_age_sex_class) {
+		if (weight_bd_type_per_age_sex_class = nil ) or empty(weight_bd_type_per_age_sex_class) {
 			return any(possible_building_types);
 		}
-		loop a over: proba_bd_type_per_age_sex_class.keys {
-			if (ind.age < a) {
-				map<string, float> weight_bds <-  proba_bd_type_per_age_sex_class[a][ind.sex];
+		loop a over: weight_bd_type_per_age_sex_class.keys {
+			if (ind.age >= a[0]) and (ind.age <= a[1]) {
+				map<string, float> weight_bds <-  weight_bd_type_per_age_sex_class[a][ind.sex];
 				list<float> proba_bds <- possible_building_types collect ((each in weight_bds.keys) ? weight_bds[each]:1.0 );
 				if (sum(proba_bds) = 0) {return any(possible_building_types);}
 				return possible_building_types[rnd_choice(proba_bds)];

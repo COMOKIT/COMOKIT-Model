@@ -16,18 +16,21 @@ global {
 	 
 	//GIS data
 	//TODO : make it less dependant on the hierarchical organization of experiment
-	string dataset <- "../../Datasets/Ben Tre/"; // default
+	//string dataset <- "../../Datasets/Ben Tre/"; // default
 	//string dataset <- "../../Datasets/Vinh Phuc/"; // default
-	//string dataset <- "../../Datasets/Castanet Tolosan/"; // default
+	string dataset <- "../../Datasets/Castanet Tolosan/"; // default
 	
 	file shp_boundary <- file_exists(dataset+"boundary.shp") ? shape_file(dataset+"boundary.shp"):nil;
 	file shp_buildings <- file_exists(dataset+"buildings.shp") ? shape_file(dataset+"buildings.shp"):nil;
 
-	//Population data
+	//Population data 
 	csv_file csv_population <- file_exists(dataset+"population.csv") ? csv_file(dataset+"population.csv",separator,header):nil;
 	csv_file csv_parameter_population <- file_exists(dataset+"Population parameter.csv") ? csv_file(dataset+"Population parameter.csv",",",true):nil;
 	csv_file csv_parameter_agenda <- file_exists(dataset+"Agenda parameter.csv") ? csv_file(dataset+"Agenda parameter.csv",",",true):nil;
-
+	csv_file csv_activity_weights <- file_exists(dataset+"Activity weights.csv") ? csv_file(dataset+"Activity weights.csv",",",string, false):nil;
+	csv_file csv_building_type_weights <- file_exists(dataset+"Building type weights.csv") ? csv_file(dataset+"Building type weights.csv",",",string, false):nil;
+	
+	
 	//simulation step
 	float step<-1#h;
 	date starting_date <- date([2020,3,2]);
@@ -152,6 +155,7 @@ global {
 	float proba_lunch_outside_workplace <- 0.5; //proba to have lunch outside the working place (home or restaurant)
 	float proba_lunch_at_home <- 0.5; // if lunch outside the working place, proba of having lunch at home
 	
+	float proba_work_outside <- 0.0; //proba for an individual to work outside the study area
 	float proba_go_outside <- 0.0; //proba for an individual to do an activity outside the study area
 	float proba_outside_contamination_per_hour <- 0.0; //proba per hour of being infected for Individual outside the study area 
 	
@@ -168,40 +172,42 @@ global {
 	 	act_other::remove_duplicates(OSM_other_activity + ["admin","meeting", "supplypoint","bookstore", "place_of_worship"])
 	 ];
 	
-		
-	map<int,map<int,map<string,float>>> proba_activity_per_age_sex_class <- [
-		10 :: 
+	
+	//for each category of age, and for each sex, the weight of the different activities
+	map<list<int>,map<int,map<string,float>>> weight_activity_per_age_sex_class <- [
+		 [0,10] :: 
 		[0::[act_neighbor::1.0,act_friend::1.0, act_eating::0.5, act_shopping::0.5,act_leisure::1.0,act_outside::2.0,act_sport::1.0,act_other::0.1 ], 
 		1::[act_neighbor::1.0,act_friend::1.0, act_eating::0.5, act_shopping::0.5,act_leisure::1.0,act_outside::2.0,act_sport::1.0,act_other::0.1 ]],
 	
-		18 :: 
+		[11,18] :: 
 		[0::[act_neighbor::0.2,act_friend::0.5, act_eating::2.0, act_shopping::1.0,act_leisure::3.0,act_outside::2.0,act_sport::3.0,act_other::0.5 ], 
 		1::[act_neighbor::0.2,act_friend::0.5, act_eating::2.0, act_shopping::1.0,act_leisure::3.0,act_outside::2.0,act_sport::1.0,act_other::0.5 ]],
 	
-		60 :: 
+		[19,60] :: 
 		[0::[act_neighbor::1.0,act_friend::1.0, act_eating::1.0, act_shopping::1.0,act_leisure::1.0,act_outside::1.0,act_sport::1.0,act_other::1.0 ], 
 		1::[act_neighbor::2.0,act_friend::2.0, act_eating::0.2, act_shopping::3.0,act_leisure::0.5,act_outside::1.0,act_sport::0.5,act_other::1.0 ]],
 	
-		100 :: 
+		[61,120] :: 
 		[0::[act_neighbor::3.0,act_friend::2.0, act_eating::0.5, act_shopping::0.5,act_leisure::0.5,act_outside::2.0,act_sport::0.2,act_other::2.0 ], 
 		1::[act_neighbor::3.0,act_friend::2.0, act_eating::0.1, act_shopping::1.0,act_leisure::0.2,act_outside::2.0,act_sport::0.1,act_other::2.0 ]]
 	
 	];
 	
-	map<int,map<int,map<string,float>>> proba_bd_type_per_age_sex_class <- [
-		10 :: 
+	//for each category of age, and for each sex, the weight of the different type of buildings
+	map<list<int>,map<int,map<string,float>>> weight_bd_type_per_age_sex_class <- [
+		[0,10] :: 
 		[0::["playground"::5.0, "park"::3.0, "gamecenter"::2.0], 
 		1::["playground"::5.0, "park"::3.0, "gamecenter"::3.0]],
 	
-		18 :: 
+		[11,18] :: 
 		[0::["playground"::2.0, "park"::2.0, "gamecenter"::3.0], 
 		1::["playground"::2.0, "park"::2.0, "gamecenter"::1.0, "karaoke"::3.0, "cinema"::3.0, "caphe-karaoke"::3.0]],
 	
-		60 :: 
+		[19,60] :: 
 		[0::["playground"::0.5, "park"::2.0, "gamecenter"::1.0], 
 		1::["playground"::5.0, "park"::3.0, "gamecenter"::3.0]],
 	
-		100 :: 
+		[61,120] :: 
 		[0::["playground"::0.0, "park"::3.0, "gamecenter"::0.1, "place_of_worship"::2.0, "cinema"::2.0], 
 		1::["playground"::0.0, "park"::3.0, "gamecenter"::0.0, "place_of_worship"::3.0,"cinema"::2.0]]
 	
