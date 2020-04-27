@@ -27,12 +27,11 @@ jobs:
       
     - name: Move COMOKIT under single folder
       run: mkdir COMOKIT && find . -maxdepth 1 -not -name ".*" | grep -v COMOKIT| xargs -i mv {} ./COMOKIT
-      
-    - name: Installing cURL
-      run: apt install -y --no-install-recommends curl ca-certificates unzip
 
     - name: Download latest GAMA Continuous version
-      run: curl -o gama.zip -fSL $(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_Linux | cut -d ":" -f 2,3 | tr -d \")
+      uses: enflo/curl-action@master
+      with:
+        curl: -o gama.zip -fSL $(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_Linux | cut -d ":" -f 2,3 | tr -d \")
     
     - name: Prepare GAMA
       run: unzip gama.zip -d $GITHUB_WORKSPACE/GAMA && rm gama.zip && chmod +x GAMA/headless/gama-headless.sh
