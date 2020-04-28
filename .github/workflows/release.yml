@@ -18,7 +18,7 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -29,12 +29,10 @@ jobs:
       run: mkdir COMOKIT && find . -maxdepth 1 -not -name ".*" | grep -v COMOKIT| xargs -i mv {} ./COMOKIT
 
     - name: Download latest GAMA Continuous version
-      run: docker run enflo/curl-action -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous
-      
-    #- name: Check $GAMA_URL
-    #  run: echo $GAMA_URL
-    #  with:
-    # curl -o gama.zip -fSL $(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_Linux | cut -d ":" -f 2,3 | tr -d \")
+      run: docker run enflo/curl-action -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_Linux | cut -d ":" -f 2,3 | tr -d \"
+
+    - name: Download latest GAMA Continuous version
+      run: export GAMA_URL=$(docker run enflo/curl-action -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_Linux | cut -d ":" -f 2,3 | tr -d \")
     
     - name: Prepare GAMA
       run: unzip gama.zip -d $GITHUB_WORKSPACE/GAMA && rm gama.zip && chmod +x GAMA/headless/gama-headless.sh
