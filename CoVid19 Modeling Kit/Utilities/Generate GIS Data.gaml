@@ -23,7 +23,7 @@ global {
 	string osm_file_path <- dataset_path + "/map.osm";
 	string googlemap_path <- dataset_path + "/googlemap.png";
 	bool use_google_map_data <- true;
-	bool use_google_OSM_data <- false;
+	bool use_google_OSM_data <- true;
 	
 	int zoom <- 18 min: 17 max: 20;
 	float simplication_dist <- 1.0;
