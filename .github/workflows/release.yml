@@ -53,7 +53,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         # Note-worthy description of changes in release
-        body: "Latest version of COMOKIT bundled with GAMA Continuous w/o JDK and COMO-TK" # optional
+        #body: "Latest version of COMOKIT bundled with GAMA Continuous w/o JDK and COMO-TK" # optional
         # Path to load note-worthy description of changes in release from
         #body_path: # optional
         # Gives the release a custom name. Defaults to tag name
@@ -64,6 +64,6 @@ jobs:
         prerelease: true # optional
         # Newline-delimited list of path globs for asset files to upload
         files: COMOKIT.zip # optional
-        tag_name: ${ echo $GITHUB_SHA }
+        tag_name: master
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ROIARTHURB }}
