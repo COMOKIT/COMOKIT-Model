@@ -380,7 +380,7 @@ global {
 							if not empty(cells) {
 								list<geometry> gs <- union(cells collect (each + tolerance_dist)).geometries;
 								if (buffer_coeff > 0) {
-									float buffer_dist <- first(cell_google).shape.width * buffer_coeff;
+									float buffer_dist <- first(cells).width * buffer_coeff;
 									gs <- gs collect (each + buffer_dist);
 								}
 								create marker from: gs with: [type::type];
