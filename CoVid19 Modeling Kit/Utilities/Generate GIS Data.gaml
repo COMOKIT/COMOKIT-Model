@@ -23,7 +23,7 @@ global {
 	string osm_file_path <- dataset_path + "/map.osm";
 	string googlemap_path <- dataset_path + "/googlemap.png";
 	bool use_google_map_data <- true;
-	bool use_google_OSM_data <- true;
+	bool use_OSM_data <- true;
 	
 	int zoom <- 18 min: 17 max: 20;
 	float simplication_dist <- 1.0;
@@ -59,7 +59,7 @@ global {
 	init {
 		write "Start the pre-processing process";
 		create Boundary from: data_file;
-		if (use_google_OSM_data) {
+		if (use_OSM_data) {
 			osm_file osmfile;
 			if (file_exists(osm_file_path)) {
 				osmfile  <- osm_file(osm_file_path, filtering);
