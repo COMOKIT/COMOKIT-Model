@@ -401,6 +401,8 @@ global {
 				ind <- ind + 1; 
 			}
 		} else {
+			save Building crs:"EPSG:3857" to:dataset_path +"/buildings.shp" type: shp attributes: ["type"::type, "flats"::flats,"height"::height, "levels"::levels];
+		
 			do pause;
 		}
 		
