@@ -44,7 +44,7 @@ jobs:
       run: git clone https://github.com/COMOKIT/COMO-TK.git
       
     - name: Check workspace content
-      run: tree -L 2 $GITHUB_WORKSPACE
+      run: ls -lah $GITHUB_WORKSPACE
       
     - name: Compress release
       run: zip COMOKIT.zip $GITHUB_WORKSPACE/COMOKIT $GITHUB_WORKSPACE/GAMA $GITHUB_WORKSPACE/COMO-TK
