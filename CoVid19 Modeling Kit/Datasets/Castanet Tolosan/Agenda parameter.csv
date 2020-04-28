@@ -19,10 +19,10 @@ nb_activity_fellows_mean,3.0
 nb_activity_fellows_std,2.0
 max_num_activity_for_non_working_day,4
 max_num_activity_for_old_people,3
+max_num_activity_for_unemployed,3
 proba_activity_evening,0.7
 proba_lunch_outside_workplace,0.5
 proba_lunch_at_home,0.5
 proba_go_outside,0.2
 proba_work_outside,0.3
-proba_outside_contamination_per_hour,0.0
 building_neighbors_dist,500

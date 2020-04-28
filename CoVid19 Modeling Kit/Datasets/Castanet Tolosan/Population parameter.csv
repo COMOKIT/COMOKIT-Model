@@ -13,4 +13,6 @@ nb_classmates_mean,10.0
 nb_classmates_std,5.0
 nb_work_colleagues_mean,5.0
 nb_work_colleagues_std,3.0
-work_at_home_unemployed,0.1
+proba_unemployed_M,0.1
+proba_unemployed_F,0.1
+work_at_home,0.1

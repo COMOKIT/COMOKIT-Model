@@ -31,6 +31,8 @@ species Individual schedules: shuffle(Individual where (each.status != dead)){
 	//Sex of the individual
 	int sex; //0 M 1 F
 	
+	bool is_unemployed <- false; //is unemployed or not
+	
 	//#############################################################
 	//Location related attributes
 	//#############################################################
