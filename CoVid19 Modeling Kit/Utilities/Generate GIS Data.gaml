@@ -52,7 +52,7 @@ global {
 	list<rgb> color_bds <- [rgb(241,243,244), rgb(255,250,241)];
 	
 	map<string,rgb> google_map_type <- ["restaurant"::rgb(255,159,104), "shop"::rgb(73,149,244)];
-	
+		
 	geometry shape <- envelope(data_file);
 	map filtering <- ["building"::[], "shop"::[], "historic"::[], "amenity"::[], "sport"::[], "military"::[], "leisure"::[], "office"::[]];
 	image_file static_map_request ;
@@ -166,8 +166,9 @@ global {
 		save Building crs:"EPSG:3857" to:dataset_path +"/buildings.shp" type: shp attributes: ["type"::type, "flats"::flats,"height"::height, "levels"::levels];
 		
 		map<string, list<Building>> buildings <- Building group_by (each.type);
-		loop ll over: buildings {
-			rgb col <- rnd_color(255);
+		loop type over: buildings.keys {
+			list<Building> ll <- buildings[type];
+			rgb col <- (type in google_map_type.keys) ? google_map_type[type] : rnd_color(255);
 			ask ll {
 				color <- col;
 			}
@@ -392,6 +393,8 @@ global {
 										point loc <- shape.points with_max_of (each.y);
 										Building bd <- Building closest_to loc;
 										bd.type <- type;
+										color <- (type in google_map_type.keys) ? google_map_type[type] : rnd_color(255);
+				
 									}
 								}
 							}
@@ -440,7 +443,7 @@ global {
 species marker {
 	string type;
 	aspect default{
-		draw shape color: google_map_type[type];
+		draw shape color: google_map_type[type] depth: 1;
 	}
 }
 
