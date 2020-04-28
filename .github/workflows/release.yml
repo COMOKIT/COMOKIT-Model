@@ -37,17 +37,17 @@ jobs:
     - name: Download GAMA
       run: wget -O gama.zip $GAMA_URL
     
-    - name: Prepare GAMA
+    - name: Extract GAMA Continuous
       run: unzip gama.zip -d $GITHUB_WORKSPACE/GAMA && rm gama.zip && chmod +x GAMA/headless/gama-headless.sh
 
-    - name: Get COMOKIT ToolKit scripts/
+    - name: Get COMOKIT ToolKit
       run: git clone https://github.com/COMOKIT/COMO-TK.git
       
     - name: Check workspace content
-      run: ls -lah $GITHUB_WORKSPACE
+      run: ls -lah $GITHUB_WORKSPACE/*
       
     - name: Compress release
-      run: zip COMOKIT.zip $GITHUB_WORKSPACE/COMOKIT $GITHUB_WORKSPACE/GAMA $GITHUB_WORKSPACE/COMO-TK
+      run: zip -r COMOKIT.zip $GITHUB_WORKSPACE/COMOKIT $GITHUB_WORKSPACE/GAMA $GITHUB_WORKSPACE/COMO-TK
         
     - name: Action Release
       uses: softprops/action-gh-release@v1
