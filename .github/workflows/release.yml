@@ -61,3 +61,6 @@ jobs:
         prerelease: true # optional
         # Newline-delimited list of path globs for asset files to upload
         files: COMOKIT.zip # optional
+        tag_name: master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ROIARTHURB }}
