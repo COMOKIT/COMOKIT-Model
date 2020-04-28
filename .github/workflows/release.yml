@@ -43,8 +43,11 @@ jobs:
     - name: Get COMOKIT ToolKit scripts/
       run: git clone https://github.com/COMOKIT/COMO-TK.git
       
-    - name: Prepare release
-      run: zip COMOKIT.zip COMOKIT GAMA COMO-TK
+    - name: Check workspace content
+      run: tree -L 2 $GITHUB_WORKSPACE
+      
+    - name: Compress release
+      run: zip COMOKIT.zip $GITHUB_WORKSPACE/COMOKIT $GITHUB_WORKSPACE/GAMA $GITHUB_WORKSPACE/COMO-TK
         
     - name: Action Release
       uses: softprops/action-gh-release@v1
