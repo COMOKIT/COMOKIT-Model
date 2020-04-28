@@ -29,10 +29,10 @@ jobs:
       run: mkdir COMOKIT && find . -maxdepth 1 -not -name ".*" | grep -v COMOKIT| xargs -i mv {} ./COMOKIT
 
     - name: Download latest GAMA Continuous version
-      run: $(docker run enflo/curl-action -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous) | grep  continuous/GAMA1.8_Continuous_Linux | cut -d ":" -f 2,3 | tr -d \"
+      run: docker run enflo/curl-action -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous
       
-    - name: Check $GAMA_URL
-      run: echo $GAMA_URL
+    #- name: Check $GAMA_URL
+    #  run: echo $GAMA_URL
     #  with:
     # curl -o gama.zip -fSL $(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_Linux | cut -d ":" -f 2,3 | tr -d \")
     
