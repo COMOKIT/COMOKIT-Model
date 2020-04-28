@@ -22,8 +22,8 @@ global {
 	//optional
 	string osm_file_path <- dataset_path + "/map.osm";
 	string googlemap_path <- dataset_path + "/googlemap.png";
-	bool use_google_map_data <- true;
 	bool use_OSM_data <- true;
+	bool use_google_map_data <- true;
 	
 	int zoom <- 18 min: 17 max: 20;
 	float simplication_dist <- 1.0;
@@ -140,7 +140,9 @@ global {
 			if (file_exists(googlemap_path)) {
 				do load_google_image;
 			} else {
-				map input_values <- user_input("Do you want to download google maps to fill in the data?",["Download data" :: true]);
+				map input_values <- user_input("Do you want to download google maps to fill in the data? (warning: risk of being blocked by google!)",["Download data" :: false, "Delay (in s) between two requests"::5.0]);
+				experiment.minimum_cycle_duration <- max(0.5, float(input_values["Delay (in s) between two requests"]));
+	
 				if bool(input_values["Download data"]) {
 						point bottom_right <- CRS_transform({shape.width, shape.height}, "EPSG:4326").location;
 					point top_left <- bottom_right - (bottom_right - CRS_transform(location, "EPSG:4326").location) * 2;
