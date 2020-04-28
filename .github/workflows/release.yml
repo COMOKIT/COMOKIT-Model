@@ -31,6 +31,9 @@ jobs:
     - name: Get latest GAMA Continuous version download url
       run: export GAMA_URL=$(docker run enflo/curl-action -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_Linux | cut -d ":" -f 2,3 | tr -d \")
     
+    - name: Check $GAMA_URL
+      run: echo $GAMA_URL
+    
     - name: Download GAMA
       run: wget -O gama.zip $GAMA_URL
     
