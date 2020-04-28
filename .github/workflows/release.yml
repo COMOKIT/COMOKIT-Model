@@ -50,7 +50,7 @@ jobs:
       run: zip -r COMOKIT.zip $GITHUB_WORKSPACE/COMOKIT $GITHUB_WORKSPACE/GAMA $GITHUB_WORKSPACE/COMO-TK
         
     - name: Action Release
-    - uses: eine/tip@gha-tip
+      uses: eine/tip@gha-tip
       with:
         token: ${{ secrets.GH_TOKEN_ROIARTHURB }}
         cwd: ${{ github.workspace }}
