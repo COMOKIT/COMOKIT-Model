@@ -111,8 +111,8 @@ global {
 	float nb_work_colleagues_mean <- 5.0; //Mean number of work colleagures with which an Individual will have close contact
 	float nb_work_colleagues_std <- 3.0;//Stand deviation of the number of work colleagures with which an Individual will have close contact
 	float proba_work_at_home <- 0.05; //probability to work at home;
-	float proba_unemployed_M <- 0.1; // probability for a M individual to be unemployed.
-	float proba_unemployed_F <-0.1; // probability for a F individual to be unemployed.
+	float proba_unemployed_M <- 0.03; // probability for a M individual to be unemployed.
+	float proba_unemployed_F <-0.03; // probability for a F individual to be unemployed.
 	list<string> possible_homes <- remove_duplicates(OSM_home + ["", "home", "hostel"]);  //building type that will be considered as home
 	
 	 //building type that will be considered as home - for each type, the coefficient to apply to this type for this choice of working place
