@@ -1,4 +1,3 @@
-# This is a basic workflow to help you get started with Actions
 name: Release CI master
 
 # Controls when the action will run. Triggers the workflow on push or pull request
@@ -28,25 +27,32 @@ jobs:
       
     - name: Move COMOKIT under single folder
       run: mkdir COMOKIT && find . -maxdepth 1 -not -name ".*" | grep -v COMOKIT| xargs -i mv {} ./COMOKIT
-
-    - name: Download latest GAMA Continuous version
-      uses: wei/curl@master
-      with:
-        args: -o gama.zip -fSL $(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_Linux | cut -d ":" -f 2,3 | tr -d \")
+      
+    - name: Get latest GAMA Continuous version download url
+      run: echo ::set-env name=GAMA_URL::$(docker run enflo/curl-action -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_Linux | cut -d ":" -f 2,3 | tr -d \")
     
-    - name: Prepare GAMA
+    - name: Check $GAMA_URL
+      run: echo $GAMA_URL
+    
+    - name: Download GAMA
+      run: wget -O gama.zip $GAMA_URL
+    
+    - name: Extract GAMA Continuous
       run: unzip gama.zip -d $GITHUB_WORKSPACE/GAMA && rm gama.zip && chmod +x GAMA/headless/gama-headless.sh
 
-    - name: Get COMOKIT ToolKit scripts/
+    - name: Get COMOKIT ToolKit
       run: git clone https://github.com/COMOKIT/COMO-TK.git
       
-    - name: Prepare release
-      run: zip COMOKIT.zip COMOKIT GAMA COMO-TK
+    - name: Check workspace content
+      run: ls -lah $GITHUB_WORKSPACE/*
+      
+    - name: Compress release
+      run: zip -r COMOKIT.zip $GITHUB_WORKSPACE/COMOKIT $GITHUB_WORKSPACE/GAMA $GITHUB_WORKSPACE/COMO-TK
         
     - name: Action Release
-      uses: yakuhzi/action-release@v1.2.0
+      uses: eine/tip@gha-tip
       with:
-        # File to upload to the release
-        file: COMOKIT.zip
-        # Path to changelog file
-        #changelogs: # optional
+        token: ${{ secrets.GH_TOKEN_ROIARTHURB }}
+        cwd: ${{ github.workspace }}
+        files: |
+          COMOKIT.zip
