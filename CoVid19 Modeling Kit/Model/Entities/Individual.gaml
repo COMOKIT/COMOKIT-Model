@@ -296,7 +296,7 @@ species Individual schedules: shuffle(Individual where (each.status != dead)){
 		if (school != nil) {
 			int nb_classmates <- max(0,int(gauss(nb_classmates_mean,nb_classmates_std)));
 			if nb_classmates > 0 {
-				colleagues <- nb_classmates among (schools[school] - self);
+				colleagues <- nb_classmates among ((schools[school] where ((each.age >= (age -1)) and (each.age <= (age + 1))))- self);
 			}
 		}
  	}
