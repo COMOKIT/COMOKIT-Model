@@ -42,6 +42,7 @@ global {
 		create outside;
 		the_outside <- first(outside);
 		do create_activities;
+		do create_hospital;
 		
 		list<Building> homes <- Building where (each.type in possible_homes);
 		map<string,list<Building>> buildings_per_activity <- Building group_by (each.type);

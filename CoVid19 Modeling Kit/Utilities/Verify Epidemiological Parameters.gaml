@@ -209,5 +209,24 @@ experiment check_epidemiology type:gui
 				data "Dead" value: nb_dead color:#white marker:false;
 			}
 		}
+		display "charts Hospitalized" toolbar: false background: #black  refresh: every(24 #cycle) {
+			chart "Hospitalized cases" background: #black axes: #black color: #white  legend_font: font("Helvetica", 14, #bold) title_visible: true {
+				data "Hospitalized" value: length(pseudo_individual where(each.is_hospitalised)) color: #red marker: false style: line	 thickness: 2;
+			}
+		}
+		display "charts ICU" toolbar: false background: #black  {
+			chart "ICU cases" background: #black axes: #black color: #white legend_font: font("Helvetica", 14, #bold) title_visible: true {
+				loop s over: simulations {
+					data "ICU" value: length(pseudo_individual where(each.is_ICU)) color: #red marker: false style: line	 thickness: 2;
+				}
+			}
+		}
+		display "charts Deaths" toolbar: false background: #black  refresh: every(24 #cycle) {
+			chart "Dead cases" background: #black axes: #black color: #white legend_font: font("Helvetica", 14, #bold) title_visible: true {
+				loop s over: simulations {
+					data "Deaths" value: s.total_number_deaths color: #red marker: false style: line	 thickness: 2;
+				}
+			}
+		}
 	}
 }

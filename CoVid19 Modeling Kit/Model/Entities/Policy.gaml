@@ -1,7 +1,7 @@
 /***
 * Part of the GAMA CoVid19 Modeling Kit
 * see http://gama-platform.org/covid19
-* Author: Alexis Drogoul, Benoit Gaudou
+* Author: Alexis Drogoul, Benoit Gaudou, Damien Philippon
 * Tags: covid19,epidemiology
 ***/
 
@@ -319,4 +319,146 @@ species DetectionPolicy parent: AbstractPolicy {
 		return true;
 	}
 
+}
+
+/**
+ * The policy used to use hospitals for cure  */
+species HospitalisationPolicy parent: AbstractPolicy{
+	bool is_allowing_ICU;
+	bool is_allowing_hospitalisation;
+	
+	action add_individual_to_hospital(Individual an_individual){
+		if(an_individual.status != dead){
+			list<Hospital> available_hospitals <- Hospital where(each.capacity_hospitalisation>0);
+			if(an_individual.hospitalisation_status=need_ICU){
+				available_hospitals <- Hospital where(each.capacity_ICU>0);
+			}
+			if(length(available_hospitals)>0){
+				Hospital the_hospital <- one_of(available_hospitals);
+				if(an_individual.hospitalisation_status=need_ICU){
+					add an_individual to: the_hospital.ICU_individuals;
+					the_hospital.capacity_ICU <- the_hospital.capacity_ICU-1;
+					an_individual.is_ICU <- true;
+					an_individual.is_hospitalised <- false;
+					ask an_individual{
+						do enter_building(the_hospital);
+					}
+				}else{
+					add an_individual to: the_hospital.hospitalised_individuals;
+					the_hospital.capacity_hospitalisation<- the_hospital.capacity_hospitalisation-1;
+					an_individual.is_ICU <- false;
+					an_individual.is_hospitalised <- true;
+					ask an_individual{
+						do enter_building(the_hospital);
+					}
+				}
+			}else{
+				ask an_individual{
+					is_ICU <- false;
+					is_hospitalised <- false;
+					do enter_building(self.home);
+				}
+			}
+		}
+	}
+	
+	action update_individuals_in_hospital{
+		loop a_hospital over: Hospital{
+			if(length(a_hospital.individuals)>0){
+				//Removing dead individuals
+				ask a_hospital.ICU_individuals where(each.status=dead){
+					remove self from: a_hospital.ICU_individuals;
+					self.is_ICU <- false;
+					self.is_hospitalised <- false;
+					self.hospitalisation_status <- no_need_hospitalisation;
+					a_hospital.capacity_ICU <- a_hospital.capacity_ICU+1;
+				}
+				ask a_hospital.hospitalised_individuals where(each.status=dead){
+					remove self from: a_hospital.hospitalised_individuals;
+					self.is_ICU <- false;
+					self.is_hospitalised <- false;
+					self.hospitalisation_status <- no_need_hospitalisation;
+					a_hospital.capacity_hospitalisation <- a_hospital.capacity_hospitalisation+1;
+				}
+				
+				
+				//Changing ICU individuals
+				loop an_individual over: a_hospital.ICU_individuals where(each.hospitalisation_status!=need_ICU){
+					remove an_individual from: a_hospital.ICU_individuals;
+					a_hospital.capacity_ICU <- a_hospital.capacity_ICU+1;
+					an_individual.is_ICU <- false;
+					an_individual.is_hospitalised <- false;
+					if((an_individual.status!=recovered)and(an_individual.hospitalisation_status=need_hospitalisation)){
+						if(a_hospital.capacity_hospitalisation>0){
+							a_hospital.capacity_hospitalisation <- a_hospital.capacity_hospitalisation-1;
+							add an_individual to: a_hospital.hospitalised_individuals;
+							an_individual.is_hospitalised <- true;
+						}else{
+							do add_individual_to_hospital(an_individual);
+						}
+					}else{
+						ask an_individual{
+							do enter_building(self.home);
+						}
+					}
+				}
+				
+				//Changing hospitalised individuals needing ICU
+				loop an_individual over:a_hospital.hospitalised_individuals where(each.hospitalisation_status=need_ICU){
+					remove an_individual from: a_hospital.hospitalised_individuals;
+					a_hospital.capacity_hospitalisation <- a_hospital.capacity_hospitalisation+1;
+					an_individual.is_ICU <- false;
+					an_individual.is_hospitalised <- false;
+					if(a_hospital.capacity_ICU>0){
+						add an_individual to: a_hospital.ICU_individuals;
+						a_hospital.capacity_ICU <- a_hospital.capacity_ICU -1;
+						an_individual.is_ICU <- true;
+					}else{
+						do add_individual_to_hospital(an_individual);
+					}
+				}
+				
+				//Changing hospitalised individuals needing to be release
+				loop an_individual over:a_hospital.hospitalised_individuals where((each.hospitalisation_status=no_need_hospitalisation) or (each.status=recovered)){
+					remove an_individual from: a_hospital.hospitalised_individuals;
+					a_hospital.capacity_hospitalisation <- a_hospital.capacity_hospitalisation+1;
+					an_individual.is_ICU <- false;
+					an_individual.is_hospitalised <- false;
+					ask an_individual{
+						do enter_building(self.home);
+					}
+				}
+			}
+		}
+	}
+	
+	action apply{
+		//Updating individuals in the hospitals
+		do update_individuals_in_hospital;
+		
+		//Look for new individuals to put to the hospital
+		if(is_allowing_ICU){
+			loop an_individual over: Individual where((each.hospitalisation_status=need_ICU) and (each.status!=dead) and (each.is_ICU=false)){
+				do add_individual_to_hospital(an_individual);
+				total_number_ICU <- total_number_ICU +1;
+			}
+		}
+		if(is_allowing_hospitalisation){
+			loop an_individual over: Individual where((each.hospitalisation_status=need_hospitalisation) and (each.status!=recovered) and (each.status!=dead) and (each.is_hospitalised=false) and (each.is_ICU=false)){
+				do add_individual_to_hospital(an_individual);
+				total_number_hospitalised <- total_number_hospitalised+1;
+			}
+		}
+	}
+	
+	bool is_allowed (Individual i, Activity activity){
+		if(i.is_ICU){
+			return false;
+		}else{
+			if(i.is_hospitalised){
+				return false;
+			}
+		}
+		return true;
+	}
 }
