@@ -41,10 +41,6 @@ global
 	init { 
 		do create_authority;
 		do init_epidemiological_parameters;
-		do create_hospital;
-		ask Authority {
-				policy <- create_hospitalisation_policy(true, true, false, 0);
-			}
 		create pseudo_bound number:1
 		{
 			shape <- world.shape;
