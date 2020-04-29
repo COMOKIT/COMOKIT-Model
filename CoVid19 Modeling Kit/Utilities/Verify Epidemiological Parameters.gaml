@@ -41,6 +41,10 @@ global
 	init { 
 		do create_authority;
 		do init_epidemiological_parameters;
+		do create_hospital;
+		ask Authority {
+				policy <- create_hospitalisation_policy(true, true, false, 0);
+			}
 		create pseudo_bound number:1
 		{
 			shape <- world.shape;
@@ -207,6 +211,25 @@ experiment check_epidemiology type:gui
 				data "Symptomatic" value: nb_symptomatic color:#silver marker:false;
 				data "Recovered" value: nb_recovered color:#blue marker:false;
 				data "Dead" value: nb_dead color:#white marker:false;
+			}
+		}
+		display "charts Hospitalized" toolbar: false background: #black  refresh: every(24 #cycle) {
+			chart "Hospitalized cases" background: #black axes: #black color: #white  legend_font: font("Helvetica", 14, #bold) title_visible: true {
+				data "Hospitalized" value: length(pseudo_individual where(each.is_hospitalised)) color: #red marker: false style: line	 thickness: 2;
+			}
+		}
+		display "charts ICU" toolbar: false background: #black  {
+			chart "ICU cases" background: #black axes: #black color: #white legend_font: font("Helvetica", 14, #bold) title_visible: true {
+				loop s over: simulations {
+					data "ICU" value: length(pseudo_individual where(each.is_ICU)) color: #red marker: false style: line	 thickness: 2;
+				}
+			}
+		}
+		display "charts Deaths" toolbar: false background: #black  refresh: every(24 #cycle) {
+			chart "Dead cases" background: #black axes: #black color: #white legend_font: font("Helvetica", 14, #bold) title_visible: true {
+				loop s over: simulations {
+					data "Deaths" value: s.total_number_deaths color: #red marker: false style: line	 thickness: 2;
+				}
 			}
 		}
 	}

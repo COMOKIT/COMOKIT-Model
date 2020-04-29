@@ -158,6 +158,13 @@ species Authority {
 		return p;
 	}
 	
+	AbstractPolicy create_hospitalisation_policy(bool allow_ICU, bool allow_hospitalisation){
+		create HospitalisationPolicy returns: result{
+			is_allowing_ICU <- allow_ICU;
+			is_allowing_hospitalisation <- allow_hospitalisation;
+		}
+		return (first(result));
+	}
 	
 	AbstractPolicy create_no_containment_policy {
 		create NoPolicy returns: result;
@@ -172,5 +179,6 @@ species Authority {
 
 		return (first(result));
 	}
+	
 
 }  

@@ -20,6 +20,9 @@ global
 	int total_number_of_infected <- 0;
 	int total_number_reported <- 0;
 	int total_number_individual <- 0;
+	int total_number_deaths <- 0;
+	int total_number_hospitalised <- 0;
+	int total_number_ICU <- 0;
 	
 	map<string, int> building_infections;
 	map<int,int> total_incidence_age;
@@ -105,6 +108,8 @@ species Individual schedules: shuffle(Individual where (each.status != dead)){
 	float proba_wearing_mask;
 	//Bool to represent wearing a mask
 	bool is_wearing_mask;
+	//Number of times negatively tested
+	int number_negative_tests <- 0;
 	
 	//#############################################################
 	//Hospitalisation related attributes
@@ -197,6 +202,7 @@ species Individual schedules: shuffle(Individual where (each.status != dead)){
 		}
 	}
 
+	
 	//Action to call to update wearing a mask for a time step
 	action update_wear_mask
 	{
@@ -473,6 +479,7 @@ species Individual schedules: shuffle(Individual where (each.status != dead)){
 				if(world.is_fatal(self.age))
 				{
 					hospitalisation_status <- no_need_hospitalisation;
+					total_number_deaths <- total_number_deaths+1;
 					do set_status(dead);
 				}
 				else
@@ -493,6 +500,7 @@ species Individual schedules: shuffle(Individual where (each.status != dead)){
 			if(self.hospitalisation_status=need_ICU)and(self.is_ICU=false)
 			{
 				do set_status(dead);
+				total_number_deaths <- total_number_deaths+1;
 				self.hospitalisation_status <- no_need_hospitalisation;
 			}
 			else
@@ -501,12 +509,15 @@ species Individual schedules: shuffle(Individual where (each.status != dead)){
 				if(self.hospitalisation_status=need_ICU)and(self.is_ICU=true)and(world.is_fatal(self.age))
 				{
 					do set_status(dead);
+					total_number_deaths <- total_number_deaths+1;
 					self.hospitalisation_status <- no_need_hospitalisation;
 				}
 				else
 				{
 					do set_status(recovered);
-					self.hospitalisation_status <- no_need_hospitalisation;
+					if(self.is_ICU=false){
+						self.hospitalisation_status <- no_need_hospitalisation;
+					}
 				}
 			}
 		}

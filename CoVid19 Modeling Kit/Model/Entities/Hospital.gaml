@@ -12,6 +12,19 @@ model CoVid19
 
 import "Building.gaml"
 
+global{
+	int number_hospital <- 1;
+	int capacity_hospitalisation_per_hospital <- 10000;
+	int capacity_ICU_per_hospital <- 1000;
+	
+	//Action to create a hospital TO CHANGE WHEN DATA ARE AVAILABLE
+	action create_hospital{
+		create Hospital number:number_hospital{
+			capacity_hospitalisation <- capacity_hospitalisation_per_hospital;
+			capacity_ICU <- capacity_ICU_per_hospital;
+		}
+	}
+}
 species Hospital parent:Building {
 	//Number of places for hospitalisation
 	int capacity_hospitalisation; //NOT ICU
