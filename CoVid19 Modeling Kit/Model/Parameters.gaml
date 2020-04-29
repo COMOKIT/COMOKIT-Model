@@ -88,10 +88,12 @@ global {
 	// ------ From file
 	string separator <- ";";
 	bool header <- true; // If there is a header or not (must be true for now)
-	string age_var <- "AGE"; // The variable name for "age" Individual attribute
+	string age_var <- "AGE"; // The variable name for "age" Individual attribute | WARNING : IPUMS name
 	map<string,float> age_map;  // The mapping of value for gama to translate, if nill then direct cast to int (Default behavior in Synthetic Population.gaml)
-	string gender_var <- "SEX"; // The variable name for "sex" Individual attribute
+	string gender_var <- "SEX"; // The variable name for "sex" Individual attribute | WARNING : IPUMS name
 	map<string,int> gender_map <- ["1"::0,"2"::1]; // The mapping of value for gama to translate, if nill then cast to int
+	string unemployed_var <- "EMPSTAT"; // The variable that represent employment status | WARNING : IPUMS name
+	map<string,bool> unemployed_map <- ["1"::false,"2"::true,"3"::true]; // 1 = employed, 2 = unemployed, 3 = inactive | WARNING : IPUMS name
 	string householdID <- "parentId"; // The variable for household identification
 	int number_of_individual <- -1; // Control the number of Individual agent in the simulation from the file: if <0 or more than record in the file, takes the exact number of individual in the file
 	

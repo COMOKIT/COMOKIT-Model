@@ -19,6 +19,10 @@ import "Parameters.gaml"
  */
 global {
 	
+	// ------------------------------ //
+	// SYNTHETIC POPULATION FROM FILE //
+	// ------------------------------ //
+	
 	/*
 	 * Uses the provided population.csv (in Datasets folder) to initialize the population of agent with. The required
 	 * arguments are: </br>
@@ -41,6 +45,7 @@ global {
 		with:[
 			age::convert_age(get(age_var)),
 			sex::convert_gender(get(gender_var)),
+			is_unemployed::convert_unemployed(get(unemployed_var)),
 			household_id::string(get(householdID)) replace("\"","")
 		]{
 			if households contains_key household_id { households[household_id] <+ self; }
@@ -60,6 +65,32 @@ global {
 		}
 		
 	}
+		
+	//#############################################################
+	// Attribute convertion rules for csv based synthetic population
+	//#############################################################
+	
+	// Convert SP encoded age into gama model specification (float)
+	float convert_age(string input){ 
+		input <- input replace("\"","");
+		return (age_map=nil or empty(age_map)) ? int(input) : age_map[input];
+	}
+	
+	// Convert SP encoded gender into gama model specification (0=men, 1=women)
+	int convert_gender(string input){ 
+		input <- input replace("\"","");
+		return (gender_map=nil or empty(gender_map)) ? int(input) : gender_map[input]; 
+	}
+	
+	// Convert SP encoded employment status into gama model specification (true=unemployed,false=employed)
+	bool convert_unemployed(string input){
+		input <- input replace("\"","");
+		return (unemployed_map=nil or empty(unemployed_map)) ? bool(input) : unemployed_map[input];
+	}
+	
+	// ------------------------------------------- //
+	// SYNTHETIC POPULATION FROM COMOKIT ALGORITHM //
+	// ------------------------------------------- //
 	
 	/*
 	 * The default algorithm to create a population of agent from simple rules. </p>
@@ -156,18 +187,9 @@ global {
 		}	
 	}
 	
-	// Convert SP encoded age into gama model specification (float)
-	float convert_age(string input){ 
-		input <- input replace("\"","");
-		return (age_map=nil or empty(age_map)) ? int(input) : age_map[input];
-	}
-	
-	// Convert SP encoded gender into gama model specification (0=men, 1=women)
-	int convert_gender(string input){ 
-		input <- input replace("\"","");
-		return (gender_map=nil or empty(gender_map)) ? int(input) : gender_map[input]; 
-	}
-	
+	// ----------------------------------- //
+	// SYNTHETIC POPULATION SOCIAL NETWORK //
+	// ----------------------------------- //
 	
 	/*
 	 * The default algorithm to create a the social network (friends and colleagues) of agent from simple rules :</p>
@@ -212,6 +234,10 @@ global {
 			do initialise_social_network(WP, Sc,ind_per_age_cat);
 		}
 	}
+	
+	// ------------------------------------------------------- //
+	// SYNTHETIC POPULATION SCHOOL / WORK LOCATION ASSIGNEMENT //
+	// ------------------------------------------------------- //
 	
 	// Inputs
 	//   working_places : map associating to each Building a weight (= surface * coefficient for this type of building to be a working_place)
@@ -283,6 +309,10 @@ global {
 			}
 		}		
 	}
+	
+	// ----------------- //
+	// SYNTHETIC AGENDAS //
+	// ----------------- //
 	
 	
 	// Inputs
