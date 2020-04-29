@@ -9,9 +9,19 @@ model CoVid19
 
 import "../../Model/Global.gaml"
 import "../Abstract Experiment.gaml"
+import "../Abstract Batch Experiment.gaml"
+
+global {
+	
+	//@Override
+	action define_policy{
+		ask Authority {
+			policy <- create_no_containment_policy();
+		}
+	}
+}
 
 experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
-	
 	float factor <- 0.1;
 
 	action _init_ {
@@ -22,9 +32,8 @@ experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 		loop proportion over: [0.0,1.0] {
 			create simulation with: [color::(colors at int(proportion*5)), init_all_ages_factor_contact_rate_wearing_mask::factor, dataset::shape_path, seed::simulation_seed, init_all_ages_proportion_wearing_mask::proportion, force_parameters::list(epidemiological_proportion_wearing_mask, epidemiological_factor_wearing_mask)] {
 				name <- string(int(proportion*100)) + "% with mask";
-				ask Authority {
-					policy <- create_no_containment_policy();
-				}
+
+				do define_policy();
 
 			}
 
