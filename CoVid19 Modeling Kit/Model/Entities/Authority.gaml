@@ -158,10 +158,11 @@ species Authority {
 		return p;
 	}
 	
-	AbstractPolicy create_hospitalisation_policy(bool allow_ICU, bool allow_hospitalisation){
+	AbstractPolicy create_hospitalisation_policy(bool allow_ICU, bool allow_hospitalisation, int nb_tests){
 		create HospitalisationPolicy returns: result{
 			is_allowing_ICU <- allow_ICU;
 			is_allowing_hospitalisation <- allow_hospitalisation;
+			nb_minimum_tests <- nb_tests;
 		}
 		return (first(result));
 	}

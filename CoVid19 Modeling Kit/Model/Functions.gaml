@@ -85,18 +85,29 @@ global
 	}
 	
 	//Time between exposure and symptom onset of an individual of a given age
-	float get_incubation_time(int age)
+	float get_incubation_period_symptomatic(int age)
 	{
-		if(map_epidemiological_parameters[age][epidemiological_incubation_period][0]=epidemiological_fixed)
+		if(map_epidemiological_parameters[age][epidemiological_incubation_period_symptomatic][0]=epidemiological_fixed)
 		{
-			return float(map_epidemiological_parameters[age][epidemiological_incubation_period][1])*nb_step_for_one_day;
+			return float(map_epidemiological_parameters[age][epidemiological_incubation_period_symptomatic][1])*nb_step_for_one_day;
 		}
 		else
 		{
-			return get_rnd_from_distribution(map_epidemiological_parameters[age][epidemiological_incubation_period][0],float(map_epidemiological_parameters[age][epidemiological_incubation_period][1]),float(map_epidemiological_parameters[age][epidemiological_incubation_period][2]))*nb_step_for_one_day;
+			return get_rnd_from_distribution(map_epidemiological_parameters[age][epidemiological_incubation_period_symptomatic][0],float(map_epidemiological_parameters[age][epidemiological_incubation_period_symptomatic][1]),float(map_epidemiological_parameters[age][epidemiological_incubation_period_symptomatic][2]))*nb_step_for_one_day;
 		}
 	}
-	
+	//Time between exposure and symptom onset of an individual of a given age
+	float get_incubation_period_asymptomatic(int age)
+	{
+		if(map_epidemiological_parameters[age][epidemiological_incubation_period_asymptomatic][0]=epidemiological_fixed)
+		{
+			return float(map_epidemiological_parameters[age][epidemiological_incubation_period_asymptomatic][1])*nb_step_for_one_day;
+		}
+		else
+		{
+			return get_rnd_from_distribution(map_epidemiological_parameters[age][epidemiological_incubation_period_asymptomatic][0],float(map_epidemiological_parameters[age][epidemiological_incubation_period_asymptomatic][1]),float(map_epidemiological_parameters[age][epidemiological_incubation_period_asymptomatic][2]))*nb_step_for_one_day;
+		}
+	}
 	//Time between onset of a primary case of a given age and onset of secondary case 
 	float get_serial_interval(int age)
 	{
@@ -111,18 +122,30 @@ global
 	}
 	
 	//Time between onset and recovery for an infectious individual of a given age
-	float get_infectious_time(int age)
+	float get_infectious_period_symptomatic(int age)
 	{
-		if(map_epidemiological_parameters[age][epidemiological_onset_to_recovery][0]=epidemiological_fixed)
+		if(map_epidemiological_parameters[age][epidemiological_infectious_period_symptomatic][0]=epidemiological_fixed)
 		{
-			return float(map_epidemiological_parameters[age][epidemiological_onset_to_recovery][1])*nb_step_for_one_day;
+			return float(map_epidemiological_parameters[age][epidemiological_infectious_period_symptomatic][1])*nb_step_for_one_day;
 		}
 		else
 		{
-			return get_rnd_from_distribution(map_epidemiological_parameters[age][epidemiological_onset_to_recovery][0],float(map_epidemiological_parameters[age][epidemiological_onset_to_recovery][1]),float(map_epidemiological_parameters[age][epidemiological_onset_to_recovery][2]))*nb_step_for_one_day;
+			return get_rnd_from_distribution(map_epidemiological_parameters[age][epidemiological_infectious_period_symptomatic][0],float(map_epidemiological_parameters[age][epidemiological_infectious_period_symptomatic][1]),float(map_epidemiological_parameters[age][epidemiological_infectious_period_symptomatic][2]))*nb_step_for_one_day;
 		}
 	}
 	
+	//Time between onset and recovery for an infectious individual of a given age
+	float get_infectious_period_asymptomatic(int age)
+	{
+		if(map_epidemiological_parameters[age][epidemiological_infectious_period_asymptomatic][0]=epidemiological_fixed)
+		{
+			return float(map_epidemiological_parameters[age][epidemiological_infectious_period_asymptomatic][1])*nb_step_for_one_day;
+		}
+		else
+		{
+			return get_rnd_from_distribution(map_epidemiological_parameters[age][epidemiological_infectious_period_asymptomatic][0],float(map_epidemiological_parameters[age][epidemiological_infectious_period_asymptomatic][1]),float(map_epidemiological_parameters[age][epidemiological_infectious_period_asymptomatic][2]))*nb_step_for_one_day;
+		}
+	}
 	//Reduction of the successful contact rate of an infectious individual of a given age
 	float get_factor_contact_rate_wearing_mask(int age)
 	{

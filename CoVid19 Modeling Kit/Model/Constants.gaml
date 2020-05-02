@@ -11,21 +11,22 @@ model CoVid19
 
 
 global {
-	//Epidemiological status of the individual
-	string susceptible <- "S";
-	string latent <- "L";
-	string asymptomatic <- "Ia";
-	string presymptomatic <- "Ip";
-	string symptomatic <- "Is";
-	string recovered <- "R";
-	string dead <- "D";
+	//State of an individual
+	string susceptible <- "susceptible";
+	string latent <- "latent";
+	string presymptomatic <- "presymptomatic";
+	string asymptomatic <- "asymptomatic";
+	string symptomatic <- "symptomatic";
+	string removed <- "removed";
 	
 	//Diagnostic status of the individual
 	string not_tested <- "Not tested";
 	string tested_positive <- "Positive";
 	string tested_negative <- "Negative";
 	
-	//Hospitalized status of the individual
+	//Clinical status of the individual
+	string dead <- "Dead";
+	string recovered <- "Recovered";
 	string no_need_hospitalisation <- "Not needed";
 	string need_hospitalisation <- "Need hospitalisation";
 	string need_ICU <- "Need ICU";
@@ -85,7 +86,8 @@ global {
 	string epidemiological_probability_true_negative <- "Probability_true_negative";
 	string epidemiological_proportion_wearing_mask <- "Proportion_wearing_mask";
 	string epidemiological_factor_wearing_mask <- "Factor_wearing_mask";
-	string epidemiological_incubation_period <-"Incubation_period";
+	string epidemiological_incubation_period_symptomatic <-"Incubation_period_symptomatic";
+	string epidemiological_incubation_period_asymptomatic <-"Incubation_period_asymptomatic";
 	string epidemiological_serial_interval <- "Serial_interval";
 	string epidemiological_proportion_hospitalisation <- "Proportion_hospitalisation";
 	string epidemiological_onset_to_hospitalisation <- "Onset_to_hospitalisation";
@@ -93,6 +95,7 @@ global {
 	string epidemiological_hospitalisation_to_ICU <- "Hospitalisation_to_ICU";
 	string epidemiological_stay_ICU <- "Stay_ICU";
 	string epidemiological_proportion_death_symptomatic <- "Proportion_death_symptomatic";
-	string epidemiological_onset_to_recovery <- "Onset_to_recovery";
+	string epidemiological_infectious_period_symptomatic <- "Infectious_period_symptomatic";
+	string epidemiological_infectious_period_asymptomatic <- "Infectious_period_asymptomatic";
 	
 }

@@ -306,15 +306,13 @@ species DetectionPolicy parent: AbstractPolicy {
 	bool not_tested_only;
 
 	action apply {
-		list<Individual> individual_to_test <- symptomatic_only ? (not_tested_only ? Individual where (each.status = symptomatic and
-		each.report_status = not_tested) : Individual where (each.status = symptomatic)) : (not_tested_only ? Individual where (each.status != dead and
-		each.report_status = not_tested) : Individual where (each.status != dead));
+		list<Individual> individual_to_test <- symptomatic_only ? (not_tested_only ? Individual where (each.state = symptomatic and
+		each.report_status = not_tested) : Individual where (each.state = symptomatic)) : (not_tested_only ? Individual where (each.clinical_status != dead and
+		each.report_status = not_tested) : Individual where (each.clinical_status != dead));
 		ask nb_individual_tested_per_step among individual_to_test {
 			do test_individual;
 		}
-
 	}
-
 	bool is_allowed (Individual i, Activity activity) {
 		return true;
 	}
@@ -326,107 +324,92 @@ species DetectionPolicy parent: AbstractPolicy {
 species HospitalisationPolicy parent: AbstractPolicy{
 	bool is_allowing_ICU;
 	bool is_allowing_hospitalisation;
+	int nb_minimum_tests;
 	
-	action add_individual_to_hospital(Individual an_individual){
-		if(an_individual.status != dead){
-			list<Hospital> available_hospitals <- Hospital where(each.capacity_hospitalisation>0);
-			if(an_individual.hospitalisation_status=need_ICU){
-				available_hospitals <- Hospital where(each.capacity_ICU>0);
+	action remove_individual_from_ICU(Individual an_individual, Hospital a_hospital){
+		remove an_individual from:a_hospital.ICU_individuals;
+		a_hospital.capacity_ICU <- a_hospital.capacity_ICU+1;
+		an_individual.is_ICU <- false;
+	}
+	
+	action remove_individual_from_hospitalised(Individual an_individual, Hospital a_hospital){
+		remove an_individual from:a_hospital.hospitalised_individuals;
+		a_hospital.capacity_hospitalisation <- a_hospital.capacity_hospitalisation+1;
+		an_individual.is_hospitalised <- false;
+	}
+	
+	action add_individual_to_ICU (Individual an_individual, Hospital a_hospital){
+		add an_individual to: a_hospital.ICU_individuals;
+		a_hospital.capacity_ICU <- a_hospital.capacity_ICU-1;
+		an_individual.is_ICU <- true;
+	}
+	
+	action add_individual_to_hospitalised (Individual an_individual, Hospital a_hospital){
+		add an_individual to: a_hospital.hospitalised_individuals;
+		a_hospital.capacity_hospitalisation <- a_hospital.capacity_hospitalisation-1;
+		an_individual.is_hospitalised <- true;
+	}
+	
+	action try_add_individual_to_hospital(Individual an_individual){
+		if(an_individual.clinical_status=need_hospitalisation){
+			list<Hospital> possible_hospitals <- (Hospital where(each.capacity_hospitalisation>0));
+			if(length(possible_hospitals)>0){
+				do add_individual_to_hospitalised(an_individual,one_of(possible_hospitals));
 			}
-			if(length(available_hospitals)>0){
-				Hospital the_hospital <- one_of(available_hospitals);
-				if(an_individual.hospitalisation_status=need_ICU){
-					add an_individual to: the_hospital.ICU_individuals;
-					the_hospital.capacity_ICU <- the_hospital.capacity_ICU-1;
-					an_individual.is_ICU <- true;
-					an_individual.is_hospitalised <- false;
-					ask an_individual{
-						do enter_building(the_hospital);
-					}
-				}else{
-					add an_individual to: the_hospital.hospitalised_individuals;
-					the_hospital.capacity_hospitalisation<- the_hospital.capacity_hospitalisation-1;
-					an_individual.is_ICU <- false;
-					an_individual.is_hospitalised <- true;
-					ask an_individual{
-						do enter_building(the_hospital);
-					}
-				}
-			}else{
-				ask an_individual{
-					is_ICU <- false;
-					is_hospitalised <- false;
-					do enter_building(self.home);
-				}
+		}else{
+			list<Hospital> possible_hospitals <- (Hospital where(each.capacity_ICU>0));
+			if(length(possible_hospitals)>0){
+				do add_individual_to_ICU(an_individual,one_of(possible_hospitals));
 			}
 		}
 	}
 	
 	action update_individuals_in_hospital{
 		loop a_hospital over: Hospital{
-			if(length(a_hospital.individuals)>0){
-				//Removing dead individuals
-				ask a_hospital.ICU_individuals where(each.status=dead){
-					remove self from: a_hospital.ICU_individuals;
-					self.is_ICU <- false;
-					self.is_hospitalised <- false;
-					self.hospitalisation_status <- no_need_hospitalisation;
-					a_hospital.capacity_ICU <- a_hospital.capacity_ICU+1;
+			
+			//REMOVE DEAD PEOPLE
+			loop an_individual over: a_hospital.hospitalised_individuals where(each.clinical_status=dead){
+				do remove_individual_from_hospitalised(an_individual, a_hospital);
+			}
+			loop an_individual over: a_hospital.ICU_individuals where(each.clinical_status=dead){
+				do remove_individual_from_ICU(an_individual, a_hospital);
+			}
+			
+			//REMOVE RECOVERED PEOPLE FROM HOSPITALISED
+			loop an_individual over: a_hospital.hospitalised_individuals where((each.state!=symptomatic) and (cycle-each.last_test>nb_step_for_one_day) and (each.number_negative_tests<nb_minimum_tests)){
+				ask an_individual{
+					do test_individual;
 				}
-				ask a_hospital.hospitalised_individuals where(each.status=dead){
-					remove self from: a_hospital.hospitalised_individuals;
-					self.is_ICU <- false;
-					self.is_hospitalised <- false;
-					self.hospitalisation_status <- no_need_hospitalisation;
-					a_hospital.capacity_hospitalisation <- a_hospital.capacity_hospitalisation+1;
-				}
-				
-				
-				//Changing ICU individuals
-				loop an_individual over: a_hospital.ICU_individuals where(each.hospitalisation_status!=need_ICU){
-					remove an_individual from: a_hospital.ICU_individuals;
-					a_hospital.capacity_ICU <- a_hospital.capacity_ICU+1;
-					an_individual.is_ICU <- false;
-					an_individual.is_hospitalised <- false;
-					if((an_individual.status!=recovered)and(an_individual.hospitalisation_status=need_hospitalisation)){
-						if(a_hospital.capacity_hospitalisation>0){
-							a_hospital.capacity_hospitalisation <- a_hospital.capacity_hospitalisation-1;
-							add an_individual to: a_hospital.hospitalised_individuals;
-							an_individual.is_hospitalised <- true;
-						}else{
-							do add_individual_to_hospital(an_individual);
-						}
-					}else{
-						ask an_individual{
-							do enter_building(self.home);
+				if(an_individual.report_status=tested_negative){
+					an_individual.number_negative_tests <- an_individual.number_negative_tests +1;
+					if(an_individual.number_negative_tests>=nb_minimum_tests){
+						do remove_individual_from_hospitalised(an_individual, a_hospital);
+						if(an_individual.state=removed){
+							an_individual.clinical_status <- recovered;
 						}
 					}
+				}else{
+					an_individual.number_negative_tests <- 0;
 				}
-				
-				//Changing hospitalised individuals needing ICU
-				loop an_individual over:a_hospital.hospitalised_individuals where(each.hospitalisation_status=need_ICU){
-					remove an_individual from: a_hospital.hospitalised_individuals;
-					a_hospital.capacity_hospitalisation <- a_hospital.capacity_hospitalisation+1;
-					an_individual.is_ICU <- false;
-					an_individual.is_hospitalised <- false;
-					if(a_hospital.capacity_ICU>0){
-						add an_individual to: a_hospital.ICU_individuals;
-						a_hospital.capacity_ICU <- a_hospital.capacity_ICU -1;
-						an_individual.is_ICU <- true;
-					}else{
-						do add_individual_to_hospital(an_individual);
-					}
+			}
+			
+			//REMOVE ICU PEOPLE THAT JUST NEED HOSPITALISATION
+			loop an_individual over: a_hospital.ICU_individuals where(each.clinical_status=need_hospitalisation){
+				do remove_individual_from_ICU(an_individual,a_hospital);
+				if(a_hospital.capacity_hospitalisation>0){
+					do add_individual_to_hospitalised(an_individual,a_hospital);
+				}else{
+					do try_add_individual_to_hospital(an_individual);
 				}
-				
-				//Changing hospitalised individuals needing to be release
-				loop an_individual over:a_hospital.hospitalised_individuals where((each.hospitalisation_status=no_need_hospitalisation) or (each.status=recovered)){
-					remove an_individual from: a_hospital.hospitalised_individuals;
-					a_hospital.capacity_hospitalisation <- a_hospital.capacity_hospitalisation+1;
-					an_individual.is_ICU <- false;
-					an_individual.is_hospitalised <- false;
-					ask an_individual{
-						do enter_building(self.home);
-					}
+			}
+			
+			//ADD HOSPITALISED PEOPLE THAT NOW NEED ICU
+			loop an_individual over: a_hospital.hospitalised_individuals where(each.clinical_status=need_ICU){
+				do remove_individual_from_hospitalised(an_individual, a_hospital);
+				if(a_hospital.capacity_ICU>0){
+					do add_individual_to_ICU(an_individual,a_hospital);
+				}else{
+					do try_add_individual_to_hospital(an_individual);
 				}
 			}
 		}
@@ -435,30 +418,20 @@ species HospitalisationPolicy parent: AbstractPolicy{
 	action apply{
 		//Updating individuals in the hospitals
 		do update_individuals_in_hospital;
-		
-		//Look for new individuals to put to the hospital
-		if(is_allowing_ICU){
-			loop an_individual over: Individual where((each.hospitalisation_status=need_ICU) and (each.status!=dead) and (each.is_ICU=false)){
-				do add_individual_to_hospital(an_individual);
-				total_number_ICU <- total_number_ICU +1;
+		if(is_allowing_hospitalisation){
+			//ADD PEOPLE NEEDING ICU OR HOSPITALISATION NOT PRESENT YET
+			loop an_individual over: Individual where((each.clinical_status=need_hospitalisation) and (each.is_hospitalised=false)){
+				do try_add_individual_to_hospital(an_individual);
 			}
 		}
-		if(is_allowing_hospitalisation){
-			loop an_individual over: Individual where((each.hospitalisation_status=need_hospitalisation) and (each.status!=recovered) and (each.status!=dead) and (each.is_hospitalised=false) and (each.is_ICU=false)){
-				do add_individual_to_hospital(an_individual);
-				total_number_hospitalised <- total_number_hospitalised+1;
+		if(is_allowing_ICU){
+			loop an_individual over: Individual where((each.clinical_status=need_ICU) and (each.is_ICU=false)){
+				do try_add_individual_to_hospital(an_individual);
 			}
 		}
 	}
 	
 	bool is_allowed (Individual i, Activity activity){
-		if(i.is_ICU){
-			return false;
-		}else{
-			if(i.is_hospitalised){
-				return false;
-			}
-		}
-		return true;
+		return not(i.is_ICU or i.is_hospitalised);
 	}
 }

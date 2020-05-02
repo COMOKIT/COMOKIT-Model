@@ -179,11 +179,13 @@ global {
 				add list(epidemiological_fixed,string(init_all_ages_probability_true_negative)) to: tmp_map at: epidemiological_probability_true_negative;
 				add list(epidemiological_fixed,string(init_all_ages_proportion_wearing_mask)) to: tmp_map at: epidemiological_proportion_wearing_mask;
 				add list(epidemiological_fixed,string(init_all_ages_factor_contact_rate_wearing_mask)) to: tmp_map at: epidemiological_factor_wearing_mask;
-				add list(init_all_ages_distribution_type_incubation,string(init_all_ages_parameter_1_incubation),string(init_all_ages_parameter_2_incubation)) to: tmp_map at: epidemiological_incubation_period;
+				add list(init_all_ages_distribution_type_incubation_period_symptomatic,string(init_all_ages_parameter_1_incubation_period_symptomatic),string(init_all_ages_parameter_2_incubation_period_symptomatic)) to: tmp_map at: epidemiological_incubation_period_symptomatic;
+				add list(init_all_ages_distribution_type_incubation_period_asymptomatic,string(init_all_ages_parameter_1_incubation_period_asymptomatic),string(init_all_ages_parameter_2_incubation_period_asymptomatic)) to: tmp_map at: epidemiological_incubation_period_asymptomatic;
 				add list(init_all_ages_distribution_type_serial_interval,string(init_all_ages_parameter_1_serial_interval),string(init_all_ages_parameter_2_serial_interval)) to: tmp_map at: epidemiological_serial_interval;
 				add list(epidemiological_fixed,string(init_all_ages_proportion_hospitalisation)) to: tmp_map at: epidemiological_proportion_hospitalisation;
 				add list(epidemiological_fixed,string(init_all_ages_proportion_icu)) to: tmp_map at: epidemiological_proportion_icu;
-				add list(init_all_ages_distribution_type_onset_to_recovery,string(init_all_ages_parameter_1_onset_to_recovery),string(init_all_ages_parameter_2_onset_to_recovery)) to: tmp_map at: epidemiological_onset_to_recovery;
+				add list(init_all_ages_distribution_type_infectious_period_symptomatic,string(init_all_ages_parameter_1_infectious_period_symptomatic),string(init_all_ages_parameter_2_infectious_period_symptomatic)) to: tmp_map at: epidemiological_infectious_period_symptomatic;
+				add list(init_all_ages_distribution_type_infectious_period_asymptomatic,string(init_all_ages_parameter_1_infectious_period_asymptomatic),string(init_all_ages_parameter_2_infectious_period_asymptomatic)) to: tmp_map at: epidemiological_infectious_period_asymptomatic;
 				add list(init_all_ages_distribution_type_onset_to_hospitalisation,string(init_all_ages_parameter_1_onset_to_hospitalisation),string(init_all_ages_parameter_2_onset_to_hospitalisation)) to: tmp_map at: epidemiological_onset_to_hospitalisation;
 				add list(init_all_ages_distribution_type_hospitalisation_to_ICU,string(init_all_ages_parameter_1_hospitalisation_to_ICU),string(init_all_ages_parameter_2_hospitalisation_to_ICU)) to: tmp_map at: epidemiological_hospitalisation_to_ICU;
 				add list(init_all_ages_distribution_type_stay_ICU,string(init_all_ages_parameter_1_stay_ICU),string(init_all_ages_parameter_2_stay_ICU)) to: tmp_map at: epidemiological_stay_ICU;
@@ -223,14 +225,20 @@ global {
 				match epidemiological_factor_wearing_mask{
 					list_value <- list<string>(epidemiological_fixed,init_all_ages_factor_contact_rate_wearing_mask);
 				}
-				match epidemiological_incubation_period{
-					list_value <- list<string>(init_all_ages_distribution_type_incubation,string(init_all_ages_parameter_1_incubation),string(init_all_ages_parameter_2_incubation));
+				match epidemiological_incubation_period_symptomatic{
+					list_value <- list<string>(init_all_ages_distribution_type_incubation_period_symptomatic,string(init_all_ages_parameter_1_incubation_period_symptomatic),string(init_all_ages_parameter_2_incubation_period_symptomatic));
+				}
+				match epidemiological_incubation_period_asymptomatic{
+					list_value <- list<string>(init_all_ages_distribution_type_incubation_period_asymptomatic,string(init_all_ages_parameter_1_incubation_period_asymptomatic),string(init_all_ages_parameter_2_incubation_period_asymptomatic));
 				}
 				match epidemiological_serial_interval{
 					list_value <- list<string>(init_all_ages_distribution_type_serial_interval,string(init_all_ages_parameter_1_serial_interval));
 				}
-				match epidemiological_onset_to_recovery{
-					list_value <- list<string>(init_all_ages_distribution_type_onset_to_recovery,string(init_all_ages_parameter_1_onset_to_recovery),string(init_all_ages_parameter_2_onset_to_recovery));
+				match epidemiological_infectious_period_symptomatic{
+					list_value <- list<string>(init_all_ages_distribution_type_infectious_period_symptomatic,string(init_all_ages_parameter_1_infectious_period_symptomatic),string(init_all_ages_parameter_2_infectious_period_symptomatic));
+				}
+				match epidemiological_infectious_period_asymptomatic{
+					list_value <- list<string>(init_all_ages_distribution_type_infectious_period_asymptomatic,string(init_all_ages_parameter_1_infectious_period_asymptomatic),string(init_all_ages_parameter_2_infectious_period_asymptomatic));
 				}
 				match epidemiological_proportion_hospitalisation{
 					list_value <- list<string>(epidemiological_fixed,init_all_ages_proportion_hospitalisation);

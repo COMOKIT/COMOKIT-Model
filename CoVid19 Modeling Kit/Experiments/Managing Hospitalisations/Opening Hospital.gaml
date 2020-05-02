@@ -15,24 +15,30 @@ experiment "Opening Hospitals" parent: "Abstract Experiment" autorun: true {
 	action _init_ {
 		string shape_path <- self.ask_dataset_path();
 		float simulation_seed <- rnd(2000.0);
-		list<rgb> colors <- brewer_colors("Paired");
+		list<rgb> colors <- [#blue, #cyan, #green, #red];
 		
-		create simulation with: [color::(colors at 1),dataset::shape_path, seed::simulation_seed] {
+		create simulation with: [color::(colors at 0),dataset::shape_path, seed::simulation_seed] {
 			name <- "No Hospitalisation";
 			ask Authority {
 				policy <- create_no_containment_policy();
 			}
 		}
-		create simulation with: [color::(colors at 2),dataset::shape_path, seed::simulation_seed] {
+		create simulation with: [color::(colors at 1),dataset::shape_path, seed::simulation_seed] {
 			name <- "Only ICU hospitalisation";
 			ask Authority {
-				policy <- create_hospitalisation_policy(true, false);
+				policy <- create_hospitalisation_policy(true, false,2);
+			}
+		}
+		create simulation with: [color::(colors at 2),dataset::shape_path, seed::simulation_seed] {
+			name <- "ICU and Hospitalisation";
+			ask Authority {
+				policy <- create_hospitalisation_policy(true, true,2);
 			}
 		}
 		create simulation with: [color::(colors at 3),dataset::shape_path, seed::simulation_seed] {
-			name <- "ICU and Hospitalisation";
+			name <- "ICU and Hospitalisation for 5 tests";
 			ask Authority {
-				policy <- create_hospitalisation_policy(true, true);
+				policy <- create_hospitalisation_policy(true, true,5);
 			}
 		}
 	}
@@ -60,24 +66,10 @@ experiment "Opening Hospitals" parent: "Abstract Experiment" autorun: true {
 				}
 			}
 		}
-		display "charts Total Hospitalized" toolbar: false background: #black  refresh: every(24 #cycle) {
-			chart "Total Hospitalized cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {
-				loop s over: simulations {
-					data s.name value: s.total_number_hospitalised color: s.color marker: false style: line	 thickness: 2;
-				}
-			}
-		}
-		display "charts Total ICU" toolbar: false background: #black refresh: every(24 #cycle) {
-			chart "Total ICU cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {
-				loop s over: simulations {
-					data s.name value: s.total_number_ICU color: s.color marker: false style: line	 thickness: 2;
-				}
-			}
-		}
 		display "charts Deaths" toolbar: false background: #black  refresh: every(24 #cycle) {
 			chart "Dead cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {
 				loop s over: simulations {
-					data s.name value: s.total_number_deaths color: s.color marker: false style: line	 thickness: 2;
+					data s.name value: length(s.Individual where(each.clinical_status=dead)) color: s.color marker: false style: line	 thickness: 2;
 				}
 			}
 		}

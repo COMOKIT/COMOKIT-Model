@@ -61,15 +61,21 @@ global {
 	float init_all_ages_probability_true_negative <- 0.92; //Probability of successfully identifying a non infected
 	float init_all_ages_proportion_wearing_mask <- 0.0; //Proportion of people wearing a mask
 	float init_all_ages_factor_contact_rate_wearing_mask <- 0.5; //Factor of reduction for successful contact rate of an infectious individual wearing mask
-	string init_all_ages_distribution_type_incubation <- "Lognormal"; //Type of distribution of the incubation period; Among normal, lognormal, weibull, gamma
-	float init_all_ages_parameter_1_incubation <- 1.57; //First parameter of the incubation period distribution
-	float init_all_ages_parameter_2_incubation <- 0.65; //Second parameter of the incubation period distribution
+	string init_all_ages_distribution_type_incubation_period_symptomatic <- "Lognormal"; //Type of distribution of the incubation period; Among normal, lognormal, weibull, gamma
+	float init_all_ages_parameter_1_incubation_period_symptomatic <- 1.57; //First parameter of the incubation period distribution for symptomatic
+	float init_all_ages_parameter_2_incubation_period_symptomatic <- 0.65; //Second parameter of the incubation period distribution for symptomatic
+	string init_all_ages_distribution_type_incubation_period_asymptomatic <- "Lognormal"; //Type of distribution of the incubation period; Among normal, lognormal, weibull, gamma
+	float init_all_ages_parameter_1_incubation_period_asymptomatic <- 1.57; //First parameter of the incubation period distribution for asymptomatic
+	float init_all_ages_parameter_2_incubation_period_asymptomatic <- 0.65; //Second parameter of the incubation period distribution for asymptomatic
 	string init_all_ages_distribution_type_serial_interval <- "Normal"; //Type of distribution of the serial interval
 	float init_all_ages_parameter_1_serial_interval <- 3.96;//First parameter of the serial interval distribution
 	float init_all_ages_parameter_2_serial_interval <- 3.75;//Second parameter of the serial interval distribution
-	string init_all_ages_distribution_type_onset_to_recovery <- "Lognormal";//Type of distribution of the time from onset to recovery
-	float init_all_ages_parameter_1_onset_to_recovery <- 3.034953;//First parameter of the time from onset to recovery distribution
-	float init_all_ages_parameter_2_onset_to_recovery <- 0.34;//Second parameter of the time from onset to recovery distribution
+	string init_all_ages_distribution_type_infectious_period_symptomatic <- "Lognormal";//Type of distribution of the time from onset to recovery
+	float init_all_ages_parameter_1_infectious_period_symptomatic <- 3.034953;//First parameter of the time from onset to recovery distribution
+	float init_all_ages_parameter_2_infectious_period_symptomatic <- 0.34;//Second parameter of the time from onset to recovery distribution
+	string init_all_ages_distribution_type_infectious_period_asymptomatic <- "Lognormal";//Type of distribution of the time from onset to recovery
+	float init_all_ages_parameter_1_infectious_period_asymptomatic <- 3.034953;//First parameter of the time from onset to recovery distribution
+	float init_all_ages_parameter_2_infectious_period_asymptomatic <- 0.34;//Second parameter of the time from onset to recovery distribution
 	float init_all_ages_proportion_hospitalisation <- 0.2; //Proportion of symptomatic cases hospitalized
 	string init_all_ages_distribution_type_onset_to_hospitalisation <- "Lognormal";//Type of distribution of the time from onset to hospitalization
 	float init_all_ages_parameter_1_onset_to_hospitalisation  <- 3.034953;//First parameter of the time from onset to hospitalization distribution
