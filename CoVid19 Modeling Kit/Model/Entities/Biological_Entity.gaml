@@ -10,7 +10,7 @@ model BiologicalEntity
 /* Insert your model definition here */
 import "../Functions.gaml"
 
-species Biological_Entity control:fsm{
+species BiologicalEntity control:fsm{
 	float latent_period;
 	float presymptomatic_period;
 	float infectious_period;
@@ -131,7 +131,7 @@ species Biological_Entity control:fsm{
 		//Perform human to human transmission
 		if allow_transmission_human {
 			float proba <- contact_rate*reduction_factor;
-			list<Biological_Entity> fellows <- Biological_Entity where (flip(proba) and (each.state = susceptible));
+			list<BiologicalEntity> fellows <- BiologicalEntity where (flip(proba) and (each.state = susceptible));
 			write fellows;
 			ask fellows {
 				do define_new_case;

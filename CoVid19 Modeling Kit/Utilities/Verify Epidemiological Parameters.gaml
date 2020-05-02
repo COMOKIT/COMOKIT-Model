@@ -81,7 +81,7 @@ global
 	}
 }
 
-species pseudo_individual parent:Biological_Entity
+species pseudo_individual parent:BiologicalEntity
 {
 	//Reflex to trigger transmission to other individuals and environmental contamination
 	reflex infect_others when: is_infectious

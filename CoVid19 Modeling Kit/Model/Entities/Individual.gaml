@@ -29,7 +29,7 @@ global
 	map<int,int> total_incidence_age;
 }
 
-species Individual parent: Biological_Entity schedules: shuffle(Individual where (each.clinical_status != dead)){
+species Individual parent: BiologicalEntity schedules: shuffle(Individual where (each.clinical_status != dead)){
 	//Age of the individual
 	int age;
 	//Sex of the individual
