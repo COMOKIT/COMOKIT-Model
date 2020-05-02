@@ -342,12 +342,18 @@ species HospitalisationPolicy parent: AbstractPolicy{
 		add an_individual to: a_hospital.ICU_individuals;
 		a_hospital.capacity_ICU <- a_hospital.capacity_ICU-1;
 		an_individual.is_ICU <- true;
+		ask an_individual{
+			do enter_building(a_hospital);
+		}
 	}
 	
 	action add_individual_to_hospitalised (Individual an_individual, Hospital a_hospital){
 		add an_individual to: a_hospital.hospitalised_individuals;
 		a_hospital.capacity_hospitalisation <- a_hospital.capacity_hospitalisation-1;
 		an_individual.is_hospitalised <- true;
+		ask an_individual{
+			do enter_building(a_hospital);
+		}
 	}
 	
 	action try_add_individual_to_hospital(Individual an_individual){
@@ -355,11 +361,19 @@ species HospitalisationPolicy parent: AbstractPolicy{
 			list<Hospital> possible_hospitals <- (Hospital where(each.capacity_hospitalisation>0));
 			if(length(possible_hospitals)>0){
 				do add_individual_to_hospitalised(an_individual,one_of(possible_hospitals));
+			}else{
+				ask an_individual{
+					do enter_building(self.home);
+				}
 			}
 		}else{
 			list<Hospital> possible_hospitals <- (Hospital where(each.capacity_ICU>0));
 			if(length(possible_hospitals)>0){
 				do add_individual_to_ICU(an_individual,one_of(possible_hospitals));
+			}else{
+				ask an_individual{
+					do enter_building(self.home);
+				}
 			}
 		}
 	}
@@ -386,6 +400,9 @@ species HospitalisationPolicy parent: AbstractPolicy{
 						do remove_individual_from_hospitalised(an_individual, a_hospital);
 						if(an_individual.state=removed){
 							an_individual.clinical_status <- recovered;
+							ask an_individual{
+								do enter_building(self.home);
+							}
 						}
 					}
 				}else{
