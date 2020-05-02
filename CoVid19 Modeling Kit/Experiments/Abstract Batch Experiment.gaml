@@ -77,23 +77,23 @@ global{
 				// Number of new cases per step per building (or building type) and age category
 				
 				// Number of hospitalisations per step per age category
-				length(subIndividual where(each.hospitalisation_status=need_hospitalisation)),
+				length(subIndividual where(each.clinical_status=need_hospitalisation)),
 				// Number of ICU per step per age category
-				length(subIndividual where(each.hospitalisation_status=need_ICU)),
+				length(subIndividual where(each.clinical_status=need_ICU)),
 				// Number of susceptible per step per age category
-				length(subIndividual where (each.status=susceptible)),
+				length(subIndividual where (each.state=susceptible)),
 				// Number of exposed per step per age category
 				length(subIndividual where (each.is_latent())),
 				// Number of asymptomatic permanent per step per age category
-				length(subIndividual where (each.status = asymptomatic)),
+				length(subIndividual where (each.state = asymptomatic)),
 				// Number of asymptomatic temporary per step per age category
-				length(subIndividual where (each.status = presymptomatic)),
+				length(subIndividual where (each.state = presymptomatic)),
 				// Number of symptomatic per step per age category
-				length(subIndividual where (each.status = symptomatic)),
+				length(subIndividual where (each.state = symptomatic)),
 				// Number of recovered per step per age category
-				length(subIndividual where (each.status = recovered)),			
+				length(subIndividual where (each.clinical_status = recovered)),			
 				// Number of dead per step per age category
-				length(subIndividual where (each.status = dead))
+				length(subIndividual where (each.clinical_status = dead))
 			] type: "csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_" + (i - ageCategory) + "-" + (i-1) + ".csv" rewrite:false;
 		}
 	}
@@ -127,19 +127,19 @@ experiment "Abstract Batch Experiment" type:batch repeat: 2 until: world.sim_sto
 			// Number of ICU per step per age category
 			
 			// Number of susceptible per step per age category
-			simulations mean_of length(each.Individual where (each.status=susceptible)),
+			simulations mean_of length(each.Individual where (each.state=susceptible)),
 			// Number of exposed per step per age category
 			simulations mean_of length(each.Individual where (each.is_latent())),
 			// Number of asymptomatic permanent per step per age category
-			simulations mean_of length(each.Individual where (each.status = asymptomatic)),
+			simulations mean_of length(each.Individual where (each.state = asymptomatic)),
 			// Number of asymptomatic temporary per step per age category
-			simulations mean_of length(each.Individual where (each.status = presymptomatic)),
+			simulations mean_of length(each.Individual where (each.state = presymptomatic)),
 			// Number of symptomatic per step per age category
-			simulations mean_of length(each.Individual where (each.status = symptomatic)),
+			simulations mean_of length(each.Individual where (each.state = symptomatic)),
 			// Number of recovered per step per age category
-			simulations mean_of length(each.Individual where (each.status = recovered)),			
+			simulations mean_of length(each.Individual where (each.clinical_status = recovered)),			
 			// Number of dead per step per age category
-			simulations mean_of length(each.Individual where (each.status = dead))
+			simulations mean_of length(each.Individual where (each.clinical_status = dead))
 		] type: "csv" to: result_folder + "batchResult-" + modelName + ".csv" rewrite:false;
 	}
 }

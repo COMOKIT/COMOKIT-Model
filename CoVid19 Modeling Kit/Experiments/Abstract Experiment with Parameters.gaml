@@ -48,12 +48,18 @@ experiment "With parameters" parent: "Abstract Experiment" autorun: true {
 	/**
 	 * Other epidemiological parameters
 	 */
-	//Type of distribution of the incubation period; Among normal, lognormal, weibull, gamma
-	parameter "Type of distribution for incubation" category: "Epidemiology" among: ["Normal", "Lognormal", "Gamma", "Weibull"] var:  init_all_ages_distribution_type_incubation <- "Lognormal"; 
-	//First parameter of the incubation period distribution
-	parameter "Parameter 1 for incubation" category: "Epidemiology" var:  init_all_ages_parameter_1_incubation <- 1.57; 
-	//Second parameter of the incubation period distribution
-	parameter "Parameter 2 for incubation" category: "Epidemiology" var:  init_all_ages_parameter_2_incubation <- 0.65; 
+	//Type of distribution of the incubation period for symptomatic; Among normal, lognormal, weibull, gamma
+	parameter "Type of distribution for incubation symptomatic" category: "Epidemiology" among: ["Normal", "Lognormal", "Gamma", "Weibull"] var:  init_all_ages_distribution_type_incubation_period_symptomatic <- "Lognormal"; 
+	//First parameter of the incubation period distribution for symptomatic
+	parameter "Parameter 1 for incubation symptomatic" category: "Epidemiology" var:  init_all_ages_parameter_1_incubation_period_symptomatic <- 1.57; 
+	//Second parameter of the incubation period distribution for symptomatic
+	parameter "Parameter 2 for incubation symptomatic" category: "Epidemiology" var:  init_all_ages_parameter_2_incubation_period_symptomatic <- 0.65; 
+	//Type of distribution of the incubation period for asymptomatic; Among normal, lognormal, weibull, gamma
+	parameter "Type of distribution for incubation asymptomatic" category: "Epidemiology" among: ["Normal", "Lognormal", "Gamma", "Weibull"] var:  init_all_ages_distribution_type_incubation_period_symptomatic <- "Lognormal"; 
+	//First parameter of the incubation period distribution for asymptomatic
+	parameter "Parameter 1 for incubation asymptomatic" category: "Epidemiology" var:  init_all_ages_parameter_1_incubation_period_symptomatic <- 1.57; 
+	//Second parameter of the incubation period distribution for asymptomatic
+	parameter "Parameter 2 for incubation asymptomatic" category: "Epidemiology" var:  init_all_ages_parameter_2_incubation_period_symptomatic <- 0.65; 
 	//Type of distribution of the serial interval
 	parameter "Type of distribution for serial interval" category: "Epidemiology" among: ["Normal", "Lognormal", "Gamma", "Weibull"] var:
 	 init_all_ages_distribution_type_serial_interval <- "Normal"; 
@@ -61,13 +67,20 @@ experiment "With parameters" parent: "Abstract Experiment" autorun: true {
 	parameter "Parameter 1 for serial interval" category: "Epidemiology" var:  init_all_ages_parameter_1_serial_interval <- 3.96; 
 	//Second parameter of the serial interval distribution
 	parameter "Parameter 2 for serial interval" category: "Epidemiology" var:  init_all_ages_parameter_2_serial_interval <- 3.75; 
-	//Type of distribution of the time from onset to recovery
-	parameter "Type of distribution for onset to recovery" category: "Epidemiology" among: ["Normal", "Lognormal", "Gamma", "Weibull"] var:
-	 init_all_ages_distribution_type_onset_to_recovery <- "Lognormal"; 
-	//First parameter of the time from onset to recovery distribution
-	parameter "Parameter 1 for onset to recovery" category: "Epidemiology" var:  init_all_ages_parameter_1_onset_to_recovery <- 3.034953; 
-	//Second parameter of the time from onset to recovery distribution
-	parameter "Parameter 2 for onset to recovery" category: "Epidemiology" var:  init_all_ages_parameter_2_onset_to_recovery <- 0.34; 
+	//Type of distribution of infectious period symptomatic distribution
+	parameter "Type of distribution for infectious period symptomatic" category: "Epidemiology" among: ["Normal", "Lognormal", "Gamma", "Weibull"] var:
+	 init_all_ages_distribution_type_infectious_period_symptomatic <- "Lognormal"; 
+	//First parameter of the infectious period symptomatic distribution
+	parameter "Parameter 1 for infectious period symptomatic" category: "Epidemiology" var:  init_all_ages_parameter_1_infectious_period_symptomatic <- 3.034953; 
+	//Second parameter of the infectious period symptomatic distribution
+	parameter "Parameter 2 for infectious period symptomatic" category: "Epidemiology" var:  init_all_ages_parameter_2_infectious_period_symptomatic <- 0.34; 
+	//Type of infectious period asymptomatic distribution
+	parameter "Type of distribution for infectious period asymptomatic" category: "Epidemiology" among: ["Normal", "Lognormal", "Gamma", "Weibull"] var:
+	 init_all_ages_distribution_type_infectious_period_asymptomatic <- "Lognormal"; 
+	//First parameter of the infectious period asymptomatic distribution
+	parameter "Parameter 1 for infectious period asymptomatic" category: "Epidemiology" var:  init_all_ages_parameter_1_infectious_period_asymptomatic <- 3.034953; 
+	//Second parameter of the infectious period asymptomatic distribution
+	parameter "Parameter 2 for infectious period asymptomatic" category: "Epidemiology" var:  init_all_ages_parameter_2_infectious_period_asymptomatic <- 0.34;
 	//Probability of successfully identifying an infected
 	parameter "True positive test" category: "Epidemiology" var:  init_all_ages_probability_true_positive <- 0.89; 
 	//Probability of successfully identifying a non infected
