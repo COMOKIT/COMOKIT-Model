@@ -1,0 +1,40 @@
+/***
+* Name: $TITLE$
+* $DESC$
+* Based on a template present in COMOKIT, to make simple experiments on a specific policy. 
+* see http://comokit.org
+* Author: $AUTHOR$
+* Tags: covid19,epidemiology
+***/
+
+model $TITLE$ 
+
+import "All COMOKIT.gaml"
+
+global {
+	
+	string dataset <- "../datasets/Case Study/"; // Relative path to the folder containing the boundary.shp, buildings.shp, satellite.png, etc. datafiles. 
+
+
+	action define_policy{  
+		ask Authority {
+			// look at the Authority species to see how to define policies
+			//policy <- create_lockdown_policy();
+		}
+	}
+
+}
+
+experiment $TITLE$ parent: "Abstract Experiment" {
+	
+	output {
+		
+		// A basic layout where nothing but the displays and the experiment controls appear on screen
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
+	
+		// Graphical display showing the geographical representation of the model 
+		display "Main" parent: default_display {}
+	
+	}
+
+}
