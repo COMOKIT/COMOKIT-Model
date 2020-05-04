@@ -41,7 +41,7 @@ jobs:
       run: unzip gama.zip -d $GITHUB_WORKSPACE/GAMA && rm gama.zip && chmod +x GAMA/headless/gama-headless.sh
 
     - name: Get COMOKIT ToolKit
-      run: git clone https://github.com/COMOKIT/COMO-TK.git
+      run: git clone https://github.com/COMOKIT/COMOKIT-HPC.git
       
     - name: Check workspace content
       run: ls -lah $GITHUB_WORKSPACE/*
