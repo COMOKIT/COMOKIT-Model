@@ -25,9 +25,6 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
       
-    - name: Move COMOKIT under single folder
-      run: mkdir COMOKIT && find . -maxdepth 1 -not -name ".*" | grep -v COMOKIT| xargs -i mv {} ./COMOKIT
-      
     - name: Get latest GAMA Continuous version download url
       run: echo ::set-env name=GAMA_URL::$(docker run enflo/curl-action -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_Linux | cut -d ":" -f 2,3 | tr -d \")
     
