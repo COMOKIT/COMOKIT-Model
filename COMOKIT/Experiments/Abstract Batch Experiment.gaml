@@ -155,4 +155,5 @@ experiment "Abstract Batch Headless" type:gui
 	// Parameters for headless settings
 	parameter var:idSimulation init: 0 min: 0;
 	parameter var:ageCategory init: 5 min: 1 max: 100;
+	parameter var:result_folder;
 }
