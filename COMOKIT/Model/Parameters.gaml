@@ -14,13 +14,13 @@ import "Constants.gaml"
 global {
 	
 	// Data set management
-	string case_study; // The case study name
-	string DEFAULT_CASE_STUDY <- "Vinh Phuc";
+	string case_study <- "Domiz - refugee camp"; // The case study name
+	string DEFAULT_CASE_STUDY <- "Vinh Phuc"; // Default case study
 	
-	string dataset_folder; // The data set folder name
+	string dataset_folder <- "External Datasets"; // The data set folder name
 	string DEFAULT_DATASET_FOLDER <- "Datasets";
 	
-	// Get data set or default one if not properly loaded
+	// Get data set or default/random one if not properly loaded
 	string dataset <- build_data_set_path();
 	
 	//GIS data
@@ -252,6 +252,10 @@ global {
 	 * Default value are dataset_folder = "Datasets" and case_study = "Vinh Phuc"
 	 */
 	string build_data_set_path {
+		
+		write sample(world.dataset_folder);
+		write sample(world.case_study);
+		
 		string dataset_path <- experiment.project_path;
 		string dsf <- world.dataset_folder = nil ? world.DEFAULT_DATASET_FOLDER : world.dataset_folder;
 		dsf <- last(dsf)="/"?dsf:dsf+"/";

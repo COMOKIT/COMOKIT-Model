@@ -11,6 +11,7 @@ import "../../Model/Global.gaml"
 import "../Abstract Experiment.gaml"
 
 global {
+	
 	action define_policy{   
 		ask Authority {
 				policy <- create_hospitalisation_policy(true, true,2);
