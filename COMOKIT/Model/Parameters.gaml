@@ -14,11 +14,11 @@ import "Constants.gaml"
 global {
 	
 	// Data set management
-	string case_study <- "Domiz - refugee camp"; // The case study name
-	string DEFAULT_CASE_STUDY <- "Vinh Phuc"; // Default case study
+	string case_study; // The case study name
+	string DEFAULT_CASE_STUDY <- "Vinh Phuc" const: true;
 	
-	string dataset_folder <- "External Datasets"; // The data set folder name
-	string DEFAULT_DATASET_FOLDER <- "Datasets";
+	string dataset_folder; // The data set folder name
+	string DEFAULT_DATASET_FOLDER <- "Datasets"  const: true;
 	
 	// Get data set or default/random one if not properly loaded
 	string dataset <- build_data_set_path();
@@ -241,9 +241,9 @@ global {
 	/*
 	 * Gather all the sub-folder of the given dataset_folder
 	 */
-	list<string> gather_dataset_names(string dataset_folder <- world.dataset_folder) {
-		list<string> dirs <- folder(dataset_folder).contents  ;
-		dirs <- dirs where folder_exists(dataset_folder + each);
+	list<string> gather_dataset_names(string dataset_fol <- world.dataset_folder) {
+		list<string> dirs <- folder(dataset_fol).contents  ;
+		dirs <- dirs where folder_exists(dataset_fol + each);
 		return dirs;
 	}
 	
@@ -252,10 +252,6 @@ global {
 	 * Default value are dataset_folder = "Datasets" and case_study = "Vinh Phuc"
 	 */
 	string build_data_set_path {
-		
-		write sample(world.dataset_folder);
-		write sample(world.case_study);
-		
 		string dataset_path <- experiment.project_path;
 		string dsf <- world.dataset_folder = nil ? world.DEFAULT_DATASET_FOLDER : world.dataset_folder;
 		dsf <- last(dsf)="/"?dsf:dsf+"/";
