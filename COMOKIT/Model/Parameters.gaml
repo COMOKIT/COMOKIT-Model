@@ -16,8 +16,8 @@ global {
 	 
 	//GIS data
 	//TODO : make it less dependant on the hierarchical organization of experiment
-	string dataset <- "../../Datasets/Ben Tre/"; // default
-	//string dataset <- "../../Datasets/Vinh Phuc/"; // default
+	//string dataset <- "../../Datasets/Ben Tre/"; // default
+	string dataset <- "../../Datasets/Vinh Phuc/"; // default
 	//string dataset <- "../../Datasets/Castanet Tolosan/"; // default
 	
 	file shp_boundary <- file_exists(dataset+"boundary.shp") ? shape_file(dataset+"boundary.shp"):nil;
@@ -41,7 +41,7 @@ global {
 	//Epidemiological parameters
 	float nb_step_for_one_day <- #day/step; //Used to define the different period used in the model
 	bool load_epidemiological_parameter_from_file <- true; //Allowing parameters being loaded from a csv file 
-	string epidemiological_parameters <- "../Parameters/Epidemiological Parameters.csv"; //File for the parameters
+	string epidemiological_parameters <- "../../Parameters/Epidemiological Parameters.csv"; //File for the parameters
 	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
 	bool allow_transmission_human <- true; //Allowing human to human transmission
 	bool allow_transmission_building <- true; //Allowing environment contamination and infection
