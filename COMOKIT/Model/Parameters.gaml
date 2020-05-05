@@ -15,10 +15,10 @@ global {
 	
 	// Data set management
 	string case_study; // The case study name
-	string DEFAULT_CASE_STUDY <- "Vinh Phuc";
+	string DEFAULT_CASE_STUDY <- "Vinh Phuc" const: true;
 	
 	string dataset_folder; // The data set folder name
-	string DEFAULT_DATASET_FOLDER <- "Datasets";
+	string DEFAULT_DATASET_FOLDER <- "Datasets"  const: true;
 	
 	// Get data set or default one if not properly loaded
 	string dataset <- build_data_set_path();
@@ -241,9 +241,9 @@ global {
 	/*
 	 * Gather all the sub-folder of the given dataset_folder
 	 */
-	list<string> gather_dataset_names(string dataset_folder <- world.dataset_folder) {
-		list<string> dirs <- folder(dataset_folder).contents  ;
-		dirs <- dirs where folder_exists(dataset_folder + each);
+	list<string> gather_dataset_names(string dataset_fol <- world.dataset_folder) {
+		list<string> dirs <- folder(dataset_fol).contents  ;
+		dirs <- dirs where folder_exists(dataset_fol + each);
 		return dirs;
 	}
 	
