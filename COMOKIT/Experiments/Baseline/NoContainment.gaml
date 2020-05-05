@@ -41,10 +41,10 @@ experiment "No Containment" parent: "Abstract Experiment" {
 		display "Clinical chart" {
 			chart "Clinical" background: #white axes: #black {
 				data no_need_hospitalisation value: length(Individual where (each.clinical_status=no_need_hospitalisation)) color: #green marker: false style: line;
-				data need_hospitalisation value: length(Individual where (each.is_latent())) color: #orange marker: false style: line;
-				data need_ICU value: length(Individual where (each.state=presymptomatic)) color: #red marker: false style: line;
-				data recovered value: length(Individual where (each.state=symptomatic)) color: #blue marker: false style: line;
-				data dead value: length(Individual where (each.state=asymptomatic)) color: #black marker: false style: line;
+				data need_hospitalisation value: length(Individual where (each.clinical_status=need_hospitalisation)) color: #orange marker: false style: line;
+				data need_ICU value: length(Individual where (each.clinical_status=need_ICU)) color: #red marker: false style: line;
+				data recovered value: length(Individual where (each.clinical_status=recovered)) color: #blue marker: false style: line;
+				data dead value: length(Individual where (each.clinical_status=dead)) color: #black marker: false style: line;
 			}
 		}
 		display "Hospital chart" {
