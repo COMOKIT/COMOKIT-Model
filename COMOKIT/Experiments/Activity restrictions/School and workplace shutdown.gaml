@@ -21,7 +21,7 @@ global {
 	}
 	
 	list<bool> ask_closures {
-		return list<bool>(user_input("Select closure politics: ", ["School closure"::true,"Workplace closure"::true]).values);
+		return list<bool>(user_input("Select closure politics: ", [enter("School closure",true),enter("Workplace closure",true)]).values);
 	}
 		
 }

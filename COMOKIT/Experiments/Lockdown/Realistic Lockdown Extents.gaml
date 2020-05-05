@@ -72,28 +72,22 @@ experiment "Unconfined Individuals" parent: "Abstract Experiment" autorun: true 
 					data s.name /*  + " (infected)"*/ value: s.number_of_infectious color: s.color marker: false style: line thickness: 2;
 					//data s.name + " (reported)" value: s.total_number_reported color: s.color marker: true line_visible: false thickness: 1;
 				}
-
 			}
 
 			graphics "title" {
 				draw ("Day " + int((current_date - starting_date) / #day)) font: default at: {100 #px, 0} color: #white anchor: #top_left;
 			}
-
 		}
-
 	}
 
 	output {
-		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
 		display "Main" parent: simple_display {
 			graphics title {
 				draw world.name font: default at: {5 #px, 5 #px} color: world.color anchor: #top_left;
 			}
-
 		}
-
 	}
-
 }
 
 /*

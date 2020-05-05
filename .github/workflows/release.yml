@@ -38,13 +38,13 @@ jobs:
       run: unzip gama.zip -d $GITHUB_WORKSPACE/GAMA && rm gama.zip && chmod +x GAMA/headless/gama-headless.sh
 
     - name: Get COMOKIT ToolKit
-      run: git clone https://github.com/COMOKIT/COMOKIT-HPC.git
+      run: git clone https://github.com/COMOKIT/COMOKIT-HPC.git $GITHUB_WORKSPACE/COMOKIT-HPC
       
     - name: Check workspace content
       run: ls -lah $GITHUB_WORKSPACE/*
       
     - name: Compress release
-      run: zip -r COMOKIT.zip $GITHUB_WORKSPACE/COMOKIT $GITHUB_WORKSPACE/GAMA $GITHUB_WORKSPACE/COMO-TK
+      run: cd $GITHUB_WORKSPACE && zip -r $GITHUB_WORKSPACE/COMOKIT.zip ./COMOKIT ./GAMA ./COMOKIT-HPC
         
     - name: Action Release
       uses: eine/tip@gha-tip

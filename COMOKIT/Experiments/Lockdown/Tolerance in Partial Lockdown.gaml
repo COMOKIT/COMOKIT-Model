@@ -47,7 +47,7 @@ experiment "Comparison of tolerance levels" parent: "Abstract Experiment" autoru
 	}
 
 	output {
-		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
 		display "Main" parent: simple_display {
 		graphics title {
 				draw world.name  font: default at: {0, world.shape.height/2 - 30#px} color:world.color anchor: #top_left;
