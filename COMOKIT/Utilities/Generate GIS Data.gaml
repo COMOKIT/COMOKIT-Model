@@ -31,13 +31,6 @@ global {
 	//if true, GAMA is going to download the background satellite image (Bing image).
 	bool download_satellite_image <- true;
 	
-	//display the google image if this one exists
-	bool display_google_map <- false parameter:"Display google map image";
-	
-	//display the satellite image if this one exists
-	bool display_satellite_image <- true parameter:"Display satellite image";
-	
-	
 	
 	/* ------------------------------------------------------------------ 
 	 * 
@@ -653,18 +646,10 @@ experiment generateGISdata type: gui autorun: true {
 		create simulation;
 	}
 	output {
-		display map type: opengl draw_env: false{
+		display map type: opengl draw_env: false background: #black{
+			image (file_exists(googlemap_path) ? (googlemap_path): "white.png") transparency: 0.2;
+			image (file_exists(dataset_path+"/satellite.png") ? (dataset_path+"/satellite.png"): "white.png")  transparency: 0.2;
 			
-			graphics "satellite image"  refresh: false{
-				if display_satellite_image and file_exists(dataset_path +"/satellite.png" ) {
-					draw image_file(googlemap_path) ;
-				}
-			}
-			graphics "google image"  refresh: false{
-				if use_google_map_data and display_google_map and file_exists(googlemap_path) {
-					draw image_file(googlemap_path) ;
-				}
-			}
 			graphics "tile" {
 				if bounds_tile != nil {
 					draw bounds_tile color: #red empty: true;

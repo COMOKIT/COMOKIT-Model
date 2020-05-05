@@ -48,7 +48,7 @@ experiment "Abstract Experiment" virtual:true{
            		draw world.name  font: default at: { 20#px, 20#px} anchor: #top_left color:text_color;
            		draw ("Day " + int((current_date - starting_date) /  #day)) + " | " + ("Cases " + world.number_of_infectious)  font: default at: { 20#px, 50#px} anchor: #top_left color:text_color;
             }
-			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): dataset_folder+"Default/satellite.png" transparency: 0.5 refresh: false;
+			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../Utilities/white.png" transparency: 0.5 refresh: false;
 			
 			species Building {
 				draw shape color:  viral_load>0?rgb(255*viral_load,0,0):#lightgrey empty: true width: 2;
@@ -60,8 +60,8 @@ experiment "Abstract Experiment" virtual:true{
 		}
 		
 		display "default_3D_display" synchronized: false type: opengl background: #black draw_env: false virtual: true {
-			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): dataset_folder+"Default/satellite.png" transparency: 0.5 refresh: false;
-			
+			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../Utilities/white.png" transparency: 0.5 refresh: false;
+	
 			species Building transparency: 0.7 refresh:false{
 				draw shape depth: rnd(50) color:  #lightgrey empty: false width: 2;
 			}
