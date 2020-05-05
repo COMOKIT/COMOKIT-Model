@@ -13,12 +13,11 @@ import "../Abstract Experiment.gaml"
 
 experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 
-	string dataSetPath <- "../../Datasets/Vinh Phuc/";
-//	string dataSetPath <- "../../Datasets/Test 1/";
+	string use_case <- "Ben Tre/";
 
 	action _init_ {
 		
- 		create simulation with: [dataset::dataSetPath] {	
+ 		create simulation with: [case_study::use_case] {	
  			name <- "No containment";
  					
 			ask Authority {
@@ -28,7 +27,7 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 			}
 		}
 		
-		create simulation  with: [dataset::dataSetPath]  {
+		create simulation  with: [case_study::use_case]  {
 			int number_of_tests_ <- 20;
 			float percentage_ <- 0.1;			
 			
@@ -47,7 +46,7 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 			}
 		}
 
-		create simulation  with: [dataset::dataSetPath]  {
+		create simulation  with: [case_study::use_case]  {
 			int number_of_tests_ <- 20;
 			
 			name <- "Family ";
@@ -64,7 +63,7 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 
 		}		
 		
-		create simulation  with: [dataset::dataSetPath]  {
+		create simulation  with: [case_study::use_case]  {
 			int number_of_tests_ <- 20;
 			
 			name <- "Dynamic spacial lockdown";

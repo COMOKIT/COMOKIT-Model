@@ -13,13 +13,17 @@ import "Constants.gaml"
 
 global {
 	
-	 
-	//GIS data
-	//TODO : make it less dependant on the hierarchical organization of experiment
-	//string dataset <- "../../Datasets/Ben Tre/"; // default
-	string dataset <- "../../Datasets/Vinh Phuc/"; // default
-	//string dataset <- "../../Datasets/Castanet Tolosan/"; // default
+	// Data set management
+	string case_study; // The case study name
+	string DEFAULT_CASE_STUDY <- "Vinh Phuc";
 	
+	string dataset_folder; // The data set folder name
+	string DEFAULT_DATASET_FOLDER <- "Datasets";
+	
+	// Get data set or default one if not properly loaded
+	string dataset <- build_data_set_path();
+	
+	//GIS data
 	file shp_boundary <- file_exists(dataset+"boundary.shp") ? shape_file(dataset+"boundary.shp"):nil;
 	file shp_buildings <- file_exists(dataset+"buildings.shp") ? shape_file(dataset+"buildings.shp"):nil;
 
@@ -227,4 +231,42 @@ global {
 	//Policy parameters
 	list<string> meeting_relaxing_act <- [act_working, act_studying,act_eating,act_leisure,act_sport]; //fordidden activity when choosing "no meeting, no relaxing" policy
 	int nb_days_apply_policy <- 0;
+	
+	
+	// ----------------------------------------------------- //
+	//				 DATASET PATH MANAGEMENT				 //
+	// ----------------------------------------------------- //
+	
+	
+	/*
+	 * Gather all the sub-folder of the given dataset_folder
+	 */
+	list<string> gather_dataset_names(string dataset_folder <- world.dataset_folder) {
+		list<string> dirs <- folder(dataset_folder).contents  ;
+		dirs <- dirs where folder_exists(dataset_folder + each);
+		return dirs;
+	}
+	
+	/*
+	 * build the data set folder from provided case_study and dataset_folder </br>
+	 * Default value are dataset_folder = "Datasets" and case_study = "Vinh Phuc"
+	 */
+	string build_data_set_path {
+		string dataset_path <- experiment.project_path;
+		string dsf <- world.dataset_folder = nil ? world.DEFAULT_DATASET_FOLDER : world.dataset_folder;
+		dsf <- last(dsf)="/"?dsf:dsf+"/";
+		dataset_path <- dataset_path+dsf;
+		if not(folder_exists(dataset_path)) {error "Data set folder does not exists : "+dataset_path; return;}
+		
+		// TODO : uncomment and see !!! WHY IT IS NIL ??? AND WHY world.DEFAULT_DATASET_FOLDER IS NOT ???????
+		write sample(world.DEFAULT_CASE_STUDY); write sample(world.DEFAULT_DATASET_FOLDER);
+		string cs <- world.case_study = nil ? world.DEFAULT_CASE_STUDY : world.case_study;
+		
+		if not(folder_exists(dataset_path+cs)) {cs <- one_of(gather_dataset_names(dataset_path));}
+		cs <- last(cs)="/"?cs:cs+"/";
+		dataset_path <- dataset_path+cs;
+		 
+		return dataset_path;
+	}
+	
 }

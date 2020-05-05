@@ -11,6 +11,7 @@ model CoVid19
 
 
 global {
+	
 	//State of an individual
 	string susceptible <- "susceptible";
 	string latent <- "latent";

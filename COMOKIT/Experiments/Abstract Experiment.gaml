@@ -14,7 +14,6 @@ global {
 	rgb text_color <- world.color.brighter.brighter;
 	rgb background <- world.color.darker.darker;
 	int number_of_infectious <- 0 update: length(Individual where (each.is_infectious));
-	string dataset_folder <- "../../Datasets/"; // Need to be overwritten if the caller is not in a sub-directory
 
 	init { 
 		do init_epidemiological_parameters;
@@ -27,12 +26,10 @@ global {
 
 experiment "Abstract Experiment" virtual:true{
 
-	
-
 	string ask_dataset_path {
 		int index <- -1;
 		string question <- "Available datasets :\n ";
-		list<string> dirs <- self.gather_dataset_names();
+		list<string> dirs <- world.gather_dataset_names();
 		loop i from: 0 to: length(dirs) - 1 {
 			question <- question + (i+1) + "- " + dirs[i] + " \n ";
 		}
@@ -42,17 +39,6 @@ experiment "Abstract Experiment" virtual:true{
 		}
 		return dataset_folder + dirs[index] + "/";
 	}
-	
-	
-	list<string> gather_dataset_names {
-		list<string> dirs <- folder(dataset_folder).contents  ;
-		//list<string> dirs <- folder("../Datasets").contents  ;
-		dirs <- dirs where folder_exists(dataset_folder + each);
-		return dirs;
-	}
-	
-	
-	
 	
 	output {
 		display "default_display" synchronized: false type: opengl background: background virtual: true draw_env: false {
