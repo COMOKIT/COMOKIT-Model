@@ -38,7 +38,7 @@ experiment "Abstract Experiment" virtual:true{
 		}
 
 		loop while: (index < 0) or (index > length(dirs) - 1) {
-			index <- int(user_input(question, ["Your choice"::1])["Your choice"]) - 1;
+			index <- int(user_input(question, [enter("Your choice",1)])["Your choice"]) -1;
 		}
 		return dataset_folder + dirs[index] + "/";
 	}

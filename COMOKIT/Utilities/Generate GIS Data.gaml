@@ -10,10 +10,7 @@ model CoVid19
 global {
 	
 	//define the path to the dataset folder
-	//string dataset_path <- "../Datasets/Castanet Tolosan";
-	string dataset_path <- "../Datasets/Ha Loi - Me Linh";
-	//string dataset_path <- "../Datasets/Long Bien";
-	
+	string dataset_path <- "../Datasets/Test Generate GIS Data";	
 	
 	//define the bounds of the studied area
 	file data_file <-shape_file(dataset_path + "/boundary.shp");
@@ -140,7 +137,8 @@ global {
 			if (file_exists(googlemap_path)) {
 				do load_google_image;
 			} else {
-				map input_values <- user_input("Do you want to download google maps to fill in the data? (warning: risk of being blocked by google!)",["Download data" :: false, "Delay (in s) between two requests"::5.0]);
+//				map input_values <- user_input("Do you want to download google maps to fill in the data? (warning: risk of being blocked by google!)",["Download data" :: false, "Delay (in s) between two requests"::5.0]);
+				map input_values <- user_input("Do you want to download google maps to fill in the data? (warning: risk of being blocked by google!)",[enter("Download data",false), enter("Delay (in s) between two requests",5.0)]);
 				experiment.minimum_cycle_duration <- max(0.5, float(input_values["Delay (in s) between two requests"]));
 	
 				if bool(input_values["Download data"]) {
@@ -263,7 +261,7 @@ global {
 		int size_x <- 1500;
 		int size_y <- 1500;
 		
-		string rest_link<- "https://dev.virtualearth.net/REST/v1/Imagery/Map/Aerial/?mapArea="+bottom_right.y+"," + top_left.x + ","+ top_left.y + "," + bottom_right.x + "&mapSize="+int(size_x)+","+int(size_y)+ "&key=AvZ5t7w-HChgI2LOFoy_UF4cf77ypi2ctGYxCgWOLGFwMGIGrsiDpCDCjliUliln" ;
+		string rest_link<- "https://dev.virtualearth.net/REST/v1/Imagery/Map/Aerial/?mapArea="+bottom_right.y+"," + top_left.x + ","+ top_left.y + "," + bottom_right.x + "&mapSize="+size_x+","+size_y+ "&key=AvZ5t7w-HChgI2LOFoy_UF4cf77ypi2ctGYxCgWOLGFwMGIGrsiDpCDCjliUliln" ;
 		static_map_request <- image_file(rest_link);
 	
 		write "Satellite image retrieved";
@@ -272,7 +270,7 @@ global {
 		}
 		save cell to: dataset_path +"/satellite.png" type: image;
 		
-		string rest_link2<- "https://dev.virtualearth.net/REST/v1/Imagery/Map/Aerial/?mapArea="+bottom_right.y+"," + top_left.x + ","+ top_left.y + "," + bottom_right.x + "&mmd=1&mapSize="+int(size_x)+","+int(size_y)+ "&key=AvZ5t7w-HChgI2LOFoy_UF4cf77ypi2ctGYxCgWOLGFwMGIGrsiDpCDCjliUliln" ;
+		string rest_link2<- "https://dev.virtualearth.net/REST/v1/Imagery/Map/Aerial/?mapArea="+bottom_right.y+"," + top_left.x + ","+ top_left.y + "," + bottom_right.x + "&mmd=1&mapSize="+size_x+","+size_y+ "&key=AvZ5t7w-HChgI2LOFoy_UF4cf77ypi2ctGYxCgWOLGFwMGIGrsiDpCDCjliUliln" ;
 		file f <- json_file(rest_link2);
 		list<string> v <- string(f.contents) split_with ",";
 		int index <- 0;
