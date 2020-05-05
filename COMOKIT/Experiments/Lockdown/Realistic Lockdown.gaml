@@ -10,12 +10,12 @@ model CoVid19
 import "../../Model/Global.gaml"
 import "../Abstract Experiment.gaml"
 
-experiment "Realistic Lockdown" parent: "Abstract Experiment" {
+experiment "Realistic Lockdown" parent: "Abstract Experiment" autorun: true {
 	map<string, unknown> ask_values {
 		float p <- -1.0;
 		map<string, unknown> result;
 		loop while: (p > 1) or (p < 0) {
-			result <- user_input("Initialization", ["Proportion (between 0 and 1) of essential workers allowed to go out"::0.1, "Daily number of tests"::300]);
+			result <- user_input("Initialization", [enter("Proportion (between 0 and 1) of essential workers allowed to go out",0.1), enter("Daily number of tests",300)]);
 			p <- float(result["Proportion (between 0 and 1) of essential workers allowed to go out"]);
 		}
 
@@ -53,28 +53,26 @@ experiment "Realistic Lockdown" parent: "Abstract Experiment" {
 		
 		display "charts" toolbar: false background: #black{
 			chart "Infected cases" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
-			loop s over: simulations {
-				data s.name value: s.number_of_infectious color: s.color marker: false style: line thickness: 2; 
-				
-			}}
+				loop s over: simulations {
+					data s.name value: s.number_of_infectious color: s.color marker: false style: line thickness: 2; 		
+				}
+			}
 		}
 		
 		display "Cumulative incidence" toolbar: false background: #black{
 			chart "Cumulative incidence" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
-			loop s over: simulations {
-				data s.name value: s.total_number_of_infected color: s.color marker: false style: line thickness: 2; 
-				
-			}}
+				loop s over: simulations {
+					data s.name value: s.total_number_of_infected color: s.color marker: false style: line thickness: 2; 
+				}
+			}
 		}
 	}
 
 	output {
-		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: false;
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
 		
 		display "Main" parent: default_display {
 		}
-
 	}
-
 }
 
