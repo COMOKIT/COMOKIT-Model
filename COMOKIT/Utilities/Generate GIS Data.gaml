@@ -657,7 +657,7 @@ experiment generateGISdata type: gui autorun: true {
 			
 			graphics "satellite image"  refresh: false{
 				if display_satellite_image and file_exists(dataset_path +"/satellite.png" ) {
-					draw image_file(googlemap_path) ;
+					draw image_file(dataset_path +"/satellite.png") ;
 				}
 			}
 			graphics "google image"  refresh: false{
