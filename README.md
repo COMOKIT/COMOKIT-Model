@@ -22,11 +22,11 @@
     <a href="https://comokit.org"><strong>Explore the project »</strong></a>
     <br />
     <br />
-    [![Contributors][https://img.shields.io/github/contributors/COMOKIT/COMOKIT-Model.svg?style=flat-square]][https://github.com/COMOKIT/COMOKIT-Model/graphs/contributors]
+    <a href="https://github.com/COMOKIT/COMOKIT-Model/graphs/contributors"><img alt="Contributors" src="https://img.shields.io/github/contributors/COMOKIT/COMOKIT-Model.svg?style=flat-square" /></a>
     ·
-    [![Issues][https://img.shields.io/github/issues/COMOKIT/COMOKIT-Model.svg?style=flat-square]][https://github.com/COMOKIT/COMOKIT-Model/issues]
+    <a href="https://github.com/COMOKIT/COMOKIT-Model/issues"><img alt="Issues" src="https://img.shields.io/github/issues/COMOKIT/COMOKIT-Model.svg?style=flat-square)](https://github.com/COMOKIT/COMOKIT-Model/issues" /></a>
     ·
-    [![GPL3 License][https://img.shields.io/github/license/COMOKIT/COMOKIT-Model.svg?style=flat-square]][https://github.com/COMOKIT/COMOKIT-Model/blob/master/LICENSE]
+    <a href="https://github.com/COMOKIT/COMOKIT-Model/blob/master/LICENSE"><img alt="GPL3 License" src="https://img.shields.io/github/license/COMOKIT/COMOKIT-Model.svg?style=flat-square" /></a>
   </p>
 </p>
 
