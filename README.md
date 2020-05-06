@@ -27,6 +27,10 @@
     <a href="https://github.com/COMOKIT/COMOKIT-Model/issues"><img alt="Issues" src="https://img.shields.io/github/issues/COMOKIT/COMOKIT-Model.svg?style=flat-square)](https://github.com/COMOKIT/COMOKIT-Model/issues" /></a>
     ·
     <a href="https://github.com/COMOKIT/COMOKIT-Model/blob/master/LICENSE"><img alt="GPL3 License" src="https://img.shields.io/github/license/COMOKIT/COMOKIT-Model.svg?style=flat-square" /></a>
+    <br />
+    <a href="https://github.com/COMOKIT/COMOKIT-Model/network/members"><img alt="Fork" src="https://img.shields.io/github/forks/COMOKIT/COMOKIT-Model.svg?style=flat-square" /></a>
+    ·
+    <a href="https://github.com/COMOKIT/COMOKIT-Model/stargazers"><img alt="Fork" src="https://img.shields.io/github/stars/COMOKIT/COMOKIT-Model.svg?style=flat-square" /></a>
   </p>
 </p>
 
