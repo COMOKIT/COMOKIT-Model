@@ -258,10 +258,7 @@ global {
 		dataset_path <- dataset_path+dsf;
 		if not(folder_exists(dataset_path)) {error "Data set folder does not exists : "+dataset_path; return;}
 		
-		// TODO : uncomment and see !!! WHY IT IS NIL ??? AND WHY world.DEFAULT_DATASET_FOLDER IS NOT ???????
-		write sample(world.DEFAULT_CASE_STUDY); write sample(world.DEFAULT_DATASET_FOLDER);
 		string cs <- world.case_study = nil ? world.DEFAULT_CASE_STUDY : world.case_study;
-		
 		if not(folder_exists(dataset_path+cs)) {cs <- one_of(gather_dataset_names(dataset_path));}
 		cs <- last(cs)="/"?cs:cs+"/";
 		dataset_path <- dataset_path+cs;
