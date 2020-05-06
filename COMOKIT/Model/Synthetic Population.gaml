@@ -572,7 +572,11 @@ global {
 					
 					list<Individual> cands <- current_ind.friends where ((each.agenda_week[day - 1][current_hour]) = nil);
 					list<Individual> inds <- max(0,gauss(nb_activity_fellows_mean,nb_activity_fellows_std)) among cands;
-					//write  current_ind.name + " : " + current_ind.age + " nb friends: " + length(current_ind.friends) + " inds: "+ length(inds) + " friend age: "+ (current_ind.friends collect each.age);
+					ask world {do console_output(
+						current_ind.name + " : " + current_ind.age + " nb friends: " + length(current_ind.friends) 
+						+ " inds: "+ length(inds) + " friend age: "+ (current_ind.friends collect each.age),
+						caller::"Synthetic Population.gaml"
+					);}
 					loop ind over: inds {
 						map<int,pair<Activity,list<Individual>>> agenda_day_ind <- ind.agenda_week[day - 1];
 						agenda_day_ind[current_hour] <- act::(inds - ind + current_ind);
@@ -582,7 +586,10 @@ global {
 							if not (return_home) {break;}
 						}
 						if (return_home) {agenda_day_ind[end_hour] <- staying_home[0]::[];}
-						//write "ind.agenda_week: " + day + " -> "+ ind.agenda_week[day - 1];
+						ask world {do console_output( 
+							"ind.agenda_week: " + day + " -> "+ ind.agenda_week[day - 1], 
+							caller::"Synthetic Population.gaml"
+						);}
 					}
 					agenda_day[current_hour] <- act::inds;
 				} else {

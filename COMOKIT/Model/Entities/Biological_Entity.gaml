@@ -132,7 +132,7 @@ species BiologicalEntity control:fsm{
 		if allow_transmission_human {
 			float proba <- contact_rate*reduction_factor;
 			list<BiologicalEntity> fellows <- BiologicalEntity where (flip(proba) and (each.state = susceptible));
-			write fellows;
+			ask world {do console_output(sample(fellows), caller::"Biological_Entity.gaml");}
 			ask fellows {
 				do define_new_case;
 			}

@@ -15,7 +15,7 @@ import "ActivitiesMonitor.gaml"
 global {
 
 	action create_authority {
-		write "Create an authority ";
+		ask world { do console_output("Create an authority ", caller::"Authority.gaml");}
 		create Authority;
 		do define_policy;
 

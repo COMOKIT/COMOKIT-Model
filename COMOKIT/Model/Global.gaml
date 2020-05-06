@@ -27,7 +27,7 @@ global {
 	map<int,map<string,list<string>>> map_epidemiological_parameters;
 	action global_init {
 		
-		write "global init";
+		do console_output("global init");
 		if (shp_boundary != nil) {
 			create Boundary from: shp_boundary;
 		}
@@ -266,6 +266,22 @@ global {
 				{
 					map_epidemiological_parameters[aYear][aParameter] <- list_value;
 				}
+			}
+		}
+	}
+	
+	// Global debug mode to print in console all messages called from #console_output()
+	bool DEBUG <- false;
+	// the available level of debug among debug, error and warning (default = debug)
+	string LEVEL init:"debug" among:["debug","error","warning"];
+	// Simple print_out method
+	action console_output(string output, string caller <- "Global.gaml", string level <- LEVEL) { 
+		if DEBUG {
+			string msg <- "["+caller+"] "+output; 
+			switch level {
+				match "error" {error msg;}
+				match "warning" {warn msg;}
+				default {write msg;}
 			}
 		}
 	}
