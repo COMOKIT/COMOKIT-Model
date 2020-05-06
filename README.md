@@ -78,9 +78,9 @@ To get a local copy up and running follow these simple steps.
 
 ### Add your own dataset
 
-Here's a 5 minutes tutorial to show you how to do
+Here's a 5 minutes tutorial to show you how to do :
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/sQI63mgtYi4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![5 minutes tutorial to create a complete case study in COMOKIT](https://i.imgur.com/8IHcKPP.png)](https://www.youtube.com/watch?v=sQI63mgtYi4)
 
 <!-- ROADMAP -->
 ## Roadmap
