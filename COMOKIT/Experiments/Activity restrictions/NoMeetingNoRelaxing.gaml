@@ -11,7 +11,10 @@ model CoVid19
 import "../../Model/Global.gaml"
 import "../Abstract Experiment.gaml"
 
-global {
+/*
+ * Initialize a policy based on activity restrictions: working, studying and leisure (including go to eat or making sport outside) 
+ */
+global { 
 
 	action define_policy{   
 		ask Authority {
@@ -23,6 +26,7 @@ global {
 }
 
 experiment "No Meeting No Relaxing" parent: "Abstract Experiment" {
+	
 	output {
 		display "Main" parent: default_display {
 		}

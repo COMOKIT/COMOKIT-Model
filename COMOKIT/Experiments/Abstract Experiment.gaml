@@ -10,11 +10,18 @@ model CoVid19
 import "../Model/Global.gaml"
 
 global {
+	
+	// Utils variable for the look and feel of simulation GUI
 	font default <- font("Helvetica", 18, #bold);
 	rgb text_color <- world.color.brighter.brighter;
 	rgb background <- world.color.darker.darker;
+	
+	// Monitor the number of infectious individual
 	int number_of_infectious <- 0 update: length(Individual where (each.is_infectious));
 
+	/*
+	 * Gloabl three steps initialization of a any simulation
+	 */
 	init { 
 		do init_epidemiological_parameters;
 		do global_init;
@@ -23,22 +30,59 @@ global {
 
 }
 
+/*
+ * The highest order abstraction to initialize a simulation instance of a COMOKIT model. Any
+ * new use case, should extend it. It provides basic data set path management and display setup options for the GUI </br>
+ * Also see Abstract Experiment with Parameters.gaml and Abstract Batch Experiment for more features. </br>
+ * 
+ */
+experiment "Abstract Experiment" virtual:true {
 
-experiment "Abstract Experiment" virtual:true{
-
-	string ask_dataset_path {
-		int index <- -1;
-		string question <- "Available datasets :\n ";
-		list<string> dirs <- world.gather_dataset_names();
-		loop i from: 0 to: length(dirs) - 1 {
-			question <- question + (i+1) + "- " + dirs[i] + " \n ";
-		}
-
-		loop while: (index < 0) or (index > length(dirs) - 1) {
-			index <- int(user_input(question, [enter("Your choice",1)])["Your choice"]) -1;
-		}
-		return dataset_folder + dirs[index] + "/";
+	// ----------------------------------------------------- //
+	//				 DATASET PATH MANAGEMENT				 //
+	// ----------------------------------------------------- //
+	
+	/*
+	 * build the data set folder from provided case_study and dataset_folder </br>
+	 * Default value are dataset_folder = "Datasets" and case_study = "Vinh Phuc"
+	 */
+	string build_data_set_path(
+		string dataset_folder_project_path <- project_path+DEFAULT_DATASET_FOLDER_NAME, 
+		string case_study_folder_name <- DEFAULT_CASE_STUDY_FOLDER_NAME
+	) {
+		if not(folder_exists(dataset_folder_project_path)) {error "Data set folder does not exists : "+dataset_folder_project_path;}
+		
+		string dataset_path <- last(dataset_folder_project_path)="/"?dataset_folder_project_path:dataset_folder_project_path+"/";
+		
+		if not(folder_exists(dataset_path+case_study_folder_name)) {error "Case study folder  does not exists : "+dataset_path+case_study_folder_name;}
+		
+		case_study_folder_name <- last(case_study_folder_name)="/"?case_study_folder_name:case_study_folder_name+"/";
+		return dataset_path+case_study_folder_name;
 	}
+	
+	/*
+	 * Gather all the sub-folder of the given dataset_folder
+	 */
+	list<string> gather_dataset_names(string dataset_folder_project_path <- project_path+DEFAULT_DATASET_FOLDER_NAME) {
+		if not(folder_exists(dataset_folder_project_path)) {error "Wrong data set folder access "+dataset_folder_project_path;}
+		list<string> dirs <- folder(dataset_folder_project_path).contents  ;
+		if not(last(dataset_folder_project_path)="/") { dataset_folder_project_path <- dataset_folder_project_path+"/";} 
+		dirs <- dirs where folder_exists(dataset_folder_project_path + each);
+		return dirs;
+	}
+
+	/*
+	 * Ask user to choose a dataset among available ones
+	 */
+	string ask_dataset_path(string dataset_folder_project_path <- project_path+DEFAULT_DATASET_FOLDER_NAME) {
+		list<string> dirs <- gather_dataset_names(dataset_folder_project_path) - EXCLUDED_CASE_STUDY_FOLDER_NAME;
+		string question <- "Choose one dataset among : "+dirs;
+		return dataset_folder_project_path + "/" + user_input(question, [choose("Your choice",string,first(dirs),dirs)])["Your choice"] + "/";
+	}
+	
+	// ----------------------------------------------------- //
+	//				 MAIN DEFAULT DISPLAY					 //
+	// ----------------------------------------------------- //
 	
 	output {
 		display "default_display" synchronized: false type: opengl background: background virtual: true draw_env: false {
@@ -48,7 +92,7 @@ experiment "Abstract Experiment" virtual:true{
            		draw world.name  font: default at: { 20#px, 20#px} anchor: #top_left color:text_color;
            		draw ("Day " + int((current_date - starting_date) /  #day)) + " | " + ("Cases " + world.number_of_infectious)  font: default at: { 20#px, 50#px} anchor: #top_left color:text_color;
             }
-			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../Utilities/white.png" transparency: 0.5 refresh: false;
+			image file:  file_exists(project_dataset_path+"/satellite.png") ? (project_dataset_path+"/satellite.png"): "../Utilities/white.png" transparency: 0.5 refresh: false;
 			
 			species Building {
 				draw shape color:  viral_load>0?rgb(255*viral_load,0,0):#lightgrey empty: true width: 2;
@@ -60,7 +104,7 @@ experiment "Abstract Experiment" virtual:true{
 		}
 		
 		display "default_3D_display" synchronized: false type: opengl background: #black draw_env: false virtual: true {
-			image file:  file_exists(dataset+"/satellite.png") ? (dataset+"/satellite.png"): "../Utilities/white.png" transparency: 0.5 refresh: false;
+			image file:  file_exists(project_dataset_path+"/satellite.png") ? (project_dataset_path+"/satellite.png"): "../Utilities/white.png" transparency: 0.5 refresh: false;
 	
 			species Building transparency: 0.7 refresh:false{
 				draw shape depth: rnd(50) color:  #lightgrey empty: false width: 2;
