@@ -46,6 +46,8 @@ deploy:
   overwrite: true
   tag_name: latest
   prerelease: true
+  # Overwritting current latest
+  target_commitish: 16c29c4b21b04be1abecc86564e3e97d7aa261de
   file:
     - "COMOKIT-Win.zip"
     - "COMOKIT-Mac.zip"
