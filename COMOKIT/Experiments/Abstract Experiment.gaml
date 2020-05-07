@@ -41,48 +41,47 @@ experiment "Abstract Experiment" virtual: true {
 //				 DATASET PATH MANAGEMENT				 //
 // ----------------------------------------------------- //
 
+
+	string with_path_termination(string p) {
+		return last(p) = "/" ? p : p+"/";
+	}
+
 /*
 	 * build the data set folder from provided case_study and dataset_folder </br>
 	 * Default value are dataset_folder = "Datasets" and case_study = "Vinh Phuc"
 	 */
-	string build_dataset_path (string datasets_folder_path <- project_path + DEFAULT_DATASETS_FOLDER_NAME, string case_study_folder_name <- DEFAULT_CASE_STUDY_FOLDER_NAME) {
-		if not (folder_exists(datasets_folder_path)) {
-			error "Data set folder does not exists : " + datasets_folder_path;
+	string build_dataset_path (string _datasets_folder_path <- project_path + DEFAULT_DATASETS_FOLDER_NAME, string _case_study_folder_name <- DEFAULT_CASE_STUDY_FOLDER_NAME) {
+		string dfp <- with_path_termination(_datasets_folder_path);
+		string csfd <- with_path_termination(_case_study_folder_name);
+		if not (folder_exists(dfp)) {
+			error "Datasets folder does not exist : " + datasets_folder_path;
+		} else if not (folder_exists(dfp + csfd)) {
+			error "Case study folder  does not exist : " + dfp + case_study_folder_name;
 		}
-
-		string dataset_path <- last(datasets_folder_path) = "/" ? datasets_folder_path : datasets_folder_path + "/";
-		if not (folder_exists(dataset_path + case_study_folder_name)) {
-			error "Case study folder  does not exists : " + dataset_path + case_study_folder_name;
-		}
-
-		case_study_folder_name <- last(case_study_folder_name) = "/" ? case_study_folder_name : case_study_folder_name + "/";
-		return dataset_path + case_study_folder_name;
+		return dfp + csfd;
 	}
 
 	/*
 	 * Gather all the sub-folder of the given dataset_folder
 	 */
-	list<string> gather_dataset_names (string datasets_folder_path <- project_path + DEFAULT_DATASETS_FOLDER_NAME) {
-		if not (folder_exists(datasets_folder_path)) {
-			error "Wrong data set folder access " + datasets_folder_path;
+	list<string> gather_dataset_names (string _datasets_folder_path <- project_path + DEFAULT_DATASETS_FOLDER_NAME) {
+		string dfp <- with_path_termination(_datasets_folder_path);
+		if not (folder_exists(dfp)) {
+			error "Datasets folder does not exist : " + dfp;
 		}
-
-		list<string> dirs <- folder(datasets_folder_path).contents;
-		if not (last(datasets_folder_path) = "/") {
-			datasets_folder_path <- datasets_folder_path + "/";
-		}
-
-		dirs <- dirs where folder_exists(datasets_folder_path + each);
+		list<string> dirs <- folder(dfp).contents;
+		dirs <- dirs where folder_exists(dfp + each);
 		return dirs;
 	}
 
 	/*
 	 * Ask user to choose a dataset among available ones
 	 */
-	string ask_dataset_path (string datasets_folder_path <- project_path + DEFAULT_DATASETS_FOLDER_NAME) {
-		list<string> dirs <- gather_dataset_names(datasets_folder_path) - EXCLUDED_CASE_STUDY_FOLDERS_NAME;
+	string ask_dataset_path (string _datasets_folder_path <- project_path + DEFAULT_DATASETS_FOLDER_NAME) {
+		string dfp <- with_path_termination(_datasets_folder_path);
+		list<string> dirs <- gather_dataset_names(dfp) - EXCLUDED_CASE_STUDY_FOLDERS_NAME;
 		string question <- "Choose one dataset among : " + dirs;
-		return datasets_folder_path + "/" + user_input(question, [choose("Your choice", string, first(dirs), dirs)])["Your choice"] + "/";
+		return dfp + "/" + user_input(question, [choose("Your choice", string, first(dirs), dirs)])["Your choice"] + "/";
 	}
 
 	// ----------------------------------------------------- //
