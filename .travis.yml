@@ -22,11 +22,11 @@ script:
 # Mac build
 - curl -o gama.zip -fSL $GAMA_MAC
 - unzip gama.zip -d ./GAMA
-- chmod +x ./GAMA/Contents/headless/gama-headless.sh
+- chmod +x ./GAMA/Gama.app/Contents/headless/gama-headless.sh
 # Create Library folders
-- mkdir -p ./GAMA/Contents/Eclipse/configuration/org.eclipse.osgi/15/0/.cp/models/
-- cp -r COMOKIT ./GAMA/Contents/Eclipse/configuration/org.eclipse.osgi/15/0/.cp/models/
-- zip -r ./COMOKIT-Mac.zip ./GAMA/GAMA.app
+- mkdir -p ./GAMA/Gama.app/Contents/Eclipse/configuration/org.eclipse.osgi/15/0/.cp/models/
+- cp -r COMOKIT ./GAMA/Gama.app/Contents/Eclipse/configuration/org.eclipse.osgi/15/0/.cp/models/
+- zip -r ./COMOKIT-Mac.zip ./GAMA/Gama.app
 
 # Clean GAMA version
 - rm -fr ./GAMA
