@@ -39,6 +39,11 @@ script:
 - cp -r COMOKIT ./GAMA/configuration/org.eclipse.osgi/15/0/.cp/models/
 - zip -r --symlinks ./COMOKIT-Win.zip ./GAMA
 
+before_deploy:
+  - git remote add master https://${GITHUB_API_KEY}@github.com/COMOKIT/COMOKIT-Model.git
+  - git fetch master --tags
+  - git tag -f latest
+  - git push master --tags -f
 deploy:
   provider: releases
   name: "All-In-One Archive"
@@ -46,8 +51,6 @@ deploy:
   overwrite: true
   tag_name: latest
   prerelease: true
-  # Overwritting current latest
-  target_commitish: 16c29c4b21b04be1abecc86564e3e97d7aa261de
   file:
     - "COMOKIT-Win.zip"
     - "COMOKIT-Mac.zip"
@@ -57,5 +60,4 @@ deploy:
     repo: COMOKIT/COMOKIT-Model
     branch: master
     tags: false
-  api_key:
-    secure: Whzxvz+GZpaBqYVAQ6fAiUrMoQu39U0E6jZ8UdaYxX2oyC7NoJwR/fQ/DzIaOyo6TNYEZSDFDt8DrNwa+h2Uetin2WxwYnRQMBQalWBfdeieoxlqc2o5u+MIHKZ8+uvL2USH52crs7boZ4NOkzvCCNKX5oelCOCYtELhySjr0J+5dAgxQAib6+W+fZTb40X5meonirUZUm7fjq5EW3YFkUupKOxUuS1UhgUJL1eRNBokIfnZQRP0ARMUTsg6qLstv5Ts+LCWAzoZwO3ZlzyxK5lcsF//nM0AwvtbFV4p0s3yC4nyB0QJYbKbMs+x58F7I8iH6dTOxMvyMA/UKDa/df9P/3AJXjgK3/CdcS2/K1nHygMBZR+eLA0ggCo4t3tHE5KkSYxnfAdK7BEMa+LPCYtL+2fiNpIYcIRF/WkIUPf00i2ckg85ep6Ucf3o4EdreJWBxmY5B9tzNCtm+/lTO0zuCglZ7/tq1EkKLeReRdcMPsQojfZekF4lPq8IrbX/Ntz/mx+7vkcs4FfTfS6zpCPv72Q/Q7FBrA0LAYISQTBL8tq4cWJE4MfKHjHL1j/Xxa6VAybZFPFMXBLssWzhK6eLnoyaIOCOqsEI6EZhraFw9duazhn31QrB74tHSp7ufsrY+hjNFdKa0GQ2LmfGe8OjvjWww0P2DHkVna6oOvI=
+  api_key: $GITHUB_API_KEY
