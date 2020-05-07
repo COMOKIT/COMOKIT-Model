@@ -19,7 +19,7 @@ experiment "Comparison of tolerance levels" parent: "Abstract Experiment" autoru
 		list<rgb> colors <- brewer_colors("Paired");
 		
 		loop tolerance over: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0] {
-			create simulation with: [color::(colors at int(tolerance*5)), project_dataset_path::shape_path, seed::simulation_seed] {
+			create simulation with: [color::(colors at int(tolerance*5)), dataset_path::shape_path, seed::simulation_seed] {
 				name <- string(int(tolerance*100)) + "% of tolerance";
 				ask Authority {
 					policy <- with_tolerance(create_lockdown_policy(), tolerance);

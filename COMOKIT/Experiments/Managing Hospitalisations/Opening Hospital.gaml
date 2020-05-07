@@ -17,25 +17,25 @@ experiment "Opening Hospitals" parent: "Abstract Experiment" autorun: true {
 		float simulation_seed <- rnd(2000.0);
 		list<rgb> colors <- [#blue, #cyan, #green, #red];
 		
-		create simulation with: [color::(colors at 0),project_dataset_path::shape_path, seed::simulation_seed] {
+		create simulation with: [color::(colors at 0),dataset_path::shape_path, seed::simulation_seed] {
 			name <- "No Hospitalisation";
 			ask Authority {
 				policy <- create_no_containment_policy();
 			}
 		}
-		create simulation with: [color::(colors at 1),project_dataset_path::shape_path, seed::simulation_seed] {
+		create simulation with: [color::(colors at 1),dataset_path::shape_path, seed::simulation_seed] {
 			name <- "Only ICU hospitalisation";
 			ask Authority {
 				policy <- create_hospitalisation_policy(true, false,2);
 			}
 		}
-		create simulation with: [color::(colors at 2),project_dataset_path::shape_path, seed::simulation_seed] {
+		create simulation with: [color::(colors at 2),dataset_path::shape_path, seed::simulation_seed] {
 			name <- "ICU and Hospitalisation";
 			ask Authority {
 				policy <- create_hospitalisation_policy(true, true,2);
 			}
 		}
-		create simulation with: [color::(colors at 3),project_dataset_path::shape_path, seed::simulation_seed] {
+		create simulation with: [color::(colors at 3),dataset_path::shape_path, seed::simulation_seed] {
 			name <- "ICU and Hospitalisation for 5 tests";
 			ask Authority {
 				policy <- create_hospitalisation_policy(true, true,5);

@@ -19,7 +19,7 @@ experiment "Early containment" parent: "Abstract Experiment" autorun: true {
 		int color_browser <- 0;
 		int nb_cases <- 20;
 		loop nb_days over: [0, 15, 30, 45, 60] {
-			create simulation with: [color::(colors at int(color_browser)), project_dataset_path::shape_path, seed::simulation_seed] {
+			create simulation with: [color::(colors at int(color_browser)), dataset_path::shape_path, seed::simulation_seed] {
 				name <- string(nb_days) + " days containment after " + nb_cases + " cases";
 				ask Authority {
 					AbstractPolicy d <- create_detection_policy(100, true, true);

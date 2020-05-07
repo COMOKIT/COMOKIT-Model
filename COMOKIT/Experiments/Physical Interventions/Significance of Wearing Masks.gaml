@@ -30,7 +30,7 @@ experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 		list<rgb> colors <- brewer_colors("Paired");
 		
 		loop proportion over: [0.0,1.0] {
-			create simulation with: [color::(colors at int(proportion*5)), project_dataset_path::shape_path, seed::simulation_seed,   
+			create simulation with: [color::(colors at int(proportion*5)), dataset_path::shape_path, seed::simulation_seed,   
 				init_all_ages_factor_contact_rate_wearing_mask::factor, init_all_ages_proportion_wearing_mask::proportion, 
 				force_parameters::list(epidemiological_proportion_wearing_mask, epidemiological_factor_wearing_mask)
 			] {

@@ -15,25 +15,24 @@ global {
 	
 	// The case study name and dataset path variable to be used in models
 	string case_study_folder_name; // The case study folder
-	string dataset_folder_project_path; // The path from root project to the data set folder (can contains several case studies)
+	string datasets_folder_path; // The path from root project to the data set folder (can contains several case studies)
 	// Default dataset management
-	list<string> EXCLUDED_CASE_STUDY_FOLDER_NAME <- ["Test Generate GIS Data"] const:true;
+	list<string> EXCLUDED_CASE_STUDY_FOLDERS_NAME <- ["Test Generate GIS Data"] const:true;
 	string DEFAULT_CASE_STUDY_FOLDER_NAME <- "Vinh Phuc" const: true;
 	string DEFAULT_DATASET_FOLDER_NAME <- "Datasets"  const: true;
-	string DEFAULT_MODEL_TO_PROJECT_PATH <- "../.." const:true;
 	// The actual dataset path
-	string project_dataset_path <- build_dataset_path();
+	string dataset_path <- build_dataset_path();
 	
 	//GIS data
-	file shp_boundary <- file_exists(project_dataset_path+"boundary.shp") ? shape_file(project_dataset_path+"boundary.shp"):nil;
-	file shp_buildings <- file_exists(project_dataset_path+"buildings.shp") ? shape_file(project_dataset_path+"buildings.shp"):nil;
+	file shp_boundary <- file_exists(dataset_path+"boundary.shp") ? shape_file(dataset_path+"boundary.shp"):nil;
+	file shp_buildings <- file_exists(dataset_path+"buildings.shp") ? shape_file(dataset_path+"buildings.shp"):nil;
 
 	//Population data 
-	csv_file csv_population <- file_exists(project_dataset_path+"population.csv") ? csv_file(project_dataset_path+"population.csv",separator,header):nil;
-	csv_file csv_parameter_population <- file_exists(project_dataset_path+"Population parameter.csv") ? csv_file(project_dataset_path+"Population parameter.csv",",",true):nil;
-	csv_file csv_parameter_agenda <- file_exists(project_dataset_path+"Agenda parameter.csv") ? csv_file(project_dataset_path+"Agenda parameter.csv",",",true):nil;
-	csv_file csv_activity_weights <- file_exists(project_dataset_path+"Activity weights.csv") ? csv_file(project_dataset_path+"Activity weights.csv",",",string, false):nil;
-	csv_file csv_building_type_weights <- file_exists(project_dataset_path+"Building type weights.csv") ? csv_file(project_dataset_path+"Building type weights.csv",",",string, false):nil;
+	csv_file csv_population <- file_exists(dataset_path+"population.csv") ? csv_file(dataset_path+"population.csv",separator,header):nil;
+	csv_file csv_parameter_population <- file_exists(dataset_path+"Population parameter.csv") ? csv_file(dataset_path+"Population parameter.csv",",",true):nil;
+	csv_file csv_parameter_agenda <- file_exists(dataset_path+"Agenda parameter.csv") ? csv_file(dataset_path+"Agenda parameter.csv",",",true):nil;
+	csv_file csv_activity_weights <- file_exists(dataset_path+"Activity weights.csv") ? csv_file(dataset_path+"Activity weights.csv",",",string, false):nil;
+	csv_file csv_building_type_weights <- file_exists(dataset_path+"Building type weights.csv") ? csv_file(dataset_path+"Building type weights.csv",",",string, false):nil;
 	
 	
 	//simulation step
@@ -46,7 +45,7 @@ global {
 	//Epidemiological parameters
 	float nb_step_for_one_day <- #day/step; //Used to define the different period used in the model
 	bool load_epidemiological_parameter_from_file <- true; //Allowing parameters being loaded from a csv file 
-	string epidemiological_parameters <- DEFAULT_MODEL_TO_PROJECT_PATH+"/Parameters/Epidemiological Parameters.csv"; //File for the parameters
+	string epidemiological_parameters <- experiment.project_path+"Parameters/Epidemiological Parameters.csv"; //File for the parameters
 	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
 	bool allow_transmission_human <- true; //Allowing human to human transmission
 	bool allow_transmission_building <- true; //Allowing environment contamination and infection
@@ -238,17 +237,20 @@ global {
 	// ---------------
 	
 	/*
-	 * Default way to initialize the data set from models redefining variables case_study and dataset_folder
+	 * Default way to initialize the data set redefining variables case_study_folder_name and datasets_folder_path
+	 * relative to the location of the launched simulation
 	 */
-	string build_dataset_path(string relative_path <- DEFAULT_MODEL_TO_PROJECT_PATH) {
-		string the_path <- relative_path+"/";
+	string build_dataset_path(string relative_path <- experiment.project_path) {
+		string the_path <- relative_path;
 		string default <- the_path+"/"+DEFAULT_DATASET_FOLDER_NAME+"/"+DEFAULT_CASE_STUDY_FOLDER_NAME+"/";
-		if(dataset_folder_project_path=nil and case_study_folder_name=nil) {return default;}
-		if(dataset_folder_project_path=nil){
+		if(datasets_folder_path=nil and case_study_folder_name=nil) {return default;}
+		if(datasets_folder_path=nil){
 			the_path <- the_path+DEFAULT_DATASET_FOLDER_NAME+"/";
 			the_path <- the_path + (folder_exists(the_path+case_study_folder_name) ? case_study_folder_name : DEFAULT_CASE_STUDY_FOLDER_NAME) + "/";
 		} else {
-			the_path <- (folder_exists(dataset_folder_project_path) ? dataset_folder_project_path : the_path+"/"+DEFAULT_DATASET_FOLDER_NAME) + "/";
+			the_path <- (folder_exists(datasets_folder_path) ? datasets_folder_path : 
+				(folder_exists(the_path+datasets_folder_path) ? the_path+datasets_folder_path : the_path+"/"+DEFAULT_DATASET_FOLDER_NAME)
+			) + "/";
 			list<string> case_studies <- folder(the_path).contents; 
 			if (case_studies contains case_study_folder_name) { the_path <- the_path+(last(case_study_folder_name)="/"?case_study_folder_name:case_study_folder_name+"/"); }
 			else {

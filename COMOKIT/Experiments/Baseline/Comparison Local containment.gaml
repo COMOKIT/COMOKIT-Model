@@ -17,7 +17,7 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 
 	action _init_ {
 		
- 		create simulation with: [project_dataset_path::use_case] {	
+ 		create simulation with: [dataset_path::use_case] {	
  			name <- "No containment";
  					
 			ask Authority {
@@ -27,7 +27,7 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 			}
 		}
 		
-		create simulation  with: [project_dataset_path::use_case]  {
+		create simulation  with: [dataset_path::use_case]  {
 			int number_of_tests_ <- 20;
 			float percentage_ <- 0.1;			
 			
@@ -46,7 +46,7 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 			}
 		}
 
-		create simulation  with: [project_dataset_path::use_case]  {
+		create simulation  with: [dataset_path::use_case]  {
 			int number_of_tests_ <- 20;
 			
 			name <- "Family ";
@@ -63,7 +63,7 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 
 		}		
 		
-		create simulation  with: [project_dataset_path::use_case]  {
+		create simulation  with: [dataset_path::use_case]  {
 			int number_of_tests_ <- 20;
 			
 			name <- "Dynamic spacial lockdown";

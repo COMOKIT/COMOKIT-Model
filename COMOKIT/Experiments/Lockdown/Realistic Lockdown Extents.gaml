@@ -53,7 +53,7 @@ experiment "Unconfined Individuals" parent: "Abstract Experiment" autorun: true 
 		int color_browser <- 0;
 		
 		loop percentage over: [0.05, 0.1, 0.2, 0.3, 0.4] {
-			create simulation with: [color::(colors at int(color_browser)), project_dataset_path::shape_path, seed::simulation_seed] {
+			create simulation with: [color::(colors at int(color_browser)), dataset_path::shape_path, seed::simulation_seed] {
 				name <-  string(int(percentage*100)) + "% of unconfined people";
 				
 				percentage_of_people_allowed <- percentage;

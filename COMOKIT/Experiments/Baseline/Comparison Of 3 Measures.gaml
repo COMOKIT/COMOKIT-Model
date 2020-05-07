@@ -16,7 +16,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 	action _init_ {
 		string shape_path <- self.ask_dataset_path();
 		float simulation_seed <- rnd(2000.0);
-		create simulation with: [project_dataset_path::shape_path, seed::simulation_seed] {
+		create simulation with: [dataset_path::shape_path, seed::simulation_seed] {
 			name <- "School closed";
 			ask Authority {
 				policy <- createPolicy(false, true);
@@ -24,7 +24,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
 		}
 
-		create simulation with: [project_dataset_path::shape_path, seed::simulation_seed]{
+		create simulation with: [dataset_path::shape_path, seed::simulation_seed]{
 			name <- "No Containment";
 			ask Authority { 
 				policy <- create_no_containment_policy();
@@ -32,7 +32,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
 		}
 
-		create simulation with: [project_dataset_path::shape_path, seed::simulation_seed]{
+		create simulation with: [dataset_path::shape_path, seed::simulation_seed]{
 			name <- "Home Containment";
 			ask Authority {
 				policy <- createPolicy(false, false);

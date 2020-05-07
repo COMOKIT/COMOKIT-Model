@@ -11,6 +11,7 @@ import "../../Model/Global.gaml"
 import "../Abstract Experiment.gaml"
 
 global {
+	
 	list<Individual> sources <- [];
 
 	action define_policy {
