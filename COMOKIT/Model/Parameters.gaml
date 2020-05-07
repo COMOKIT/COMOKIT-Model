@@ -19,7 +19,7 @@ global {
 	// Default dataset management
 	list<string> EXCLUDED_CASE_STUDY_FOLDERS_NAME <- ["Test Generate GIS Data"] const:true;
 	string DEFAULT_CASE_STUDY_FOLDER_NAME <- "Vinh Phuc" const: true;
-	string DEFAULT_DATASET_FOLDER_NAME <- "Datasets"  const: true;
+	string DEFAULT_DATASETS_FOLDER_NAME <- "Datasets"  const: true;
 	// The actual dataset path
 	string dataset_path <- build_dataset_path();
 	
@@ -242,14 +242,14 @@ global {
 	 */
 	string build_dataset_path(string relative_path <- experiment.project_path) {
 		string the_path <- relative_path;
-		string default <- the_path+"/"+DEFAULT_DATASET_FOLDER_NAME+"/"+DEFAULT_CASE_STUDY_FOLDER_NAME+"/";
+		string default <- the_path+"/"+DEFAULT_DATASETS_FOLDER_NAME+"/"+DEFAULT_CASE_STUDY_FOLDER_NAME+"/";
 		if(datasets_folder_path=nil and case_study_folder_name=nil) {return default;}
 		if(datasets_folder_path=nil){
-			the_path <- the_path+DEFAULT_DATASET_FOLDER_NAME+"/";
+			the_path <- the_path+DEFAULT_DATASETS_FOLDER_NAME+"/";
 			the_path <- the_path + (folder_exists(the_path+case_study_folder_name) ? case_study_folder_name : DEFAULT_CASE_STUDY_FOLDER_NAME) + "/";
 		} else {
 			the_path <- (folder_exists(datasets_folder_path) ? datasets_folder_path : 
-				(folder_exists(the_path+datasets_folder_path) ? the_path+datasets_folder_path : the_path+"/"+DEFAULT_DATASET_FOLDER_NAME)
+				(folder_exists(the_path+datasets_folder_path) ? the_path+datasets_folder_path : the_path+"/"+DEFAULT_DATASETS_FOLDER_NAME)
 			) + "/";
 			list<string> case_studies <- folder(the_path).contents; 
 			if (case_studies contains case_study_folder_name) { the_path <- the_path+(last(case_study_folder_name)="/"?case_study_folder_name:case_study_folder_name+"/"); }

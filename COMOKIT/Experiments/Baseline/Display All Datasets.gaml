@@ -17,7 +17,7 @@ experiment "Datasets" parent: "Abstract Experiment" autorun: true {
 
 		float simulation_seed <- rnd(2000.0);
 		loop s over:  dirs {
-		create simulation with: [dataset_path::build_data_set_path(case_study_folder_name::s), seed::simulation_seed] {
+		create simulation with: [dataset_path::build_dataset_path(case_study_folder_name::s), seed::simulation_seed] {
 			name <- s;
 			ask Authority {
 				policy <- create_no_containment_policy();
