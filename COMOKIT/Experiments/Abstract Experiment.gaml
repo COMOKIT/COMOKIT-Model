@@ -47,37 +47,37 @@ experiment "Abstract Experiment" virtual:true {
 	 * Default value are dataset_folder = "Datasets" and case_study = "Vinh Phuc"
 	 */
 	string build_data_set_path(
-		string dfp <- project_path+DEFAULT_DATASET_FOLDER_NAME, 
-		string csfd <- DEFAULT_CASE_STUDY_FOLDER_NAME
+		string datasets_folder_path <- project_path+DEFAULT_DATASET_FOLDER_NAME, 
+		string case_study_folder_name <- DEFAULT_CASE_STUDY_FOLDER_NAME
 	) {
-		if not(folder_exists(dfp)) {error "Data set folder does not exists : "+dfp;}
+		if not(folder_exists(datasets_folder_path)) {error "Data set folder does not exists : "+datasets_folder_path;}
 		
-		 dfp <- last(dfp)="/"?dfp:dfp+"/";
+		string dataset_path <- last(datasets_folder_path)="/"?datasets_folder_path:datasets_folder_path+"/";
 		
-		if not(folder_exists(dfp+csfd)) {error "Case study folder  does not exists : "+dfp+csfd;}
+		if not(folder_exists(dataset_path+case_study_folder_name)) {error "Case study folder  does not exists : "+dataset_path+case_study_folder_name;}
 		
-		 csfd <- last(csfd)="/"?csfd:csfd+"/";
-		return dfp+csfd;
+		case_study_folder_name <- last(case_study_folder_name)="/"?case_study_folder_name:case_study_folder_name+"/";
+		return dataset_path+case_study_folder_name;
 	}
 	
 	/*
 	 * Gather all the sub-folder of the given dataset_folder
 	 */
-	list<string> gather_dataset_names(string dfp <- project_path+DEFAULT_DATASET_FOLDER_NAME) {
-		if not(folder_exists(dfp)) {error "Wrong data set folder access "+dfp;}
-		list<string> dirs <- folder(dfp).contents  ;
-		if not(last(dfp)="/") { dfp <- dfp+"/";} 
-		dirs <- dirs where folder_exists(dfp + each);
+	list<string> gather_dataset_names(string datasets_folder_path <- project_path+DEFAULT_DATASET_FOLDER_NAME) {
+		if not(folder_exists(datasets_folder_path)) {error "Wrong data set folder access "+datasets_folder_path;}
+		list<string> dirs <- folder(datasets_folder_path).contents  ;
+		if not(last(datasets_folder_path)="/") { datasets_folder_path <- datasets_folder_path+"/";} 
+		dirs <- dirs where folder_exists(datasets_folder_path + each);
 		return dirs;
 	}
 
 	/*
 	 * Ask user to choose a dataset among available ones
 	 */
-	string ask_dataset_path(string dfp <- project_path+DEFAULT_DATASET_FOLDER_NAME) {
-		list<string> dirs <- gather_dataset_names(dfp) - EXCLUDED_CASE_STUDY_FOLDERS_NAME;
+	string ask_dataset_path(string datasets_folder_path <- project_path+DEFAULT_DATASET_FOLDER_NAME) {
+		list<string> dirs <- gather_dataset_names(datasets_folder_path) - EXCLUDED_CASE_STUDY_FOLDERS_NAME;
 		string question <- "Choose one dataset among : "+dirs;
-		return dfp + "/" + user_input(question, [choose("Your choice",string,first(dirs),dirs)])["Your choice"] + "/";
+		return datasets_folder_path + "/" + user_input(question, [choose("Your choice",string,first(dirs),dirs)])["Your choice"] + "/";
 	}
 	
 	// ----------------------------------------------------- //
@@ -85,7 +85,7 @@ experiment "Abstract Experiment" virtual:true {
 	// ----------------------------------------------------- //
 	
 	output {
-		display "default_display" synchronized: false type: opengl background: #white virtual: true draw_env: false {
+		display "default_display" synchronized: false type: opengl background: background virtual: true draw_env: false {
 			
 			overlay position: { 5, 5 } size: { 700 #px, 200 #px }  transparency: 1
             {
@@ -103,7 +103,7 @@ experiment "Abstract Experiment" virtual:true {
 
 		}
 		
-		display "default_3D_display" synchronized: false type: opengl background: #white draw_env: false virtual: true {
+		display "default_3D_display" synchronized: false type: opengl background: #black draw_env: false virtual: true {
 			image file:  file_exists(dataset_path+"/satellite.png") ? (dataset_path+"/satellite.png"): "../Utilities/white.png" transparency: 0.5 refresh: false;
 	
 			species Building transparency: 0.7 refresh:false{
@@ -125,7 +125,7 @@ experiment "Abstract Experiment" virtual:true {
 		}
 		
 		
-		display "simple_display" parent: default_display synchronized: false type: opengl background: #white virtual: true draw_env: false {
+		display "simple_display" parent: default_display synchronized: false type: opengl background: #black virtual: true draw_env: false {
 			
 			species Building {
 				draw shape color:  #lightgrey empty: true width: 2;
