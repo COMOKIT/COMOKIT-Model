@@ -26,7 +26,7 @@ script:
 # Create Library folders
 - mkdir -p ./GAMA/Contents/Eclipse/configuration/org.eclipse.osgi/15/0/.cp/models/
 - cp -r COMOKIT ./GAMA/Contents/Eclipse/configuration/org.eclipse.osgi/15/0/.cp/models/
-- zip -r ./COMOKIT-Mac.zip ./GAMA
+- zip -r ./COMOKIT-Mac.zip ./GAMA/GAMA.app
 
 # Clean GAMA version
 - rm -fr ./GAMA
@@ -46,7 +46,10 @@ deploy:
   overwrite: true
   tag_name: latest
   prerelease: true
-  file: COMOKIT-Mac.zip COMOKIT-Win.zip COMOKIT-Linux.zip
+  file:
+    - "COMOKIT-Win.zip"
+    - "COMOKIT-Mac.zip"
+    - "COMOKIT-Linux.zip"
   skip_cleanup: true
   on:
     repo: COMOKIT/COMOKIT-Model
