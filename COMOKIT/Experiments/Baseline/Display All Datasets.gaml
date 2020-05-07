@@ -13,8 +13,7 @@ import "../Abstract Experiment.gaml"
 experiment "Datasets" parent: "Abstract Experiment" autorun: true {
 
 	action _init_ {
-		list<string> dirs <- gather_dataset_names();
-
+		list<string> dirs <- gather_dataset_names() - EXCLUDED_CASE_STUDY_FOLDERS_NAME;
 		float simulation_seed <- rnd(2000.0);
 		loop s over:  dirs {
 		create simulation with: [dataset_path::build_dataset_path(_case_study_folder_name::s), seed::simulation_seed] {
