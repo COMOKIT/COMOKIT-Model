@@ -1,9 +1,9 @@
-/***
-* Part of the GAMA CoVid19 Modeling Kit
-* see http://gama-platform.org/covid19
+/******************************************************************
+* This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
+* Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Patrick Taillandier
 * Tags: covid19,epidemiology, gis
-***/
+******************************************************************/
 
 //this model enables to create the building file and to download a background satellite image
 model CoVid19

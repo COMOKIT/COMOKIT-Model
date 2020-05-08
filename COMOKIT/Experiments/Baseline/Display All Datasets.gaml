@@ -1,9 +1,9 @@
-/***
-* Part of the GAMA CoVid19 Modeling Kit
-* see http://gama-platform.org/covid19
+/******************************************************************
+* This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
+* Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Alexis Drogoul
 * Tags: covid19,epidemiology
-***/
+******************************************************************/
 
 model CoVid19
 
@@ -13,11 +13,10 @@ import "../Abstract Experiment.gaml"
 experiment "Datasets" parent: "Abstract Experiment" autorun: true {
 
 	action _init_ {
-		list<string> dirs <- gather_dataset_names();
-
+		list<string> dirs <- gather_dataset_names() - EXCLUDED_CASE_STUDY_FOLDERS_NAME;
 		float simulation_seed <- rnd(2000.0);
 		loop s over:  dirs {
-		create simulation with: [dataset_path::build_data_set_path(case_study_folder_name::s), seed::simulation_seed] {
+		create simulation with: [dataset_path::build_dataset_path(_case_study_folder_name::s), seed::simulation_seed] {
 			name <- s;
 			ask Authority {
 				policy <- create_no_containment_policy();
