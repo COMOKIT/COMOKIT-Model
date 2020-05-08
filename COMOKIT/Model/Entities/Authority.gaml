@@ -228,5 +228,17 @@ species Authority {
 		return first(result);
 	}
 	
+	/*
+	 * To define a policy that allow school and/or work
+	 */
+	AbstractPolicy createPolicy (bool school, bool work) {
+		create ActivitiesListingPolicy returns: result {
+			allowed_activities[studying.name] <- school;
+			allowed_activities[working.name] <- work;
+		}
+
+		return (first(result));
+	}
+	
 
 }  
