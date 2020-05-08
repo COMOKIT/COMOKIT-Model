@@ -32,7 +32,7 @@ global {
 	string need_hospitalisation <- "Need hospitalisation";
 	string need_ICU <- "Need ICU";
 
-	
+	//The list of activities
 	string act_neighbor <- "visiting neighbor";
 	string act_friend <- "visiting friend";
 	string act_home <- "staying at home";
