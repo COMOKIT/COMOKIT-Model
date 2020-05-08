@@ -7,18 +7,26 @@
 
 model Buildingsfrompoints
 
-
+/*
+ * Global model to generate buildings from building location (shapefile of points).
+ * 
+ * TODO: add the ability to generate building from a shapefile of roads with arbitrary parameter to
+ * generate building along the roads
+ * 
+ */
 global {
 	
+	// MANDATORY : The path to your data set with boundary shape
 	string dataset_path <- "../External Datasets/Domiz - refugee camp/";
-	
-	// Blocks
-	file building_blocks_file <- file(dataset_path+ "Domiz_Shelters_block.shp");
 	file building_bounds_file <- file(dataset_path+ "boundary.shp");
-	// Roads (to define block with when no one wants to digitalize the area)
-	string roads_file;
 	geometry shape <- envelope(building_bounds_file);
-	// Mandatory
+	
+	// OPTIONAL : Blocks of building
+	file building_blocks_file <- file(dataset_path+ "Domiz_Shelters_block.shp");
+	// OPTIONAL : TODO - Roads (to define block with when no one wants to digitalize the area)
+	string roads_file;
+	
+	// OPTIONAL POINT LOCATIONS : the set of point locations for building
 	file building_points_file <- file(dataset_path+ "Domiz_Shelters.shp");
 	
 	// Parameter to choose to fit inside or overflows outside building_blocks_file
@@ -27,6 +35,7 @@ global {
 	// Output
 	string output_building_file_path <- dataset_path+"buildings.shp";
 	
+	// Debug mode
 	bool DEBUG <- true;
 	
 	init {
