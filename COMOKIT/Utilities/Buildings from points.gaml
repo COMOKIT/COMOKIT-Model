@@ -18,6 +18,8 @@ global {
 	
 	// MANDATORY : The path to your data set with boundary shape
 	string dataset_path <- "../External Datasets/Domiz - refugee camp/";
+	
+//	string dataset_path <- "../External Datasets/Domiz - refugee camp/";
 	file building_bounds_file <- file(dataset_path+ "boundary.shp");
 	geometry shape <- envelope(building_bounds_file);
 	
@@ -48,31 +50,36 @@ global {
 		if DEBUG {write "There is "+length(building_block)+" building blocks";}
 		
 		ask building_point {
-			building_block bb <- building_block overlapping self;
-			if bb=nil { bb <- first(building_block sort_by (each.shape.centroid distance_to self)); }  
+			building_block bb <- one_of(building_block overlapping self);
+			if bb=nil { bb <- building_block with_min_of (each.shape.centroid distance_to self); }  
 			bb.linked_points <+ self;
 		}
 		
-		if DEBUG {write "There is "+length(building_point)+" building points ("+sum(building_block collect (length(each.linked_points)))+")";}
+		if DEBUG {write "There is "+length(building_point)+" building points ("+(building_block sum_of (length(each.linked_points)))+")";}
 		
 		ask building_block where not(empty(each.linked_points)) {
 			list<geometry> sub_blocks <- self.shape to_squares (length(linked_points),overflow);
-			if length(sub_blocks) != length(linked_points) {error "Does not create the proper number of building from points";}
-			loop sb over:sub_blocks {create output_building with:[shape::sb];}
-		}
-		
-		ask output_building { 
-			related <- building_point closest_to self;
-			self.shape.attributes <<+ related.shape.attributes;
+			if length(sub_blocks) < length(linked_points) {
+				error "Does not create the proper number of building from points";
+			} 
+			loop pt over: linked_points {
+				geometry sub_block <- sub_blocks with_min_of (each.centroid distance_to pt);
+				sub_blocks >> sub_block;
+				create output_building with: [shape::sub_block, related::pt] ;
+			}
+			 
 		}
 		
 		if DEBUG {
-			output_building rnd_output <- any(output_building); 
-			write sample(rnd_output.shape.attributes);
-			write sample(rnd_output.related.shape.attributes);
+			list<string> atts <- first(building_point).shape.attributes.keys; 
+			atts <- atts collect ("\""+each + "\"::related.shape.attributes[\""+each+"\"]" );
+			
+			//use to write the save statement.... you just have to copy the result of this line in the attributes facet.
+			write (string(atts) replace ("'","")) replace ("\\","");
 		}
 		
-		save output_building to:output_building_file_path type:shp;
+		    
+		save output_building to:output_building_file_path type:shp attributes:["Site_ID"::related.shape.attributes["Site_ID"],"Sensor_ID"::related.shape.attributes["Sensor_ID"],"Sensor_Dat"::related.shape.attributes["Sensor_Dat"],"Confidence"::related.shape.attributes["Confidence"],"Field_Vali"::related.shape.attributes["Field_Vali"],"CampStatus"::related.shape.attributes["CampStatus"],"CampName"::related.shape.attributes["CampName"],"Notes"::related.shape.attributes["Notes"],"StaffID"::related.shape.attributes["StaffID"],"EventCode"::related.shape.attributes["EventCode"],"CampType"::related.shape.attributes["CampType"],"CampTrend"::related.shape.attributes["CampTrend"],"Shelter_St"::related.shape.attributes["Shelter_St"],"ShelterClo"::related.shape.attributes["ShelterClo"],"Structure_"::related.shape.attributes["Structure_"]];
 		
 	}
 	
