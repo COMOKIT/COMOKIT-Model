@@ -3,6 +3,8 @@ branches:
   only:
   - master
 jobs:
+  allow_failures:
+    - if: branch = master
   include:
     - # Disable build for every commit
       if: TRAVIS_EVENT_TYPE = cron
