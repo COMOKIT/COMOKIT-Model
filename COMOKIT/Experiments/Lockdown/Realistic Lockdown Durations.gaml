@@ -1,9 +1,9 @@
-/***
-* Part of the GAMA CoVid19 Modeling Kit
-* see http://gama-platform.org/covid19
+/******************************************************************
+* This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
+* Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Alexis Drogoul
 * Tags: covid19,epidemiology
-***/
+******************************************************************/
 
 model CoVid19
 
@@ -40,10 +40,9 @@ experiment "Early containment" parent: "Abstract Experiment" autorun: true {
 
 	permanent {
 		display "charts" toolbar: false background: #black refresh: every(24 #cycle) {
-			chart "Infected cases" /*"Infected and reported cases"*/ background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 12, #bold) title_visible: true {
+			chart "Infected cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 12, #bold) title_visible: true {
 				loop s over: simulations {
-					data s.name /*  + " (infected)"*/ value: s.number_of_infectious color: s.color marker: false style: line thickness: 2;
-					//data s.name + " (reported)" value: s.total_number_reported color: s.color marker: true line_visible: false thickness: 1;
+					data s.name value: s.number_of_infectious color: s.color marker: false style: line thickness: 2;
 				}
 
 			}

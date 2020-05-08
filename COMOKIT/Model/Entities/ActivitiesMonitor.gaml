@@ -1,9 +1,9 @@
-/***
-* Name: ActivitiesMonitor
-* Author: ben
-* Description: 
-* Tags: Tag1, Tag2, TagN
-***/
+/******************************************************************
+* This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
+* Relase 1.0, May 2020. See http://comokit.org for support and updates
+* Author: Benoit Gaudou
+* Tags: covid19,epidemiology
+******************************************************************/
 
 @no_experiment
 model ActivitiesMonitor

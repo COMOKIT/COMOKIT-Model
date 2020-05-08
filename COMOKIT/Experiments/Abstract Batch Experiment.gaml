@@ -1,9 +1,9 @@
-/***
+/******************************************************************
 * Batch experiment to explore the GAMA CoVid19 Modeling Kit
-* see http://gama-platform.org/covid19
+* Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Arthur Brugiere <roiarthurb>, Kevin Chapuis <chapuisk>
 * Tags: covid19,batch,hpc,exploration
-***/
+******************************************************************/
 
 model CoVid19
 
@@ -98,12 +98,7 @@ global{
 		}
 	}
 	
-	/***************/
-	/*  OVERRIDES  */
-	/***************/
-	
-	// @Override	
-	//string shape_path <- "../Datasets/Vinh Phuc/";
+
 }
 
 // This experiment is needed to run batch within GAMA

@@ -1,11 +1,14 @@
-/***
+/******************************************************************
+* This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
+* Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Name: COMOKIT
-* Author: A. Drogoul
+* Author: Alexis Drogoul
 * Description: Serves as a bridge to import all of COMOKIT into this project. 
 * Import in turn this file (for instance drag and drop it onto your file, or write `import "All COMOKIT.gaml";` as the first line of your model)
 * into your own models or experiments to get access to all the species and abstract bases of GUI and batch experiments defined in COMOKIT. 
-* Tags: Covid-19
-***/
+* Tags: covid19,epidemiology
+******************************************************************/
+
 model COMOKIT
 
 /**

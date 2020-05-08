@@ -1,11 +1,11 @@
-/***
+/******************************************************************
 * Name: Sensitivity
 * Author: Arthur Brugiere <roiarthurb>
 * Description: Batch file extracting raw data to post-process them
 * and analyze sensitivity in our model
 * 
 * Tags: Batch, sensitivity, extract data
-***/
+******************************************************************/
 
 model ReplicationSensitivity
 
