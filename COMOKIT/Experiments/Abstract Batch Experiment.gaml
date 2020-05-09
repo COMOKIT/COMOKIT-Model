@@ -145,7 +145,7 @@ experiment "Abstract Batch Headless" type:gui
 {
 	init {
 		batch_enable_detailedCSV <- true;
-		string shape_path <- "../Datasets/Vinh Phuc/";
+		dataset_path <- build_dataset_path();
 	}
 	// Parameters for headless settings
 	parameter var:idSimulation init: 0 min: 0;
