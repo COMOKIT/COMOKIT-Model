@@ -19,7 +19,6 @@ global {
 	// MANDATORY : The path to your data set with boundary shape
 	string dataset_path <- "../External Datasets/Domiz - refugee camp/";
 	
-//	string dataset_path <- "../External Datasets/Domiz - refugee camp/";
 	file building_bounds_file <- file(dataset_path+ "boundary.shp");
 	geometry shape <- envelope(building_bounds_file);
 	
@@ -65,30 +64,22 @@ global {
 			loop pt over: linked_points {
 				geometry sub_block <- sub_blocks with_min_of (each.centroid distance_to pt);
 				sub_blocks >> sub_block;
-				create output_building with: [shape::sub_block, related::pt] ;
+				create output_building with: [shape::sub_block, related::pt] {
+					loop k over: related.shape.attributes.keys {
+						shape.attributes[k] <- related.shape.attributes[k];
+					}
+				}
 			}
 			 
 		}
-		
-		if DEBUG {
-			list<string> atts <- first(building_point).shape.attributes.keys; 
-			atts <- atts collect ("\""+each + "\"::related.shape.attributes[\""+each+"\"]" );
+		list<string> atts <- first(building_point).shape.attributes.keys; 
 			
-			//use to write the save statement.... you just have to copy the result of this line in the attributes facet.
-			write (string(atts) replace ("'","")) replace ("\\","");
+		if DEBUG {
+			write "Attributes to save:" + atts;
 		}
 		
-		    
-		save output_building to:output_building_file_path type:shp 
-			attributes:["Site_ID"::related.shape.attributes["Site_ID"],"Sensor_ID"::related.shape.attributes["Sensor_ID"],
-				"Sensor_Dat"::related.shape.attributes["Sensor_Dat"],"Confidence"::related.shape.attributes["Confidence"],
-				"Field_Vali"::related.shape.attributes["Field_Vali"],"CampStatus"::related.shape.attributes["CampStatus"],
-				"CampName"::related.shape.attributes["CampName"],"Notes"::related.shape.attributes["Notes"],
-				"StaffID"::related.shape.attributes["StaffID"],"EventCode"::related.shape.attributes["EventCode"],
-				"CampType"::related.shape.attributes["CampType"],"CampTrend"::related.shape.attributes["CampTrend"],
-				"Shelter_St"::related.shape.attributes["Shelter_St"],"ShelterClo"::related.shape.attributes["ShelterClo"],
-				"Structure_"::related.shape.attributes["Structure_"]];
 		
+		save (output_building collect each.shape) to:output_building_file_path type:shp attributes:atts;		
 	}
 	
 }
