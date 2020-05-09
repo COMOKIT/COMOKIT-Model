@@ -1,7 +1,7 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
-* Author: Kevin Chapuis
+* Author: Kevin Chapuis, Patrick Taillandier
 * Tags: covid19,epidemiology
 ******************************************************************/
 
@@ -84,18 +84,30 @@ global {
 	
 }
 
+/*
+ * The species that represents building blocks
+ */
 species building_block {
 	list<building_point> linked_points; 
 	aspect default {draw shape color:#grey; draw string(length(linked_points)) at:shape.centroid font:font(5) color:#white;}
 }
 
+/*
+ * The species that represents point location of building 
+ */
 species building_point { aspect default {draw circle(1) color:#red;}} 
 
+/*
+ * The generated output building
+ */
 species output_building {
 	building_point related; 
 	aspect default {draw shape.contour buffer 1 color:#white;}
 } 
 
+/*
+ * Display output for debug and verification
+ */
 experiment xp {
 	output {
 		display map type: opengl draw_env: false background: #black {
