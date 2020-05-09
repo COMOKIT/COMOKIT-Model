@@ -35,9 +35,7 @@ experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 				force_parameters::list(epidemiological_proportion_wearing_mask, epidemiological_factor_wearing_mask)
 			] {
 				name <- string(int(proportion*100)) + "% with mask";
-
-				do define_policy();
-
+				// Automatically call define_policy action
 			}
 
 		}
