@@ -16,12 +16,13 @@ global {
 		ask Authority {
 			list<bool> c <- world.ask_closures();
 			ask world {do console_output(sample(c),"School and workplace shutdown.gaml");}
-			policy <- createPolicy(not(c[1]), not(c[0])); 
+			policy <- createPolicy(not(c[0]), not(c[1])); 
 		}
 	}
 	
 	list<bool> ask_closures {
-		return list<bool>(user_input("Select closure politics: ", [enter("School closure",true),enter("Workplace closure",true)]).values);
+		map res <- user_input("Select closure politics: ", [enter("School closure",true),enter("Workplace closure",true)]);
+		return list<bool>(res["School closure"],res["Workplace closure"]);
 	}
 		
 }
