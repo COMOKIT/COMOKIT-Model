@@ -45,7 +45,8 @@ script:
 
 before_deploy:
   # Remove latest release
-  - curl -v -H 'Authorization: token ${GITHUB_API_KEY}' -X DELETE $( node -pe 'JSON.parse(process.argv[1]).url' "$(curl -s  https://api.github.com/repos/COMOKIT/COMOKIT-Model/releases/tags/latest)" )
+  - LATEST_COMOKIT_URL=$(node -pe 'JSON.parse(process.argv[1]).url' "$(curl -s  https://api.github.com/repos/COMOKIT/COMOKIT-Model/releases/tags/latest)
+  - curl -v -H 'Authorization: token ${GITHUB_API_KEY}' -X DELETE $LATEST_COMOKIT_URL
   # Update tag
   - git remote add master https://${GITHUB_API_KEY}@github.com/COMOKIT/COMOKIT-Model.git
   - git fetch master --tags
