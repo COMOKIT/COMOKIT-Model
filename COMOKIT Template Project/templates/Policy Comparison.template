@@ -33,7 +33,7 @@ experiment $TITLE$ parent: "Abstract Experiment" {
 		loop nb_test over:list_of_value_to_compare {
 			// Create a simulation with a given policy
 			create simulation with: [dataset_path::dataset] {	
-	 			name <- POLICY_NAME;
+	 			name <- POLICY_NAME + " - Value = " + nb_test;
 	 					
 				ask Authority {
 					// ***************************************************************************
