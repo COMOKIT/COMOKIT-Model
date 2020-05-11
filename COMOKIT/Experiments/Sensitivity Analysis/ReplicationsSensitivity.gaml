@@ -1,11 +1,10 @@
 /******************************************************************
-* Name: Sensitivity
+* This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
+* Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Arthur Brugiere <roiarthurb>
-* Description: Batch file extracting raw data to post-process them
-* and analyze sensitivity in our model
-* 
-* Tags: Batch, sensitivity, extract data
+* Tags: covid19,epidemiology,sensitivity,batch
 ******************************************************************/
+
 
 model ReplicationSensitivity
 
