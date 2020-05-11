@@ -126,7 +126,7 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 
 
 	output {
-		layout #split ;//consoles: false editors: false navigator: false tray: false tabs: false toolbars: false;
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false;
 		display "Main" parent: default_display {
 			species SpatialPolicy {
 				draw application_area empty: true color: #red;
