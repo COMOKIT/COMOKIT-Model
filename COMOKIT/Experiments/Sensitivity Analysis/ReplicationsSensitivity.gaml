@@ -13,10 +13,13 @@ import "../Abstract Batch Experiment.gaml"
 
 global {
 	/** Insert the global definitions, variables and actions here */
+	int cycle_limit <- 5000 const:true; // Sort of panic exit
+	bool batch_enable_detailedCSV <- true;
+	int ageCategory <- 5;
 }
 
 experiment Sensitivity parent: "Abstract Batch Experiment" 
-	type: batch repeat: 500 keep_seed: false until: ((Individual count each.is_infected = 0) and had_infected_Individual) or world.sim_stop() 
+	type: batch repeat: 100 keep_seed: false until: world.sim_stop() or cycle>=cycle_limit 
 {
 	method exhaustive;
 	

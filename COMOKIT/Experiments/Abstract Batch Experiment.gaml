@@ -26,7 +26,7 @@ global{
 	string modelName <- self.host.name;
 	list<string> list_shape_path <- [];
 	
-	bool sim_stop { return (Individual count each.is_infected = 0) and had_infected_Individual; }
+	bool sim_stop { return (Individual all_match ([susceptible, removed] contains each.state)) and had_infected_Individual; }
 	
 	init{
 		if (idSimulation = -1){
@@ -105,10 +105,6 @@ global{
 experiment "Abstract Batch Experiment" type:batch repeat: 2 until: world.sim_stop()
 		 virtual:true  parent: "Abstract Experiment"
 {
-	init {
-		batch_enable_detailedCSV <- true;
-		string shape_path <- "../Datasets/Vinh Phuc/";
-	}
 	
 	// @Override			
 	reflex end_of_runs {		
