@@ -373,7 +373,7 @@ global {
 		// Initialization for students or workers
 		ask Individual where ((each.age < retirement_age) and (each.age >= min_student_age))  {
 			// Students and workers have an agenda similar for 6 days of the week ...
-			if (is_unemployed) {
+			if (is_unemployed and age >= max_student_age) {
 				loop i from:1 to: 7 {
 					ask myself {do manag_day_off(myself,i,possible_activities_without_rel,possible_activities_tot);}
 				} 
@@ -479,7 +479,17 @@ global {
 			}
 		}
 		
-	
+		ask Individual {
+			loop i from: 0 to: 6 {
+				if (not empty(agenda_week[i])) {
+					int last_act <- max(agenda_week[i].keys);
+					if (species(agenda_week[i][last_act].key) != staying_home) {
+						int h <- last_act = 23 ? 23 : min(23, last_act + rnd(1,max_duration_default));
+						agenda_week[i][h] <- first(staying_home)::[];
+					}
+				}
+			}
+		}
 		
 		if (choice_of_target_mode = gravity) {
 			ask Individual {
