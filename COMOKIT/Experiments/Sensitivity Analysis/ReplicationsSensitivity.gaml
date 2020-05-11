@@ -14,8 +14,7 @@ import "../Abstract Batch Experiment.gaml"
 global {
 	/** Insert the global definitions, variables and actions here */
 	int cycle_limit <- 5000 const:true; // Sort of panic exit
-	bool batch_enable_detailedCSV <- true;
-	int ageCategory <- 5;
+
 }
 
 experiment Sensitivity parent: "Abstract Batch Experiment" 
