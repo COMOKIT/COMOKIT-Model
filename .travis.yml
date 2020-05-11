@@ -3,11 +3,9 @@ branches:
   only:
   - master
 jobs:
-  allow_failures:
-    - if: branch = master
   include:
-    - # Disable build for every commit
-      if: TRAVIS_EVENT_TYPE = cron
+    - # Allow only CRON jobs
+      if: $TRAVIS_EVENT_TYPE = cron
 before_script:
   - GAMA_LINUX=$(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_withJDK_Linux | cut -d ':' -f 2,3 | tr -d \")
   - GAMA_MAC=$(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_withJDK_Mac | cut -d ':' -f 2,3 | tr -d \")
