@@ -13,7 +13,7 @@ import "All COMOKIT.gaml"
 
 global {
 
-	string dataset <- "../datasets/Case Study/"; // Relative path to the folder containing the boundary.shp, buildings.shp, satellite.png, etc. datafiles. 
+	string dataset_path <- "../datasets/Case Study/"; // Relative path to the folder containing the boundary.shp, buildings.shp, satellite.png, etc. datafiles. 
 	string POLICY_NAME <- "your_policy"; // Not mandatory but will be used in GUI
 	
 	// List of variable to compare policy with
@@ -32,7 +32,7 @@ experiment $TITLE$ parent: "Abstract Experiment" {
 		// Loop over the variable of policies to compare 
 		loop nb_test over:list_of_value_to_compare {
 			// Create a simulation with a given policy
-			create simulation with: [dataset_path::dataset] {	
+			create simulation with: [dataset_path::dataset_path] {	
 	 			name <- POLICY_NAME + " - Value = " + nb_test;
 	 					
 				ask Authority {
