@@ -102,40 +102,13 @@ global{
 }
 
 // This experiment is needed to run batch within GAMA
-experiment "Abstract Batch Experiment" type:batch repeat: 2 until: world.sim_stop()
+experiment "Abstract Batch Experiment" type:batch repeat: 80 until: world.sim_stop() keep_simulations: false
 		 virtual:true  parent: "Abstract Experiment"
 {
 	init {
 		batch_enable_detailedCSV <- true;
-		string shape_path <- "../Datasets/Vinh Phuc/";
-	}
-	
-	// @Override			
-	reflex end_of_runs {		
-		save [
-			// Number of new cases (incidence) per step per age category
-			simulations mean_of each.total_number_of_infected,
-			// Number of new cases per step per building (or building type) and age category
-			
-			// Number of hospitalizations per step per age category
-			
-			// Number of ICU per step per age category
-			
-			// Number of susceptible per step per age category
-			simulations mean_of length(each.Individual where (each.state=susceptible)),
-			// Number of exposed per step per age category
-			simulations mean_of length(each.Individual where (each.is_latent())),
-			// Number of asymptomatic permanent per step per age category
-			simulations mean_of length(each.Individual where (each.state = asymptomatic)),
-			// Number of asymptomatic temporary per step per age category
-			simulations mean_of length(each.Individual where (each.state = presymptomatic)),
-			// Number of symptomatic per step per age category
-			simulations mean_of length(each.Individual where (each.state = symptomatic)),
-			// Number of recovered per step per age category
-			simulations mean_of length(each.Individual where (each.clinical_status = recovered)),			
-			// Number of dead per step per age category
-			simulations mean_of length(each.Individual where (each.clinical_status = dead))
-		] type: "csv" to: result_folder + "batchResult-" + modelName + ".csv" rewrite:false;
+		dataset_path <- build_dataset_path();
+		ageCategory <- 5;
 	}
 }
 
