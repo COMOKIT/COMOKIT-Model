@@ -2,10 +2,6 @@ dist: bionic
 branches:
   only:
   - master
-jobs:
-  exlude:
-    - # Allow only CRON jobs
-      if: NOT env(TRAVIS_EVENT_TYPE) = cron
 
 before_script:
   - GAMA_LINUX=$(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_withJDK_Linux | cut -d ':' -f 2,3 | tr -d \")
