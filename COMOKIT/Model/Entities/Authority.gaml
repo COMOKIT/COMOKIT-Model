@@ -67,6 +67,21 @@ species Authority {
  	//											 //
  	// ----------------------------------------- //
 	
+	// ********************
+	// ABSTRACT COMBINATION
+	// ********************
+	
+	/*
+	 * To define a combination of policies: returns a combination of all given (list<AbstractPolicy>) policies 
+	 */
+	CompoundPolicy combination(list<AbstractPolicy> policies) {
+		create CompoundPolicy with: [targets::policies] returns: result;
+		return first(result);
+	}
+	
+	// *****************
+	// POLICY EXTENSIONS
+	// ***************** 
 	
 	/*
 	 * To limit a policiy to be constraint in space: returns the policy (AbstractPolicy) p to
@@ -105,14 +120,6 @@ species Authority {
 	}
 	
 	/*
-	 * To define a combination of policies: returns a combination of all given (list<AbstractPolicy>) policies 
-	 */
-	CompoundPolicy combination(list<AbstractPolicy> policies) {
-		create CompoundPolicy with: [targets::policies] returns: result;
-		return first(result);
-	}
-	
-	/*
 	 * To define a tolerance for the applications of policies: returns the (AbstractPolicy) policy p to
 	 * be relaxed by (float in [0,1]) tolerance
 	 * 
@@ -123,6 +130,33 @@ species Authority {
 		create PartialPolicy with: [target::p, tolerance::tolerance] returns: result;
 		return first(result);
 	}
+	
+		
+	/*
+	 * To define a policy to be applied only on a given proportion of individual: returns the (AbstractPolicy) policy p
+	 * that will allows a proportion (float) a of individual to contravene to the restrictions 
+	 */
+	AllowedIndividualsPolicy with_percentage_of_allowed_individual(AbstractPolicy p, float a) {
+		create AllowedIndividualsPolicy with: [target::p, percentage_of_essential_workers::a]  returns: result;
+		return (first(result));
+	}
+
+	/*
+	 * To define a policy that prohibit age group to exit home:
+	 * returns a AbstractPolicy that will prohibit people to leave home given age groups (list of pair(min,max))
+	 */
+	AbstractPolicy with_age_group_at_home_policy(AbstractPolicy p, list<pair<int,int>> age_group_at_home){
+		map<Individual,bool> age_group_allowance;
+		ask Individual { 
+			age_group_allowance[self] <- age_group_at_home none_matches (age > each.key and age < each.value); 
+		}
+		create AllowedIndividualsPolicy with:[target::p,allowed_workers::age_group_allowance] returns: res;
+		return first(res);
+	}
+	
+	// *****************
+	// SPECIFIC POLICIES
+	// *****************
 	
 	/*
 	 * To define a policy that prohibit every activities
@@ -163,15 +197,6 @@ species Authority {
 	FamilyOfPositiveAtHome create_family_of_positive_at_home_policy {
 		create FamilyOfPositiveAtHome returns: result;				
 		return first(result);
-	}
-	
-	/*
-	 * To define a policy to be applied only on a given proportion of individual: returns the (AbstractPolicy) policy p
-	 * that will allows a proportion (float) a of individual to contravene to the restrictions 
-	 */
-	AllowedIndividualsPolicy with_percentage_of_allowed_individual(AbstractPolicy p, float a) {
-		create AllowedIndividualsPolicy with: [target::p, percentage_of_essential_workers::a]  returns: result;
-		return (first(result));
 	}
 
 	/*

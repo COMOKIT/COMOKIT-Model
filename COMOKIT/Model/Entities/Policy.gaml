@@ -230,7 +230,7 @@ species AllowedIndividualsPolicy parent: ForwardingPolicy {
 
 	bool is_allowed (Individual i, Activity activity) {
 		if (allowed_workers contains_key i) {
-			return true;
+			return allowed_workers[i];
 		} else {
 			return super.is_allowed(i, activity);
 		}
