@@ -405,15 +405,13 @@ global {
 		float long_max <- float(v[index+2] replace (" ",""));
 		float lat_min <- float(v[index + 1] replace (" ",""));
 		float lat_max <- float(v[index +3] replace ("]",""));
-		point pt1 <- to_GAMA_CRS({lat_min,long_max}, "EPSG:4326").location ;
-		point pt2 <- to_GAMA_CRS({lat_max,long_min},"EPSG:4326").location;
-		pt1 <- CRS_transform(pt1, "EPSG:3857").location ;
-		pt2 <- CRS_transform(pt2,"EPSG:3857").location;
+		point pt1 <- CRS_transform({lat_min,long_max},"EPSG:4326", "EPSG:3857").location ;
+		point pt2 <- CRS_transform({lat_max,long_min},"EPSG:4326","EPSG:3857").location;
 		float width <- abs(pt1.x - pt2.x)/1500;
-		float height <- abs(pt1.y - pt2.y)/1500;
-		
-		string info <- ""  + width +"\n0.0\n0.0\n"+height+"\n"+min(pt1.x,pt2.x)+"\n"+min(pt1.y,pt2.y);
-		
+		float height <- (pt2.y - pt1.y)/1500;
+			
+		string info <- ""  + width +"\n0.0\n0.0\n"+height+"\n"+min(pt1.x,pt2.x)+"\n"+(height < 0 ? max(pt1.y,pt2.y) : min(pt1.y,pt2.y));
+	
 		//save the metadat
 		save info to: dataset_path +"/satellite.pgw";
 		
