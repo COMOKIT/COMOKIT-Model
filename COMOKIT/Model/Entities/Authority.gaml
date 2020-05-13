@@ -105,8 +105,8 @@ species Authority {
 	 * To define a policy to be launched considering a given threshold of confirmed cases: returns the policy
 	 * (AbstractPolicy) p to start when (int) min number of infected Individual have been confirmed (through tests)
 	 */
-	CaseRangePolicy from_min_cases (AbstractPolicy p, int min) {
-		create CaseRangePolicy with: [target::p, min::min] returns: result;
+	CaseRangePolicy from_min_cases (AbstractPolicy p, int min, bool only_hospitalized <- false) {
+		create CaseRangePolicy with: [target::p, min::min, only_hospitalized::only_hospitalized] returns: result;
 		return first(result);
 	}
 	
@@ -114,8 +114,8 @@ species Authority {
 	 * To define a policy to stop after a certain amount of confirmed cases: returns the policy
 	 * (AbstractPolicy) p to last when (int) max number of infected Individual have been confirmed (through tests)
 	 */
-	CaseRangePolicy until_max_cases (AbstractPolicy p, int max) {
-		create CaseRangePolicy with: [target::p, max::max] returns: result;
+	CaseRangePolicy until_max_cases (AbstractPolicy p, int max, bool only_hospitalized <- false) {
+		create CaseRangePolicy with: [target::p, max::max, only_hospitalized::only_hospitalized] returns: result;
 		return first(result);
 	}
 	

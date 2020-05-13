@@ -284,10 +284,12 @@ species TemporaryPolicy parent: ForwardingPolicy {
 species CaseRangePolicy parent: ForwardingPolicy {
 	int min <- -1;
 	int max <- int(#max_int);
-	
+	bool only_hospitalized <- false;
 	
 	bool is_active {
-		return total_number_reported between (min -1, max);
+		return only_hospitalized ?
+			total_number_hospitalised between (min-1, max) : 
+			total_number_reported between (min -1, max);
 	}
 	
 	bool is_allowed(Individual i, Activity activity){
