@@ -15,7 +15,7 @@ global {
 	float percentage_of_people_allowed <- 0.1;
 	float start_lockdown_until_prop <- 0.01; 
 	float small_test_sample <- 0.001;
-	float large_test_sample <- 0.1;
+	float large_test_sample <- 0.005;
 	int stay_at_home_age_limit <- 50;
 	
 	bool with_hospital_policy <- true;
@@ -48,7 +48,7 @@ global {
 		ask authority { 
 			// Test policy
 			AbstractPolicy d <- create_detection_policy(
-				length(Individual)*small_test_sample, // 0.1% of the population 
+				length(Individual)*small_test_sample, // 0.01% of the population 
 				true, // only_symptomatic_ones = true 
 				true // only_untested_ones
 			);
@@ -71,7 +71,7 @@ global {
 		ask authority { 
 			// Test policy
 			AbstractPolicy d <- create_detection_policy(
-				length(Individual)*large_test_sample, // 10% of the population 
+				length(Individual)*large_test_sample, // 1% of the population 
 				false, // only_symptomatic_ones = true 
 				false // only_untested_ones
 			);
@@ -207,7 +207,7 @@ experiment "Comparison of realistic actions" parent: "Abstract Experiment" autor
  *	BATCH runs
  */
 experiment "Comparison of realistic actions batch" parent: "Abstract Batch Experiment" 
-	type: batch repeat: 1 until: world.sim_stop() keep_seed: true
+	type: batch repeat: 18 until: world.sim_stop() keep_seed: true
 { 
 	
 	parameter "my_policy" var:my_policy among:["french style", "south corean style", "britain style", "no policy"];
