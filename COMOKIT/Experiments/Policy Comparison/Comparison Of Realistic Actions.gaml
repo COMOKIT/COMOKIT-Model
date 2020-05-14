@@ -22,11 +22,13 @@ global {
 	int number_of_test_in_hospital <- 2;
 	
 	list<string> policies <- ["no policy", "french style", "south corean style", "britain style"];
-	string my_policy;
+	string my_policy <- "no policy";
 	
-	init {
+	action define_policy {
+		if empty(Authority) { error "there is no authority created"; }
+		do console_output("Initializing "+my_policy+" policy", "Comparison of Realistic Actions.gaml");
 		switch my_policy {
-			match "french style" { do build_french_style_action(Authority[0]); }
+			match "french style" { write "OKKKKK"; do build_french_style_action(Authority[0]); }
 			match "south corean style" { do build_south_corean_style_action(Authority[0]); }
 			match "britain style" { do build_britain_style_plan(Authority[0]); }
 			default {
@@ -38,7 +40,7 @@ global {
 		}
 	}
 	
-	/*
+		/*
 	 * Few test and (consequently) late lockdown
 	 */
 	action build_french_style_action(Authority authority) {
@@ -204,12 +206,11 @@ experiment "Comparison of realistic actions" parent: "Abstract Experiment" autor
  *	BATCH runs
  */
 experiment "Comparison of realistic actions batch" parent: "Abstract Batch Experiment" 
-	type: batch repeat: 1 keep_simulations:false until: world.sim_stop() 
-{
+	type: batch repeat: 1 until: world.sim_stop() 
+{ 
 	
+	parameter "my_policy" var:my_policy among:["french style", "south corean style", "britain style", "no policy"];
 	method exhaustive;
-	
-	parameter my_policy	var:my_policy init:"no policy" among:["no policy", "french style", "south corean style", "britain style"];
 
 }
 
