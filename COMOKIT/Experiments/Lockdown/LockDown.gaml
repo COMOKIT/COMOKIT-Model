@@ -20,7 +20,7 @@ global {
 
 }
 
-experiment "Lock Down" parent: "Abstract Experiment" {
+experiment "Lockdown" parent: "Abstract Experiment" {
 	output {
 		display "Main" parent: default_display {}
 	}
