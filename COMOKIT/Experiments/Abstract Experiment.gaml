@@ -11,9 +11,9 @@ import "../Model/Global.gaml"
 global {
 
 // Utils variable for the look and feel of simulation GUI
-	font default <- font("Helvetica", 18, #bold);
-	rgb text_color <- world.color.brighter.brighter;
-	rgb background <- world.color.darker.darker;
+	font default <- font("Helvetica", 18, #bold) const: true;
+	rgb text_color <- world.color.brighter.brighter const: true;
+	rgb background <- world.color.darker.darker const: true;
 
 	// Monitor the number of infectious individual
 	int number_of_infectious <- 0 update: length(Individual where (each.is_infectious));

@@ -102,22 +102,22 @@ experiment "Comparison of realistic actions" parent: "Abstract Experiment" autor
 		float simulation_seed <- rnd(2000.0);
 		
 		// --------------------------------------
-		// FRENCH TYPE OF POLITICAL ACTION
+		// FRENCH TYPE OF POLICY
 		// --------------------------------------
 		create simulation with: [dataset_path::shape_path, seed::simulation_seed] {
 			name <- "Limited tests and late lockdown";
 			ask Authority { 
 				// Test policy
 				AbstractPolicy d <- create_detection_policy(
-					length(Individual)*small_test_sample, // 0.1% of the population 
+					int(length(Individual)*small_test_sample), // 1% of the population 
 					true, // only_symptomatic_ones = true 
 					true // only_untested_ones
 				);
 				// Lockdown policy with 10% of people doing they activities starting from 10% population confirmed case
-				// TODO : better model for Frensh lock down policy allowance
+				// TODO : better model for French lockdown policy allowance
 				AbstractPolicy l <- from_min_cases(
 					with_tolerance(create_lockdown_policy(), percentage_of_people_allowed),
-					length(Individual)*start_lockdown_until_prop
+					int(length(Individual)*start_lockdown_until_prop)
 				);
 				AbstractPolicy r <- create_positive_at_home_policy();
 				if with_hospital_policy { policy <- combination([d, l, r, create_hospitalisation_policy(true, true, number_of_test_in_hospital)]);} 
@@ -128,14 +128,14 @@ experiment "Comparison of realistic actions" parent: "Abstract Experiment" autor
 		}
 
 		// --------------------------------------
-		// SOUTH COREAN TYPE OF POLITICAL ACTION
+		// SOUTH KOREAN TYPE OF POLICY
 		// --------------------------------------
 		create simulation with: [dataset_path::shape_path, seed::simulation_seed]{
-			name <- "Mass test and case confirmed household quarantine";
+			name <- "Mass test and confirmed cases' households quarantine";
 			ask Authority { 
 				// Test policy
 				AbstractPolicy d <- create_detection_policy(
-					length(Individual)*large_test_sample, // 10% of the population 
+					int(length(Individual)*large_test_sample), // 10% of the population 
 					false, // only_symptomatic_ones = true 
 					false // only_untested_ones
 				);
@@ -147,10 +147,10 @@ experiment "Comparison of realistic actions" parent: "Abstract Experiment" autor
 		}
 
 		// -------------------------------
-		// GRAND BRITAIN EARLY ACTION PLAN
+		// GREAT BRITAIN EARLY POLICY
 		// -------------------------------
 		create simulation with: [dataset_path::shape_path, seed::simulation_seed]{
-			name <- "No test and people at-risk stay home";
+			name <- "No test and people at risk stay home";
 			ask Authority {
 				AbstractPolicy l <- with_age_group_at_home_policy(policy,[(stay_at_home_age_limit::120)]);
 				AbstractPolicy r <- create_positive_at_home_policy();
@@ -223,13 +223,13 @@ experiment "Realistic actions batch exploration" parent: "Abstract Batch Experim
 	
 	// FRENCH STYLE OF ACTIONS
 	parameter "Percentage of people allowed" var: percentage_of_people_allowed init: 0.0 min: 0.0 max: 0.5 step: 0.05;
-	parameter "Start lockdown until proprotion of confirmedcases" var: start_lockdown_until_prop init:0.1 min:0.0 max:0.4 step:0.1;
+	parameter "Start lockdown until proportion of confirmed cases" var: start_lockdown_until_prop init:0.1 min:0.0 max:0.4 step:0.1;
 	parameter "Proportion of tested people per step" var:small_test_sample init:0.01 min:0.01 max:0.05 step:0.01;
 	
-	// SOUTH COREAN STYLE OF ACTIONS
+	// SOUTH KOREAN STYLE OF ACTIONS
 	parameter "Proportion of tested people per step" var:large_test_sample init:0.1 min:0.1 max:0.5 step:0.1;
 	
-	// GRAND BRITAIN ACTION PLAN
+	// GREAT BRITAIN STYLE ACTION PLAN
 	parameter "Age limit until stay-at-home forced" var:stay_at_home_age_limit init:50 min:0 max:100 step:5;
 	
 

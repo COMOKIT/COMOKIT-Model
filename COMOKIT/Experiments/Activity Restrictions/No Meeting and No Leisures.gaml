@@ -12,7 +12,7 @@ import "../../Model/Global.gaml"
 import "../Abstract Experiment.gaml"
 
 /*
- * Initialize a policy based on activity restrictions: working, studying and leisure (including go to eat or making sport outside) 
+ * Initialize a policy based on activity restrictions: working, studying and leisure (including having dinner or making sport outside) 
  */
 global { 
 
