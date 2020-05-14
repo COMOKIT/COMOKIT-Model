@@ -13,7 +13,7 @@ model CoVid19
 import "../Functions.gaml"
 import "Activity.gaml"
 import "Building.gaml"
-import "Biological_Entity.gaml"
+import "Biological Entity.gaml"
 
 
 global

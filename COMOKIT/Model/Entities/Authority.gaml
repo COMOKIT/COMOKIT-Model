@@ -10,7 +10,7 @@
 model CoVid19
 
 import "Policy.gaml"
-import "ActivitiesMonitor.gaml"
+import "Activities Monitor.gaml"
 
 global {
 
