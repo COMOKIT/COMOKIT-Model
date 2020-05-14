@@ -27,6 +27,7 @@ global {
 	action define_policy {
 		if empty(Authority) { error "there is no authority created"; }
 		do console_output("Initializing "+my_policy+" policy", "Comparison of Realistic Actions.gaml");
+		result_folder <-  "../../batch_output/"+my_policy + "/";
 		switch my_policy {
 			match "french style" { do build_french_style_action(Authority[0]); }
 			match "south corean style" { do build_south_corean_style_action(Authority[0]); }
@@ -206,7 +207,7 @@ experiment "Comparison of realistic actions" parent: "Abstract Experiment" autor
  *	BATCH runs
  */
 experiment "Comparison of realistic actions batch" parent: "Abstract Batch Experiment" 
-	type: batch repeat: 1 until: world.sim_stop() 
+	type: batch repeat: 1 until: world.sim_stop() keep_seed: true
 { 
 	
 	parameter "my_policy" var:my_policy among:["french style", "south corean style", "britain style", "no policy"];
