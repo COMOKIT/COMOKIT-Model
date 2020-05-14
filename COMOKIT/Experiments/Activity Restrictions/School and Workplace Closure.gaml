@@ -27,7 +27,7 @@ global {
 		
 }
 
-experiment "School Off" parent: "Abstract Experiment" {
+experiment "Closures" parent: "Abstract Experiment" {
 	output {
 		display "Main" parent: default_display {
 		}
