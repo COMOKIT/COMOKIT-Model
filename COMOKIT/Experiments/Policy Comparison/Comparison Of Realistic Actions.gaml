@@ -28,7 +28,7 @@ global {
 		if empty(Authority) { error "there is no authority created"; }
 		do console_output("Initializing "+my_policy+" policy", "Comparison of Realistic Actions.gaml");
 		switch my_policy {
-			match "french style" { write "OKKKKK"; do build_french_style_action(Authority[0]); }
+			match "french style" { do build_french_style_action(Authority[0]); }
 			match "south corean style" { do build_south_corean_style_action(Authority[0]); }
 			match "britain style" { do build_britain_style_plan(Authority[0]); }
 			default {
