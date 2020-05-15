@@ -81,7 +81,7 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 }
 
 experiment "BatchComparison" parent: "Abstract Batch Experiment" 
-	type: batch repeat: 500 until: (Individual count each.is_infected = 0) and had_infected_Individual 
+	type: batch repeat: 500 until: (Individual count each.is_infected = 0) 
 {		
 	parameter var:allow_transmission_building among: [false, true];
 	parameter var:allow_transmission_human	among: [false, true];
