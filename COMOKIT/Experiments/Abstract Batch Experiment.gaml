@@ -16,7 +16,6 @@ global{
 	/**************/
 
 	// Parameters for batch experiment
-	bool had_infected_Individual <- false;
 	bool batch_enable_detailedCSV <- false;
 	int idSimulation <- -1;
 	int ageCategory <- 100;
@@ -26,7 +25,7 @@ global{
 	string modelName <- self.host.name;
 	list<string> list_shape_path <- [];
 	
-	bool sim_stop { return (Individual all_match ([susceptible, removed] contains each.state)) and had_infected_Individual; }
+	bool sim_stop { return (Individual all_match ([susceptible, removed] contains each.state)); }
 	
 	init{
 		if (idSimulation = -1){
@@ -37,13 +36,6 @@ global{
 	/***************/
 	/* SAVING DATA */
 	/***************/
-		
-	// Experiment may stop after at least 1 infected Individual
-	reflex had_infected when: !had_infected_Individual {
-		if (Individual count each.is_infected > 0){
-			had_infected_Individual <- true;
-		}
-	}
 	
 	// Save data at every cycle on the simulation
 	reflex observerPattern when: batch_enable_detailedCSV {
