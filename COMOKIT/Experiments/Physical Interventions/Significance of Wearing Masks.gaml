@@ -73,18 +73,18 @@ experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 
 experiment "Batch1" parent: "Abstract Batch Experiment" 
 	type: batch repeat: 10 keep_seed: false until: world.sim_stop() or cycle>=5000 {	
-	
 	parameter "Force parameters" var:force_parameters init:list(epidemiological_proportion_wearing_mask, epidemiological_factor_wearing_mask);
-	parameter "Proportion wearing mask" var: init_all_ages_proportion_wearing_mask init: 0.5;
-	parameter "Factor contact rate" var: init_all_ages_factor_contact_rate_wearing_mask init: 0.5;
-}
-
-experiment "Batch2" parent: "Abstract Batch Experiment" 
-	type: batch repeat: 10 keep_seed: false until: world.sim_stop() or cycle>=5000 {	
+	parameter "Factor contact rate" var: init_all_ages_factor_contact_rate_wearing_mask init: 0.25;
 	
-	parameter "Force parameters" var:force_parameters init:list(epidemiological_proportion_wearing_mask, epidemiological_factor_wearing_mask);
-	parameter "Proportion wearing mask" var: init_all_ages_proportion_wearing_mask init: 1.0;
-	parameter "Factor contact rate" var: init_all_ages_factor_contact_rate_wearing_mask init: 0.75;
+	/*
+	 * EXPLO
+	 * ---
+	 * Uncomment the one you'll do (only 10 needed)
+	 */
+	// DONE - parameter "Proportion wearing mask" var: init_all_ages_proportion_wearing_mask init: 0.25;
+	//parameter "Proportion wearing mask" var: init_all_ages_proportion_wearing_mask init: 0.5;
+	//parameter "Proportion wearing mask" var: init_all_ages_proportion_wearing_mask init: 0.75;
+	//parameter "Proportion wearing mask" var: init_all_ages_proportion_wearing_mask init: 1.0;
 }
 
 experiment "Headless" parent: "Abstract Batch Headless" {	
