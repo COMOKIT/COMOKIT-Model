@@ -324,22 +324,28 @@ species DetectionPolicy parent: AbstractPolicy {
 /**
  * The policy used to use hospitals for cure  */
 species HospitalisationPolicy parent: AbstractPolicy{
+	//Allowing ICU admission or not (example, Lao PDR does not have ICU capacity)
 	bool is_allowing_ICU;
+	//Allowing hospitalisation or not (example, not wanting symptomatic people that are not in the need of ICU to maintain other services)
 	bool is_allowing_hospitalisation;
+	//Minimum number of tests needed to be negative to discharge an individual
 	int nb_minimum_tests;
 	
+	//Remove an individual from ICU
 	action remove_individual_from_ICU(Individual an_individual, Hospital a_hospital){
 		remove an_individual from:a_hospital.ICU_individuals;
 		a_hospital.capacity_ICU <- a_hospital.capacity_ICU+1;
 		an_individual.is_ICU <- false;
 	}
 	
+	//Remove an individual from being hospitalised (but could be later added in ICU)
 	action remove_individual_from_hospitalised(Individual an_individual, Hospital a_hospital){
 		remove an_individual from:a_hospital.hospitalised_individuals;
 		a_hospital.capacity_hospitalisation <- a_hospital.capacity_hospitalisation+1;
 		an_individual.is_hospitalised <- false;
 	}
 	
+	//Adding an individual to ICU
 	action add_individual_to_ICU (Individual an_individual, Hospital a_hospital){
 		add an_individual to: a_hospital.ICU_individuals;
 		a_hospital.capacity_ICU <- a_hospital.capacity_ICU-1;
@@ -349,6 +355,7 @@ species HospitalisationPolicy parent: AbstractPolicy{
 		}
 	}
 	
+	//Adding an individual to hospitalised individuals
 	action add_individual_to_hospitalised (Individual an_individual, Hospital a_hospital){
 		add an_individual to: a_hospital.hospitalised_individuals;
 		a_hospital.capacity_hospitalisation <- a_hospital.capacity_hospitalisation-1;
@@ -358,12 +365,14 @@ species HospitalisationPolicy parent: AbstractPolicy{
 		}
 	}
 	
+	//Try to find a place for the individual according to its clinical status
 	action try_add_individual_to_hospital(Individual an_individual){
 		if(an_individual.clinical_status=need_hospitalisation){
 			list<Hospital> possible_hospitals <- (Hospital where(each.capacity_hospitalisation>0));
 			if(length(possible_hospitals)>0){
 				do add_individual_to_hospitalised(an_individual,one_of(possible_hospitals));
 			}else{
+				//Send the individual back home when no place is available
 				ask an_individual{
 					do enter_building(self.home);
 				}
@@ -373,6 +382,7 @@ species HospitalisationPolicy parent: AbstractPolicy{
 			if(length(possible_hospitals)>0){
 				do add_individual_to_ICU(an_individual,one_of(possible_hospitals));
 			}else{
+				//send the individual back home when no place is available, could be changed to sending him to "normal" hospitalisation beds
 				ask an_individual{
 					do enter_building(self.home);
 				}
@@ -380,6 +390,7 @@ species HospitalisationPolicy parent: AbstractPolicy{
 		}
 	}
 	
+	//Update the individuals in hospital
 	action update_individuals_in_hospital{
 		loop a_hospital over: Hospital{
 			
@@ -396,6 +407,7 @@ species HospitalisationPolicy parent: AbstractPolicy{
 				ask an_individual{
 					do test_individual;
 				}
+				//If the individual has been tested negative enough times, discharge it
 				if(an_individual.report_status=tested_negative){
 					an_individual.number_negative_tests <- an_individual.number_negative_tests +1;
 					if(an_individual.number_negative_tests>=nb_minimum_tests){
@@ -433,7 +445,7 @@ species HospitalisationPolicy parent: AbstractPolicy{
 			}
 		}
 	}
-	
+	//Apply the policy
 	action apply{
 		//Updating individuals in the hospitals
 		do update_individuals_in_hospital;
@@ -449,7 +461,7 @@ species HospitalisationPolicy parent: AbstractPolicy{
 			}
 		}
 	}
-	
+	//Preventing moving anywhere for people hospitalised
 	bool is_allowed (Individual i, Activity activity){
 		return not(i.is_ICU or i.is_hospitalised);
 	}

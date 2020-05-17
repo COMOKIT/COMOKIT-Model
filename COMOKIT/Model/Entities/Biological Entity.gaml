@@ -10,29 +10,54 @@ model BiologicalEntity
 /* Insert your model definition here */
 import "../Functions.gaml"
 
+//The biological entity is the mother species of the Individual agent, it could be used for other kinds of agent that
+// could be infected by the virus
 species BiologicalEntity control:fsm{
+	//The latent period, i.e., the time between exposure and being infectious
 	float latent_period;
+	//The presymptomatic period, used only for soon to be symptomatic entity that are already infectious
 	float presymptomatic_period;
+	//The infectious period, used as the time between onset and not being infectious for symptomatic entity, or the time after the latent period for asymptomatic ones
 	float infectious_period;
+	//Time between symptoms onset and hospitalisation of a symptomatic entity
 	float time_symptoms_to_hospitalisation <- -1.0;
+	//Time between hospitalisation and admission to intensive care unit
 	float time_hospitalisation_to_ICU <- -1.0;
+	//Time of stay in intensive care unit
 	float time_stay_ICU;
+	//Clinical status of the entity (no need hospitalisation, needing hospitalisation, needing ICU, dead, recovered)
 	string clinical_status <- no_need_hospitalisation;
+	//Define if the entity is currently being treated in a hospital (but not ICU)
 	bool is_hospitalised <- false;
+	//Define if the entity is currently admitted in ICU
 	bool is_ICU <- false;
+	//Time attribute to represent the time done in ICU
 	float time_ICU;
+	//Time attribute for the different epidemiological states of the entity
 	float tick <- 0.0;
+	//Time attribute for the time before death of the entity (i.e. the time allowed between needing ICU, and death due to not having been admitted to ICU
 	float time_before_death;
+	//Boolean to determine if the agent is infected (i.e. latent, presymptomatic, symptomatic, asymptomatic)
 	bool is_infected;
+	//Boolean to determine if the agent is infectious (i.e. presymptomatic, symptomatic, asymptomatic)
 	bool is_infectious;
+	//Boolean to determine if the agent is asymptomatic (i.e. presymptomatic, asymptomatic)
 	bool is_asymptomatic;
+	//Boolean to determine if the agent is symptomatic
 	bool is_symptomatic;
+	//Report status of the entity if it has been tested, or not
 	string report_status <- not_tested;
+	//Number of step of the last test
 	int last_test <- 0;
+	//Age of the entity
 	int age;
+	//Factor of the contact rate for asymptomatic and presymptomatic individuals (might be age-dependent, hence its presence here)
 	float factor_contact_rate_asymptomatic;
+	//Basic viral release of the agent (might be age-dependent, hence its presence here)
 	float basic_viral_release;
+	//Basic contact rate of the agent (might be age-dependent, hence its presence here)
 	float contact_rate;
+	//Current location of the entity (as we do not represent transportation, the entity can only be inside a building)
 	Building current_place;
 	//Number of times negatively tested
 	int number_negative_tests <- 0;
@@ -100,12 +125,14 @@ species BiologicalEntity control:fsm{
 		return [asymptomatic,presymptomatic] contains state;
 	}
 	
+	//Action to set the status of the entity
 	action set_status {
 		is_infectious <- define_is_infectious();
 		is_infected <- define_is_infected();
 		is_asymptomatic <- define_is_asymptomatic();
 	}
 	
+	//Action to define a new case, initialising it to latent and computing its latent period, and whether or not it will be symptomatic
 	action define_new_case{
 		state <- "latent";
 		if(world.is_asymptomatic(self.age)){
@@ -139,7 +166,7 @@ species BiologicalEntity control:fsm{
 	 	}
 		
 	}
-	
+	//Reflex to update the time before death when an entity need to be admitted in ICU, but is not in ICU
 	reflex update_time_before_death when: (clinical_status = need_ICU) and (is_ICU = false) {
 		time_before_death <- time_before_death -1;
 		if(time_before_death<=0){
@@ -147,10 +174,11 @@ species BiologicalEntity control:fsm{
 			state <- removed;
 		}
 	}
-	
+	//Reflex used to update the time in ICU of the entity, and change the entity status accordingly
 	reflex update_time_in_ICU when: (clinical_status = need_ICU) and (is_ICU = true) {
 		time_ICU <- time_ICU -1;
 		if(time_ICU<=0){
+			//In the case of the entity being treated in ICU, but still dying
 			if(world.is_fatal(self.age)){
 				clinical_status <- dead;
 				state <- removed;
@@ -164,12 +192,13 @@ species BiologicalEntity control:fsm{
 	//#############################################################
 	//States
 	//#############################################################
+	//State when the entity is susceptible
 	state susceptible initial: true{
 		enter{
 			do set_status;
 		}
 	}
-	
+	//State when the entity is latent
 	state latent {
 		enter{
 			tick <- 0.0;
@@ -181,7 +210,7 @@ species BiologicalEntity control:fsm{
 		transition to: presymptomatic when: (tick>=latent_period) and (self.is_symptomatic) and (presymptomatic_period<0);
 		transition to: asymptomatic when: (tick>=latent_period) and (self.is_symptomatic=false);
 	}
-	
+	//State when the entity is presymptomatic
 	state presymptomatic {
 		enter{
 			tick <- 0.0;
@@ -191,7 +220,7 @@ species BiologicalEntity control:fsm{
 		tick <- tick+1;
 		transition to: symptomatic when: (tick>=presymptomatic_period);
 	}
-	
+	//State when the entity is symptomatic
 	state symptomatic {
 		enter{
 			tick <- 0.0;
@@ -243,6 +272,7 @@ species BiologicalEntity control:fsm{
 		}
 	}
 	
+	//State when the entity is asymptomatic
 	state asymptomatic {
 		enter{
 			tick <- 0.0;
@@ -254,7 +284,7 @@ species BiologicalEntity control:fsm{
 			clinical_status <- recovered;
 		}
 	}
-	
+	//State when the entity is not infectious anymore
 	state removed{
 		enter{
 			do set_status;

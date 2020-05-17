@@ -88,14 +88,16 @@ global {
 
 
 	
-	
+	//Action used to initialise epidemiological parameters according to the file and parameters forced by the user
 	action init_epidemiological_parameters
 	{
+		//If there are any file given as an epidemiological parameters, then we get the parameters value from it
 		if(load_epidemiological_parameter_from_file and file_exists(epidemiological_parameters))
 		{
 			csv_parameters <- csv_file(epidemiological_parameters,true);
 			matrix data <- matrix(csv_parameters);
 			map<string, list<int>> map_parameters;
+			//Loading the different rows number for the parameters in the file
 			list possible_parameters <- distinct(data column_at epidemiological_csv_column_name);
 			loop i from: 0 to: data.rows-1{
 				if(contains(map_parameters.keys, data[epidemiological_csv_column_name,i] ))
@@ -109,8 +111,11 @@ global {
 					add tmp_list to: map_parameters at: string(data[epidemiological_csv_column_name,i]);
 				}
 			}
+			//Initalising the matrix of age dependent parameters and other non-age dependent parameters
 			loop aKey over: map_parameters.keys {
 				switch aKey{
+					//Four parameters are not age dependent : allowing human to human transmission, allowing environmental contamination, 
+					//and the parameters for environmental contamination
 					match epidemiological_transmission_human{
 						allow_transmission_human <- bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?
 							bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])]):allow_transmission_human;
@@ -125,11 +130,15 @@ global {
 					match epidemiological_successful_contact_rate_building{
 						successful_contact_rate_building <- float(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?float(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])]):successful_contact_rate_building;
 					}
+					//all the other parameters could be defined as age dependent, and therefore, stocked in the matrix of parameters
 					default{
 						loop i from: 0 to:length(map_parameters[aKey])-1
 						{
 							int index_column <- map_parameters[aKey][i];
 							list<string> tmp_list <- list(string(data[epidemiological_csv_column_detail,index_column]),string(data[epidemiological_csv_column_parameter_one,index_column]),string(data[epidemiological_csv_column_parameter_two,index_column]));
+							
+							//If the parameter was provided only once in the file, then the value will be used for all ages, 
+							// else, different values would be loaded according to the age categories given, hence the age dependent matrix
 							if(i=length(map_parameters[aKey])-1)
 							{
 								loop aYear from:int(data[epidemiological_csv_column_age,index_column]) to: max_age
@@ -167,6 +176,7 @@ global {
 				}
 			}
 		}
+		//In the case no file was provided, then we simply create the matrix from the default parameters, that are not age dependent
 		else
 		{
 			loop aYear from:0 to: max_age
@@ -195,6 +205,9 @@ global {
 			}
 		}
 		
+		//In the case the user wanted to load parameters from the file, but change the value of some of them for an experiment, 
+		// the force_parameters list should contain the key for the parameter, so that the value given will replace the one already
+		// defined in the matrix
 		loop aParameter over: force_parameters
 		{
 			list<string> list_value;

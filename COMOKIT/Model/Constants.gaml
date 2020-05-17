@@ -18,7 +18,7 @@ global {
 	string presymptomatic <- "presymptomatic";
 	string asymptomatic <- "asymptomatic";
 	string symptomatic <- "symptomatic";
-	string removed <- "removed";
+	string removed <- "removed"; //Removed means that the agent is not infectious anymore, for death or recovery, use the clinical status
 	
 	//Diagnostic status of the individual
 	string not_tested <- "Not tested";
