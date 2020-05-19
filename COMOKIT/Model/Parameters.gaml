@@ -96,12 +96,15 @@ global {
 	//Synthetic population parameters
 	
 	// ------ From file
+	string var_mapper_parameters <- experiment.project_path+"Parameters/Synthetic Entity Parameters.csv"; //File for the parameters
+	file csv_mappers <- file_exists(var_mapper_parameters)?csv_file(var_mapper_parameters):nil;
+	// **s
 	string separator <- ";";
 	bool header <- true; // If there is a header or not (must be true for now)
 	string age_var <- "AGE"; // The variable name for "age" Individual attribute | WARNING : IPUMS name
 	map<string,float> age_map;  // The mapping of value for gama to translate, if nill then direct cast to int (Default behavior in Synthetic Population.gaml)
 	string gender_var <- "SEX"; // The variable name for "sex" Individual attribute | WARNING : IPUMS name
-	map<string,int> gender_map <- ["1"::0,"2"::1]; // The mapping of value for gama to translate, if nill then cast to int
+	map<string,int> gender_map <- ["1"::0,"2"::1,"male"::0,"female"::1]; // The mapping of value for gama to translate, if nill then cast to int
 	string unemployed_var <- "EMPSTAT"; // The variable that represent employment status | WARNING : IPUMS name
 	map<string,bool> unemployed_map <- ["1"::false,"2"::true,"3"::true]; // 1 = employed, 2 = unemployed, 3 = inactive | WARNING : IPUMS name
 	string householdID <- "parentId"; // The variable for household identification
