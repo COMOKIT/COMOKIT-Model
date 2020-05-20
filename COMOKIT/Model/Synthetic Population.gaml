@@ -36,7 +36,8 @@ global {
 	 * 
 	 * The algorithm also bound agent with working places, schools and homes using related methods in Global.gaml #assign_school_working_place </p>
 	 */
-	action create_population_from_file(map<Building,float> working_places,map<list<int>,list<Building>> schools, list<Building> homes
+	action create_population_from_file(map<Building,float> working_places,map<list<int>,list<Building>> schools, list<Building> homes,
+		int min_student_age, int max_student_age
 	) {
 		
 		map<string,list<Individual>> households <- [];
@@ -55,6 +56,46 @@ global {
 		list<Individual> hh_empty <- Individual where (each.household_id = nil);
 		
 		// Do something to build household to mimic built-in generator
+		int hh_n <- sum(homes collect (each.nb_households));
+		loop times:hh_n {
+			list<Individual> hh <- [];
+			
+			// Head of household 
+			if (flip(proba_active_family)) {
+				Individual father <- hh_empty first_with (each.sex = 0 and each.age > max_student_age and each.age < retirement_age);
+				if not(father = nil) {hh <+ father; father.household_id <- hh_n; hh_empty >- father;}
+				Individual mother <- hh_empty first_with (each.sex = 1 and each.age > max_student_age and each.age < retirement_age);
+				if not(mother = nil) {hh <+ mother; mother.household_id <- hh_n; hh_empty >- mother;}
+			} else {
+				Individual lone <- hh_empty first_with (each.age > max_student_age);
+				if not(lone = nil) {hh <+ lone; lone.household_id <- hh_n; hh_empty >- lone;}
+			}
+			
+			if empty(hh) {break;}
+			
+			// Children of the household
+			int number <- min(number_children_max, round(gauss(number_children_mean,number_children_std)));
+			if number > 0 {
+				Individual c <- hh_empty first_with (each.age <= max_student_age);
+				loop while: not(c=nil) and number > 0 { 
+					hh <+ c; c.household_id <- hh_n; number <- number - 1; hh_empty >- c;
+					c <- hh_empty first_with (each.age <= max_student_age);
+				}
+			}
+			
+			// Grandfather / Grandmother
+			if flip(proba_grandfather) { 
+				Individual grandfather <- hh_empty first_with (each.sex = 0 and each.age > retirement_age);
+				if not(grandfather = nil) {hh <+ grandfather; grandfather.household_id <- hh_n; hh_empty >- grandfather;}
+			}
+			if flip(proba_grandmother) {
+				Individual grandmother <- hh_empty first_with (each.sex = 1 and each.age > retirement_age);
+				if not(grandmother = nil) {hh <+ grandmother; grandmother.household_id <- hh_n; hh_empty >- grandmother;}
+			}
+			
+			// Set relatives
+			ask hh { relatives <- hh - self; }  
+		}
 		
 		list<Building> avlb_homes <- copy(homes);
 		

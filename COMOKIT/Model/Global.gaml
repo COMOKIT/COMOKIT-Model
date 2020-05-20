@@ -69,7 +69,7 @@ global {
 		
 		do console_output("Start creating population from "+(csv_population!=nil?"file":"built-in generator"));	
 		if(csv_population != nil) {
-			do create_population_from_file(working_places, schools, homes);
+			do create_population_from_file(working_places, schools, homes, min_student_age, max_student_age);
 		} else {
 			do create_population(working_places, schools, homes, min_student_age, max_student_age);
 		}
