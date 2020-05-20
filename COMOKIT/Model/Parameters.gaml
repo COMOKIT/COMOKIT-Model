@@ -40,15 +40,18 @@ global {
 	date starting_date <- date([2020,3,2]);
 	
 	int num_infected_init <- 2; //number of infected individuals at the initialization of the simulation
-	int num_recovered_init <- 0;
+	int num_recovered_init <- 0; //The number of people that have already been infected in the past
 
 	//Epidemiological parameters
 	float nb_step_for_one_day <- #day/step; //Used to define the different period used in the model
+	
 	bool load_epidemiological_parameter_from_file <- true; //Allowing parameters being loaded from a csv file 
 	string epidemiological_parameters <- experiment.project_path+"Parameters/Epidemiological Parameters.csv"; //File for the parameters
 	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
+	
 	bool allow_transmission_human <- true; //Allowing human to human transmission
 	bool allow_transmission_building <- true; //Allowing environment contamination and infection
+	
 	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period
 	float reduction_coeff_all_buildings_inhabitants <- 0.01; //reduction of the contact rate for individuals belonging to different households leaving in the same building
 	float reduction_coeff_all_buildings_individuals <- 0.05; //reduction of the contact rate for individuals belonging to different households leaving in the same building
@@ -111,6 +114,7 @@ global {
 	int number_of_individual <- -1; // Control the number of Individual agent in the simulation from the file: if <0 or more than record in the file, takes the exact number of individual in the file
 	
 	// ------ From default Gaml generator
+	float male_ratio <- 105.0/100.0; // https://ourworldindata.org/gender-ratio
 	float proba_active_family <- 0.95;
 	float number_children_mean <- 2.0;
 	float number_children_std <- 0.5;

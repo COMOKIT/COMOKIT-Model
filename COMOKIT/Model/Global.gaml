@@ -39,9 +39,12 @@ global {
 		{
 			add 0 at: aBuilding_Type to: building_infections;
 		}
+		do console_output("building and boundary : done");
 		create outside;
 		the_outside <- first(outside);
+		
 		do create_activities;
+		do console_output("Activities : done");
 		do create_hospital;
 		
 		list<Building> homes <- Building where (each.type in possible_homes);
@@ -63,7 +66,8 @@ global {
 			string type <- possible_schools[l];
 			schools[l] <- (type in buildings_per_activity.keys) ? buildings_per_activity[type] : list<Building>([]);
 		}
-			
+		
+		do console_output("Start creating population from "+(csv_population!=nil?"file":"built-in generator"));	
 		if(csv_population != nil) {
 			do create_population_from_file(working_places, schools, homes);
 		} else {

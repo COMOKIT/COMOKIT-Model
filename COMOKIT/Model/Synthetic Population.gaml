@@ -46,11 +46,15 @@ global {
 			age::convert_age(get(age_var)),
 			sex::convert_gender(get(gender_var)),
 			is_unemployed::convert_unemployed(get(unemployed_var)),
-			household_id::string(get(householdID)) replace("\"","")
-		]{
+			household_id::convert_hhid(get(householdID)) 
+		]{ 
 			if households contains_key household_id { households[household_id] <+ self; }
 			else { households[household_id] <- [self]; }
 		}
+		
+		list<Individual> hh_empty <- Individual where (each.household_id = nil);
+		
+		// Do something to build household to mimic built-in generator
 		
 		list<Building> avlb_homes <- copy(homes);
 		
@@ -72,20 +76,28 @@ global {
 	
 	// Convert SP encoded age into gama model specification (float)
 	float convert_age(string input){ 
-		input <- input replace("\"","");
-		return (age_map=nil or empty(age_map)) ? int(input) : age_map[input];
+		if (input=nil or age_map=nil or empty(age_map)) {return _get_age();} 
+		input <- input contains "\"" ? input replace("\"","") : input;
+		return not(age_map contains_key input) ? _get_age() : age_map[input];
 	}
 	
 	// Convert SP encoded gender into gama model specification (0=men, 1=women)
 	int convert_gender(string input){ 
-		input <- input replace("\"","");
-		return (gender_map=nil or empty(gender_map)) ? int(input) : gender_map[input]; 
+		if (input=nil or gender_map=nil or empty(gender_map)) {return _get_sex();}
+		input <- input contains "\"" ? input replace("\"","") : input;
+		return not(gender_map contains_key input) ? _get_sex() : gender_map[input]; 
 	}
 	
 	// Convert SP encoded employment status into gama model specification (true=unemployed,false=employed)
 	bool convert_unemployed(string input){
-		input <- input replace("\"","");
-		return (unemployed_map=nil or empty(unemployed_map)) ? bool(input) : unemployed_map[input];
+		// because we don't know yet the sex then do unifrom
+		if (input=nil or unemployed_map=nil or empty(unemployed_map)) {return _get_employment_status(rnd(1));} 
+		input <- input contains "\"" ? input replace("\"","") : input;
+		return not(unemployed_map contains_key input) ? _get_employment_status(rnd(1)) : unemployed_map[input];
+	}
+	
+	string convert_hhid(string input){
+		return not(input=nil) and input contains "\"" ? input replace("\"","") : input;
 	}
 	
 	// ------------------------------------------- //
@@ -127,14 +139,14 @@ global {
 				if flip(proba_active_family) {
 				//father
 					create Individual {
-						age <- rnd(max_student_age + 1,retirement_age);
+						age <- world._get_age(max_student_age + 1,retirement_age);
 						sex <- 0;
 						home <- myself;
 						household << self;
 					} 
 					//mother
 					create Individual {
-						age <- rnd(max_student_age + 1,retirement_age);
+						age <- world._get_age(max_student_age + 1,retirement_age);
 						sex <- 1;
 						home <- myself;
 						household << self;
@@ -145,15 +157,15 @@ global {
 					if (number > 0) {
 						create Individual number: number {
 							//last_activity <-first(staying_home);
-							age <- rnd(0,max_student_age);
-							sex <- rnd(1);
+							age <- world._get_age(maximum::max_student_age);
+							sex <- world._get_sex();
 							home <- myself;
 							household << self;
 						}
 					}
 					if (flip(proba_grandfather)) {
 						create Individual {
-							age <- rnd(retirement_age + 1, max_age);
+							age <- world._get_age(retirement_age + 1);
 							sex <- 0;
 							home <- myself;
 							household << self;
@@ -161,7 +173,7 @@ global {
 					}	
 					if (flip(proba_grandmother)) {
 						create Individual {
-							age <- rnd(retirement_age + 1, max_age);
+							age <- world._get_age(retirement_age + 1);
 							sex <- 1;
 							home <- myself;
 							household << self;
@@ -169,8 +181,8 @@ global {
 					}
 				} else {
 					create Individual {
-						age <- rnd(min_student_age + 1,max_age);
-						sex <- rnd(1);
+						age <- world._get_age(min_student_age + 1);
+						sex <- world._get_sex();
 						home <- myself;
 						household << self;
 					} 
@@ -183,9 +195,35 @@ global {
 			}
 		}
 		ask Individual where ((each.age >= max_student_age) and (each.age < retirement_age)) {
-			is_unemployed <- flip((sex = 0) ? proba_unemployed_M : proba_unemployed_F);
+			is_unemployed <- world._get_employment_status(sex);
 		}	
 	}
+	
+	// *************************************
+	// Default demographic attribute methods
+	// *************************************
+	// To be consistant between file and generator 
+	// base synthetic population
+	
+	/*
+	 * Default way to define age
+	 */
+	 int _get_age(int minimum <- 0, int maximum <- max_age, map<int,float> dist <- nil) {
+	 	if dist=nil or empty(dist) { return rnd(minimum,maximum);}
+	 	else {return int(rnd_choice(dist));}
+	 }
+	 
+	 /*
+	  * Default way to define sex
+	  */
+	 int _get_sex(float male_proba <- male_ratio){ return flip(male_proba) ? 0 : 1; }
+	  
+	 /*
+	  * 
+	  */
+	 bool _get_employment_status(int gender) {
+	 	return flip((gender = 0) ? proba_unemployed_M : proba_unemployed_F);
+	 }
 	
 	// ----------------------------------- //
 	// SYNTHETIC POPULATION SOCIAL NETWORK //

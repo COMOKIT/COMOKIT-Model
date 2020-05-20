@@ -34,8 +34,8 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	int age;
 	//Sex of the individual
 	int sex; //0 M 1 F
-	
-	bool is_unemployed <- false; //is unemployed or not
+	//employement status of the individual
+	bool is_unemployed; 
 	
 	//Bool to consider only once the death
 	bool is_counted_dead <- false;
