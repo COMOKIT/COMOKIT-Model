@@ -39,7 +39,7 @@ global {
 		}
 	}
 	
-		/*
+	/*
 	 * Few test and (consequently) late lockdown
 	 */
 	action build_french_style_action(Authority authority) {
@@ -57,8 +57,13 @@ global {
 				int(length(Individual) * start_lockdown_until_prop)
 			);
 			AbstractPolicy r <- create_positive_at_home_policy();
-			if with_hospital_policy { policy <- combination([d, l, r, create_hospitalisation_policy(true, true, number_of_test_in_hospital)]);} 
-			else { policy <- combination([d, l, r]); }
+			
+			if with_hospital_policy { 
+				policy <- combination([d, l, r, create_hospitalisation_policy(true, true, number_of_test_in_hospital)]);
+			} 
+			else { 
+				policy <- combination([d, l, r]);
+			}
 		}
 	}
 	
@@ -75,8 +80,12 @@ global {
 			);
 			// confirmed case household stay at home
 			AbstractPolicy l <- create_family_of_positive_at_home_policy(); 
-			if with_hospital_policy { policy <- combination([d, l, create_hospitalisation_policy(true, true, number_of_test_in_hospital)]);} 
-			else { policy <- combination([d, l]); }
+			if with_hospital_policy { 
+				policy <- combination([d, l, create_hospitalisation_policy(true, true, number_of_test_in_hospital)]);
+			} 
+			else { 
+				policy <- combination([d, l]);
+			}
 		}
 	}
 	

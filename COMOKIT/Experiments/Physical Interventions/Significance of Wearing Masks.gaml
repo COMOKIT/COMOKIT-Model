@@ -11,7 +11,7 @@
 * 	- proportions (in the _init_ action) sets the various the various proportions of the Individual population wearing a mask (set to 0% or 100%).
 * 		One simulation is created for each element of the list. As an example, add 0.5 to test with 50% of the population wearing a mask.
 * Dataset: chosen by the user (through a choice popup)
-* Tags: covid19,epidemiology
+* Tags: covid19,epidemiology,mask
 ******************************************************************/
 
 model CoVid19
