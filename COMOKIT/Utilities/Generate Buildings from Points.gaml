@@ -1,6 +1,9 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
+* 
+* A global model that generates buildings from  a shapefile of points.
+* 
 * Author: Kevin Chapuis, Patrick Taillandier
 * Tags: covid19,epidemiology
 ******************************************************************/
@@ -8,27 +11,24 @@
 model Buildingsfrompoints
 
 /*
- * Global model to generate buildings from building location (shapefile of points).
- * 
  * TODO: add the ability to generate building from a shapefile of roads with arbitrary parameter to
  * generate building along the roads
- * 
  */
 global {
 	
 	// MANDATORY : The path to your data set with boundary shape
-	string dataset_path <- "../External Datasets/Domiz - refugee camp/";
+	string dataset_path <- "../External Datasets/MY_DATASET/";
 	
 	file building_bounds_file <- file(dataset_path+ "boundary.shp");
 	geometry shape <- envelope(building_bounds_file);
 	
 	// OPTIONAL : Blocks of building
-	file building_blocks_file <- file(dataset_path+ "Domiz_Shelters_block.shp");
+	file building_blocks_file <- file(dataset_path+ "MY_DATASET_BLOCKS.shp");
 	// OPTIONAL : TODO - Roads (to define block with when no one wants to digitalize the area)
 	string roads_file;
 	
 	// OPTIONAL POINT LOCATIONS : the set of point locations for building
-	file building_points_file <- file(dataset_path+ "Domiz_Shelters.shp");
+	file building_points_file <- file(dataset_path+ "MY_DATASET_POINTS.shp");
 	
 	// Parameter to choose to fit inside or overflows outside building_blocks_file
 	bool overflow <- false;
