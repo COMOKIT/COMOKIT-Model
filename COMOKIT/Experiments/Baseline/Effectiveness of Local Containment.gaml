@@ -86,16 +86,8 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 		}							
 	}
 	
-	permanent {
-		
-		display "charts" toolbar: false background: #black{
-			chart "Infected cases" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
-				loop s over: simulations {
-					data s.name value: s.number_of_infectious color: s.color marker: false style: line thickness: 2; 
-					
-				}
-			}
-		}
+	permanent {		
+		display "charts" parent: infected_cases {}
 
 		display "activities" toolbar: false background: #black refresh: every(24.0) {
 			chart "Work" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 10, #bold) position: {0,0} size: {0.5,0.5} {

@@ -44,5 +44,4 @@ experiment Sensitivity parent: "Abstract Batch Experiment"
 
 }
 
-experiment SensitivityHeadless parent: "Abstract Batch Headless" 
-{}
+experiment SensitivityHeadless parent: "Abstract Batch Headless"  {}

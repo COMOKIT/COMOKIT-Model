@@ -31,25 +31,17 @@ experiment "Comparison of tolerance levels" parent: "Abstract Experiment" autoru
 	}
 
 	permanent {
-		display "charts" toolbar: false background: #black  refresh: every(24 #cycle) {
-			chart "Infected cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {
-				loop s over: simulations {
-					data s.name value: s.number_of_infectious color: s.color marker: false style: line	 thickness: 2;
-				}
-
-			}
+		display "charts" parent: infected_cases refresh: every(24 #cycle) {
 			graphics "title" {
 				draw ("Day " + int((current_date - starting_date) /  #day))  font: default at: {100#px, 0} color:#white anchor: #top_left;
-			}
-
+			}			
 		}
-
 	}
 
 	output {
 		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
 		display "Main" parent: simple_display {
-		graphics title {
+			graphics title {
 				draw world.name  font: default at: {0, world.shape.height/2 - 30#px} color:world.color anchor: #top_left;
 			}
 		}

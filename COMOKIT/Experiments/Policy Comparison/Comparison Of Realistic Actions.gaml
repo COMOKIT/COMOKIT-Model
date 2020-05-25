@@ -176,14 +176,7 @@ experiment "Comparison of realistic actions" parent: "Abstract Experiment" autor
 	///////////
 	// CHART //
 	permanent {
-		
-		display "charts" toolbar: false background: #black refresh: every(24 #cycle) {
-			chart "Infected cases" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
-			loop s over: simulations {
-				data s.name value: s.number_of_infectious color: s.color marker: false style: line thickness: 2; 
-				
-			}}
-		}
+		display "charts" parent: infected_cases refresh: every(24 #cycle) {}
 		
 		display "charts Deaths" toolbar: false background: #black  refresh: every(24 #cycle) {
 			chart "Dead cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {
@@ -199,7 +192,6 @@ experiment "Comparison of realistic actions" parent: "Abstract Experiment" autor
 	output {
 		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false;
 		display "Main" parent: default_display {}
-
 	}
 }
 

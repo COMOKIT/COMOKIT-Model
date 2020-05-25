@@ -51,25 +51,12 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 	}
 	
 	permanent {
-		
-		display "charts" toolbar: false background: #black{
-			chart "Infected cases" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
-			loop s over: simulations {
-				data s.name value: s.number_of_infectious color: s.color marker: false style: line thickness: 2; 
-				
-			}}
+		display "charts" parent: infected_cases {
 			graphics "title" {
 				draw ("Day " + int((current_date - starting_date) /  #day))  font: default at: {100#px, 0} color:#white anchor: #top_left;
-			}
+			}			
 		}
-		
-		display "Cumulative incidence" toolbar: false background: #black{
-			chart "Cumulative incidence" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
-			loop s over: simulations {
-				data s.name value: s.total_number_of_infected color: s.color marker: false style: line thickness: 2; 
-				
-			}}
-		}
+		display "cumulative" parent: cumulative_incidence {}
 	}
 
 
