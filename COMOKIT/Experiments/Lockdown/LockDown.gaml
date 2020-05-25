@@ -22,7 +22,7 @@ global {
 	int num_days <- 120;
 
 	/*
-	 * Initialize a policy based on activity restrictions: working, studying and leisure (including having dinner or making sport outside) 
+	 * Initialize the lockdown policy over a given duration: no activities are allowed.
 	 */
 	action define_policy{
 		ask Authority {
