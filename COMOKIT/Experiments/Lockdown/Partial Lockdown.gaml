@@ -35,7 +35,7 @@ experiment "Partial Lock Down" parent: "Abstract Experiment" {
 	output {
 		display "Main" parent: default_display {
 		}
-		display "Chart" parent: default_white_chart {
+		display "Chart" parent: states_evolution_chart {
 		}
 		display "Cumulative incidence" parent: cumulative_incidence {
 		}
