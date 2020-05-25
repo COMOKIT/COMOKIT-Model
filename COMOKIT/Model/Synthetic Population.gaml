@@ -71,8 +71,6 @@ global {
 				if not(lone = nil) {hh <+ lone; lone.household_id <- string(hh_n); hh_empty >- lone;}
 			}
 			
-			if empty(hh) {break;}
-			
 			// Children of the household
 			int number <- min(number_children_max, round(gauss(number_children_mean,number_children_std)));
 			if number > 0 {
@@ -92,6 +90,8 @@ global {
 				Individual grandmother <- hh_empty first_with (each.sex = 1 and each.age > retirement_age);
 				if not(grandmother = nil) {hh <+ grandmother; grandmother.household_id <- string(hh_n); hh_empty >- grandmother;}
 			}
+			
+			if empty(hh) {break;}
 			
 			// Set relatives
 			ask hh { relatives <- hh - self; }  
