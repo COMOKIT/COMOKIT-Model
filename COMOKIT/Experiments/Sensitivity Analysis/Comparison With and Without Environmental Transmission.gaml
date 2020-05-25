@@ -14,7 +14,7 @@
 * 
 * Dataset: chosen by the user (through a choice popup)
 *  
-* Tags: covid19,epidemiology,policy comparison
+* Tags: covid19,epidemiology,policy comparison, sensitivity analysis
 ******************************************************************/
 
 model CoVid19
