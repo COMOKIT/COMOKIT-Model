@@ -236,7 +236,7 @@ global {
 	
 	
 	//Policy parameters
-	list<string> meeting_relaxing_act <- [act_working, act_studying,act_eating,act_leisure,act_sport]; //fordidden activity when choosing "no meeting, no relaxing" policy
+	list<string> meeting_relaxing_act <- [act_working,act_studying,act_eating,act_leisure,act_sport]; //fordidden activity when choosing "no meeting, no relaxing" policy
 	int nb_days_apply_policy <- 0;
 	
 	// ---------------
