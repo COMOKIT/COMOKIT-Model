@@ -132,21 +132,25 @@ global {
 	float proba_work_at_home <- 0.05; //probability to work at home;
 	float proba_unemployed_M <- 0.03; // probability for a M individual to be unemployed.
 	float proba_unemployed_F <-0.03; // probability for a F individual to be unemployed.
-	list<string> possible_homes <- remove_duplicates(OSM_home + ["", "home", "hostel"]);  //building type that will be considered as home
+	
 	
 	 //building type that will be considered as home - for each type, the coefficient to apply to this type for this choice of working place
 	 //weight of a working place = area * this coefficient
-	map<string, float> possible_workplaces <- (OSM_work_place as_map (each::2.0)) + map(["office"::3.0, "admin"::2.0, "industry"::1.0, "store"::1.0, "shop"::1.0,"bookstore"::1.0,
+	map<string, float> possible_workplaces <-  map(["office"::3.0, "admin"::2.0, "industry"::1.0, "store"::1.0, "shop"::1.0,"bookstore"::1.0,
 		"gamecenter"::1.0, "restaurant"::1.0,"coffeeshop"::1.0,"caphe"::1.0, "caphe-karaoke"::1.0,"farm"::0.1, "repairshop"::1.0,"hostel"::1.0
 	]);
 	
 	// building type that will considered as school (ou university) - for each type, the min and max age to go to this type of school.
 	map<list<int>,string> possible_schools <- [[3,18]::"school", [19,23]::"university"]; 
+
 	
 	//Acvitity parameters 
+	string building_type_per_activity_parameters <- experiment.project_path+"Parameters/Building type per activity type.csv"; //File for the parameters
+	
 	string choice_of_target_mode <- gravity among: ["random", "gravity","closest"]; // model used for the choice of building for an activity 
 	int nb_candidates <- 4; // number of building considered for the choice of building for a particular activity
 	float gravity_power <- 0.5;  // power used for the gravity model: weight_of_building <- area of the building / (distance to it)^gravity_power
+	
 	
 	
 	//Agenda paramaters
@@ -166,7 +170,7 @@ global {
 	int max_duration_lunch <- 2; // max duration (in hour) of the lunch time
 	int max_duration_default <- 3; // default duration (in hour) of activities
 	int min_age_for_evening_act <- 13; //min age of individual to have an activity after school
-	float nb_activity_fellows_mean <- 3.0;
+	float nb_activity_fellows_mean <- 3.0; 
 	float nb_activity_fellows_std <- 2.0;
 
 	int max_num_activity_for_non_working_day <- 4; //max number of activity for non working day
@@ -183,15 +187,6 @@ global {
 	//Activity parameters
 	float building_neighbors_dist <- 500 #m; //used by "visit to neighbors" activity (max distance of neighborhood).
 	
-	//list of activities, and for each activity type, the list of possible building type
-	map<string, list<string>> activities <- [
-		act_shopping::remove_duplicates(OSM_shop + ["shop","market","supermarket", "store"]), 
-		act_eating::remove_duplicates(OSM_eat + ["restaurant","coffeeshop", "caphe"]),
-		act_leisure::remove_duplicates(OSM_leisure + ["gamecenter", "karaoke", "cinema", "caphe-karaoke"]), 
-		act_outside::remove_duplicates(OSM_outside_activity + ["playground", "park"]), 
-		act_sport::remove_duplicates(OSM_sport + ["sport"]),
-	 	act_other::remove_duplicates(OSM_other_activity + ["admin","meeting", "supplypoint","bookstore", "place_of_worship"])
-	 ];
 	
 	
 	//for each category of age, and for each sex, the weight of the different activities

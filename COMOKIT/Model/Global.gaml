@@ -24,8 +24,15 @@ import "Synthetic Population.gaml"
 global {
 	geometry shape <- envelope(shp_buildings);
 	outside the_outside;
+	
+	list<string> possible_homes ;  //building type that will be considered as home	
+	map<string, list<string>> activities; //list of activities, and for each activity type, the list of possible building type
+	
+	
+	
 	map<int,map<string,list<string>>> map_epidemiological_parameters;
 	action global_init {
+		do init_building_type_parameters;
 		
 		do console_output("global init");
 		if (shp_boundary != nil) {
@@ -42,7 +49,6 @@ global {
 		do console_output("building and boundary : done");
 		create outside;
 		the_outside <- first(outside);
-		
 		do create_activities;
 		do console_output("Activities : done");
 		do create_hospital;
@@ -90,6 +96,28 @@ global {
 
 	}
 
+
+	action init_building_type_parameters {
+		csv_parameters <- csv_file(building_type_per_activity_parameters,",",true);
+		matrix data <- matrix(csv_parameters);
+		//Loading the different rows number for the parameters in the file
+		loop i from: 0 to: data.rows-1{
+			string activity_type <- data[0,i];
+			list<string> bd_type;
+			loop j from: 1 to: data.columns - 1 {
+				if (data[j,i] != nil) {
+					bd_type << data[j,i];
+				}
+				
+			}
+			activities[activity_type] <- bd_type;
+		}
+		remove key: act_studying from:activities;
+		possible_homes<- activities[act_home];
+		remove key: act_home from:activities;
+		add all: activities[act_working] as_map (each::2.0) to: possible_workplaces;
+		remove key: act_working from:activities;
+	}
 
 	
 	//Action used to initialise epidemiological parameters according to the file and parameters forced by the user

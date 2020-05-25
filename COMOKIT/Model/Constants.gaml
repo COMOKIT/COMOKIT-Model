@@ -50,16 +50,6 @@ global {
 	string gravity <- "gravity";
 	string closest <- "closest";
 	
-	// OSM Constant (type of building)
-	list<string> OSM_eat <- ["restaurant","bakery"];
-	list<string> OSM_home <- ["yes","house", "manor","apartments",'chocolate','shoes',"caravan"];
-	list<string> OSM_shop <- ['commercial','supermarket',"bakery","frozen_food","alcohol","retail","furniture","bicycle"];
-	list<string> OSM_outside_activity <- [];
-	list<string> OSM_leisure <- [];
-	list<string> OSM_sport <- ['tennis','multi','basketball','soccer','rugby_league','swimming','cycling','pelota','boules','skateboard','beachvolleyball','athletics'];
-	list<string> OSM_other_activity <- ['car_repair','garages','church','hairdresser',"chapel","memorial","ruins"];
-	list<string> OSM_work_place <- ['office',"estate_agent","public","civic","government","manufacture","company"];
-	list<string> OSM_school <- ["school"];
 	
 	//number of the column for the epidemiological parameters CSV file
 	int epidemiological_csv_column_name <- 0; //Name of the parameter

@@ -1,0 +1,10 @@
+Actitity type, Buildings type
+staying at home,,yes,house,manor,apartments,caravan,hostel,hotel,home
+working,office,estate_agent,public,civic,government,manufacture,company
+studying,school
+eating,restaurant,coffeeshop,caphe,bakery
+shopping,commercial,supermarket,bakery,frozen_food,alcohol,retail,furniture,bicycle,chocolate,shoes,shop,market,store,bookstore
+leisure,coffeeshop,caphe,gamecenter, karaoke, cinema, caphe-karaoke
+outside activity,playground, park
+sport,sport,tennis,multi,basketball,soccer,rugby_league,swimming,cycling,pelota,boules,skateboard,beachvolleyball,athletics
+other activity,car_repair,garages,church,hairdresser,chapel,memorial,ruins,admin,meeting,supplypoint,place_of_worship
