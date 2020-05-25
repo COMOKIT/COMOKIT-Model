@@ -11,7 +11,7 @@
 * 	- tolerance: defines the rate of the population who is allowed to do its activities. (default value: 0.2)
 * 	- radius_lockdown: the radius of the policy application area (default value: 200 #m)
 * Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Vinh Phuc)
-* Tags: covid19,epidemiology
+* Tags: covid19,epidemiology,lockdown
 ******************************************************************/
 
 model CoVid19
