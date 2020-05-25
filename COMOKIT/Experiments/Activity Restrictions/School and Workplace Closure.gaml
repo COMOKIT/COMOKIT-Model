@@ -27,7 +27,7 @@ global {
 		ask Authority {
 			list<bool> c <- world.ask_closures();
 			ask world {do console_output(sample(c),"School and workplace shutdown.gaml");}
-			policy <- createPolicy(not(c[0]), not(c[1])); 
+			policy <- create_school_work_closure_policy(not(c[0]), not(c[1])); 
 		}
 	}
 	

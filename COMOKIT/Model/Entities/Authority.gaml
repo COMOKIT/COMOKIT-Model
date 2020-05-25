@@ -256,7 +256,7 @@ species Authority {
 	/*
 	 * To define a policy that allow school and/or work
 	 */
-	AbstractPolicy createPolicy (bool school, bool work) {
+	AbstractPolicy create_school_work_closure_policy (bool school, bool work) {
 		create ActivitiesListingPolicy returns: result {
 			allowed_activities[studying.name] <- school;
 			allowed_activities[working.name] <- work;
