@@ -5,9 +5,9 @@
 * Description: 
 * 	Model illustrating a total lockdown policy applied on a population with a given tolerance.
 * 	In a total lockdown, no activities are allowed.
-* 	The tolerance is expressed as a rate of the population that is allowed to do its activities.
+* 	The tolerance expresses a rate of the population that is allowed to do its activities.
 * Parameters:
-* 	- tolerance: (asked to the user in a popup) defines the rate of the population who it allowed to do its activities.
+* 	- tolerance: (asked to the user in a popup) defines the rate of the population who is allowed to do its activities.
 * Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Vinh Phuc)
 * Tags: covid19,epidemiology, lockdown
 ******************************************************************/
