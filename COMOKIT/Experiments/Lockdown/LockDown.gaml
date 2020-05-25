@@ -10,13 +10,10 @@ model CoVid19
 import "../../Model/Global.gaml"
 import "../Abstract Experiment.gaml"
 
-import "../Abstract Batch Experiment.gaml"
-
 global {
 	int num_days <- 120;
 
-	action define_policy{  
-		result_folder  <- "../../batch_output_"+num_days+ "/";
+	action define_policy{
 		ask Authority {
 			if (num_days > 0) {
 				policy <- create_lockdown_policy();

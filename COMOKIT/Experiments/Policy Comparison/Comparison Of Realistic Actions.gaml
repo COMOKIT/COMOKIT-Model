@@ -9,7 +9,6 @@ model CoVid19
 
 import "../../Model/Global.gaml"
 import "../Abstract Experiment.gaml"
-import "../Abstract Batch Experiment.gaml"
 
 global {
 	float percentage_of_people_allowed <- 0.1;
@@ -27,7 +26,6 @@ global {
 	action define_policy {
 		if empty(Authority) { error "there is no authority created"; }
 		do console_output("Initializing "+my_policy+" policy", "Comparison of Realistic Actions.gaml");
-		result_folder <-  "../../batch_output/"+my_policy + "/";
 		switch my_policy {
 			match "french style" { do build_french_style_action(Authority[0]); }
 			match "south corean style" { do build_south_corean_style_action(Authority[0]); }
