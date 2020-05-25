@@ -42,20 +42,12 @@ experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 	}
 
 	permanent {
-		display "charts" toolbar: false background: #black  refresh: every(24 #cycle) {
-			chart "Infected cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {
-				loop s over: simulations {
-					data s.name value: s.number_of_infectious color: s.color marker: false style: line	 thickness: 2;
-				}
-
-			}
+		display "charts" parent: infected_cases refresh: every(24 #cycle) {
 			graphics "title" {
 				draw ("Day " + int((current_date - starting_date) /  #day))  font: default at: {100#px, 0} color:#white anchor: #top_left;
 				draw  "Mask Efficiency " + round(factor * 100) + "%" font: default at: {100#px, 30#px}  color: #white anchor: #top_left;
 			}
-
 		}
-
 	}
 
 	output {

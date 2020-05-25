@@ -27,9 +27,11 @@ global {
 		
 }
 
-experiment "Closures" parent: "Abstract Experiment" {
+experiment "Closures" parent: "Abstract Experiment" autorun: true {
 	output {
-		display "Main" parent: default_display {
-		}
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
+		
+		display "Main" parent: default_display {}
+		display "Plot" parent: states_evolution_chart {}				
 	}
 }
