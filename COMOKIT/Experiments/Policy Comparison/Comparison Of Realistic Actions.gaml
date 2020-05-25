@@ -48,7 +48,7 @@ global {
 		ask authority { 
 			// Test policy
 			AbstractPolicy d <- create_detection_policy(
-				length(Individual)*small_test_sample, // 0.01% of the population 
+				int(length(Individual) * small_test_sample), // 0.01% of the population 
 				true, // only_symptomatic_ones = true 
 				true // only_untested_ones
 			);
@@ -56,7 +56,7 @@ global {
 			// TODO : better model for Frensh lock down policy allowance
 			AbstractPolicy l <- from_min_cases(
 				with_tolerance(create_lockdown_policy(), percentage_of_people_allowed),
-				length(Individual)*start_lockdown_until_prop
+				int(length(Individual) * start_lockdown_until_prop)
 			);
 			AbstractPolicy r <- create_positive_at_home_policy();
 			if with_hospital_policy { policy <- combination([d, l, r, create_hospitalisation_policy(true, true, number_of_test_in_hospital)]);} 
@@ -71,7 +71,7 @@ global {
 		ask authority { 
 			// Test policy
 			AbstractPolicy d <- create_detection_policy(
-				length(Individual)*large_test_sample, // 1% of the population 
+				int(length(Individual) * large_test_sample), // 1% of the population 
 				false, // only_symptomatic_ones = true 
 				false // only_untested_ones
 			);
