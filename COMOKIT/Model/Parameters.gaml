@@ -136,8 +136,8 @@ global {
 	
 	 //building type that will be considered as home - for each type, the coefficient to apply to this type for this choice of working place
 	 //weight of a working place = area * this coefficient
-	map<string, float> possible_workplaces <-  map(["office"::3.0, "admin"::2.0, "industry"::1.0, "store"::1.0, "shop"::1.0,"bookstore"::1.0,
-		"gamecenter"::1.0, "restaurant"::1.0,"coffeeshop"::1.0,"caphe"::1.0, "caphe-karaoke"::1.0,"farm"::0.1, "repairshop"::1.0,"hostel"::1.0
+	map<string, float> possible_workplaces <-  map(["office"::1.5, "admin"::1.0, "industry"::0.5, "store"::0.5, "shop"::0.5,"bookstore"::0.5,
+		"gamecenter"::0.5, "restaurant"::0.5,"coffeeshop"::0.5,"caphe"::0.5, "caphe-karaoke"::0.5,"farm"::0.05, "repairshop"::0.5,"hostel"::0.5
 	]);
 	
 	// building type that will considered as school (ou university) - for each type, the min and max age to go to this type of school.

@@ -115,7 +115,7 @@ global {
 		remove key: act_studying from:activities;
 		possible_homes<- activities[act_home];
 		remove key: act_home from:activities;
-		add all: activities[act_working] as_map (each::2.0) to: possible_workplaces;
+		add all: activities[act_working] as_map (each::1.0) to: possible_workplaces;
 		remove key: act_working from:activities;
 	}
 
