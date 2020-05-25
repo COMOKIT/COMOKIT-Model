@@ -66,18 +66,11 @@ experiment "Unconfined Individuals" parent: "Abstract Experiment" autorun: true 
 	}
 
 	permanent {
-		display "charts" toolbar: false background: #black refresh: every(24 #cycle) {
-			chart "Infected cases" /*"Infected and reported cases"*/ background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 12, #bold) title_visible: true {
-				loop s over: simulations {
-					data s.name /*  + " (infected)"*/ value: s.number_of_infectious color: s.color marker: false style: line thickness: 2;
-					//data s.name + " (reported)" value: s.total_number_reported color: s.color marker: true line_visible: false thickness: 1;
-				}
-			}
-
+		display "charts" parent: infected_cases refresh: every(24 #cycle) {
 			graphics "title" {
 				draw ("Day " + int((current_date - starting_date) / #day)) font: default at: {100 #px, 0} color: #white anchor: #top_left;
-			}
-		}
+			}			
+		}		
 	}
 
 	output {
@@ -88,51 +81,4 @@ experiment "Unconfined Individuals" parent: "Abstract Experiment" autorun: true 
 			}
 		}
 	}
-}
-
-/*
- *
- *	HEADLESS/BATCH !
- *
- */
-experiment "Realistic Lock Down Batch" parent: "Abstract Batch Experiment" 
-	type: batch repeat: 500 keep_seed: true until: (Individual count each.is_infected = 0) or world.sim_stop() 
-{
-	method exhaustive;
-	
-	// CONFINMENT POLICY
-	parameter "Percentage of people allowed" var: percentage_of_people_allowed init: 0.0 min: 0.0 max: 0.5 step: 0.05;
-	parameter "Nbr of cases needed to start the policy" var:nb_cases init:0 min:0 max: 100 step: 5;
-	parameter "Nbr of days of lockdown" var:nb_days init: 7 min: 7 max: 182 step: 7; // Max ~6months	
-	
-	// COVID TEST POLICY
-	//parameter "number of tests" var: number_of_tests_per_step init: 10 min: 0 max: 10000 among: [10, 100];
-	//parameter var:only_untested_ones among: [true, false];
-	//parameter var:only_symptomatic_ones among: [true, false];
-	
-	permanent {
-		
-		display "charts" toolbar: false background: #black{
-			chart "Infected cases" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
-			loop s over: simulations {
-				data s.name value: s.number_of_infectious color: s.color marker: false style: line thickness: 2; 
-				
-			}}
-		}
-		
-		display "Cumulative incidence" toolbar: false background: #black{
-			chart "Cumulative incidence" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
-			loop s over: simulations {
-				data s.name value: s.total_number_of_infected color: s.color marker: false style: line thickness: 2; 
-				
-			}}
-		}
-	}
-
-}
-
-experiment "Unconfined Individuals Headless" parent: "Abstract Batch Headless" {
-	parameter "Percentage of people allowed" var: percentage_of_people_allowed init: 0.0 min: 0.0 max: 0.5 step: 0.05;
-	parameter "Nbr of cases needed to start the policy" var:nb_cases init:0 min:0 max: 100 step: 5;
-	parameter "Nbr of days of lockdown" var:nb_days init: 7 min: 7 max: 182 step: 7; // Max ~6months	
 }

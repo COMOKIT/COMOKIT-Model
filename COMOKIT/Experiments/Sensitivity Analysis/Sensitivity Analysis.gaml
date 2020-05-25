@@ -17,7 +17,7 @@ global {
 
 }
 
-experiment Sensitivity parent: "Abstract Batch Experiment" 
+experiment Sensitivity parent: "Abstract Batch" 
 	type: batch repeat: 60 keep_seed: false until: world.sim_stop() or cycle>=cycle_limit 
 	
 {
@@ -44,5 +44,4 @@ experiment Sensitivity parent: "Abstract Batch Experiment"
 
 }
 
-experiment SensitivityHeadless parent: "Abstract Batch Headless" 
-{}
+experiment SensitivityHeadless parent: "Abstract Headless"  {}

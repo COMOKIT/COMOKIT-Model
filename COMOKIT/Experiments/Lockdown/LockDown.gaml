@@ -33,9 +33,3 @@ experiment "Lockdown" parent: "Abstract Experiment" {
 	}
 
 }
-
-experiment "Comparison num days Lockdown" parent: "Abstract Batch Experiment" 
-	type: batch repeat: 20 keep_seed: true until: world.sim_stop() 
-{		
-	parameter var:num_days among: [0, 15,30, 60,90,120];
-}

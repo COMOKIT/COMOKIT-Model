@@ -44,13 +44,7 @@ experiment "Opening Hospitals" parent: "Abstract Experiment" autorun: true {
 	}
 
 	permanent {
-		display "charts Infected" toolbar: false background: #black  refresh: every(24 #cycle) {
-			chart "Infected cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {
-				loop s over: simulations {
-					data s.name value: s.number_of_infectious color: s.color marker: false style: line	 thickness: 2;
-				}
-			}
-		}
+		display "charts" parent: infected_cases refresh: every(24 #cycle) {}
 		
 		display "charts Hospitalized" toolbar: false background: #black  refresh: every(24 #cycle) {
 			chart "Hospitalized cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {

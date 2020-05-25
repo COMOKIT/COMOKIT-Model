@@ -1,10 +1,12 @@
 /******************************************************************
-* Batch experiment to explore the GAMA CoVid19 Modeling Kit
+* This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit 
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Arthur Brugiere <roiarthurb>, Kevin Chapuis <chapuisk>
+* Description: Batch experiment to explore the GAMA CoVid19 Modeling Kit.
+*    This model defines experiments on top of which exploration models can be built. 
+*    In particular, it describes all the data that will be saved at each simulation step in a file.
 * Tags: covid19,batch,hpc,exploration
 ******************************************************************/
-
 model CoVid19
 
 import "Abstract Experiment.gaml"
@@ -65,9 +67,7 @@ global{
 			
 			save [
 				// Number of new cases (incidence) per step per age category
-				total_incidence,
-				// Number of new cases per step per building (or building type) and age category
-				
+				total_incidence,				
 				// Number of hospitalisations per step per age category
 				length(subIndividual where(each.clinical_status=need_hospitalisation)),
 				// Number of ICU per step per age category
@@ -89,12 +89,10 @@ global{
 			] type: "csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_" + (i - ageCategory) + "-" + (i-1) + ".csv" rewrite:false;
 		}
 	}
-	
-
 }
 
 // This experiment is needed to run batch within GAMA
-experiment "Abstract Batch Experiment" type:batch repeat: 80 until: world.sim_stop() keep_simulations: false
+experiment "Abstract Batch" type:batch repeat: 80 until: world.sim_stop() keep_simulations: false
 		 virtual:true  parent: "Abstract Experiment"
 {
 	init {
@@ -105,7 +103,7 @@ experiment "Abstract Batch Experiment" type:batch repeat: 80 until: world.sim_st
 }
 
 // This experiment is needed to run headless experiments
-experiment "Abstract Batch Headless" type:gui
+experiment "Abstract Headless" type:gui
 		 virtual:true  parent: "Abstract Experiment"
 {
 	init {

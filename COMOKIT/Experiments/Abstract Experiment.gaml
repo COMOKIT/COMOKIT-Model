@@ -138,13 +138,13 @@ experiment "Abstract Experiment" virtual: true {
 
 		}
 
-		display "default_white_chart" virtual: true {
-			chart "sir" background: #white axes: #black {
-				data "susceptible" value: length(Individual where (each.state = susceptible)) color: #green marker: false style: line;
-				data "latent" value: length(Individual where (each.is_latent())) color: #orange marker: false style: line;
-				data "infected" value: length(Individual where (each.is_infectious)) color: #red marker: false style: line;
-				data "recovered" value: length(Individual where (each.clinical_status = recovered)) color: #blue marker: false style: line;
-				data "dead" value: length(Individual where (each.clinical_status = dead)) color: #black marker: false style: line;
+		display "states_evolution_chart" background: #black virtual: true {
+			chart "Population epidemiological states evolution" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
+				data "Susceptible" value: length(Individual where (each.state = susceptible)) color: #green marker: false style: line;
+				data "Latent" value: length(Individual where (each.is_latent())) color: #orange marker: false style: line;
+				data "Infectious" value: length(Individual where (each.is_infectious)) color: #red marker: false style: line;
+				data "Recovered" value: length(Individual where (each.clinical_status = recovered)) color: #blue marker: false style: line;
+				data "Dead" value: length(Individual where (each.clinical_status = dead)) color: #black marker: false style: line;
 			}
 
 		}
@@ -157,5 +157,24 @@ experiment "Abstract Experiment" virtual: true {
 		}
 
 	}
+	
+	permanent {
+		
+		display "infected_cases" toolbar: false background: #black virtual: true {
+			chart "Infected cases" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
+				loop s over: simulations {
+					data s.name value: s.number_of_infectious color: s.color marker: false style: line thickness: 2; 		
+				}
+			}
+		}
+		
+		display "cumulative_incidence" toolbar: false background: #black virtual: true {
+			chart "Cumulative incidence" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
+				loop s over: simulations {
+					data s.name value: s.total_number_of_infected color: s.color marker: false style: line thickness: 2; 
+				}
+			}
+		}		
+	}	
 
 }
