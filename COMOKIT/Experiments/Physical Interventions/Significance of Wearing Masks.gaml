@@ -62,10 +62,3 @@ experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 	}
 
 }
-
-experiment "Headless" parent: "Abstract Batch Headless" {	
-	
-	parameter "Force parameters" var:force_parameters init:list(epidemiological_proportion_wearing_mask, epidemiological_factor_wearing_mask);
-	parameter "Proportion wearing mask" var: init_all_ages_proportion_wearing_mask init: 0.0 min: 0.0 max: 1.0 step: 0.1;
-	parameter "Factor contact rate" var: init_all_ages_factor_contact_rate_wearing_mask init: 0.0 min: 0.0 max: 1.0 step: 0.1;
-}

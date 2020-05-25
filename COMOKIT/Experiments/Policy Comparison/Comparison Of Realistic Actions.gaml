@@ -194,38 +194,3 @@ experiment "Comparison of realistic actions" parent: "Abstract Experiment" autor
 		display "Main" parent: default_display {}
 	}
 }
-
-/*
- *	BATCH runs
- */
-experiment "Comparison of realistic actions batch" parent: "Abstract Batch Experiment" 
-	type: batch repeat: 18 until: world.sim_stop() keep_seed: true
-{ 
-	
-	parameter "my_policy" var:my_policy among:["french style", "south corean style", "britain style", "no policy"];
-	method exhaustive;
-
-}
-
-/*
- *	BATCH exploration
- */
-experiment "Realistic actions batch exploration" parent: "Abstract Batch Experiment" 
-	type: batch repeat: 20 keep_simulations:false until: world.sim_stop() 
-{
-	method exhaustive;
-	
-	// FRENCH STYLE OF ACTIONS
-	parameter "Percentage of people allowed" var: percentage_of_people_allowed init: 0.0 min: 0.0 max: 0.5 step: 0.05;
-	parameter "Start lockdown until proportion of confirmed cases" var: start_lockdown_until_prop init:0.1 min:0.0 max:0.4 step:0.1;
-	parameter "Proportion of tested people per step" var:small_test_sample init:0.01 min:0.01 max:0.05 step:0.01;
-	
-	// SOUTH KOREAN STYLE OF ACTIONS
-	parameter "Proportion of tested people per step" var:large_test_sample init:0.1 min:0.1 max:0.5 step:0.1;
-	
-	// GREAT BRITAIN STYLE ACTION PLAN
-	parameter "Age limit until stay-at-home forced" var:stay_at_home_age_limit init:50 min:0 max:100 step:5;
-	
-
-}
-
