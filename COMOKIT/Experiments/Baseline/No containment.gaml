@@ -2,9 +2,11 @@
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Benoit Gaudou
+* 
 * Description: 
 * 	The simplest baseline model: it creates one simulation with a no containment policy 
 * 		and plots the evolution of the number of individuals in each epidemiological states.
+* 
 * Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Vinh Phuc)
 * Tags: covid19,epidemiology
 ******************************************************************/

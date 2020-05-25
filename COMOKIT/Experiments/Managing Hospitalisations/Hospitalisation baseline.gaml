@@ -2,14 +2,17 @@
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Huynh Quang Nghi
+* 
 * Description: 
 * 	Model illustrating the hospitalisation policy (without any other intervention policy).
 * 	It defines several more precise charts to monitor the evolution of Individuals clinical states and the number of Individuals in hospitals. 
+* 
 * Parameters:
 * 	The hospitalization policy accepts 3 parameters: create_hospitalisation_policy(is_allowing_ICU, is_allowing_hospitalisation, nb_minimum_tests):
 * 	- is_allowing_ICU (boolean): whether hospitals allow ICU admission (set to true),
 *	- is_allowing_hospitalisation: whether hospitals allow hospitalisation (set to true),
 *	- nb_minimum_tests: the m inimum number of tests needed to be negative and to discharge an individual (set to 2).
+* 
 * Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Vinh Phuc)
 * Tags: covid19,epidemiology
 ******************************************************************/

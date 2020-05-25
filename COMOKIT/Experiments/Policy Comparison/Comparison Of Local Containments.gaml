@@ -2,15 +2,18 @@
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Benoit Gaudou
+* 
 * Description: 
 * 	Model comparing 4 local measures: no containment, realistic lockdown, 
 * 		family containment (the whole family at home when a signle member is positive to a test) 
 * 		and dynamic local containment (all Individuals in an area around an Individual tested positive have to stay home).
 * 	One simulation on the same case study and with the same Random Number Generator seed  is created for each measure scenario.
 * 	Activity losses are also ploted.
+* 
 * Parameters:
 * 	- number_of_tests_: set the number of tests executed (per simulation step, i.e. per hour)
 * 	- the dynamic local containment is set to 20#m (defined in the dedicated experiment)
+* 
 * Dataset: chosen by the user (through a choice popup)
 * Tags: covid19,epidemiology, policy comparison, local policy
 ******************************************************************/

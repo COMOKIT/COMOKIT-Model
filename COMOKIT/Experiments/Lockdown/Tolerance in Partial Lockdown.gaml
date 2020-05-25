@@ -2,14 +2,17 @@
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Alexis Drogoul
+* 
 * Description: 
 * 	Model comparing total lockdown policies with various tolerance values (for each tolerance value, one simulation is created and executed).
 * 	In a total lockdown, no activities are allowed.
 * 	The tolerance expresses a rate of the population that is allowed to do its activities.
 * 	Contrarily to "Realistic Lockdown Extents" model (where the Individuals allowed to move are always the same ones over the simulation,
 * 		in this model the tolerance is only used as a probability to be allowed to do an activity.
+* 
 * Parameters:
 * 	- the possible tolerance values to be compared: can be modified in the loop creating the simulations (default value: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+* 
 * Dataset: chosen by the user (through a choice popup)
 * Tags: covid19,epidemiology,lockdown,policy comparison
 ******************************************************************/

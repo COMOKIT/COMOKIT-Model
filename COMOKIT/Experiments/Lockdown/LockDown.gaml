@@ -2,12 +2,15 @@
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Huynh Quang Nghi
+* 
 * Description: 
 * 	Model with a total lockdown policy applied during a given number of days.
 * 	In a total lockdown, no activities are allowed, and this is applied to all the Individuals.
 * 	After this lockdown period, no policy is applied.
+* 
 * Parameters:
 * 	- numb_days: defines the number of days for the lockdown application.
+* 
 * Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Vinh Phuc)
 * Tags: covid19,epidemiology,lockdown
 ******************************************************************/

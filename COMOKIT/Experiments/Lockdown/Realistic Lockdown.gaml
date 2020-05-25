@@ -2,14 +2,17 @@
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Alexis Drogoul
+* 
 * Description: 
 * 	This model compares a policy without containment and a realistic lockdown policy.
 * 	A realistic lockdown policy allows Individuals shopping and home activities only, with a given tolerance (e.g. for essential workers).
 * 	As soon as an Individual is positive to a test, it has to stay home.
 * 	During the simulation, a given number of tests (nb_tests_) are performed at every simulation step.
+* 
 * Parameters:
 * 	- tolerance: defines the rate of the population who is allowed to do its activities (default value: 0.1)
 * 	- nb_tests_: number of tests performed every step (default value: 100)
+* 
 * Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Vinh Phuc)
 * Tags: covid19,epidemiology,lockdown
 ******************************************************************/

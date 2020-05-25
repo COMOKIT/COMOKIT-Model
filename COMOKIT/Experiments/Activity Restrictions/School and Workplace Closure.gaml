@@ -2,13 +2,16 @@
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Huynh Quang Nghi
+* 
 * Description: 
 * 	Model illustrating school and workplace closure policy:
 * 	- school closure prevents children to go to school/university (instead they stay home)
 * 	- workplace closure prevents adults with an employment to go to work (instead they stay home)
+* 
 * Parameters: 
 * 	The model asks the user whether it wants to activate the school closure and whether it wants to activate the workplace closure.
 * 	Default values are true to activate both closure policies.
+* 
 * Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Vinh Phuc)
 * Tags: covid19,epidemiology
 ******************************************************************/
