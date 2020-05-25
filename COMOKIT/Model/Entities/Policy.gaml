@@ -1,6 +1,10 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
+* 
+* All the base policies provided with COMOKIT. Most of their combinations
+* are indeed declared in the actions of the Authority agent.
+* 
 * Author: Alexis Drogoul, Benoit Gaudou, Damien Philippon
 * Tags: covid19,epidemiology
 ******************************************************************/

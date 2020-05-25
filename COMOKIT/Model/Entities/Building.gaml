@@ -1,6 +1,11 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
+* 
+* Buildings represent in COMOKIT spatial entities where Individuals gather 
+* to undertake their Activities. They are provided with a viral load to
+* enable environmental transmission. 
+* 
 * Author: Huynh Quang Nghi, Benoit Gaudou, Damien Philippon, Patrick Taillandier
 * Tags: covid19,epidemiology
 ******************************************************************/
@@ -57,7 +62,6 @@ species Building {
 	}
 
 	aspect default {
-//		draw name color:#black;
 		draw shape color: #gray empty: true;
 	}
 

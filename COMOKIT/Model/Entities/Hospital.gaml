@@ -1,6 +1,10 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
+* 
+* A special sub-species of Building where infected symptomatic people
+* can be gathered, depending on the policies implemented.
+* 
 * Author: Huynh Quang Nghi, Damien Philippon
 * Tags: covid19,epidemiology
 ******************************************************************/
