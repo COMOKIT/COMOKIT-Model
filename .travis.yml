@@ -15,32 +15,56 @@ script:
   - curl -o gama.zip -fSL $GAMA_LINUX
   - unzip gama.zip -d ./GAMA
   - chmod +x ./GAMA/headless/gama-headless.sh
-  # Create Library folders
-  - mkdir -p ./GAMA/configuration/org.eclipse.osgi/15/0/.cp/models/
-  - cp -r COMOKIT ./GAMA/configuration/org.eclipse.osgi/15/0/.cp/models/
+  # Get model jar path
+  - modelJar=`find ./GAMA -name 'msi.gama.models*'`
+  # Add COMOKIT in models
+  - mv $modelJar ./models.zip
+  - unzip ./models.zip -d ./models
+  - cp -r COMOKIT ./models/models/
+  - (cd models; zip -r --symlinks ../$modelJar .)
+  # Fix GAMA plugins security
+  - jarSize=`ls -l $modelJar | cut -d " " -f5`
+  - sed -i "/<artifact classifier='osgi.bundle' id='msi.gama.models'/,/<\/artifact>/ s/<property name.*/<property name='download.size' value='$jarSize'\/>/g;" ./GAMA/artifacts.xml
+  # Prepare release
   - zip -r --symlinks ./COMOKIT-Linux.zip ./GAMA
 
   # Clean GAMA version
-  - rm -fr ./GAMA
+  - rm -fr ./GAMA ./models.zip ./models
 
   # Mac build
   - curl -o gama.zip -fSL $GAMA_MAC
   - unzip gama.zip -d ./GAMA
   - chmod +x ./GAMA/Gama.app/Contents/headless/gama-headless.sh
-  # Create Library folders
-  - mkdir -p ./GAMA/Gama.app/Contents/Eclipse/configuration/org.eclipse.osgi/15/0/.cp/models/
-  - cp -r COMOKIT ./GAMA/Gama.app/Contents/Eclipse/configuration/org.eclipse.osgi/15/0/.cp/models/
+  # Get model jar path
+  - modelJar=`find ./GAMA -name 'msi.gama.models*'`
+  # Add COMOKIT in models
+  - mv $modelJar ./models.zip
+  - unzip ./models.zip -d ./models
+  - cp -r COMOKIT ./models/models/
+  - (cd models; zip -r --symlinks ../$modelJar .)
+  # Fix GAMA plugins security
+  - jarSize=`ls -l $modelJar | cut -d " " -f5`
+  - sed -i "/<artifact classifier='osgi.bundle' id='msi.gama.models'/,/<\/artifact>/ s/<property name.*/<property name='download.size' value='$jarSize'\/>/g;" ./GAMA/Gama.app/Contents/Eclipse/artifacts.xml
+  # Prepare release
   - zip -r --symlinks ./COMOKIT-Mac.zip ./GAMA/Gama.app
 
   # Clean GAMA version
-  - rm -fr ./GAMA
+  - rm -fr ./GAMA ./models.zip ./models
 
   # Windows build
   - curl -o gama.zip -fSL $GAMA_WINDOWS
   - unzip gama.zip -d ./GAMA
-  # Create Library folders
-  - mkdir -p ./GAMA/configuration/org.eclipse.osgi/15/0/.cp/models/
-  - cp -r COMOKIT ./GAMA/configuration/org.eclipse.osgi/15/0/.cp/models/
+  # Get model jar path
+  - modelJar=`find ./GAMA -name 'msi.gama.models*'`
+  # Add COMOKIT in models
+  - mv $modelJar ./models.zip
+  - unzip ./models.zip -d ./models
+  - cp -r COMOKIT ./models/models/
+  - (cd models; zip -r --symlinks ../$modelJar .)
+  # Fix GAMA plugins security
+  - jarSize=`ls -l $modelJar | cut -d " " -f5`
+  - sed -i "/<artifact classifier='osgi.bundle' id='msi.gama.models'/,/<\/artifact>/ s/<property name.*/<property name='download.size' value='$jarSize'\/>/g;" ./GAMA/artifacts.xml
+  # Prepare release
   - zip -r --symlinks ./COMOKIT-Win.zip ./GAMA
 
 before_deploy:
