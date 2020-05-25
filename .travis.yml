@@ -20,7 +20,7 @@ script:
   # Add COMOKIT in models
   - mv $modelJar ./models.zip
   - unzip ./models.zip -d ./models
-  - cp -r COMOKIT ./models/models/
+  - cp -r COMOKIT ./models/models/ && cp -r COMOKIT\ Template\ Project ./models/models/
   - (cd models; zip -r --symlinks ../$modelJar .)
   # Fix GAMA plugins security
   - jarSize=`ls -l $modelJar | cut -d " " -f5`
@@ -40,7 +40,7 @@ script:
   # Add COMOKIT in models
   - mv $modelJar ./models.zip
   - unzip ./models.zip -d ./models
-  - cp -r COMOKIT ./models/models/
+  - cp -r COMOKIT ./models/models/ && cp -r COMOKIT\ Template\ Project ./models/models/
   - (cd models; zip -r --symlinks ../$modelJar .)
   # Fix GAMA plugins security
   - jarSize=`ls -l $modelJar | cut -d " " -f5`
@@ -59,7 +59,7 @@ script:
   # Add COMOKIT in models
   - mv $modelJar ./models.zip
   - unzip ./models.zip -d ./models
-  - cp -r COMOKIT ./models/models/
+  - cp -r COMOKIT ./models/models/ && cp -r COMOKIT\ Template\ Project ./models/models/
   - (cd models; zip -r --symlinks ../$modelJar .)
   # Fix GAMA plugins security
   - jarSize=`ls -l $modelJar | cut -d " " -f5`
