@@ -1,6 +1,10 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
+* 
+* Declares the species used to instantiate the agent representing the
+* public authority, whose main role is to create and apply Policies
+* 
 * Author: Alexis Drogoul
 * Tags: covid19,epidemiology
 ******************************************************************/
