@@ -2,6 +2,15 @@
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Huynh Quang Nghi
+* Description: 
+* 	Model illustrating the hospitalisation policy (without any other intervention policy).
+* 	It defines several more precise charts to monitor the evolution of Individuals clinical states and the number of Individuals in hospitals. 
+* Parameters:
+* 	The hospitalization policy accepts 3 parameters: create_hospitalisation_policy(is_allowing_ICU, is_allowing_hospitalisation, nb_minimum_tests):
+* 	- is_allowing_ICU (boolean): whether hospitals allow ICU admission (set to true),
+*	- is_allowing_hospitalisation: whether hospitals allow hospitalisation (set to true),
+*	- nb_minimum_tests: the m inimum number of tests needed to be negative and to discharge an individual (set to 2).
+* Dataset: default dataset (i.e. Vinh Phuc)	
 * Tags: covid19,epidemiology
 ******************************************************************/
 model CoVid19
@@ -13,20 +22,20 @@ global {
 	
 	action define_policy{   
 		ask Authority {
-				policy <- create_hospitalisation_policy(true, true,2);
+			policy <- create_hospitalisation_policy(true, true, 2);
 		}
 	}
 }
 
-experiment "No Containment" parent: "Abstract Experiment" {
+experiment "No Containment" parent: "Abstract Experiment" autorun: true {
 
 	output {
-		display "Main" parent: default_display {
-		}
-		display "Chart" parent: states_evolution_chart {
-		}
-		display "Cumulative incidence" parent: cumulative_incidence {
-		}
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
+		
+		display "Main" parent: default_display {}
+		display "Chart" parent: states_evolution_chart {}
+		display "Cumulative incidence" parent: cumulative_incidence {}
+		
 		display "Precise chart" {
 			chart "Precise" background: #white axes: #black {
 				data "susceptible" value: length(Individual where (each.state=susceptible)) color: #green marker: false style: line;
@@ -38,6 +47,7 @@ experiment "No Containment" parent: "Abstract Experiment" {
 				data "dead" value: length(Individual where (each.clinical_status = dead)) color: #black marker: false style: line;
 			}
 		}
+		
 		display "Clinical chart" {
 			chart "Clinical" background: #white axes: #black {
 				data no_need_hospitalisation value: length(Individual where (each.clinical_status=no_need_hospitalisation)) color: #green marker: false style: line;
@@ -47,6 +57,7 @@ experiment "No Containment" parent: "Abstract Experiment" {
 				data dead value: length(Individual where (each.clinical_status=dead)) color: #black marker: false style: line;
 			}
 		}
+		
 		display "Hospital chart" {
 			chart "Hospital" background: #white axes: #black {
 				data "Hospitalised" value: length(Individual where (each.is_hospitalised)) color: #green marker: false style: line;
@@ -54,5 +65,4 @@ experiment "No Containment" parent: "Abstract Experiment" {
 			}
 		}
 	}
-
 }

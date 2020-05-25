@@ -124,7 +124,5 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 				draw application_area empty: true color: #red;
 			}
 		}
-
 	}
-
 }
