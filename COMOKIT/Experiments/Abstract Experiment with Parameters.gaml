@@ -4,12 +4,11 @@
 * Author: Damien Philippon
 * Tags: covid19,epidemiology
 ******************************************************************/
-
 model CoVid19
 
 import "Abstract Experiment.gaml"
 
-experiment "With parameters" parent: "Abstract Experiment" autorun: true {
+experiment "With parameters" parent: "Abstract Experiment" autorun: true virtual: true {
 
 	/** 
 	* Enabling parameters being loaded from a csv file  
