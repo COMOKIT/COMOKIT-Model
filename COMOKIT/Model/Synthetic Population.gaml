@@ -57,18 +57,19 @@ global {
 		
 		// Do something to build household to mimic built-in generator
 		int hh_n <- sum(homes collect (each.nb_households));
+		int hh_id <- 0;
 		loop times:hh_n {
 			list<Individual> hh <- [];
 			
 			// Head of household 
 			if (flip(proba_active_family)) {
 				Individual father <- hh_empty first_with (each.sex = 0 and each.age > max_student_age and each.age < retirement_age);
-				if not(father = nil) {hh <+ father; father.household_id <- string(hh_n); hh_empty >- father;}
+				if not(father = nil) {hh <+ father; father.household_id <- string(hh_id); hh_empty >- father;}
 				Individual mother <- hh_empty first_with (each.sex = 1 and each.age > max_student_age and each.age < retirement_age);
-				if not(mother = nil) {hh <+ mother; mother.household_id <- string(hh_n); hh_empty >- mother;}
+				if not(mother = nil) {hh <+ mother; mother.household_id <- string(hh_id); hh_empty >- mother;}
 			} else {
 				Individual lone <- hh_empty first_with (each.age > max_student_age);
-				if not(lone = nil) {hh <+ lone; lone.household_id <- string(hh_n); hh_empty >- lone;}
+				if not(lone = nil) {hh <+ lone; lone.household_id <- string(hh_id); hh_empty >- lone;}
 			}
 			
 			// Children of the household
@@ -76,7 +77,7 @@ global {
 			if number > 0 {
 				Individual c <- hh_empty first_with (each.age <= max_student_age);
 				loop while: not(c=nil) and number > 0 { 
-					hh <+ c; c.household_id <- string(hh_n); number <- number - 1; hh_empty >- c;
+					hh <+ c; c.household_id <- string(hh_id); number <- number - 1; hh_empty >- c;
 					c <- hh_empty first_with (each.age <= max_student_age);
 				}
 			}
@@ -84,17 +85,20 @@ global {
 			// Grandfather / Grandmother
 			if flip(proba_grandfather) { 
 				Individual grandfather <- hh_empty first_with (each.sex = 0 and each.age > retirement_age);
-				if not(grandfather = nil) {hh <+ grandfather; grandfather.household_id <- string(hh_n); hh_empty >- grandfather;}
+				if not(grandfather = nil) {hh <+ grandfather; grandfather.household_id <- string(hh_id); hh_empty >- grandfather;}
 			}
 			if flip(proba_grandmother) {
 				Individual grandmother <- hh_empty first_with (each.sex = 1 and each.age > retirement_age);
-				if not(grandmother = nil) {hh <+ grandmother; grandmother.household_id <- string(hh_n); hh_empty >- grandmother;}
+				if not(grandmother = nil) {hh <+ grandmother; grandmother.household_id <- string(hh_id); hh_empty >- grandmother;}
 			}
 			
 			if empty(hh) {break;}
 			
 			// Set relatives
-			ask hh { relatives <- hh - self; }  
+			ask hh { relatives <- hh - self; } 
+			
+			// Increment hh identifier
+			hh_id <- hh_id + 1; 
 		}
 		
 		list<Building> avlb_homes <- copy(homes);
