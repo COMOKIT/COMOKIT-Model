@@ -8,7 +8,7 @@
 * Parameters:
 * 	The activities defined as a activity with meeting are defined in the global variable:
 * 	- meeting_relaxing_act (in Parameters.gaml)
-* Dataset: default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME, i.e. Vinh Phuc)	
+* Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Vinh Phuc)
 * Tags: covid19,epidemiology
 ******************************************************************/
 
