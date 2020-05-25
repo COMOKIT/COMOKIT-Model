@@ -1,6 +1,14 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
+* 
+* The base of all experiments in COMOKIT. Provides a set of utilities
+* (dataset path management, virtual displays, graphic constants, ...) 
+* that can be reused, inherited or redefined in child experiments.
+* Also see Abstract Experiment with Parameters.gaml and Abstract 
+* Batch Experiment for more features in terms of parameterization 
+* and exploration of simulations.
+* 
 * Author: Huynh Quang Nghi, Alexis Drogoul
 * Tags: covid19,epidemiology
 ******************************************************************/
@@ -29,12 +37,7 @@ global {
 
 }
 
-/*
- * The highest order abstraction to initialize a simulation instance of a COMOKIT model. Any
- * new use case, should extend it. It provides basic data set path management and display setup options for the GUI </br>
- * Also see Abstract Experiment with Parameters.gaml and Abstract Batch Experiment for more features. </br>
- * 
- */
+
 experiment "Abstract Experiment" virtual: true {
 
 // ----------------------------------------------------- //
