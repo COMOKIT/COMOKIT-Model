@@ -5,7 +5,7 @@
 * Description: 
 * 	The simplest baseline model: it creates one simulation with a no containment policy 
 * 		and plots the evolution of the number of individuals in each epidemiological states.
-* Dataset: default dataset (i.e. Vinh Phuc).
+* Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Vinh Phuc)
 * Tags: covid19,epidemiology
 ******************************************************************/
 
