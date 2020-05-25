@@ -10,7 +10,7 @@
 * 	- is_allowing_ICU (boolean): whether hospitals allow ICU admission (set to true),
 *	- is_allowing_hospitalisation: whether hospitals allow hospitalisation (set to true),
 *	- nb_minimum_tests: the m inimum number of tests needed to be negative and to discharge an individual (set to 2).
-* Dataset: default dataset (i.e. Vinh Phuc)	
+* Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Vinh Phuc)
 * Tags: covid19,epidemiology
 ******************************************************************/
 model CoVid19

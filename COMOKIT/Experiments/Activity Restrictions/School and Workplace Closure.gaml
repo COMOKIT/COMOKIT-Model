@@ -9,7 +9,7 @@
 * Parameters: 
 * 	The model asks the user whether it wants to activate the school closure and whether it wants to activate the workplace closure.
 * 	Default values are true to activate both closure policies.
-* Dataset: Deafault dataset (i.e. Vinh Phuc)
+* Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Vinh Phuc)
 * Tags: covid19,epidemiology
 ******************************************************************/
 
