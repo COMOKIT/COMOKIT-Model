@@ -89,12 +89,10 @@ global{
 			] type: "csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_" + (i - ageCategory) + "-" + (i-1) + ".csv" rewrite:false;
 		}
 	}
-	
-
 }
 
 // This experiment is needed to run batch within GAMA
-experiment "Abstract Batch Experiment" type:batch repeat: 80 until: world.sim_stop() keep_simulations: false
+experiment "Abstract Batch" type:batch repeat: 80 until: world.sim_stop() keep_simulations: false
 		 virtual:true  parent: "Abstract Experiment"
 {
 	init {
@@ -105,7 +103,7 @@ experiment "Abstract Batch Experiment" type:batch repeat: 80 until: world.sim_st
 }
 
 // This experiment is needed to run headless experiments
-experiment "Abstract Batch Headless" type:gui
+experiment "Abstract Headless" type:gui
 		 virtual:true  parent: "Abstract Experiment"
 {
 	init {
