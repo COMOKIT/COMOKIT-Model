@@ -5,8 +5,10 @@
 * Description: 
 * 	Model illustrating a policy that does not allow any activity that lets Individuals meet other Individuals.
 *   Activities such as working, studying, going to school, eating, leisure, or sport are thus forbidden.
-* Parameters: no parameter
-* Dataset: Vinh Phuc	
+* Parameters:
+* 	The activities defined as a activity with meeting are defined in the global variable:
+* 	- meeting_relaxing_act (in Parameters.gaml)
+* Dataset: default dataset (i.e. Vinh Phuc)	
 * Tags: covid19,epidemiology
 ******************************************************************/
 
