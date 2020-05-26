@@ -13,12 +13,12 @@ import "All COMOKIT.gaml"
 
 global {
 	
-	string dataset_path <- "../datasets/Case Study/"; // Relative path to the folder containing the boundary.shp, buildings.shp, satellite.png, etc. datafiles. 
+	string dataset_path <- "../Datasets/Case Study/"; // Relative path to the folder containing the boundary.shp, buildings.shp, satellite.png, etc. datafiles. 
 
 
 	action define_policy{  
 		// ***************************************************************************
-		// SEE Model/Entities/Authoriy.gaml for built-in functions to created policies
+		// SEE Model/Entities/Authority.gaml for built-in functions to create policies
 		// ***************************************************************************	
 		ask Authority {
 			// look at the Authority species to see how to define policies
@@ -43,7 +43,7 @@ experiment $TITLE$ parent: "Abstract Experiment" {
 	// Setup a chart to follow the number of infectious cases 
 	permanent {
 		display "charts" toolbar: false background: #black refresh: every(24 #cycle) {
-			chart "Infected cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 12, #bold) title_visible: true {
+			chart "Infectious cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 12, #bold) title_visible: true {
 				data simulation.name value: simulation.number_of_infectious color: simulation.color marker: false style: line thickness: 2;
 			}
 		}
