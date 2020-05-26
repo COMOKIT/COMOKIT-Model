@@ -12,7 +12,7 @@ script:
   - sed -i -e  "s/gamaNature<\/nature>/gamaNature<\/nature>\n\t\t<nature>msi.gama.application.builtinNature<\/nature>/g" ./COMOKIT/.project
 
   # Linux build
-  - curl -o gama.zip -fSL $GAMA_LINUX
+  - curl -o gama.zip -fSL $(echo $GAMA_LINUX)
   - unzip gama.zip -d ./GAMA
   - chmod +x ./GAMA/headless/gama-headless.sh
   # Get model jar path
@@ -32,7 +32,7 @@ script:
   - rm -fr ./GAMA ./models.zip ./models
 
   # Mac build
-  - curl -o gama.zip -fSL $GAMA_MAC
+  - curl -o gama.zip -fSL $(echo $GAMA_MAC)
   - unzip gama.zip -d ./GAMA
   - chmod +x ./GAMA/Gama.app/Contents/headless/gama-headless.sh
   # Get model jar path
@@ -52,7 +52,7 @@ script:
   - rm -fr ./GAMA ./models.zip ./models
 
   # Windows build
-  - curl -o gama.zip -fSL $GAMA_WINDOWS
+  - curl -o gama.zip -fSL $(echo $GAMA_WINDOWS)
   - unzip gama.zip -d ./GAMA
   # Get model jar path
   - modelJar=`find ./GAMA -name 'msi.gama.models*'`
