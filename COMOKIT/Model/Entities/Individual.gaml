@@ -1,6 +1,14 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
+* 
+* The main species of COMOKIT: a Biological Entity that can perform 
+* Activities in Buildings.
+* Individuals maintain networks of family members, friends and colleagues
+* In addition to the attributes and states inherited from its parent, 
+* this species provides actions so that its agents can be tested, hospitalized, 
+* infected, can infect others, wear masks, and so on.
+* 
 * Author: Huynh Quang Nghi, Patrick Taillandier, Damien Philippon
 * Tags: covid19,epidemiology
 ******************************************************************/

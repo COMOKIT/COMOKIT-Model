@@ -2,13 +2,16 @@
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Huynh Quang Nghi
+* 
 * Description: 
 * 	Model illustrating a policy that does not allow any activity that lets Individuals meet other Individuals.
 *   Activities such as working, studying, going to school, eating, leisure, or sport are thus forbidden.
+* 
 * Parameters:
 * 	The activities defined as a activity with meeting are defined in the global variable:
 * 	- meeting_relaxing_act (in Parameters.gaml)
-* Dataset: default dataset (i.e. Vinh Phuc)	
+* 
+* Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Vinh Phuc)
 * Tags: covid19,epidemiology
 ******************************************************************/
 

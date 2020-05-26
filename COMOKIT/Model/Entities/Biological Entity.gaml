@@ -1,6 +1,12 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
+* 
+* Abstract species representing the dynamics of infection and clinical 
+* states in a "biological" agent. Parent of the Individual species, it is 
+* designed to be used for other species of agent that could be infected 
+* by the virus
+* 
 * Author: Damien Philippon
 * Tags: covid19,epidemiology
 ******************************************************************/

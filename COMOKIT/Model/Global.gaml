@@ -1,6 +1,10 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
+* 
+* This file contains global declarations of actions and attributes, used
+* mainly for the purpose of initialising the model in experiments
+* 
 * Author: Benoit Gaudou, Damien Philippon, Patrick Taillandier
 * Tags: covid19,epidemiology
 ******************************************************************/

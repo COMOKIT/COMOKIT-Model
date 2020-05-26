@@ -1,0 +1,9 @@
+<Experiment_plan>
+	<Simulation experiment="SensitivityHeadless" finalStep="20" id="0" seed="0" sourcePath="../Experiments/Sensitivity Analysis/Sensitivity Analysis.gaml" until="world.sim_stop()">
+		<Parameters>
+			<Parameter type="INT" value="0" var="idSimulation"/>
+			<Parameter type="STRING" value="../batch_output/" var="result_folder"/>
+		</Parameters>
+		<Outputs/>
+	</Simulation>
+</Experiment_plan>

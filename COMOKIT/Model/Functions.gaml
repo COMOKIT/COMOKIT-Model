@@ -1,6 +1,10 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
+* 
+* Declares a set of global functions used throughout COMOKIT (principally 
+* by the epidemiological sub-model)
+* 
 * Author: Damien Philippon
 * Tags: covid19,epidemiology
 ******************************************************************/
@@ -13,8 +17,6 @@ model CoVid19
 import "Constants.gaml"
 import "Parameters.gaml"
 import "Global.gaml"
-
-/* Insert your model definition here */
  
 global
 {

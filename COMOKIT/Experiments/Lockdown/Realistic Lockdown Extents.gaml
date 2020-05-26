@@ -2,7 +2,26 @@
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
 * Author: Alexis Drogoul
-* Tags: covid19,epidemiology
+* 
+* Description: 
+* 	Model comparing a realistic lockdown policy with various rates of the population unconfined (for each tolerance value, one simulation is created and executed).
+* 	A realistic lockdown policy allows Individuals shopping and home activities only, except for a given set of Individuals (e.g. for essential workers).
+* 	As soon as an Individual is positive to a test, it has to stay home.
+* 	During the simulation, a given number of tests (nb_tests_) are performed at every simulation step.
+* 
+* Parameters:
+* 	- percentage_of_people_allowed: defines the rate of the population who is allowed to do its activities. 
+* 			These Individuals are always allowed to perform each of their activities.
+* 	- nb_cases: the number of Individuals positive to tests needed to decide the application of the policy (default value: 20)
+* 	- nb_days: the lockdown duration 
+* 	- number_of_tests_per_step: number of tests performed every step (default value: 100)
+* 	- only_untested_ones: set whether Individuals are tested only once (or can be tested several times). 
+* 			Tests are not 100% exact, and there are probabilities of false negatives and positives.
+* 	- only_symptomatic_ones: set whether only the symptomatic are tested (or whether all the agents can be tested)
+* 	- allowed_activities: list of the allowed activities (to all agents) during the lockdown (default value: [act_home, act_shopping])
+* 
+* Dataset: chosen by the user (through a choice popup)
+* Tags: covid19,epidemiology,lockdown,policy comparison
 ******************************************************************/
 
 model CoVid19
@@ -50,18 +69,20 @@ experiment "Unconfined Individuals" parent: "Abstract Experiment" autorun: true 
 		float simulation_seed <- rnd(10000.0);
 		list<rgb> colors <- brewer_colors("Paired");
 		int color_browser <- 0;
-		
+	
+		/*
+		 * Initialize the "realistic" lockdown policy for each of the possible percentage value
+		 * 	define_policy action is called automatically.
+		 */	
 		loop percentage over: [0.05, 0.1, 0.2, 0.3, 0.4] {
-			create simulation with: [color::(colors at int(color_browser)), dataset_path::shape_path, seed::simulation_seed] {
+			create simulation with: [color::(colors at int(color_browser)), dataset_path::shape_path, seed::simulation_seed, 
+				percentage_of_people_allowed::percentage
+			] {
 				name <-  string(int(percentage*100)) + "% of unconfined people";
-				
-				percentage_of_people_allowed <- percentage;
-				do define_policy();
 			}
 
 			color_browser <- color_browser + 1;
 		}
-
 	}
 
 	permanent {

@@ -1,6 +1,9 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
+* 
+* Declares a set of global constants used throughout COMOKIT.
+* 
 * Author: Benoit Gaudou, Patrick Taillandier
 * Tags: covid19,epidemiology
 ******************************************************************/

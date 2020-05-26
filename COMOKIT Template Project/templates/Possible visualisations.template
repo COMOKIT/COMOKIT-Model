@@ -12,11 +12,11 @@ model $TITLE$
 import "All COMOKIT.gaml"
 
 global {
-	string dataset_path <- "../datasets/Case Study/"; // Relative path to the folder containing the boundary.shp, buildings.shp, satellite.png, etc. datafiles. 		
+	string dataset_path <- "../Datasets/Case Study/"; // Relative path to the folder containing the boundary.shp, buildings.shp, satellite.png, etc. datafiles. 		
 	
 	action define_policy{  
 		// ***************************************************************************
-		// SEE Model/Entities/Authoriy.gaml for built-in functions to created policies
+		// SEE Model/Entities/Authority.gaml for built-in functions to created policies
 		// ***************************************************************************	
 		ask Authority {
 			// A policy with tests and lockdown of the whole family of positively tested case.
@@ -24,7 +24,7 @@ global {
 			FamilyOfPositiveAtHome famP <- create_family_of_positive_at_home_policy();
 			policy <- combination([d, famP]);
 
-			// Agent that monitors the activity lose (necessary to plot it) 
+			// Agent that monitors the activity lost (necessary to plot it) 
 			create ActivitiesMonitor returns: result;
 			act_monitor <- first(result);
 		}
@@ -34,7 +34,7 @@ global {
 experiment $TITLE$ parent: "Abstract Experiment" autorun: true {
 
 	permanent {
-		// Setup a chart to follows the number of infectious cases over all simulations
+		// Setup a chart to follow the number of infectious cases over the simulations
 		display "charts" toolbar: false background: #black refresh: every(24 #cycle) {
 			chart "Infected cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 12, #bold) title_visible: true {
 				loop s over: simulations {
@@ -43,7 +43,7 @@ experiment $TITLE$ parent: "Abstract Experiment" autorun: true {
 			}
 		}
 		
-		// Setupe a set of charts to  monitor the lose of activities  (requiere to have initialize an ActivitiesMonitor agent in the Authority)
+		// Setup a set of charts to  monitor the lost of activities  (requires to have initialized an ActivitiesMonitor agent in the Authority)
 		display "activities" toolbar: false background: #black refresh: every(24.0) {
 			chart "Work" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 10, #bold) position: {0,0} size: {0.5,0.5} {
 				loop s over: simulations {
@@ -71,7 +71,7 @@ experiment $TITLE$ parent: "Abstract Experiment" autorun: true {
 		}
 	}
 
-	// The block where you setup the GUIs
+	// The block where the user interface is defined
 	output {
 		// You can enable/disable part of the GUI utilities	
 		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false;

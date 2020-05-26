@@ -1,6 +1,10 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
 * Relase 1.0, May 2020. See http://comokit.org for support and updates
+* 
+* This is where all the parameters of the model are being declared and, 
+* for some, initialised with default values.
+* 
 * Author: Huynh Quang Nghi, Benoit Gaudou, Damien Philippon, Patrick Taillandier
 * Tags: covid19,epidemiology
 ******************************************************************/
