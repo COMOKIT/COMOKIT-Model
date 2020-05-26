@@ -97,8 +97,12 @@ global {
 			// Set relatives
 			ask hh { relatives <- hh - self; } 
 			
+			// Add household to collection for further process (localisation)
+			households[hh_id] <- hh;
+			
 			// Increment hh identifier
 			hh_id <- hh_id + 1; 
+			
 		}
 		
 		list<Building> avlb_homes <- copy(homes);
@@ -121,24 +125,27 @@ global {
 	
 	// Convert SP encoded age into gama model specification (float)
 	float convert_age(string input){ 
-		if (input=nil or age_map=nil or empty(age_map)) {return _get_age();} 
+		if (input=nil) {return _get_age();} 
 		input <- input contains "\"" ? input replace("\"","") : input;
-		return not(age_map contains_key input) ? _get_age() : age_map[input];
+		return age_map=nil or empty(age_map) or not(age_map contains_key input) ? 
+			int(input) : rnd(first(age_map[input]),last(age_map[input]));
 	}
 	
 	// Convert SP encoded gender into gama model specification (0=men, 1=women)
 	int convert_gender(string input){ 
-		if (input=nil or gender_map=nil or empty(gender_map)) {return _get_sex();}
+		if (input=nil) {return _get_sex();}
 		input <- input contains "\"" ? input replace("\"","") : input;
-		return not(gender_map contains_key input) ? _get_sex() : gender_map[input]; 
+		return gender_map=nil or empty(gender_map) or not(gender_map contains_key input) ? 
+			_get_sex() : gender_map[input]; 
 	}
 	
 	// Convert SP encoded employment status into gama model specification (true=unemployed,false=employed)
 	bool convert_unemployed(string input){
 		// because we don't know yet the sex then do unifrom
-		if (input=nil or unemployed_map=nil or empty(unemployed_map)) {return _get_employment_status(rnd(1));} 
+		if (input=nil) {return _get_employment_status(rnd(1));} 
 		input <- input contains "\"" ? input replace("\"","") : input;
-		return not(unemployed_map contains_key input) ? _get_employment_status(rnd(1)) : unemployed_map[input];
+		return unemployed_map=nil or empty(unemployed_map) or not(unemployed_map contains_key input) ? 
+			_get_employment_status(rnd(1)) : unemployed_map[input];
 	}
 	
 	string convert_hhid(string input){
@@ -255,7 +262,7 @@ global {
 	 */
 	 int _get_age(int minimum <- 0, int maximum <- max_age, map<int,float> dist <- nil) {
 	 	if dist=nil or empty(dist) { return rnd(minimum,maximum);}
-	 	else {return int(rnd_choice(dist));}
+	 	else {return rnd_choice(dist);}
 	 }
 	 
 	 /*

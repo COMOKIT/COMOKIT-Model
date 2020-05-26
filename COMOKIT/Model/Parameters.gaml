@@ -114,7 +114,7 @@ global {
 	int number_of_individual <- -1; // Control the number of Individual agent in the simulation from the file: if <0 or more than record in the file, takes the exact number of individual in the file
 	
 	// ------ From default Gaml generator
-	float male_ratio <- 105.0/100.0; // https://ourworldindata.org/gender-ratio
+	float male_ratio <- 21/41; // Ratio of 105 males for 100 females, see https://ourworldindata.org/gender-ratio
 	float proba_active_family <- 0.95;
 	float number_children_mean <- 2.0;
 	float number_children_std <- 0.5;
