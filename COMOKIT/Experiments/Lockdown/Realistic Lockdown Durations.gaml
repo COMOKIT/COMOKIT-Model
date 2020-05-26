@@ -68,10 +68,7 @@ experiment "Early containment" parent: "Abstract Experiment" autorun: true {
 
 	output {
 		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
-		display "Main" parent: simple_display {
-			graphics title {
-				draw world.name font: default at: {5 #px, 5 #px} color: world.color anchor: #top_left;
-			}
-		}
+
+		display "Main" parent: default_display {}
 	}
 }
