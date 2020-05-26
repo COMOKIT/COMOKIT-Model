@@ -84,7 +84,7 @@ before_deploy:
   - git push master --tags -f
 deploy:
   provider: releases
-  name: "All-In-One Archive"
+  name: "All-In-One Version Continuous"
   body: "Prerelease of COMOKIT archived with GAMA JDK Continuous and COMOKIT's default models (in Library model)"
   overwrite: true
   tag_name: latest
