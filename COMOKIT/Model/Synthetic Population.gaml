@@ -102,7 +102,7 @@ global {
 			ask hh { relatives <- hh - self; } 
 			
 			// Add household to collection for further process (localisation)
-			households[hh_id] <- hh;
+			households[string(hh_id)] <- hh;
 			
 			// Increment hh identifier
 			hh_id <- hh_id + 1; 
