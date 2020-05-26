@@ -4,68 +4,74 @@ branches:
   - master
 
 before_script:
-  - GAMA_LINUX=$(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_withJDK_Linux | cut -d ':' -f 2,3 | tr -d \")
-  - GAMA_MAC=$(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_withJDK_Mac | cut -d ':' -f 2,3 | tr -d \")
-  - GAMA_WINDOWS=$(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_withJDK_Win | cut -d ':' -f 2,3 | tr -d \")
+  - GAMA_LINUX=$(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_withJDK_Linux | cut -d ':' -f 2,3 | tr -d \"); echo $GAMA_LINUX
+  - GAMA_MAC=$(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_withJDK_Mac | cut -d ':' -f 2,3 | tr -d \"); echo $GAMA_MAC
+  - GAMA_WINDOWS=$(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/continuous | grep  continuous/GAMA1.8_Continuous_withJDK_Win | cut -d ':' -f 2,3 | tr -d \"); echo $GAMA_WINDOWS
 script:
   # Add extra nature in .project
   - sed -i -e  "s/gamaNature<\/nature>/gamaNature<\/nature>\n\t\t<nature>msi.gama.application.builtinNature<\/nature>/g" ./COMOKIT/.project
 
-  # Linux build
+  #
+  #   Linux build
+  #       =======
   - curl -o gama.zip -fSL $(echo $GAMA_LINUX)
   - unzip gama.zip -d ./GAMA
   - chmod +x ./GAMA/headless/gama-headless.sh
   # Get model jar path
-  - modelJar=`find ./GAMA -name 'msi.gama.models*'`
+  - modelJar=`find ./GAMA -name 'msi.gama.models*'`; echo $modelJar
   # Add COMOKIT in models
   - mv $modelJar ./models.zip
   - unzip ./models.zip -d ./models
   - cp -r COMOKIT ./models/models/ && cp -r COMOKIT\ Template\ Project ./models/models/
   - (cd models; zip -r --symlinks ../$modelJar .)
   # Fix GAMA plugins security
-  - jarSize=`ls -l $modelJar | cut -d " " -f5`
+  - jarSize=`ls -l $modelJar | cut -d " " -f5`; echo $jarSize
   - sed -i "/<artifact classifier='osgi.bundle' id='msi.gama.models'/,/<\/artifact>/ s/<property name.*/<property name='download.size' value='$jarSize'\/>/g;" ./GAMA/artifacts.xml
   # Prepare release
-  - zip -r --symlinks ./COMOKIT-Linux.zip ./GAMA
+  - zip -r -q --symlinks ./COMOKIT-Linux.zip ./GAMA
 
   # Clean GAMA version
   - rm -fr ./GAMA ./models.zip ./models
 
-  # Mac build
+  #
+  #   Mac build
+  #       =======
   - curl -o gama.zip -fSL $(echo $GAMA_MAC)
   - unzip gama.zip -d ./GAMA
   - chmod +x ./GAMA/Gama.app/Contents/headless/gama-headless.sh
   # Get model jar path
-  - modelJar=`find ./GAMA -name 'msi.gama.models*'`
+  - modelJar=`find ./GAMA -name 'msi.gama.models*'`; echo $modelJar
   # Add COMOKIT in models
   - mv $modelJar ./models.zip
   - unzip ./models.zip -d ./models
   - cp -r COMOKIT ./models/models/ && cp -r COMOKIT\ Template\ Project ./models/models/
   - (cd models; zip -r --symlinks ../$modelJar .)
   # Fix GAMA plugins security
-  - jarSize=`ls -l $modelJar | cut -d " " -f5`
+  - jarSize=`ls -l $modelJar | cut -d " " -f5`; echo $jarSize
   - sed -i "/<artifact classifier='osgi.bundle' id='msi.gama.models'/,/<\/artifact>/ s/<property name.*/<property name='download.size' value='$jarSize'\/>/g;" ./GAMA/Gama.app/Contents/Eclipse/artifacts.xml
   # Prepare release
-  - zip -r --symlinks ./COMOKIT-Mac.zip ./GAMA/Gama.app
+  - zip -r -q --symlinks ./COMOKIT-Mac.zip ./GAMA/Gama.app
 
   # Clean GAMA version
   - rm -fr ./GAMA ./models.zip ./models
 
-  # Windows build
+  #
+  #   Windows build
+  #       =======
   - curl -o gama.zip -fSL $(echo $GAMA_WINDOWS)
   - unzip gama.zip -d ./GAMA
   # Get model jar path
-  - modelJar=`find ./GAMA -name 'msi.gama.models*'`
+  - modelJar=`find ./GAMA -name 'msi.gama.models*'`; echo $modelJar
   # Add COMOKIT in models
   - mv $modelJar ./models.zip
   - unzip ./models.zip -d ./models
   - cp -r COMOKIT ./models/models/ && cp -r COMOKIT\ Template\ Project ./models/models/
   - (cd models; zip -r --symlinks ../$modelJar .)
   # Fix GAMA plugins security
-  - jarSize=`ls -l $modelJar | cut -d " " -f5`
+  - jarSize=`ls -l $modelJar | cut -d " " -f5`; echo $jarSize
   - sed -i "/<artifact classifier='osgi.bundle' id='msi.gama.models'/,/<\/artifact>/ s/<property name.*/<property name='download.size' value='$jarSize'\/>/g;" ./GAMA/artifacts.xml
   # Prepare release
-  - zip -r --symlinks ./COMOKIT-Win.zip ./GAMA
+  - zip -r -q --symlinks ./COMOKIT-Win.zip ./GAMA
 
 before_deploy:
   # Remove latest release
