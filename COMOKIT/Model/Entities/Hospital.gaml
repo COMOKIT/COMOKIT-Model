@@ -27,6 +27,7 @@ global{
 	//Action to create a hospital TO CHANGE WHEN DATA ARE AVAILABLE (which building to chose, what capacity)
 	action create_hospital{
 		create Hospital number:number_hospital{
+			type <- "Hospital";
 			capacity_hospitalisation <- capacity_hospitalisation_per_hospital;
 			capacity_ICU <- capacity_ICU_per_hospital;
 		}

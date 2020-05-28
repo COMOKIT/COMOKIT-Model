@@ -154,14 +154,11 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	{
 		//Add the new case to the total number of infected (not mandatorily known)
 		total_number_of_infected <- total_number_of_infected +1;
+		
 		//Add the infection to the infections having been caused in the building
 		if(building_infections.keys contains(current_place.type))
 		{
 			building_infections[current_place.type] <- building_infections[current_place.type] +1;
-		}
-		else
-		{
-			add 1 to: building_infections at: current_place.type;
 		}
 		//Add the infection to the infections of the same age
 		if(total_incidence_age.keys contains(self.age))

@@ -50,6 +50,9 @@ global {
 		{
 			add 0 at: aBuilding_Type to: building_infections;
 		}
+		//THIS SHOULD BE REMOVED ONCE WE FINALLY HAVE HOSPITAL IN SHAPEFILE
+		add 0 at: "Hospital" to: building_infections;
+		add 0 at: "Outside" to: building_infections;
 		do console_output("building and boundary : done");
 		create outside;
 		the_outside <- first(outside);
