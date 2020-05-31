@@ -44,6 +44,8 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	int sex; //0 M 1 F
 	//employement status of the individual
 	bool is_unemployed; 
+	//COMOKIT identifier
+	string individual_id;
 	
 	//Bool to consider only once the death
 	bool is_counted_dead <- false;

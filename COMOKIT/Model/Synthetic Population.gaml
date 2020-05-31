@@ -46,15 +46,19 @@ global {
 		
 		map<string,list<Individual>> households <- [];
 		
+		if not(csv_mappers=nil) { do read_mapping(); }
+		
 		create Individual from:csv_population number: (number_of_individual <= 0 ? length(csv_population) : number_of_individual)
 		with:[
 			age::convert_age(get(age_var)),
 			sex::convert_gender(get(gender_var)),
 			is_unemployed::convert_unemployed(get(unemployed_var)),
-			household_id::convert_hhid(get(householdID)) 
+			household_id::convert_hhid(get(householdID)),
+			individual_id::get(individualID) 
 		]{ 
 			if households contains_key household_id { households[household_id] <+ self; }
 			else { households[household_id] <- [self]; }
+			if individual_id=nil or empty(individual_id) {individual_id <- name;}
 		}
 		
 		list<Individual> hh_empty <- Individual where (each.household_id = nil);
@@ -152,8 +156,56 @@ global {
 			_get_employment_status(rnd(1)) : unemployed_map[input];
 	}
 	
+	// Convert household ID from file to string 
 	string convert_hhid(string input){
 		return not(input=nil) and input contains "\"" ? input replace("\"","") : input;
+	}
+	
+	/*
+	 * Read the synthetic entity variable mapping from parameter file
+	 */
+	action read_mapping {
+		csv_parameters <- csv_file(var_mapper_parameters,",",true);
+		matrix data <- matrix(csv_parameters);
+		list<list> data_rows <- rows_list(data);
+		//Loading the different rows number for the parameters in the file
+		loop row over:data_rows{
+			string var <- first(row);
+			switch var {
+				match "age" { age_var <- row[1]; age_map <- map<string, list<float>>(read_var_map(row)); }
+				match "sex" { gender_var <- row[1]; gender_map <- map<string, int>(read_var_map(row)); }
+				match "is_unemployed" { unemployed_var <- row[1]; unemployed_map <- map<string, bool>(read_var_map(row)); }
+				match "household_id" { householdID <- row[1]; }
+				match "individual_id" { individualID <- row[1]; }
+				default {error "Failed to map variable "+var+" from Synthetic Entity Parameters.csv
+						\n Should be in "+sample(sp_var_names);}
+			}
+		}
+	}
+	
+	/*
+	 * Transpose value and map pairs into a map to convert from file to COMOKIT variable convention
+	 */
+	map read_var_map(list var_row) {
+		int idx <- 2;
+		switch first(var_row) {
+			match "age" {
+				map<string,list<float>> res <- [];
+				loop while:idx < length(var_row) { res[string(var_row[idx])] <- list<float>(var_row[idx+1]); idx <- idx+2; }
+				return res;
+			}
+			match "sex" {
+				map<string,int> res <- [];
+				loop while:idx < length(var_row) { res[string(var_row[idx])] <- int(var_row[idx+1]); idx <- idx+2; }
+				return res;
+			}
+			match "is_unemployed" {
+				map<string,bool> res <- [];
+				loop while:idx < length(var_row) { res[string(var_row[idx])] <- bool(var_row[idx+1]); idx <- idx+2; }
+				return res;
+			} 
+			default {error "unknown variable "+first(var_row)+" to map synthetic entity attribute with";} 
+		}
 	}
 	
 	// ------------------------------------------- //

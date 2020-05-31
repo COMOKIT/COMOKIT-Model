@@ -105,16 +105,19 @@ global {
 	// ------ From file
 	string var_mapper_parameters <- experiment.project_path+"Parameters/Synthetic Entity Parameters.csv"; //File for the parameters
 	file csv_mappers <- file_exists(var_mapper_parameters)?csv_file(var_mapper_parameters):nil;
-	// **s
+	list sp_var_names <- ["age","sex","is_unemployed","household_id","individual_id"];
+	// **
 	string separator <- ";";
-	bool header <- true; // If there is a header or not (must be true for now)
-	string age_var <- "AGE"; // The variable name for "age" Individual attribute | WARNING : IPUMS name
-	map<string,float> age_map;  // The mapping of value for gama to translate, if nill then direct cast to int (Default behavior in Synthetic Population.gaml)
-	string gender_var <- "SEX"; // The variable name for "sex" Individual attribute | WARNING : IPUMS name
-	map<string,int> gender_map <- ["1"::0,"2"::1,"male"::0,"female"::1]; // The mapping of value for gama to translate, if nill then cast to int
-	string unemployed_var <- "EMPSTAT"; // The variable that represent employment status | WARNING : IPUMS name
-	map<string,bool> unemployed_map <- ["1"::false,"2"::true,"3"::true]; // 1 = employed, 2 = unemployed, 3 = inactive | WARNING : IPUMS name
-	string householdID <- "parentId"; // The variable for household identification
+	bool header <- true; // If there is a header or not
+	string age_var; // The variable name for "age" Individual attribute 
+	map<string,list<float>> age_map;  // The mapping of value for gama to translate, if nill then direct cast to int 
+	string gender_var; // The variable name for "sex" Individual attribute 
+	map<string,int> gender_map; // The mapping of value for gama to translate sex into 0=male 1=female, if nill then cast to int
+	string unemployed_var; // The variable that represent employment status 
+	map<string,bool> unemployed_map; // false = employed, true = unemployed
+	string householdID; // The variable for household identification
+	string individualID <- nil; // The variable for individual identification
+	// **
 	int number_of_individual <- -1; // Control the number of Individual agent in the simulation from the file: if <0 or more than record in the file, takes the exact number of individual in the file
 	
 	// ------ From default Gaml generator
