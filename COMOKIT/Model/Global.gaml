@@ -252,6 +252,18 @@ global {
 			list<string> list_value;
 			switch aParameter
 			{
+				match epidemiological_transmission_human{
+					allow_transmission_human <- allow_transmission_human;
+				}
+				match epidemiological_transmission_building{
+					allow_transmission_building <- allow_transmission_building;
+				}
+				match epidemiological_basic_viral_decrease{
+					basic_viral_decrease <- basic_viral_decrease;
+				}
+				match epidemiological_successful_contact_rate_building{
+					successful_contact_rate_building <- successful_contact_rate_building;
+				}
 				match epidemiological_successful_contact_rate_human{
 					list_value <- list<string>(epidemiological_fixed,init_all_ages_successful_contact_rate_human);
 				}
