@@ -20,7 +20,7 @@
 model CoVid19
 
 import "../../Model/Global.gaml"
-import "../Abstract Experiment.gaml"
+import "../Abstract Batch Experiment.gaml"
 
 experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
@@ -83,4 +83,11 @@ experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
 		display "Main" parent: default_display {}
 	}
+}
+
+experiment HeadlessComparison parent: "Abstract Headless"  {
+	parameter "Allow Transmission Building" var: allow_transmission_building init: true; 
+	
+	parameter "Basic Viral Release" var: basic_viral_release init: 0.01 min: 0.01 max: 0.1 step: 0.01; // if: [allow_transmission_building,true]
+	parameter "Basic Viral Decrease" var: basic_viral_decrease init: 0.02 min: 0.02 max: 0.2 step: 0.02; // if: [allow_transmission_building,true]
 }
