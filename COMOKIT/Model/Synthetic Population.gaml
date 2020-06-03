@@ -136,8 +136,8 @@ global {
 	// Convert SP encoded age into gama model specification (float)
 	float convert_age(string input){ 
 		if not(input=nil) {
-		input <- input contains qualifier ? input replace(qualifier,"") : input;
-			if not(age_map=nil) {
+			input <- input contains qualifier ? input replace(qualifier,"") : input;
+			if not(age_map=nil) and not(empty(age_map)) {
 				if age_map contains input { return rnd(first(age_map[input]),last(age_map[input])); }
 			} else {
 				if int(input) is int { return int(input); }
@@ -150,7 +150,7 @@ global {
 	int convert_gender(string input){ 
 		if not(input=nil) {
 			input <- input contains qualifier ? input replace(qualifier,"") : input;
-			if not(gender_map=nil) {
+			if not(gender_map=nil) and not(empty(age_map)) {
 				if (gender_map contains EMPTY and empty(input)) { return gender_map[EMPTY]; }
 				else if (gender_map contains input) { return gender_map[input]; }
 				else if (gender_map contains OTHER) { return gender_map[OTHER]; }
@@ -165,7 +165,7 @@ global {
 	bool convert_unemployed(string input){
 		if not(input=nil) {
 			input <- input contains qualifier ? input replace(qualifier,"") : input;
-			if not(unemployed_map=nil) {
+			if not(unemployed_map=nil) and not(empty(age_map)) {
 				if(unemployed_map contains EMPTY and empty(input)) { return unemployed_map[EMPTY]; }
 				else if(unemployed_map contains input) { return unemployed_map[input]; }
 				else if(unemployed_map contains OTHER) { return unemployed_map[OTHER]; }
@@ -209,16 +209,19 @@ global {
 			match "age" {
 				map<string,list<float>> res <- [];
 				loop while:idx < length(var_row) { res[string(var_row[idx])] <- list<float>(var_row[idx+1]); idx <- idx+2; }
+				if length(res)=1 and res contains_key "" {return nil;}
 				return res;
 			}
 			match "sex" {
 				map<string,int> res <- [];
 				loop while:idx < length(var_row) { res[string(var_row[idx])] <- int(var_row[idx+1]); idx <- idx+2; }
+				if length(res)=1 and res contains_key "" {return nil;}
 				return res;
 			}
 			match "is_unemployed" {
 				map<string,bool> res <- [];
 				loop while:idx < length(var_row) { res[string(var_row[idx])] <- bool(var_row[idx+1]); idx <- idx+2; }
+				if length(res)=1 and res contains_key "" {return nil;}
 				return res;
 			} 
 			default {error "unknown variable "+first(var_row)+" to map synthetic entity attribute with";} 

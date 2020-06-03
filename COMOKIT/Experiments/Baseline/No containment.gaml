@@ -31,5 +31,10 @@ experiment "No Containment" parent: "Abstract Experiment" autorun: true {
 		
 		display "Main" parent: default_display {}
 		display "Plot" parent: states_evolution_chart {}	
+		
+		display "Population age" parent: demographics_age { }
+		display "Population gender" parent: demographics_sex { }
+		display "Population employment status" parent: demographics_employed { }
+		display "Household size" parent: demographics_household_size { }
 	}
 }
