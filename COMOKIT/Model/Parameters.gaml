@@ -18,7 +18,7 @@ import "Constants.gaml"
 global {
 	
 	// Parameter folder path
-	string parameter_folder_path <- experiment.project_path+"Parameters";
+	string parameters_folder_path <- experiment.project_path+"Parameters";
 	// The case study name and dataset path variable to be used in models
 	string case_study_folder_name; // The case study folder
 	string datasets_folder_path; // The path from root project to the data set folder (can contains several case studies)
@@ -53,7 +53,7 @@ global {
 	float nb_step_for_one_day <- #day/step; //Used to define the different period used in the model
 	
 	bool load_epidemiological_parameter_from_file <- true; //Allowing parameters being loaded from a csv file 
-	string epidemiological_parameters <- (last(parameter_folder_path)="/"?parameter_folder_path:parameter_folder_path+"/")
+	string epidemiological_parameters <- (last(parameters_folder_path)="/"?parameters_folder_path:parameters_folder_path+"/")
 		+"Epidemiological Parameters.csv"; //File for the parameters
 	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
 	
@@ -157,7 +157,7 @@ global {
 
 	
 	//Acvitity parameters 
-	string building_type_per_activity_parameters <- (last(parameter_folder_path)="/"?parameter_folder_path:parameter_folder_path+"/")
+	string building_type_per_activity_parameters <- (last(parameters_folder_path)="/"?parameters_folder_path:parameters_folder_path+"/")
 		+"/Building type per activity type.csv"; //File for the parameters
 	
 	string choice_of_target_mode <- gravity among: ["random", "gravity","closest"]; // model used for the choice of building for an activity 
