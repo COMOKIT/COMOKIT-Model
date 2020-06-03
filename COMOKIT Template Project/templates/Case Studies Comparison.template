@@ -12,6 +12,12 @@ model $TITLE$
 import "All COMOKIT.gaml"
 
 global {
+	
+	// Parameter file folder
+	// by default parameter files are placed in Parameters/ folder of COMOKIT
+	// if you decide to redefine the path to that folder identify the place COMOKIT can find your parameter files
+	string parameter_folder_path <- "../../COMOKIT/Parameters/";
+	  
 	string POLICY_NAME <- "your_policy"; // Not mandatory but will be used in GUI
 }
 

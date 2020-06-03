@@ -17,6 +17,8 @@ import "Constants.gaml"
 
 global {
 	
+	// Parameter folder path
+	string parameter_folder_path <- experiment.project_path+"Parameters";
 	// The case study name and dataset path variable to be used in models
 	string case_study_folder_name; // The case study folder
 	string datasets_folder_path; // The path from root project to the data set folder (can contains several case studies)
@@ -32,7 +34,8 @@ global {
 	file shp_buildings <- file_exists(dataset_path+"buildings.shp") ? shape_file(dataset_path+"buildings.shp"):nil;
 
 	//Population data 
-	csv_file csv_population <- file_exists(dataset_path+"population.csv") ? csv_file(dataset_path+"population.csv",separator,header):nil;
+	csv_file csv_population <- file_exists(dataset_path+"population.csv") ? csv_file(dataset_path+"population.csv",separator,qualifier,header):nil;
+	csv_file csv_population_attribute_mappers <- file_exists(dataset_path+"Population Records.csv")?csv_file(dataset_path+"Population Records.csv",",",true):nil;
 	csv_file csv_parameter_population <- file_exists(dataset_path+"Population parameter.csv") ? csv_file(dataset_path+"Population parameter.csv",",",true):nil;
 	csv_file csv_parameter_agenda <- file_exists(dataset_path+"Agenda parameter.csv") ? csv_file(dataset_path+"Agenda parameter.csv",",",true):nil;
 	csv_file csv_activity_weights <- file_exists(dataset_path+"Activity weights.csv") ? csv_file(dataset_path+"Activity weights.csv",",",string, false):nil;
@@ -50,7 +53,8 @@ global {
 	float nb_step_for_one_day <- #day/step; //Used to define the different period used in the model
 	
 	bool load_epidemiological_parameter_from_file <- true; //Allowing parameters being loaded from a csv file 
-	string epidemiological_parameters <- experiment.project_path+"Parameters/Epidemiological Parameters.csv"; //File for the parameters
+	string epidemiological_parameters <- (last(parameter_folder_path)="/"?parameter_folder_path:parameter_folder_path+"/")
+		+"Epidemiological Parameters.csv"; //File for the parameters
 	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
 	
 	bool allow_transmission_human <- true; //Allowing human to human transmission
@@ -103,12 +107,13 @@ global {
 	//Synthetic population parameters
 	
 	// ------ From file
-	string var_mapper_parameters <- experiment.project_path+"Parameters/Synthetic Entity Parameters.csv"; //File for the parameters
-	file csv_mappers <- file_exists(var_mapper_parameters)?csv_file(var_mapper_parameters):nil;
-	list sp_var_names <- ["age","sex","is_unemployed","household_id","individual_id"];
+	string OTHER <- "OTHER" const:true;
+	string EMPTY <- "EMPTY" const:true;
 	// **
-	string separator <- ";";
+	string separator <- ";"; // File separator for synthetic population micro-data
+	string qualifier <- "\""; // The default text qualifier
 	bool header <- true; // If there is a header or not
+	
 	string age_var; // The variable name for "age" Individual attribute 
 	map<string,list<float>> age_map;  // The mapping of value for gama to translate, if nill then direct cast to int 
 	string gender_var; // The variable name for "sex" Individual attribute 
@@ -152,7 +157,8 @@ global {
 
 	
 	//Acvitity parameters 
-	string building_type_per_activity_parameters <- experiment.project_path+"Parameters/Building type per activity type.csv"; //File for the parameters
+	string building_type_per_activity_parameters <- (last(parameter_folder_path)="/"?parameter_folder_path:parameter_folder_path+"/")
+		+"/Building type per activity type.csv"; //File for the parameters
 	
 	string choice_of_target_mode <- gravity among: ["random", "gravity","closest"]; // model used for the choice of building for an activity 
 	int nb_candidates <- 4; // number of building considered for the choice of building for a particular activity
