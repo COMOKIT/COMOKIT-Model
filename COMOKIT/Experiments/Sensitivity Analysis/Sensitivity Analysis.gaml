@@ -49,4 +49,11 @@ experiment Sensitivity parent: "Abstract Batch"
 	}
 }
 
-experiment SensitivityHeadless parent: "Abstract Headless"  {}
+experiment SensitivityHeadless parent: "Abstract Headless"  {
+	parameter "Allow Transmission Building" var: allow_transmission_building init: true; 
+	
+	parameter "Basic Viral Release" var: basic_viral_release init: 0.01 min: 0.01 max: 0.1 step: 0.01; // if: [allow_transmission_building,true]
+	parameter "Basic Viral Decrease" var: basic_viral_decrease init: 0.02 min: 0.02 max: 0.2 step: 0.02; // if: [allow_transmission_building,true]
+	
+	parameter "Init All Ages Successful Contact Rate Human" var: init_all_ages_successful_contact_rate_human init: 0.01529959 among: [0.01529959, 0.02236774, 0.02993250, 0.03034067, 0.03319786, 0.034014,  0.03673534, 0.04043608, 0.04854507, 0.07120533];
+}
