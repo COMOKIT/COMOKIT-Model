@@ -22,6 +22,11 @@ model CoVid19
 import "../../Model/Global.gaml"
 import "../Abstract Batch Experiment.gaml"
 
+global{
+	
+	list<string> force_parameters <- list(epidemiological_transmission_building,epidemiological_basic_viral_decrease,epidemiological_basic_viral_release);
+}
+
 experiment "Comparison" parent: "Abstract Experiment" autorun: true {
 
 	action _init_ {

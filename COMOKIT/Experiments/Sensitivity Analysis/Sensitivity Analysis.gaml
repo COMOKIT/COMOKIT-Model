@@ -23,6 +23,7 @@ import "../Abstract Batch Experiment.gaml"
 
 global {
 	int cycle_limit <- 5000 const:true; 
+	list<string> force_parameters <- list(epidemiological_successful_contact_rate_human);
 }
 
 experiment Sensitivity parent: "Abstract Batch" 
