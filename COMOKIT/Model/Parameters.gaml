@@ -158,7 +158,7 @@ global {
 	
 	//Acvitity parameters 
 	string building_type_per_activity_parameters <- (last(parameters_folder_path)="/"?parameters_folder_path:parameters_folder_path+"/")
-		+"/Building type per activity type.csv"; //File for the parameters
+		+"Building type per activity type.csv"; //File for the parameters
 	
 	string choice_of_target_mode <- gravity among: ["random", "gravity","closest"]; // model used for the choice of building for an activity 
 	int nb_candidates <- 4; // number of building considered for the choice of building for a particular activity
