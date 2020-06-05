@@ -30,9 +30,11 @@ global {
 	 * Gloabl three steps initialization of a any simulation
 	 */
 	init {
+		do before_init;
 		do init_epidemiological_parameters;
 		do global_init;
 		do create_authority;
+		do after_init;
 	}
 
 }

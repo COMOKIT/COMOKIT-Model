@@ -336,6 +336,23 @@ global {
 		}
 	}
 	
+	// ------------- //
+	// EMPTY METHODS // 
+	
+	/*
+	 * Add actions to be triggered before COMOKIT initializes
+	 */
+	action before_init {}
+	
+	/*
+	 * Add actions after COMOKIT have been initialized but before starting simulation
+	 */
+	action after_init {}
+	
+	// ----- //
+	// DEBUG //
+	// ----- //
+	
 	// Global debug mode to print in console all messages called from #console_output()
 	bool DEBUG <- false;
 	// the available level of debug among debug, error and warning (default = debug)
