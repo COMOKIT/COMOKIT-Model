@@ -138,7 +138,7 @@ global {
 		if not(input=nil) {
 			input <- input contains qualifier ? input replace(qualifier,"") : input;
 			if not(age_map=nil) and not(empty(age_map)) {
-				if age_map contains input { return rnd(first(age_map[input]),last(age_map[input])); }
+				if age_map contains_key input { return rnd(first(age_map[input]),last(age_map[input])); }
 			} else {
 				if int(input) is int { return int(input); }
 			}
@@ -150,13 +150,11 @@ global {
 	int convert_gender(string input){ 
 		if not(input=nil) {
 			input <- input contains qualifier ? input replace(qualifier,"") : input;
-			if not(gender_map=nil) and not(empty(age_map)) {
-				if (gender_map contains EMPTY and empty(input)) { return gender_map[EMPTY]; }
-				else if (gender_map contains input) { return gender_map[input]; }
-				else if (gender_map contains OTHER) { return gender_map[OTHER]; }
-			} else {
-				if int(input) = 0 or int(input) = 1 {return int(input);}
-			}
+			if not(gender_map=nil) and not(empty(gender_map)) {
+				if (gender_map contains_key EMPTY and empty(input)) { return gender_map[EMPTY]; }
+				else if (gender_map contains_key input) { return gender_map[input]; }
+				else if (gender_map contains_key OTHER) { return gender_map[OTHER]; }
+			} else if int(input) = 0 or int(input) = 1 {return int(input);}
 		}
 		return _get_sex();
 	}
@@ -165,10 +163,10 @@ global {
 	bool convert_unemployed(string input){
 		if not(input=nil) {
 			input <- input contains qualifier ? input replace(qualifier,"") : input;
-			if not(unemployed_map=nil) and not(empty(age_map)) {
-				if(unemployed_map contains EMPTY and empty(input)) { return unemployed_map[EMPTY]; }
-				else if(unemployed_map contains input) { return unemployed_map[input]; }
-				else if(unemployed_map contains OTHER) { return unemployed_map[OTHER]; }
+			if not(unemployed_map=nil) and not(empty(unemployed_map)) {
+				if(unemployed_map contains_key EMPTY and empty(input)) { return unemployed_map[EMPTY]; }
+				else if(unemployed_map contains_key input) { return unemployed_map[input]; }
+				else if(unemployed_map contains_key OTHER) { return unemployed_map[OTHER]; }
 			}
 		}
 		return _get_employment_status(rnd(1));	// because we don't know yet the sex then do unifrom
