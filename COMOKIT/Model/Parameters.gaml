@@ -57,9 +57,13 @@ global {
 		+"Epidemiological Parameters.csv"; //File for the parameters
 	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
 	
+	//Dynamics
 	bool allow_transmission_human <- true; //Allowing human to human transmission
 	bool allow_transmission_building <- true; //Allowing environment contamination and infection
+	bool allow_viral_individual_factor <- false; //Allowing individual effects on the beta and viral release
 	
+	
+	//Environmental contamination
 	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period
 	float reduction_coeff_all_buildings_inhabitants <- 0.01; //reduction of the contact rate for individuals belonging to different households leaving in the same building
 	float reduction_coeff_all_buildings_individuals <- 0.05; //reduction of the contact rate for individuals belonging to different households leaving in the same building
@@ -102,6 +106,11 @@ global {
 	string init_all_ages_distribution_type_stay_ICU <- "Lognormal";//Type of distribution of the time to stay in ICU
 	float init_all_ages_parameter_1_stay_ICU <- 3.034953;//First parameter of the time to stay in ICU
 	float init_all_ages_parameter_2_stay_ICU <- 0.34;//Second parameter of the time to stay in ICU
+	string init_all_ages_distribution_viral_individual_factor <- "Lognormal"; //Type of distribution of the individual factor for beta and viral release
+	float init_all_ages_parameter_1_viral_individual_factor <- -0.125; //First parameter of distribution of the individual factor for beta and viral release
+	float init_all_ages_parameter_2_viral_individual_factor <- 0.5; //Second parameter of distribution of the individual factor for beta and viral release
+	int ICU_capacity<-17; //Capacity of ICU for one hospital (from file)
+	int hospitalisation_capacity <- 200; //Capacity of hospitalisation admission for one hospital (assumed)
 	list<string> force_parameters;
 	
 	//Synthetic population parameters

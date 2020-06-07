@@ -97,5 +97,7 @@ global {
 	string epidemiological_proportion_death_symptomatic <- "Proportion_death_symptomatic";
 	string epidemiological_infectious_period_symptomatic <- "Infectious_period_symptomatic";
 	string epidemiological_infectious_period_asymptomatic <- "Infectious_period_asymptomatic";
+	string epidemiological_allow_viral_individual_factor <- "Allow_viral_individual_factor";
+	string epidemiological_viral_individual_factor <- "Viral_individual_factor";
 	
 }

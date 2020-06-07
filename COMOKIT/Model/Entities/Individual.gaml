@@ -149,6 +149,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		basic_viral_release <- world.get_basic_viral_release(age);
 		contact_rate <- world.get_contact_rate_human(age);
 		proba_wearing_mask <- world.get_proba_wearing_mask(age);
+		viral_factor <- world.get_viral_factor(age);
 	}
 	
 	//Action to call to define a new case, obtaining different time to key events
@@ -259,7 +260,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	reflex infect_others when: not is_outside and is_infectious
 	{
 		//Computation of the reduction of the transmission when being asymptomatic/presymptomatic and/or wearing mask
-		float reduction_factor <- 1.0;
+		float reduction_factor <- viral_factor;
 		if(is_asymptomatic)
 		{
 			reduction_factor <- reduction_factor * factor_contact_rate_asymptomatic;

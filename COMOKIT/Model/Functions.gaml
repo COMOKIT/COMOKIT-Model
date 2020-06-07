@@ -86,6 +86,21 @@ global
 		}
 	}
 	
+	
+	//Basic viral release in the environment of an infectious individual of a given age MUST BE A DISTRIBUTION
+	float get_viral_factor(int age)
+	{
+		if(allow_viral_individual_factor=false)
+		{
+			//No difference between individuals
+			return 1.0;
+		}
+		else
+		{
+			return get_rnd_from_distribution(map_epidemiological_parameters[age][epidemiological_viral_individual_factor][0],float(map_epidemiological_parameters[age][epidemiological_viral_individual_factor][1]),float(map_epidemiological_parameters[age][epidemiological_viral_individual_factor][2]));
+		}
+	}
+	
 	//Time between exposure and symptom onset of an individual of a given age
 	float get_incubation_period_symptomatic(int age)
 	{
