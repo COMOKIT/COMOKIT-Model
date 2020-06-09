@@ -57,6 +57,8 @@ species BiologicalEntity control:fsm{
 	int last_test <- 0;
 	//Age of the entity
 	int age;
+	//Factor for the beta and the basic viral release
+	float viral_factor;
 	//Factor of the contact rate for asymptomatic and presymptomatic individuals (might be age-dependent, hence its presence here)
 	float factor_contact_rate_asymptomatic;
 	//Basic viral release of the agent (might be age-dependent, hence its presence here)
@@ -75,6 +77,7 @@ species BiologicalEntity control:fsm{
 		factor_contact_rate_asymptomatic <- world.get_factor_contact_rate_asymptomatic(age);
 		basic_viral_release <- world.get_basic_viral_release(age);
 		contact_rate <- world.get_contact_rate_human(age);
+		viral_factor <- world.get_viral_factor(age);
 	}
 	
 	//Action to call when performing a test on a individual

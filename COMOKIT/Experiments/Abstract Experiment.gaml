@@ -30,9 +30,11 @@ global {
 	 * Gloabl three steps initialization of a any simulation
 	 */
 	init {
+		do before_init;
 		do init_epidemiological_parameters;
 		do global_init;
 		do create_authority;
+		do after_init;
 	}
 
 }
@@ -158,6 +160,36 @@ experiment "Abstract Experiment" virtual: true {
 			}
 
 		}
+		
+		// DEMOGRAPHICS
+		
+		display "demographics_age" virtual: true {
+			chart "Ages" type: histogram {
+				loop i from: 0 to: max_age { data ""+i value: Individual count(each.age = i); }
+			}
+		}
+		
+		display "demographics_sex" virtual: true {
+			chart "sex" type: pie {
+				data "Male" value: Individual count (each.sex=0);
+				data "Female" value: Individual count (each.sex=1);
+			}
+		}
+		
+		display "demographics_employed" virtual: true {
+			chart "unemployed" type: pie {
+				data "Employed" value: Individual count not(each.is_unemployed);
+				data "Unemployed" value: Individual count each.is_unemployed;
+			}
+		}
+		
+		display "demographics_household_size" virtual: true {
+			chart "Household size" type:histogram {
+				loop i from: 0 to:max(Individual collect (length(each.relatives))) { 
+					data string(i) value: Individual count (length(each.relatives)=i);
+				}
+			}
+		}	 
 
 	}
 	

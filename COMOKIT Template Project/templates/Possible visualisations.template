@@ -12,6 +12,12 @@ model $TITLE$
 import "All COMOKIT.gaml"
 
 global {
+
+	// Parameter file folder
+	// by default parameter files are placed in Parameters/ folder of COMOKIT
+	// if you decide to redefine the path to that folder identify the place COMOKIT can find your parameter files
+	string parameter_folder_path <- "../../COMOKIT/Parameters/";
+
 	string dataset_path <- "../Datasets/Case Study/"; // Relative path to the folder containing the boundary.shp, buildings.shp, satellite.png, etc. datafiles. 		
 	
 	action define_policy{  

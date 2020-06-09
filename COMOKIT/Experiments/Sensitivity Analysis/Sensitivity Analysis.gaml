@@ -23,6 +23,7 @@ import "../Abstract Batch Experiment.gaml"
 
 global {
 	int cycle_limit <- 5000 const:true; 
+	list<string> force_parameters <- list(epidemiological_successful_contact_rate_human);
 }
 
 experiment Sensitivity parent: "Abstract Batch" 
@@ -50,3 +51,8 @@ experiment Sensitivity parent: "Abstract Batch"
 }
 
 experiment SensitivityHeadless parent: "Abstract Headless"  {}
+
+
+experiment ContactRateHumanHeadless parent: "Abstract Headless"  {
+	parameter "Init All Ages Successful Contact Rate Human" var: init_all_ages_successful_contact_rate_human init: 0.01529959 among: [0.01529959, 0.02236774, 0.02993250, 0.03034067, 0.03319786, 0.034014,  0.03673534, 0.04043608, 0.04854507, 0.07120533];
+}

@@ -17,6 +17,8 @@ import "Constants.gaml"
 
 global {
 	
+	// Parameter folder path
+	string parameters_folder_path <- experiment.project_path+"Parameters";
 	// The case study name and dataset path variable to be used in models
 	string case_study_folder_name; // The case study folder
 	string datasets_folder_path; // The path from root project to the data set folder (can contains several case studies)
@@ -32,7 +34,8 @@ global {
 	file shp_buildings <- file_exists(dataset_path+"buildings.shp") ? shape_file(dataset_path+"buildings.shp"):nil;
 
 	//Population data 
-	csv_file csv_population <- file_exists(dataset_path+"population.csv") ? csv_file(dataset_path+"population.csv",separator,header):nil;
+	csv_file csv_population <- file_exists(dataset_path+"population.csv") ? csv_file(dataset_path+"population.csv",separator,qualifier,header):nil;
+	csv_file csv_population_attribute_mappers <- file_exists(dataset_path+"Population Records.csv")?csv_file(dataset_path+"Population Records.csv",",",true):nil;
 	csv_file csv_parameter_population <- file_exists(dataset_path+"Population parameter.csv") ? csv_file(dataset_path+"Population parameter.csv",",",true):nil;
 	csv_file csv_parameter_agenda <- file_exists(dataset_path+"Agenda parameter.csv") ? csv_file(dataset_path+"Agenda parameter.csv",",",true):nil;
 	csv_file csv_activity_weights <- file_exists(dataset_path+"Activity weights.csv") ? csv_file(dataset_path+"Activity weights.csv",",",string, false):nil;
@@ -50,12 +53,17 @@ global {
 	float nb_step_for_one_day <- #day/step; //Used to define the different period used in the model
 	
 	bool load_epidemiological_parameter_from_file <- true; //Allowing parameters being loaded from a csv file 
-	string epidemiological_parameters <- experiment.project_path+"Parameters/Epidemiological Parameters.csv"; //File for the parameters
+	string epidemiological_parameters <- (last(parameters_folder_path)="/"?parameters_folder_path:parameters_folder_path+"/")
+		+"Epidemiological Parameters.csv"; //File for the parameters
 	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
 	
+	//Dynamics
 	bool allow_transmission_human <- true; //Allowing human to human transmission
 	bool allow_transmission_building <- true; //Allowing environment contamination and infection
+	bool allow_viral_individual_factor <- false; //Allowing individual effects on the beta and viral release
 	
+	
+	//Environmental contamination
 	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period
 	float reduction_coeff_all_buildings_inhabitants <- 0.01; //reduction of the contact rate for individuals belonging to different households leaving in the same building
 	float reduction_coeff_all_buildings_individuals <- 0.05; //reduction of the contact rate for individuals belonging to different households leaving in the same building
@@ -98,23 +106,32 @@ global {
 	string init_all_ages_distribution_type_stay_ICU <- "Lognormal";//Type of distribution of the time to stay in ICU
 	float init_all_ages_parameter_1_stay_ICU <- 3.034953;//First parameter of the time to stay in ICU
 	float init_all_ages_parameter_2_stay_ICU <- 0.34;//Second parameter of the time to stay in ICU
+	string init_all_ages_distribution_viral_individual_factor <- "Lognormal"; //Type of distribution of the individual factor for beta and viral release
+	float init_all_ages_parameter_1_viral_individual_factor <- -0.125; //First parameter of distribution of the individual factor for beta and viral release
+	float init_all_ages_parameter_2_viral_individual_factor <- 0.5; //Second parameter of distribution of the individual factor for beta and viral release
+	int ICU_capacity<-17; //Capacity of ICU for one hospital (from file)
+	int hospitalisation_capacity <- 200; //Capacity of hospitalisation admission for one hospital (assumed)
 	list<string> force_parameters;
 	
 	//Synthetic population parameters
 	
 	// ------ From file
-	string var_mapper_parameters <- experiment.project_path+"Parameters/Synthetic Entity Parameters.csv"; //File for the parameters
-	file csv_mappers <- file_exists(var_mapper_parameters)?csv_file(var_mapper_parameters):nil;
-	// **s
-	string separator <- ";";
-	bool header <- true; // If there is a header or not (must be true for now)
-	string age_var <- "AGE"; // The variable name for "age" Individual attribute | WARNING : IPUMS name
-	map<string,float> age_map;  // The mapping of value for gama to translate, if nill then direct cast to int (Default behavior in Synthetic Population.gaml)
-	string gender_var <- "SEX"; // The variable name for "sex" Individual attribute | WARNING : IPUMS name
-	map<string,int> gender_map <- ["1"::0,"2"::1,"male"::0,"female"::1]; // The mapping of value for gama to translate, if nill then cast to int
-	string unemployed_var <- "EMPSTAT"; // The variable that represent employment status | WARNING : IPUMS name
-	map<string,bool> unemployed_map <- ["1"::false,"2"::true,"3"::true]; // 1 = employed, 2 = unemployed, 3 = inactive | WARNING : IPUMS name
-	string householdID <- "parentId"; // The variable for household identification
+	string OTHER <- "OTHER" const:true;
+	string EMPTY <- "EMPTY" const:true;
+	// **
+	string separator <- ";"; // File separator for synthetic population micro-data
+	string qualifier <- "\""; // The default text qualifier
+	bool header <- true; // If there is a header or not
+	
+	string age_var; // The variable name for "age" Individual attribute 
+	map<string,list<float>> age_map;  // The mapping of value for gama to translate, if nill then direct cast to int 
+	string gender_var; // The variable name for "sex" Individual attribute 
+	map<string,int> gender_map; // The mapping of value for gama to translate sex into 0=male 1=female, if nill then cast to int
+	string unemployed_var; // The variable that represent employment status 
+	map<string,bool> unemployed_map; // false = employed, true = unemployed
+	string householdID; // The variable for household identification
+	string individualID <- nil; // The variable for individual identification
+	// **
 	int number_of_individual <- -1; // Control the number of Individual agent in the simulation from the file: if <0 or more than record in the file, takes the exact number of individual in the file
 	
 	// ------ From default Gaml generator
@@ -149,7 +166,8 @@ global {
 
 	
 	//Acvitity parameters 
-	string building_type_per_activity_parameters <- experiment.project_path+"Parameters/Building type per activity type.csv"; //File for the parameters
+	string building_type_per_activity_parameters <- (last(parameters_folder_path)="/"?parameters_folder_path:parameters_folder_path+"/")
+		+"Building type per activity type.csv"; //File for the parameters
 	
 	string choice_of_target_mode <- gravity among: ["random", "gravity","closest"]; // model used for the choice of building for an activity 
 	int nb_candidates <- 4; // number of building considered for the choice of building for a particular activity

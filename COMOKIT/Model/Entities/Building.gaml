@@ -67,4 +67,6 @@ species Building {
 
 }
 
-species outside parent: Building ;
+species outside parent: Building{
+	string type <- "Outside";
+}

@@ -19,16 +19,13 @@ import "Building.gaml"
 global{
 	//Number of hospital in the city
 	int number_hospital <- 1;
-	//Capacity of hospitalisation per hospital (this should be initialised by data, but we don't have any :))
-	int capacity_hospitalisation_per_hospital <- 10000;
-	//Capacity of ICU per hospital (this should be initialised by data, but we don't have any :))
-	int capacity_ICU_per_hospital <- 1000;
 	
 	//Action to create a hospital TO CHANGE WHEN DATA ARE AVAILABLE (which building to chose, what capacity)
 	action create_hospital{
 		create Hospital number:number_hospital{
-			capacity_hospitalisation <- capacity_hospitalisation_per_hospital;
-			capacity_ICU <- capacity_ICU_per_hospital;
+			type <- "Hospital";
+			capacity_hospitalisation <- hospitalisation_capacity;
+			capacity_ICU <- ICU_capacity;
 		}
 	}
 }

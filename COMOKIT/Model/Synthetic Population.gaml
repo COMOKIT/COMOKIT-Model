@@ -46,15 +46,21 @@ global {
 		
 		map<string,list<Individual>> households <- [];
 		
-		create Individual from:csv_population number: (number_of_individual <= 0 ? length(csv_population) : number_of_individual)
+		if not(csv_population_attribute_mappers=nil) { do read_mapping(); }
+		
+		create Individual from:csv_population number: (number_of_individual <= 0 ? length(csv_population) :
+			(number_of_individual < length(csv_population) ? number_of_individual : length(csv_population)) 
+		)
 		with:[
 			age::convert_age(get(age_var)),
 			sex::convert_gender(get(gender_var)),
 			is_unemployed::convert_unemployed(get(unemployed_var)),
-			household_id::convert_hhid(get(householdID)) 
+			household_id::convert_hhid(get(householdID)),
+			individual_id::get(individualID) 
 		]{ 
 			if households contains_key household_id { households[household_id] <+ self; }
 			else { households[household_id] <- [self]; }
+			if individual_id=nil or empty(individual_id) {individual_id <- name;}
 		}
 		
 		list<Individual> hh_empty <- Individual where (each.household_id = nil);
@@ -129,31 +135,95 @@ global {
 	
 	// Convert SP encoded age into gama model specification (float)
 	float convert_age(string input){ 
-		if (input=nil) {return _get_age();} 
-		input <- input contains "\"" ? input replace("\"","") : input;
-		return age_map=nil or empty(age_map) or not(age_map contains_key input) ? 
-			int(input) : rnd(first(age_map[input]),last(age_map[input]));
+		if not(input=nil) {
+			input <- input contains qualifier ? input replace(qualifier,"") : input;
+			if not(age_map=nil) and not(empty(age_map)) {
+				if age_map contains_key input { return rnd(first(age_map[input]),last(age_map[input])); }
+			} else {
+				if int(input) is int { return int(input); }
+			}
+		} 
+		return _get_age();
 	}
 	
 	// Convert SP encoded gender into gama model specification (0=men, 1=women)
 	int convert_gender(string input){ 
-		if (input=nil) {return _get_sex();}
-		input <- input contains "\"" ? input replace("\"","") : input;
-		return gender_map=nil or empty(gender_map) or not(gender_map contains_key input) ? 
-			_get_sex() : gender_map[input]; 
+		if not(input=nil) {
+			input <- input contains qualifier ? input replace(qualifier,"") : input;
+			if not(gender_map=nil) and not(empty(gender_map)) {
+				if (gender_map contains_key EMPTY and empty(input)) { return gender_map[EMPTY]; }
+				else if (gender_map contains_key input) { return gender_map[input]; }
+				else if (gender_map contains_key OTHER) { return gender_map[OTHER]; }
+			} else if int(input) = 0 or int(input) = 1 {return int(input);}
+		}
+		return _get_sex();
 	}
 	
 	// Convert SP encoded employment status into gama model specification (true=unemployed,false=employed)
 	bool convert_unemployed(string input){
-		// because we don't know yet the sex then do unifrom
-		if (input=nil) {return _get_employment_status(rnd(1));} 
-		input <- input contains "\"" ? input replace("\"","") : input;
-		return unemployed_map=nil or empty(unemployed_map) or not(unemployed_map contains_key input) ? 
-			_get_employment_status(rnd(1)) : unemployed_map[input];
+		if not(input=nil) {
+			input <- input contains qualifier ? input replace(qualifier,"") : input;
+			if not(unemployed_map=nil) and not(empty(unemployed_map)) {
+				if(unemployed_map contains_key EMPTY and empty(input)) { return unemployed_map[EMPTY]; }
+				else if(unemployed_map contains_key input) { return unemployed_map[input]; }
+				else if(unemployed_map contains_key OTHER) { return unemployed_map[OTHER]; }
+			}
+		}
+		return _get_employment_status(rnd(1));	// because we don't know yet the sex then do unifrom
 	}
 	
+	// Convert household ID from file to string 
 	string convert_hhid(string input){
 		return not(input=nil) and input contains "\"" ? input replace("\"","") : input;
+	}
+	
+	/*
+	 * Read the synthetic entity variable mapping from parameter file
+	 */
+	action read_mapping {
+		matrix data <- matrix(csv_population_attribute_mappers);
+		list<list> data_rows <- rows_list(data);
+		//Loading the different rows number for the parameters in the file
+		loop row over:data_rows{
+			string var <- first(row);
+			switch var {
+				match AGE { age_var <- row[1]; age_map <- map<string, list<float>>(read_var_map(row)); }
+				match SEX { gender_var <- row[1]; gender_map <- map<string, int>(read_var_map(row)); }
+				match EMP { unemployed_var <- row[1]; unemployed_map <- map<string, bool>(read_var_map(row)); }
+				match HID { householdID <- row[1]; }
+				match IID { individualID <- row[1]; }
+				default {error "Failed to map variable "+var+" from Synthetic Entity Parameters.csv
+						\n Should be in "+[AGE,SEX,EMP,HID,IID];}
+			}
+		}
+	}
+	
+	/*
+	 * Transpose value and map pairs into a map to convert from file to COMOKIT variable convention
+	 */
+	map read_var_map(list var_row) {
+		int idx <- 2;
+		switch first(var_row) {
+			match "age" {
+				map<string,list<float>> res <- [];
+				loop while:idx < length(var_row) { res[string(var_row[idx])] <- list<float>(var_row[idx+1]); idx <- idx+2; }
+				if length(res)=1 and res contains_key "" {return nil;}
+				return res;
+			}
+			match "sex" {
+				map<string,int> res <- [];
+				loop while:idx < length(var_row) { res[string(var_row[idx])] <- int(var_row[idx+1]); idx <- idx+2; }
+				if length(res)=1 and res contains_key "" {return nil;}
+				return res;
+			}
+			match "is_unemployed" {
+				map<string,bool> res <- [];
+				loop while:idx < length(var_row) { res[string(var_row[idx])] <- bool(var_row[idx+1]); idx <- idx+2; }
+				if length(res)=1 and res contains_key "" {return nil;}
+				return res;
+			} 
+			default {error "unknown variable "+first(var_row)+" to map synthetic entity attribute with";} 
+		}
 	}
 	
 	// ------------------------------------------- //

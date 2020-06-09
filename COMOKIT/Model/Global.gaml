@@ -50,6 +50,9 @@ global {
 		{
 			add 0 at: aBuilding_Type to: building_infections;
 		}
+		//THIS SHOULD BE REMOVED ONCE WE FINALLY HAVE HOSPITAL IN SHAPEFILE
+		add 0 at: "Hospital" to: building_infections;
+		add 0 at: "Outside" to: building_infections;
 		do console_output("building and boundary : done");
 		create outside;
 		the_outside <- first(outside);
@@ -127,6 +130,34 @@ global {
 	//Action used to initialise epidemiological parameters according to the file and parameters forced by the user
 	action init_epidemiological_parameters
 	{
+		
+		//In the case no file was provided, then we simply create the matrix from the default parameters, that are not age dependent
+		loop aYear from:0 to: max_age
+		{
+			map<string, list<string>> tmp_map;
+			add list(epidemiological_fixed,string(init_all_ages_successful_contact_rate_human)) to: tmp_map at: epidemiological_successful_contact_rate_human;
+			add list(epidemiological_fixed,string(init_all_ages_factor_contact_rate_asymptomatic)) to: tmp_map at: epidemiological_factor_asymptomatic;
+			add list(epidemiological_fixed,string(init_all_ages_proportion_asymptomatic)) to: tmp_map at: epidemiological_proportion_asymptomatic;
+			add list(epidemiological_fixed,string(init_all_ages_proportion_dead_symptomatic)) to: tmp_map at: epidemiological_proportion_death_symptomatic;
+			add list(epidemiological_fixed,string(basic_viral_release)) to: tmp_map at: epidemiological_basic_viral_release;
+			add list(epidemiological_fixed,string(init_all_ages_probability_true_positive)) to: tmp_map at: epidemiological_probability_true_positive;
+			add list(epidemiological_fixed,string(init_all_ages_probability_true_negative)) to: tmp_map at: epidemiological_probability_true_negative;
+			add list(epidemiological_fixed,string(init_all_ages_proportion_wearing_mask)) to: tmp_map at: epidemiological_proportion_wearing_mask;
+			add list(epidemiological_fixed,string(init_all_ages_factor_contact_rate_wearing_mask)) to: tmp_map at: epidemiological_factor_wearing_mask;
+			add list(init_all_ages_distribution_type_incubation_period_symptomatic,string(init_all_ages_parameter_1_incubation_period_symptomatic),string(init_all_ages_parameter_2_incubation_period_symptomatic)) to: tmp_map at: epidemiological_incubation_period_symptomatic;
+			add list(init_all_ages_distribution_type_incubation_period_asymptomatic,string(init_all_ages_parameter_1_incubation_period_asymptomatic),string(init_all_ages_parameter_2_incubation_period_asymptomatic)) to: tmp_map at: epidemiological_incubation_period_asymptomatic;
+			add list(init_all_ages_distribution_type_serial_interval,string(init_all_ages_parameter_1_serial_interval),string(init_all_ages_parameter_2_serial_interval)) to: tmp_map at: epidemiological_serial_interval;
+			add list(epidemiological_fixed,string(init_all_ages_proportion_hospitalisation)) to: tmp_map at: epidemiological_proportion_hospitalisation;
+			add list(epidemiological_fixed,string(init_all_ages_proportion_icu)) to: tmp_map at: epidemiological_proportion_icu;
+			add list(init_all_ages_distribution_type_infectious_period_symptomatic,string(init_all_ages_parameter_1_infectious_period_symptomatic),string(init_all_ages_parameter_2_infectious_period_symptomatic)) to: tmp_map at: epidemiological_infectious_period_symptomatic;
+			add list(init_all_ages_distribution_type_infectious_period_asymptomatic,string(init_all_ages_parameter_1_infectious_period_asymptomatic),string(init_all_ages_parameter_2_infectious_period_asymptomatic)) to: tmp_map at: epidemiological_infectious_period_asymptomatic;
+			add list(init_all_ages_distribution_type_onset_to_hospitalisation,string(init_all_ages_parameter_1_onset_to_hospitalisation),string(init_all_ages_parameter_2_onset_to_hospitalisation)) to: tmp_map at: epidemiological_onset_to_hospitalisation;
+			add list(init_all_ages_distribution_type_hospitalisation_to_ICU,string(init_all_ages_parameter_1_hospitalisation_to_ICU),string(init_all_ages_parameter_2_hospitalisation_to_ICU)) to: tmp_map at: epidemiological_hospitalisation_to_ICU;
+			add list(init_all_ages_distribution_type_stay_ICU,string(init_all_ages_parameter_1_stay_ICU),string(init_all_ages_parameter_2_stay_ICU)) to: tmp_map at: epidemiological_stay_ICU;
+			add list(init_all_ages_distribution_viral_individual_factor,string(init_all_ages_parameter_1_viral_individual_factor),string(init_all_ages_parameter_2_viral_individual_factor)) to: tmp_map at: epidemiological_viral_individual_factor;
+			add tmp_map to: map_epidemiological_parameters at: aYear;
+		}
+		
 		//If there are any file given as an epidemiological parameters, then we get the parameters value from it
 		if(load_epidemiological_parameter_from_file and file_exists(epidemiological_parameters))
 		{
@@ -155,6 +186,10 @@ global {
 					match epidemiological_transmission_human{
 						allow_transmission_human <- bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?
 							bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])]):allow_transmission_human;
+					}
+					match epidemiological_allow_viral_individual_factor{
+						allow_viral_individual_factor <- bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?
+							bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])]):allow_viral_individual_factor;
 					}
 					match epidemiological_transmission_building{
 						allow_transmission_building <- bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?
@@ -212,34 +247,6 @@ global {
 				}
 			}
 		}
-		//In the case no file was provided, then we simply create the matrix from the default parameters, that are not age dependent
-		else
-		{
-			loop aYear from:0 to: max_age
-			{
-				map<string, list<string>> tmp_map;
-				add list(epidemiological_fixed,string(init_all_ages_successful_contact_rate_human)) to: tmp_map at: epidemiological_successful_contact_rate_human;
-				add list(epidemiological_fixed,string(init_all_ages_factor_contact_rate_asymptomatic)) to: tmp_map at: epidemiological_factor_asymptomatic;
-				add list(epidemiological_fixed,string(init_all_ages_proportion_asymptomatic)) to: tmp_map at: epidemiological_proportion_asymptomatic;
-				add list(epidemiological_fixed,string(init_all_ages_proportion_dead_symptomatic)) to: tmp_map at: epidemiological_proportion_death_symptomatic;
-				add list(epidemiological_fixed,string(basic_viral_release)) to: tmp_map at: epidemiological_basic_viral_release;
-				add list(epidemiological_fixed,string(init_all_ages_probability_true_positive)) to: tmp_map at: epidemiological_probability_true_positive;
-				add list(epidemiological_fixed,string(init_all_ages_probability_true_negative)) to: tmp_map at: epidemiological_probability_true_negative;
-				add list(epidemiological_fixed,string(init_all_ages_proportion_wearing_mask)) to: tmp_map at: epidemiological_proportion_wearing_mask;
-				add list(epidemiological_fixed,string(init_all_ages_factor_contact_rate_wearing_mask)) to: tmp_map at: epidemiological_factor_wearing_mask;
-				add list(init_all_ages_distribution_type_incubation_period_symptomatic,string(init_all_ages_parameter_1_incubation_period_symptomatic),string(init_all_ages_parameter_2_incubation_period_symptomatic)) to: tmp_map at: epidemiological_incubation_period_symptomatic;
-				add list(init_all_ages_distribution_type_incubation_period_asymptomatic,string(init_all_ages_parameter_1_incubation_period_asymptomatic),string(init_all_ages_parameter_2_incubation_period_asymptomatic)) to: tmp_map at: epidemiological_incubation_period_asymptomatic;
-				add list(init_all_ages_distribution_type_serial_interval,string(init_all_ages_parameter_1_serial_interval),string(init_all_ages_parameter_2_serial_interval)) to: tmp_map at: epidemiological_serial_interval;
-				add list(epidemiological_fixed,string(init_all_ages_proportion_hospitalisation)) to: tmp_map at: epidemiological_proportion_hospitalisation;
-				add list(epidemiological_fixed,string(init_all_ages_proportion_icu)) to: tmp_map at: epidemiological_proportion_icu;
-				add list(init_all_ages_distribution_type_infectious_period_symptomatic,string(init_all_ages_parameter_1_infectious_period_symptomatic),string(init_all_ages_parameter_2_infectious_period_symptomatic)) to: tmp_map at: epidemiological_infectious_period_symptomatic;
-				add list(init_all_ages_distribution_type_infectious_period_asymptomatic,string(init_all_ages_parameter_1_infectious_period_asymptomatic),string(init_all_ages_parameter_2_infectious_period_asymptomatic)) to: tmp_map at: epidemiological_infectious_period_asymptomatic;
-				add list(init_all_ages_distribution_type_onset_to_hospitalisation,string(init_all_ages_parameter_1_onset_to_hospitalisation),string(init_all_ages_parameter_2_onset_to_hospitalisation)) to: tmp_map at: epidemiological_onset_to_hospitalisation;
-				add list(init_all_ages_distribution_type_hospitalisation_to_ICU,string(init_all_ages_parameter_1_hospitalisation_to_ICU),string(init_all_ages_parameter_2_hospitalisation_to_ICU)) to: tmp_map at: epidemiological_hospitalisation_to_ICU;
-				add list(init_all_ages_distribution_type_stay_ICU,string(init_all_ages_parameter_1_stay_ICU),string(init_all_ages_parameter_2_stay_ICU)) to: tmp_map at: epidemiological_stay_ICU;
-				add tmp_map to: map_epidemiological_parameters at: aYear;
-			}
-		}
 		
 		//In the case the user wanted to load parameters from the file, but change the value of some of them for an experiment, 
 		// the force_parameters list should contain the key for the parameter, so that the value given will replace the one already
@@ -249,6 +256,21 @@ global {
 			list<string> list_value;
 			switch aParameter
 			{
+				match epidemiological_transmission_human{
+					allow_transmission_human <- allow_transmission_human;
+				}
+				match epidemiological_allow_viral_individual_factor{
+					allow_viral_individual_factor <- allow_viral_individual_factor;
+				}
+				match epidemiological_transmission_building{
+					allow_transmission_building <- allow_transmission_building;
+				}
+				match epidemiological_basic_viral_decrease{
+					basic_viral_decrease <- basic_viral_decrease;
+				}
+				match epidemiological_successful_contact_rate_building{
+					successful_contact_rate_building <- successful_contact_rate_building;
+				}
 				match epidemiological_successful_contact_rate_human{
 					list_value <- list<string>(epidemiological_fixed,init_all_ages_successful_contact_rate_human);
 				}
@@ -320,6 +342,23 @@ global {
 			}
 		}
 	}
+	
+	// ------------- //
+	// EMPTY METHODS // 
+	
+	/*
+	 * Add actions to be triggered before COMOKIT initializes
+	 */
+	action before_init {}
+	
+	/*
+	 * Add actions after COMOKIT have been initialized but before starting simulation
+	 */
+	action after_init {}
+	
+	// ----- //
+	// DEBUG //
+	// ----- //
 	
 	// Global debug mode to print in console all messages called from #console_output()
 	bool DEBUG <- false;

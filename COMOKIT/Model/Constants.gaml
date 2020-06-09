@@ -53,6 +53,12 @@ global {
 	string gravity <- "gravity";
 	string closest <- "closest";
 	
+	//List of demogrphic attributes
+	string AGE <- "age";
+	string SEX <- "sex";
+	string EMP <- "is_unemployed";
+	string HID <- "household_id";
+	string IID <- "individual_id";
 	
 	//number of the column for the epidemiological parameters CSV file
 	int epidemiological_csv_column_name <- 0; //Name of the parameter
@@ -91,5 +97,7 @@ global {
 	string epidemiological_proportion_death_symptomatic <- "Proportion_death_symptomatic";
 	string epidemiological_infectious_period_symptomatic <- "Infectious_period_symptomatic";
 	string epidemiological_infectious_period_asymptomatic <- "Infectious_period_asymptomatic";
+	string epidemiological_allow_viral_individual_factor <- "Allow_viral_individual_factor";
+	string epidemiological_viral_individual_factor <- "Viral_individual_factor";
 	
 }
