@@ -86,7 +86,7 @@ global{
 				length(subIndividual where (each.clinical_status = recovered)),			
 				// Number of dead per step per age category
 				length(subIndividual where (each.clinical_status = dead))
-			] type: "csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_" + (i - ageCategory) + "-" + (i-1) + ".csv" rewrite:false;
+			] type: "csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_" + (i - ageCategory) + "-" + (i-1) + ".csv" rewrite: (cycle = 0);
 		}
 	}
 }
