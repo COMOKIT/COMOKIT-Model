@@ -111,7 +111,7 @@ experiment "Abstract Headless" type:gui
 		dataset_path <- build_dataset_path();
 	}
 	// Parameters for headless settings
-	parameter var:idSimulation init: 0 min: 0;
+	parameter var:idSimulation init: 9999 min: 0;
 	parameter var:ageCategory init: 5 min: 1 max: 100;
 	parameter var:result_folder;
 }
