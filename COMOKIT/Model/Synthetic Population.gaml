@@ -68,18 +68,20 @@ global {
 		// Do something to build household to mimic built-in generator
 		int hh_n <- sum(homes collect (each.nb_households));
 		int hh_id <- 0;
+		string hhID <- "HH";
 		loop times:hh_n {
 			list<Individual> hh <- [];
+			string id <- hhID+string(hh_id);
 			
 			// Head of household 
 			if (flip(proba_active_family)) {
 				Individual father <- hh_empty first_with (each.sex = 0 and each.age > max_student_age and each.age < retirement_age);
-				if not(father = nil) {hh <+ father; father.household_id <- string(hh_id); hh_empty >- father;}
+				if not(father = nil) {hh <+ father; father.household_id <- id; hh_empty >- father;}
 				Individual mother <- hh_empty first_with (each.sex = 1 and each.age > max_student_age and each.age < retirement_age);
-				if not(mother = nil) {hh <+ mother; mother.household_id <- string(hh_id); hh_empty >- mother;}
+				if not(mother = nil) {hh <+ mother; mother.household_id <- id; hh_empty >- mother;}
 			} else {
 				Individual lone <- hh_empty first_with (each.age > max_student_age);
-				if not(lone = nil) {hh <+ lone; lone.household_id <- string(hh_id); hh_empty >- lone;}
+				if not(lone = nil) {hh <+ lone; lone.household_id <- id; hh_empty >- lone;}
 			}
 			
 			// Children of the household
@@ -87,7 +89,7 @@ global {
 			if number > 0 {
 				Individual c <- hh_empty first_with (each.age <= max_student_age);
 				loop while: not(c=nil) and number > 0 { 
-					hh <+ c; c.household_id <- string(hh_id); number <- number - 1; hh_empty >- c;
+					hh <+ c; c.household_id <- id; number <- number - 1; hh_empty >- c;
 					c <- hh_empty first_with (each.age <= max_student_age);
 				}
 			}
@@ -95,11 +97,11 @@ global {
 			// Grandfather / Grandmother
 			if flip(proba_grandfather) { 
 				Individual grandfather <- hh_empty first_with (each.sex = 0 and each.age > retirement_age);
-				if not(grandfather = nil) {hh <+ grandfather; grandfather.household_id <- string(hh_id); hh_empty >- grandfather;}
+				if not(grandfather = nil) {hh <+ grandfather; grandfather.household_id <- id; hh_empty >- grandfather;}
 			}
 			if flip(proba_grandmother) {
 				Individual grandmother <- hh_empty first_with (each.sex = 1 and each.age > retirement_age);
-				if not(grandmother = nil) {hh <+ grandmother; grandmother.household_id <- string(hh_id); hh_empty >- grandmother;}
+				if not(grandmother = nil) {hh <+ grandmother; grandmother.household_id <- id; hh_empty >- grandmother;}
 			}
 			
 			if empty(hh) {break;}
@@ -108,24 +110,14 @@ global {
 			ask hh { relatives <- hh - self; } 
 			
 			// Add household to collection for further process (localisation)
-			households[string(hh_id)] <- hh;
+			households[id] <- hh;
 			
 			// Increment hh identifier
 			hh_id <- hh_id + 1; 
 			
 		}
 		
-		list<Building> avlb_homes <- copy(homes);
-		
-		loop hhid over:households.keys { 
-			Building homeplace <- any(avlb_homes); // Uniform distribution | should we take HH size vs size of the building ?
-			ask households[hhid] { 
-				relatives <- households[hhid] - self;
-				home <- homeplace;
-			}
-			avlb_homes >- homeplace;
-			if empty(avlb_homes) { avlb_homes <- copy(homes); } // Again, uniform even if some homeplace already have more people than others
-		}
+		do assigne_homeplace(households.values, homes);
 		
 	}
 		
@@ -225,6 +217,29 @@ global {
 			default {error "unknown variable "+first(var_row)+" to map synthetic entity attribute with";} 
 		}
 	}
+	
+	//#######################
+	// Localisation algorithm
+	//#######################
+	
+	/*
+	 * Found a homeplace for a given household ID. Returns the choosen buildings.
+	 */
+	action assigne_homeplace(list<list<Individual>> hhs, list<Building> homeplaces) {
+		list<Building> avlb_homes <- copy(homeplaces);
+		
+		loop hh over:hhs {
+			Building homeplace <- any(avlb_homes); // Uniform distribution | should we take HH size vs size of the building ?
+			
+			ask hh { home <- homeplace; relatives <- hh - self; }
+			avlb_homes >- homeplace;
+			
+			if empty(avlb_homes) {avlb_homes <- copy(homeplaces);} // Reset available homeplace to be every home
+			
+		}
+		
+	}
+	
 	
 	// ------------------------------------------- //
 	// SYNTHETIC POPULATION FROM COMOKIT ALGORITHM //
