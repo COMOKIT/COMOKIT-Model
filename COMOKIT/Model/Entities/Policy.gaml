@@ -228,7 +228,7 @@ species AllowedIndividualsPolicy parent: ForwardingPolicy {
 	action apply {
 		invoke apply();
 		if empty(allowed_workers) and percentage_of_essential_workers > 0 {
-			allowed_workers <- ((percentage_of_essential_workers * length(Individual)) among Individual) as_map (each::true);
+			allowed_workers <- ((percentage_of_essential_workers * length(all_individuals)) among all_individuals) as_map (each::true);
 		}
 	}
 
@@ -312,9 +312,9 @@ species DetectionPolicy parent: AbstractPolicy {
 	bool not_tested_only;
 
 	action apply {
-		list<Individual> individual_to_test <- symptomatic_only ? (not_tested_only ? Individual where (each.state = symptomatic and
-		each.report_status = not_tested) : Individual where (each.state = symptomatic)) : (not_tested_only ? Individual where (each.clinical_status != dead and
-		each.report_status = not_tested) : Individual where (each.clinical_status != dead));
+		list<Individual> individual_to_test <- symptomatic_only ? (not_tested_only ? all_individuals where (each.state = symptomatic and
+		each.report_status = not_tested) : all_individuals where (each.state = symptomatic)) : (not_tested_only ? all_individuals where (each.clinical_status != dead and
+		each.report_status = not_tested) : all_individuals where (each.clinical_status != dead));
 		ask nb_individual_tested_per_step among individual_to_test {
 			do test_individual;
 		}
@@ -455,12 +455,12 @@ species HospitalisationPolicy parent: AbstractPolicy{
 		do update_individuals_in_hospital;
 		if(is_allowing_hospitalisation){
 			//ADD PEOPLE NEEDING ICU OR HOSPITALISATION NOT PRESENT YET
-			loop an_individual over: Individual where((each.clinical_status=need_hospitalisation) and (each.is_hospitalised=false)){
+			loop an_individual over: all_individuals where((each.clinical_status=need_hospitalisation) and (each.is_hospitalised=false)){
 				do try_add_individual_to_hospital(an_individual);
 			}
 		}
 		if(is_allowing_ICU){
-			loop an_individual over: Individual where((each.clinical_status=need_ICU) and (each.is_ICU=false)){
+			loop an_individual over: all_individuals where((each.clinical_status=need_ICU) and (each.is_ICU=false)){
 				do try_add_individual_to_hospital(an_individual);
 			}
 		}

@@ -27,7 +27,7 @@ global{
 	string modelName <- self.host.name;
 	list<string> list_shape_path <- [];
 	
-	bool sim_stop { return (Individual all_match ([susceptible, removed] contains each.state)); }
+	bool sim_stop { return (all_individuals all_match ([susceptible, removed] contains each.state)); }
 	
 	init{
 		if (idSimulation = -1){
@@ -60,9 +60,9 @@ global{
 			// Get corresponding Individual in age category
 			list<Individual> subIndividual;
 			if (i = 100){ // Include age 100 in last CSV
-				subIndividual <- Individual where(each.age <= i and each.age >= (i - ageCategory));
+				subIndividual <- all_individuals where(each.age <= i and each.age >= (i - ageCategory));
 			}else{
-				subIndividual <- Individual where(each.age < i and each.age >= (i - ageCategory));	
+				subIndividual <- all_individuals where(each.age < i and each.age >= (i - ageCategory));	
 			}
 			
 			save [

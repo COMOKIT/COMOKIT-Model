@@ -24,7 +24,7 @@ global {
 	rgb background <- world.color.darker.darker const: true;
 
 	// Monitor the number of infectious individual
-	int number_of_infectious <- 0 update: length(Individual where (each.is_infectious));
+	int number_of_infectious <- 0 update: length(all_individuals where (each.is_infectious));
 
 	/*
 	 * Gloabl three steps initialization of a any simulation
@@ -105,7 +105,7 @@ experiment "Abstract Experiment" virtual: true {
 				draw shape color: viral_load > 0 ? rgb(255 * viral_load, 0, 0) : #lightgrey empty: true width: 2;
 			}
 
-			agents "Individual" value: Individual where not (each.is_outside) {
+			agents "Individual" value: all_individuals where not (each.is_outside) {
 				draw square(state = susceptible or clinical_status = recovered ? 10 : 20) color: state = latent ? #yellow : (self.is_infectious ? #orangered : (clinical_status = recovered ?
 				#blue : #green));
 			}
@@ -118,15 +118,15 @@ experiment "Abstract Experiment" virtual: true {
 				draw shape depth: rnd(50) color: #lightgrey empty: false width: 2;
 			}
 
-			agents "Other" value: Individual where (not each.is_outside and each.clinical_status = recovered or each.state = susceptible) transparency: 0.5 {
+			agents "Other" value: all_individuals where (not each.is_outside and each.clinical_status = recovered or each.state = susceptible) transparency: 0.5 {
 				draw sphere(30) color: (clinical_status = recovered ? #blue : #green) at: location - {0, 0, 30};
 			}
 
-			agents "Exposed" value: Individual where (not each.is_outside and each.clinical_status = latent) transparency: 0.5 {
+			agents "Exposed" value: all_individuals where (not each.is_outside and each.clinical_status = latent) transparency: 0.5 {
 				draw sphere(30) color: #yellow at: location - {0, 0, 30};
 			}
 
-			agents "Infectious" value: Individual where (not each.is_outside and each.is_infectious) transparency: 0.5 {
+			agents "Infectious" value: all_individuals where (not each.is_outside and each.is_infectious) transparency: 0.5 {
 				draw sphere(50) color: #red at: location - {0, 0, 50};
 			}
 
@@ -137,19 +137,19 @@ experiment "Abstract Experiment" virtual: true {
 				draw shape color: #lightgrey empty: true width: 2;
 			}
 
-			agents "Individual" value: Individual where not (each.is_outside) {
+			agents "Individual" value: all_individuals where not (each.is_outside) {
 				draw square(self.is_infectious ? 30 : 10) color: state = latent ? #yellow : (self.is_infectious ? #orangered : (clinical_status = recovered ? #blue : #green));
 			}
 
 		}
 
-		display "states_evolution_chart" virtual: true {
+		display "states_evolution_chart" virtual: true refresh: every(#day) {
 			chart "Population epidemiological states evolution" background: #white axes: #black color: #black title_font: default legend_font: font("Helvetica", 14, #bold) {
-				data "Susceptible" value: length(Individual where (each.state = susceptible)) color: #green marker: false style: line;
-				data "Latent" value: length(Individual where (each.is_latent())) color: #orange marker: false style: line;
-				data "Infectious" value: length(Individual where (each.is_infectious)) color: #red marker: false style: line;
-				data "Recovered" value: length(Individual where (each.clinical_status = recovered)) color: #blue marker: false style: line;
-				data "Dead" value: length(Individual where (each.clinical_status = dead)) color: #black marker: false style: line;
+				data "Susceptible" value: length(all_individuals where (each.state = susceptible)) color: #green marker: false style: line;
+				data "Latent" value: length(all_individuals where (each.is_latent())) color: #orange marker: false style: line;
+				data "Infectious" value: length(all_individuals where (each.is_infectious)) color: #red marker: false style: line;
+				data "Recovered" value: length(all_individuals where (each.clinical_status = recovered)) color: #blue marker: false style: line;
+				data "Dead" value: length(all_individuals where (each.clinical_status = dead)) color: #black marker: false style: line;
 			}
 
 		}
@@ -165,28 +165,28 @@ experiment "Abstract Experiment" virtual: true {
 		
 		display "demographics_age" virtual: true {
 			chart "Ages" type: histogram {
-				loop i from: 0 to: max_age { data ""+i value: Individual count(each.age = i); }
+				loop i from: 0 to: max_age { data ""+i value: all_individuals count(each.age = i); }
 			}
 		}
 		
 		display "demographics_sex" virtual: true {
 			chart "sex" type: pie {
-				data "Male" value: Individual count (each.sex=0);
-				data "Female" value: Individual count (each.sex=1);
+				data "Male" value: all_individuals count (each.sex=0);
+				data "Female" value: all_individuals count (each.sex=1);
 			}
 		}
 		
 		display "demographics_employed" virtual: true {
 			chart "unemployed" type: pie {
-				data "Employed" value: Individual count not(each.is_unemployed);
-				data "Unemployed" value: Individual count each.is_unemployed;
+				data "Employed" value: all_individuals count not(each.is_unemployed);
+				data "Unemployed" value: all_individuals count each.is_unemployed;
 			}
 		}
 		
 		display "demographics_household_size" virtual: true {
 			chart "Household size" type:histogram {
-				loop i from: 0 to:max(Individual collect (length(each.relatives))) { 
-					data string(i) value: Individual count (length(each.relatives)=i);
+				loop i from: 0 to:max(all_individuals collect (length(each.relatives))) { 
+					data string(i) value: all_individuals count (length(each.relatives)=i);
 				}
 			}
 		}	 
@@ -195,7 +195,7 @@ experiment "Abstract Experiment" virtual: true {
 	
 	permanent {
 		
-		display "infected_cases" toolbar: false background: #black virtual: true {
+		display "infected_cases" toolbar: false background: #black virtual: true refresh: every(#day){
 			chart "Infected cases" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
 				loop s over: simulations {
 					data s.name value: s.number_of_infectious color: s.color marker: false style: line thickness: 2; 		
@@ -203,7 +203,7 @@ experiment "Abstract Experiment" virtual: true {
 			}
 		}
 		
-		display "cumulative_incidence" toolbar: false background: #black virtual: true {
+		display "cumulative_incidence" toolbar: false background: #black virtual: true refresh: every(#day){
 			chart "Cumulative incidence" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
 				loop s over: simulations {
 					data s.name value: s.total_number_of_infected color: s.color marker: false style: line thickness: 2; 

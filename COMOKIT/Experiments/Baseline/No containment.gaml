@@ -30,11 +30,11 @@ experiment "No Containment" parent: "Abstract Experiment" autorun: true {
 		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
 		
 		display "Main" parent: default_display {}
-		display "Plot" parent: states_evolution_chart {}	
+		display "Plot" parent: states_evolution_chart refresh: every(#day) {}	
 		
-		display "Population age" parent: demographics_age { }
-		display "Population gender" parent: demographics_sex { }
-		display "Population employment status" parent: demographics_employed { }
-		display "Household size" parent: demographics_household_size { }
+		display "Population age" parent: demographics_age refresh: every(#week) { }
+		display "Population gender" parent: demographics_sex refresh: every(#week)  { }
+		display "Population employment status" parent: demographics_employed refresh: every(#week) { }
+		display "Household size" parent: demographics_household_size refresh: every(#week)  { }
 	}
 }

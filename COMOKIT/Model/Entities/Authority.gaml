@@ -151,7 +151,7 @@ species Authority {
 	 */
 	AbstractPolicy with_age_group_at_home_policy(AbstractPolicy p, list<pair<int,int>> age_group_at_home){
 		map<Individual,bool> age_group_allowance;
-		ask Individual { 
+		ask all_individuals { 
 			age_group_allowance[self] <- age_group_at_home none_matches (age > each.key and age < each.value); 
 		}
 		create AllowedIndividualsPolicy with:[target::p,allowed_workers::age_group_allowance] returns: res;

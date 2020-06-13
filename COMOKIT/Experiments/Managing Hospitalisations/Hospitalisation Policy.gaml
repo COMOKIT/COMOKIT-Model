@@ -79,21 +79,21 @@ experiment "Opening Hospitals" parent: "Abstract Experiment" autorun: true {
 		display "charts Hospitalized" toolbar: false background: #black  refresh: every(24 #cycle) {
 			chart "Hospitalized cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {
 				loop s over: simulations {
-					data s.name value: length(s.Individual where(each.is_hospitalised)) color: s.color marker: false style: line	 thickness: 2;
+					data s.name value: length(s.all_individuals where(each.is_hospitalised)) color: s.color marker: false style: line	 thickness: 2;
 				}
 			}
 		}
 		display "charts ICU" toolbar: false background: #black  {
 			chart "ICU cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {
 				loop s over: simulations {
-					data s.name value: length(s.Individual where(each.is_ICU)) color: s.color marker: false style: line	 thickness: 2;
+					data s.name value: length(s.all_individuals where(each.is_ICU)) color: s.color marker: false style: line	 thickness: 2;
 				}
 			}
 		}
 		display "charts Deaths" toolbar: false background: #black  refresh: every(24 #cycle) {
 			chart "Dead cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {
 				loop s over: simulations {
-					data s.name value: length(s.Individual where(each.clinical_status=dead)) color: s.color marker: false style: line	 thickness: 2;
+					data s.name value: length(s.all_individuals where(each.clinical_status=dead)) color: s.color marker: false style: line	 thickness: 2;
 				}
 			}
 		}

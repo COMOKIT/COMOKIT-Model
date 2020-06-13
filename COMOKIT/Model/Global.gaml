@@ -26,6 +26,14 @@ import "Parameters.gaml"
 import "Synthetic Population.gaml"
 
 global {
+	
+	
+	/**
+	 * Individuals access
+	 */
+	 
+	species<Individual> individual_species <- Individual; // by default
+	container<Individual> all_individuals -> {container<Individual>(individual_species.population+(individual_species.subspecies accumulate each.population))};
 	geometry shape <- envelope(shp_buildings);
 	outside the_outside;
 	
@@ -86,7 +94,7 @@ global {
 		} else {
 			do create_population(working_places, schools, homes, min_student_age, max_student_age);
 		}
-		ask Individual {
+		ask all_individuals {
 			do initialise_epidemio;
 		}
 		do assign_school_working_place(working_places,schools, min_student_age, max_student_age);
@@ -95,11 +103,11 @@ global {
 		
 		do define_agenda(min_student_age, max_student_age);	
 
-		ask num_infected_init among Individual {
+		ask num_infected_init among all_individuals {
 			do define_new_case;
 		}
 		
-		total_number_individual <- length(Individual);
+		total_number_individual <- length(all_individuals);
 
 	}
 

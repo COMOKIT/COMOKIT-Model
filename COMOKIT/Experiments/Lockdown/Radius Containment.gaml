@@ -33,7 +33,7 @@ global {
 	action define_policy {
 		name <- "Radius lockdown with " + int(tolerance * 100) + "% of tolerance";
 		ask Authority {
-			ask Individual where (each.state != susceptible) {
+			ask all_individuals where (each.state != susceptible) {
 				sources << self;
 				state <- symptomatic;
 			}

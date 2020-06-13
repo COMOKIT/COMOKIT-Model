@@ -83,14 +83,14 @@ global {
 		ask Authority { 
 			// Test policy
 			AbstractPolicy d <- create_detection_policy(
-				int(length(Individual) * small_test_sample), // 0.01% of the population 
+				int(length(all_individuals) * small_test_sample), // 0.01% of the population 
 				true, // only_symptomatic_ones = true 
 				true // only_untested_ones
 			);
 			// Lockdown policy with 10% of people doing they activities starting from 10% population confirmed case
 			AbstractPolicy l <- from_min_cases(
 				with_tolerance(create_lockdown_policy(), percentage_of_people_allowed),
-				int(length(Individual) * start_lockdown_until_prop)
+				int(length(all_individuals) * start_lockdown_until_prop)
 			);
 			AbstractPolicy r <- create_positive_at_home_policy();
 			
@@ -110,7 +110,7 @@ global {
 		ask Authority { 
 			// Test policy
 			AbstractPolicy d <- create_detection_policy(
-				int(length(Individual) * large_test_sample), // 1% of the population 
+				int(length(all_individuals) * large_test_sample), // 1% of the population 
 				false, // only_symptomatic_ones = true 
 				false // only_untested_ones
 			);
@@ -191,7 +191,7 @@ experiment "Comparison of realistic actions" parent: "Abstract Experiment" autor
 		display "charts Deaths" toolbar: false background: #black  refresh: every(24 #cycle) {
 			chart "Dead cases" background: #black axes: #black color: #white title_font: default legend_font: font("Helvetica", 14, #bold) title_visible: true {
 				loop s over: simulations {
-					data s.name value: length(s.Individual where(each.clinical_status=dead)) color: s.color marker: false style: line	 thickness: 2;
+					data s.name value: length(s.all_individuals where(each.clinical_status=dead)) color: s.color marker: false style: line	 thickness: 2;
 				}
 			}
 		}

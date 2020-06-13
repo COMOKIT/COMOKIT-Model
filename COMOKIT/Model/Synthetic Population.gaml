@@ -48,7 +48,7 @@ global {
 		
 		if not(csv_population_attribute_mappers=nil) { do read_mapping(); }
 		
-		create Individual from:csv_population number: (number_of_individual <= 0 ? length(csv_population) :
+		create individual_species from:csv_population number: (number_of_individual <= 0 ? length(csv_population) :
 			(number_of_individual < length(csv_population) ? number_of_individual : length(csv_population)) 
 		)
 		with:[
@@ -63,7 +63,7 @@ global {
 			if individual_id=nil or empty(individual_id) {individual_id <- name;}
 		}
 		
-		list<Individual> hh_empty <- Individual where (each.household_id = nil);
+		list<Individual> hh_empty <- all_individuals where (each.household_id = nil);
 		
 		// Do something to build household to mimic built-in generator
 		int hh_n <- sum(homes collect (each.nb_households));
@@ -117,7 +117,7 @@ global {
 			
 		}
 		
-		do assigne_homeplace(households.values, homes);
+		do assign_homeplace(households.values, homes);
 		
 	}
 		
@@ -225,7 +225,7 @@ global {
 	/*
 	 * Found a homeplace for a given household ID. Returns the choosen buildings.
 	 */
-	action assigne_homeplace(list<list<Individual>> hhs, list<Building> homeplaces) {
+	action assign_homeplace(list<list<Individual>> hhs, list<Building> homeplaces) {
 		list<Building> avlb_homes <- copy(homeplaces);
 		
 		loop hh over:hhs {
@@ -279,14 +279,14 @@ global {
 				list<Individual> household;
 				if flip(proba_active_family) {
 				//father
-					create Individual {
+					create individual_species {
 						age <- world._get_age(max_student_age + 1,retirement_age);
 						sex <- 0;
 						home <- myself;
 						household << self;
 					} 
 					//mother
-					create Individual {
+					create individual_species {
 						age <- world._get_age(max_student_age + 1,retirement_age);
 						sex <- 1;
 						home <- myself;
@@ -296,7 +296,7 @@ global {
 					//children
 					int number <- min(number_children_max, round(gauss(number_children_mean,number_children_std)));
 					if (number > 0) {
-						create Individual number: number {
+						create individual_species number: number {
 							//last_activity <-first(staying_home);
 							age <- world._get_age(maximum::max_student_age);
 							sex <- world._get_sex();
@@ -305,7 +305,7 @@ global {
 						}
 					}
 					if (flip(proba_grandfather)) {
-						create Individual {
+						create individual_species {
 							age <- world._get_age(retirement_age + 1);
 							sex <- 0;
 							home <- myself;
@@ -313,7 +313,7 @@ global {
 						}
 					}	
 					if (flip(proba_grandmother)) {
-						create Individual {
+						create individual_species {
 							age <- world._get_age(retirement_age + 1);
 							sex <- 1;
 							home <- myself;
@@ -321,7 +321,7 @@ global {
 						}
 					}
 				} else {
-					create Individual {
+					create individual_species {
 						age <- world._get_age(min_student_age + 1);
 						sex <- world._get_sex();
 						home <- myself;
@@ -335,7 +335,7 @@ global {
 				households << household;
 			}
 		}
-		ask Individual where ((each.age >= max_student_age) and (each.age < retirement_age)) {
+		ask all_individuals where ((each.age >= max_student_age) and (each.age < retirement_age)) {
 			is_unemployed <- world._get_employment_status(sex);
 		}	
 	}
@@ -391,8 +391,8 @@ global {
 	 * 
 	 */
 	action create_social_networks(int min_student_age, int max_student_age) {
-		map<Building, list<Individual>> WP<- (Individual where (each.working_place != nil)) group_by each.working_place;
-		map<Building, list<Individual>> Sc<- (Individual where (each.school != nil)) group_by each.school;
+		map<Building, list<Individual>> WP<- (all_individuals where (each.working_place != nil)) group_by each.working_place;
+		map<Building, list<Individual>> Sc<- (all_individuals where (each.school != nil)) group_by each.school;
 		map<int,list<Individual>> ind_per_age_cat;
 		ind_per_age_cat[min_age_for_evening_act] <- [];
 		ind_per_age_cat[min_student_age] <- [];
@@ -400,7 +400,7 @@ global {
 		ind_per_age_cat[retirement_age] <- [];
 		ind_per_age_cat[max_age] <- [];
 		
-		loop p over: Individual {
+		loop p over: all_individuals {
 			loop cat over: ind_per_age_cat.keys {
 				if p.age < cat {
 					ind_per_age_cat[cat]<<p;
@@ -409,7 +409,7 @@ global {
 			}
 		}
 		
-		ask Individual {
+		ask all_individuals {
 			do initialise_social_network(WP, Sc,ind_per_age_cat);
 		}
 	}
@@ -428,7 +428,7 @@ global {
 		// Assign to each individual a school and working_place depending of its age.
 		// in addition, school and working_place can be outside.
 		// Individuals too young or too old, do not have any working_place or school 
-		ask Individual {
+		ask all_individuals {
 			last_activity <-first(staying_home);
 			do enter_building(home);
 			if (age >= min_student_age) {
@@ -546,11 +546,11 @@ global {
 		list<Activity> possible_activities_tot <- Activities.values - studying - working - staying_home;
 		list<Activity> possible_activities_without_rel <- possible_activities_tot - visiting_friend;
 		Activity eating_act <- Activity first_with (each.name = act_eating);
-		ask Individual {
+		ask all_individuals {
 			loop times: 7 {agenda_week<<[];}
 		}
 		// Initialization for students or workers
-		ask Individual where ((each.age < retirement_age) and (each.age >= min_student_age))  {
+		ask all_individuals where ((each.age < retirement_age) and (each.age >= min_student_age))  {
 			// Students and workers have an agenda similar for 6 days of the week ...
 			if (is_unemployed and age >= max_student_age) {
 				loop i from:1 to: 7 {
@@ -652,13 +652,13 @@ global {
 		}
 		
 		// Initialization for retired individuals
-		loop ind over: Individual where (each.age >= retirement_age) {
+		loop ind over: all_individuals where (each.age >= retirement_age) {
 			loop i from:1 to: 7 {
 				do manag_day_off(ind,i,possible_activities_without_rel,possible_activities_tot);
 			}
 		}
 		
-		ask Individual {
+		ask all_individuals {
 			loop i from: 0 to: 6 {
 				if (not empty(agenda_week[i])) {
 					int last_act <- max(agenda_week[i].keys);
@@ -671,7 +671,7 @@ global {
 		}
 		
 		if (choice_of_target_mode = gravity) {
-			ask Individual {
+			ask all_individuals {
 				list<Activity> acts <- remove_duplicates((agenda_week accumulate each.values) collect each.key) inter list(Activity) ;
 				loop act over: acts {
 					map<string, list<Building>> bds;
