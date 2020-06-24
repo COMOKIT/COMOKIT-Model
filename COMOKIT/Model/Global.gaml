@@ -192,22 +192,32 @@ global {
 					//Four parameters are not age dependent : allowing human to human transmission, allowing environmental contamination, 
 					//and the parameters for environmental contamination
 					match epidemiological_transmission_human{
-						allow_transmission_human <- bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?
+						if(force_parameters contains(epidemiological_transmission_human))=false{
+							allow_transmission_human <- bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?
 							bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])]):allow_transmission_human;
+						}
 					}
 					match epidemiological_allow_viral_individual_factor{
-						allow_viral_individual_factor <- bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?
+						if(force_parameters contains(epidemiological_allow_viral_individual_factor))=false{
+							allow_viral_individual_factor <- bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?
 							bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])]):allow_viral_individual_factor;
+						}
 					}
 					match epidemiological_transmission_building{
-						allow_transmission_building <- bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?
+						if(force_parameters contains(epidemiological_transmission_building))=false{
+							allow_transmission_building <- bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?
 							bool(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])]):allow_transmission_building;
+						}
 					}
 					match epidemiological_basic_viral_decrease{
-						basic_viral_decrease <- float(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?float(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])]):basic_viral_decrease;
+						if(force_parameters contains(epidemiological_basic_viral_decrease))=false{
+							basic_viral_decrease <- float(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?float(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])]):basic_viral_decrease;
+						}
 					}
 					match epidemiological_successful_contact_rate_building{
-						successful_contact_rate_building <- float(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?float(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])]):successful_contact_rate_building;
+						if(force_parameters contains(epidemiological_successful_contact_rate_building))=false{
+							successful_contact_rate_building <- float(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])])!=nil?float(data[epidemiological_csv_column_parameter_one,first(map_parameters[aKey])]):successful_contact_rate_building;
+						}
 					}
 					//all the other parameters could be defined as age dependent, and therefore, stocked in the matrix of parameters
 					default{
