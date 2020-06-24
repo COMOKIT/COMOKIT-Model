@@ -143,7 +143,7 @@ experiment "Abstract Experiment" virtual: true {
 
 		}
 
-		display "states_evolution_chart" virtual: true refresh: every(#day) {
+		display "states_evolution_chart" virtual: true refresh: every(24#cycle) {
 			chart "Population epidemiological states evolution" background: #white axes: #black color: #black title_font: default legend_font: font("Helvetica", 14, #bold) {
 				data "Susceptible" value: length(all_individuals where (each.state = susceptible)) color: #green marker: false style: line;
 				data "Latent" value: length(all_individuals where (each.is_latent())) color: #orange marker: false style: line;
@@ -195,7 +195,7 @@ experiment "Abstract Experiment" virtual: true {
 	
 	permanent {
 		
-		display "infected_cases" toolbar: false background: #black virtual: true refresh: every(#day){
+		display "infected_cases" toolbar: false background: #black virtual: true refresh: every(24#cycle){
 			chart "Infected cases" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
 				loop s over: simulations {
 					data s.name value: s.number_of_infectious color: s.color marker: false style: line thickness: 2; 		
@@ -203,7 +203,7 @@ experiment "Abstract Experiment" virtual: true {
 			}
 		}
 		
-		display "cumulative_incidence" toolbar: false background: #black virtual: true refresh: every(#day){
+		display "cumulative_incidence" toolbar: false background: #black virtual: true refresh: every(24#cycle){
 			chart "Cumulative incidence" background: #black axes: #white color: #white title_font: default legend_font: font("Helvetica", 14, #bold) {
 				loop s over: simulations {
 					data s.name value: s.total_number_of_infected color: s.color marker: false style: line thickness: 2; 
