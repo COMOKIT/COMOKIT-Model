@@ -335,6 +335,9 @@ species HospitalisationPolicy parent: AbstractPolicy{
 	//Minimum number of tests needed to be negative to discharge an individual
 	int nb_minimum_tests;
 	
+	species<Hospital> hospital_species <- Hospital;
+	container<Hospital> hospitals -> {container<Hospital>(hospital_species.population+(hospital_species.subspecies accumulate each.population))};
+	
 	//Remove an individual from ICU
 	action remove_individual_from_ICU(Individual an_individual, Hospital a_hospital){
 		remove an_individual from:a_hospital.ICU_individuals;
@@ -372,7 +375,7 @@ species HospitalisationPolicy parent: AbstractPolicy{
 	//Try to find a place for the individual according to its clinical status
 	action try_add_individual_to_hospital(Individual an_individual){
 		if(an_individual.clinical_status=need_hospitalisation){
-			list<Hospital> possible_hospitals <- (Hospital where(each.capacity_hospitalisation>0));
+			list<Hospital> possible_hospitals <- (hospitals where(each.capacity_hospitalisation>0));
 			if(length(possible_hospitals)>0){
 				do add_individual_to_hospitalised(an_individual,one_of(possible_hospitals));
 			}else{
@@ -382,7 +385,7 @@ species HospitalisationPolicy parent: AbstractPolicy{
 				}
 			}
 		}else{
-			list<Hospital> possible_hospitals <- (Hospital where(each.capacity_ICU>0));
+			list<Hospital> possible_hospitals <- (hospitals where(each.capacity_ICU>0));
 			if(length(possible_hospitals)>0){
 				do add_individual_to_ICU(an_individual,one_of(possible_hospitals));
 			}else{
@@ -396,7 +399,7 @@ species HospitalisationPolicy parent: AbstractPolicy{
 	
 	//Update the individuals in hospital
 	action update_individuals_in_hospital{
-		loop a_hospital over: Hospital{
+		loop a_hospital over: hospitals {
 			
 			//REMOVE DEAD PEOPLE
 			loop an_individual over: a_hospital.hospitalised_individuals where(each.clinical_status=dead){

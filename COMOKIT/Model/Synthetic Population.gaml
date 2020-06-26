@@ -393,12 +393,9 @@ global {
 	action create_social_networks(int min_student_age, int max_student_age) {
 		map<Building, list<Individual>> WP<- (all_individuals where (each.working_place != nil)) group_by each.working_place;
 		map<Building, list<Individual>> Sc<- (all_individuals where (each.school != nil)) group_by each.school;
-		map<int,list<Individual>> ind_per_age_cat;
-		ind_per_age_cat[min_age_for_evening_act] <- [];
-		ind_per_age_cat[min_student_age] <- [];
-		ind_per_age_cat[max_student_age] <- [];
-		ind_per_age_cat[retirement_age] <- [];
-		ind_per_age_cat[max_age] <- [];
+		list<int> age_cat <- [min_age_for_evening_act,min_student_age,max_student_age,
+			retirement_age, max_age] sort (each);
+		map<int,list<Individual>> ind_per_age_cat <- age_cat as_map (each::[]);
 		
 		loop p over: all_individuals {
 			loop cat over: ind_per_age_cat.keys {
@@ -408,10 +405,7 @@ global {
 				}  
 			}
 		}
-		
-		ask all_individuals {
-			do initialise_social_network(WP, Sc,ind_per_age_cat);
-		}
+		ask all_individuals { do initialise_social_network(WP, Sc,ind_per_age_cat); }
 	}
 	
 	// ------------------------------------------------------- //
@@ -424,7 +418,6 @@ global {
 	//   min_student_age : minimum age to be in a school
 	//   max_student_age : maximum age to go to a school
 	action assign_school_working_place(map<Building,float> working_places,map<list<int>,list<Building>> schools, int min_student_age, int max_student_age) {
-		
 		// Assign to each individual a school and working_place depending of its age.
 		// in addition, school and working_place can be outside.
 		// Individuals too young or too old, do not have any working_place or school 
@@ -486,7 +479,7 @@ global {
 					
 				}
 			}
-		}		
+		}	
 	}
 	
 	// ----------------- //
@@ -549,6 +542,7 @@ global {
 		ask all_individuals {
 			loop times: 7 {agenda_week<<[];}
 		}
+				
 		// Initialization for students or workers
 		ask all_individuals where ((each.age < retirement_age) and (each.age >= min_student_age))  {
 			// Students and workers have an agenda similar for 6 days of the week ...
@@ -697,8 +691,7 @@ global {
 				}
 			}
 		}
-		
-		
+				
 	}
 	
 	Activity activity_choice(Individual ind, list<Activity> possible_activities) {
@@ -764,7 +757,7 @@ global {
 					ask world {do console_output(
 						current_ind.name + " : " + current_ind.age + " nb friends: " + length(current_ind.friends) 
 						+ " inds: "+ length(inds) + " friend age: "+ (current_ind.friends collect each.age),
-						caller::"Synthetic Population.gaml"
+						caller::"Synthetic Population.gaml",level::"trace"
 					);}
 					loop ind over: inds {
 						map<int,pair<Activity,list<Individual>>> agenda_day_ind <- ind.agenda_week[day - 1];
@@ -777,7 +770,7 @@ global {
 						if (return_home) {agenda_day_ind[end_hour] <- staying_home[0]::[];}
 						ask world {do console_output( 
 							"ind.agenda_week: " + day + " -> "+ ind.agenda_week[day - 1], 
-							caller::"Synthetic Population.gaml"
+							caller::"Synthetic Population.gaml",level::"trace"
 						);}
 					}
 					agenda_day[current_hour] <- act::inds;

@@ -240,11 +240,12 @@ species Authority {
 	/*
 	 * To define a policy with ICU, hospitalisation and a given minimum number of test per day
 	 */
-	AbstractPolicy create_hospitalisation_policy(bool allow_ICU, bool allow_hospitalisation, int nb_tests){
+	AbstractPolicy create_hospitalisation_policy(bool allow_ICU, bool allow_hospitalisation, int nb_tests, species<Hospital> h_species <- Hospital){
 		create HospitalisationPolicy returns: result{
 			is_allowing_ICU <- allow_ICU;
 			is_allowing_hospitalisation <- allow_hospitalisation;
 			nb_minimum_tests <- nb_tests;
+			hospital_species <- h_species;
 		}
 		return (first(result));
 	}

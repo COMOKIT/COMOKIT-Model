@@ -380,16 +380,19 @@ global {
 	
 	// Global debug mode to print in console all messages called from #console_output()
 	bool DEBUG <- false;
+	list<string> levelList const:true <- ["trace","debug","warning","error"]; 
 	// the available level of debug among debug, error and warning (default = debug)
-	string LEVEL init:"debug" among:["debug","error","warning"];
+	string LEVEL init:"debug" among:["trace","debug","warning","error"];
 	// Simple print_out method
 	action console_output(string output, string caller <- "Global.gaml", string level <- LEVEL) { 
 		if DEBUG {
-			string msg <- "["+caller+"] "+output; 
-			switch level {
-				match "error" {error msg;}
-				match "warning" {warn msg;}
-				default {write msg;}
+			string msg <- "["+caller+"] "+output;
+			if levelList index_of LEVEL <= levelList index_of level {
+				switch level {
+					match "error" {error msg;}
+					match "warning" {warn msg;}
+					default {write msg;}
+				}	
 			}
 		}
 	}

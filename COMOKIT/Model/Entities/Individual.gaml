@@ -221,14 +221,17 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		
 		if (working_place != nil) {
 			int nb_colleagues <- max(0,int(gauss(nb_work_colleagues_mean,nb_work_colleagues_std)));
-			if nb_colleagues > 0 {
-				colleagues <- nb_colleagues among (working_places[working_place] - self);
+			if nb_colleagues > 1 {
+				colleagues <- nb_colleagues among working_places[working_place];
+				colleagues <- colleagues - self;
 			}
 		} 
 		if (school != nil) {
 			int nb_classmates <- max(0,int(gauss(nb_classmates_mean,nb_classmates_std)));
-			if nb_classmates > 0 {
-				colleagues <- nb_classmates among ((schools[school] where ((each.age >= (age -1)) and (each.age <= (age + 1))))- self);
+			if nb_classmates > 1 {
+				//colleagues <- nb_classmates among ((schools[school] where ((each.age >= (age -1)) and (each.age <= (age + 1))))- self);
+				colleagues <- nb_classmates among schools[school];
+				colleagues <- colleagues - self;
 			}
 		}
  	}
