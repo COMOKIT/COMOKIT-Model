@@ -181,6 +181,7 @@ global {
 	int work_hours_begin_max <- 8; //beginning working hour: max value 
 	int work_hours_end_min <- 15; //ending working hour: min value
 	int work_hours_end_max <- 18; //ending working hour: max value
+	float schoolarship_rate <- 1.0; // The proportion of school agent
 	int school_hours_begin_min <- 7; //beginning studying hour: min value
 	int school_hours_begin_max <- 9; //beginning studying hour: max value
 	int school_hours_end_min <- 15; //ending studying hour: min value
@@ -208,7 +209,6 @@ global {
 	
 	//Activity parameters
 	float building_neighbors_dist <- 500 #m; //used by "visit to neighbors" activity (max distance of neighborhood).
-	
 	
 	
 	//for each category of age, and for each sex, the weight of the different activities

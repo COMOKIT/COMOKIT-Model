@@ -546,7 +546,9 @@ global {
 		// Initialization for students or workers
 		ask all_individuals where ((each.age < retirement_age) and (each.age >= min_student_age))  {
 			// Students and workers have an agenda similar for 6 days of the week ...
-			if (is_unemployed and age >= max_student_age) {
+			if ((is_unemployed and age >= max_student_age) or 
+				(age < max_student_age and flip(1.0-schoolarship_rate))
+			) {
 				loop i from:1 to: 7 {
 					ask myself {do manag_day_off(myself,i,possible_activities_without_rel,possible_activities_tot);}
 				} 
@@ -717,69 +719,67 @@ global {
 		map<int,pair<Activity,list<Individual>>> agenda_day <- current_ind.agenda_week[day - 1];
 		list<Activity> possible_activities <- empty(current_ind.friends) ? possible_activities_without_rel : possible_activities_tot;
 		int max_act <- (current_ind.age >= retirement_age) ? max_num_activity_for_old_people :(current_ind.is_unemployed ? max_num_activity_for_unemployed : max_num_activity_for_non_working_day);
-		int num_activity <- rnd(0,max_act) - length(agenda_day);
-		if (num_activity > 0) {
-			list<int> forbiden_hours;
-			bool act_beg <- false;
-			int beg_act <- 0;
-			loop h over: agenda_day.keys sort_by each {
-				if not (act_beg) {
-					act_beg <- true;
-					beg_act <- h;
-				} else {
-					act_beg <- false;
-					loop i from: beg_act to:h {
-						forbiden_hours <<i;
-					}
+		int num_activity <- rnd(1,max_act) - length(agenda_day);
+		list<int> forbiden_hours;
+		bool act_beg <- false;
+		int beg_act <- 0;
+		loop h over: agenda_day.keys sort_by each {
+			if not (act_beg) {
+				act_beg <- true;
+				beg_act <- h;
+			} else {
+				act_beg <- false;
+				loop i from: beg_act to:h {
+					forbiden_hours <<i;
 				}
 			}
-			int current_hour <- rnd(first_act_hour_non_working_min,first_act_hour_non_working_max);
-			loop times: num_activity {
-				if (current_hour in forbiden_hours) {
-					current_hour <- current_hour + 1;
-					if (current_hour > 22) {
-						break;
-					} 
-				}
-				
-				int end_hour <- min(23,current_hour + rnd(1,max_duration_default));
-				if (end_hour in forbiden_hours) {
-					end_hour <- forbiden_hours first_with (each > current_hour) - 1;
-				}
-				if (current_hour >= end_hour) {
+		}
+		int current_hour <- rnd(first_act_hour_non_working_min,first_act_hour_non_working_max);
+		loop times: num_activity {
+			if (current_hour in forbiden_hours) {
+				current_hour <- current_hour + 1;
+				if (current_hour > 22) {
 					break;
-				}
-				Activity act <-activity_choice(current_ind, possible_activities);
-				if (species(act) = Activity) {
-					
-					list<Individual> cands <- current_ind.friends where ((each.agenda_week[day - 1][current_hour]) = nil);
-					list<Individual> inds <- max(0,gauss(nb_activity_fellows_mean,nb_activity_fellows_std)) among cands;
-					ask world {do console_output(
-						current_ind.name + " : " + current_ind.age + " nb friends: " + length(current_ind.friends) 
-						+ " inds: "+ length(inds) + " friend age: "+ (current_ind.friends collect each.age),
+				} 
+			}
+			
+			int end_hour <- min(23,current_hour + rnd(1,max_duration_default));
+			if (end_hour in forbiden_hours) {
+				end_hour <- forbiden_hours first_with (each > current_hour) - 1;
+			}
+			if (current_hour >= end_hour) {
+				break;
+			}
+			Activity act <-activity_choice(current_ind, possible_activities);
+			if (species(act) = Activity) {
+				
+				list<Individual> cands <- current_ind.friends where ((each.agenda_week[day - 1][current_hour]) = nil);
+				list<Individual> inds <- max(0,gauss(nb_activity_fellows_mean,nb_activity_fellows_std)) among cands;
+				ask world {do console_output(
+					current_ind.name + " : " + current_ind.age + " nb friends: " + length(current_ind.friends) 
+					+ " inds: "+ length(inds) + " friend age: "+ (current_ind.friends collect each.age),
+					caller::"Synthetic Population.gaml",level::"trace"
+				);}
+				loop ind over: inds {
+					map<int,pair<Activity,list<Individual>>> agenda_day_ind <- ind.agenda_week[day - 1];
+					agenda_day_ind[current_hour] <- act::(inds - ind + current_ind);
+					bool return_home <- true;
+					loop h from: current_hour + 1 to: end_hour {
+						return_home <- agenda_day_ind[h] = nil;
+						if not (return_home) {break;}
+					}
+					if (return_home) {agenda_day_ind[end_hour] <- staying_home[0]::[];}
+					ask world {do console_output( 
+						"ind.agenda_week: " + day + " -> "+ ind.agenda_week[day - 1], 
 						caller::"Synthetic Population.gaml",level::"trace"
 					);}
-					loop ind over: inds {
-						map<int,pair<Activity,list<Individual>>> agenda_day_ind <- ind.agenda_week[day - 1];
-						agenda_day_ind[current_hour] <- act::(inds - ind + current_ind);
-						bool return_home <- true;
-						loop h from: current_hour + 1 to: end_hour {
-							return_home <- agenda_day_ind[h] = nil;
-							if not (return_home) {break;}
-						}
-						if (return_home) {agenda_day_ind[end_hour] <- staying_home[0]::[];}
-						ask world {do console_output( 
-							"ind.agenda_week: " + day + " -> "+ ind.agenda_week[day - 1], 
-							caller::"Synthetic Population.gaml",level::"trace"
-						);}
-					}
-					agenda_day[current_hour] <- act::inds;
-				} else {
-					agenda_day[current_hour] <- act::[];
 				}
-				agenda_day[end_hour] <- staying_home[0]::[];
-				current_hour <- end_hour + 1;
+				agenda_day[current_hour] <- act::inds;
+			} else {
+				agenda_day[current_hour] <- act::[];
 			}
+			agenda_day[end_hour] <- staying_home[0]::[];
+			current_hour <- end_hour + 1;
 		}
 		current_ind.agenda_week[day-1] <- agenda_day;
 	}
