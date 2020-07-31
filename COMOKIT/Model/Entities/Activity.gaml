@@ -91,6 +91,111 @@ global {
 		return any(possible_building_types);
 		
 	}
+	
+	/*
+	 * Makes it possible to add an activity to an agenda: </br>
+	 * <ul>
+	 *  <li> the_activity : the activity to add to the agenda
+	 *  <li> individual : the individual agent that will have the new activity in her agenda
+	 *  <li> days : keys represents days of the week, values represent the weights to choose among available days
+	 *  <li> days_a_week : number of days in a week to carry out this new activity
+	 *  <li> hours : keys represents hours of the day, values represent the weights to choose among available starting hours
+	 *  <li> only_one_a_day : boolean value to decide if activity can be done several time a day
+	 *  <li> lenght : the lenght (in hours - #h) of the activity 
+	 * </ul>
+	 */
+	action add_activity_to_agenda(
+		Activity the_activity, Individual individual, 
+		map<int,float> days, int days_a_week, 
+		map<int,float> hours, bool only_one_a_day <- true,
+		pair<int,int> length <- 1::1
+	) {
+		// List of the day to add the activity to
+		list<int> days_of_activity;
+		loop times:days_a_week { 
+			if not(empty(days)) {
+				days_of_activity <+ rnd_choice(days); 
+				days[] >- last(days_of_activity);
+			} 
+		} 
+		
+		// Over each day
+		loop d over: days_of_activity collect each-1 {
+			
+			// Elicits the hours to start this activity (possibly several times the day)
+			list<int> starting_hours;
+			if only_one_a_day { starting_hours <+ rnd_choice(hours); }
+			else { starting_hours <- hours.keys where (flip(hours[each])); }
+			
+			ask individual {
+				// Last return home activity
+				int end_day <- max(agenda_week[d].keys);
+				
+				// Iterate over each starting hour of the new activity during the day
+				loop h over:starting_hours {
+					
+					// Current activity during starting_hour
+					pair<Activity,list<Individual>> current_act <- agenda_week[d] contains_key h ? agenda_week[d][h] :
+						agenda_week[d][max(agenda_week[d].keys where (each < h))]; 
+					
+					// Replace it with the new activity
+					agenda_week[d][h] <- the_activity::[];
+					
+					// Length of the activity
+					int l <- rnd(length.key,length.value);
+					int current_hour <- min(23,h+l);
+					
+					// Skipped activities
+					map<int,pair<Activity,list<Individual>>> removed_activities;
+					loop nh from:1 to:l { 
+						if agenda_week[d] contains_key (h+nh) {
+							removed_activities[h+nh] <- agenda_week[d][h+nh];
+							agenda_week[d][] >- h+nh; 
+						}
+					}
+					
+					// If there is no skipped activity, then return to previous activity
+					if empty(removed_activities) {
+						agenda_week[d][current_hour] <- current_act;
+					} else if length(removed_activities) = 1 { 
+						// If one activity have been skipped, just move to it and carry on with normal agenda
+						agenda_week[d][current_hour] <- first(removed_activities.values);
+					} else { // There is more than one activity skipped
+						// That contains last return home activity
+						if removed_activities contains_key end_day {
+							agenda_week[d][current_hour] <- staying_home[0]::[];
+						} else {
+							// Fill available time with removed activities
+							int available_time <- agenda_week[d].keys[(agenda_week[d].keys index_of h + 1)]-current_hour;
+							if available_time > 0 {
+								int total_time_removed <- last(removed_activities.keys) - first(removed_activities.keys);
+								map<Activity,pair<int,list<Individual>>> r_act <- removed_activities.keys 
+									as_map (removed_activities[each].key::(each::removed_activities[each].value));
+								if total_time_removed <= available_time {
+									loop a over:r_act.keys {
+										agenda_week[d][current_hour] <- a::r_act[a].value;
+										if last(r_act.keys) != a {
+											current_hour <- current_hour + r_act[a].key - r_act[r_act.keys[r_act.keys index_of a + 1]].key;
+										} 
+									}
+								} else {
+									loop while:available_time > 0 {
+										Activity a <- any(r_act.keys where (r_act[each].key <= available_time));
+										if a = nil { a <- any(r_act.keys); }
+										agenda_week[d][current_hour] <- a::r_act[a].value;
+										available_time <- available_time + r_act[a].key - r_act[r_act.keys[r_act.keys index_of a + 1]].key;
+										r_act[] >- a; 
+									}
+								}
+							}
+						}
+					}
+				}	
+			}	
+		}
+		
+	}
+	
 }
 
 species Activity {
