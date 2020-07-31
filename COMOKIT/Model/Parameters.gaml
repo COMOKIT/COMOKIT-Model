@@ -142,6 +142,9 @@ global {
 	int number_children_max <- 3;
 	float proba_grandfather<-  0.2; //rate of grandfathers (individual with age > retirement_age) - num of grandfathers = N_grandfather * num of possible homes
 	float proba_grandmother<- 0.3; //rate of grandmothers (individual with age > retirement_age) - num of grandmothers = M_grandmother * num of possible homes
+	int school_age <- 3;
+	int active_age <- 16;
+	int high_education_age <- 24;
 	int retirement_age <- 55; //an individual older than (retirement_age + 1) are not working anymore
 	int max_age <- 100; //max age of individual
 	float nb_friends_mean <- 5.0; //Mean number of friends living in the considered area
@@ -157,12 +160,10 @@ global {
 	
 	 //building type that will be considered as home - for each type, the coefficient to apply to this type for this choice of working place
 	 //weight of a working place = area * this coefficient
-	map<string, float> possible_workplaces <-  map(["office"::1.5, "admin"::1.0, "industry"::0.5, "store"::0.5, "shop"::0.5,"bookstore"::0.5,
-		"gamecenter"::0.5, "restaurant"::0.5,"coffeeshop"::0.5,"caphe"::0.5, "caphe-karaoke"::0.5,"farm"::0.05, "repairshop"::0.5,"hostel"::0.5
-	]);
+	map<string, float> possible_workplaces;
 	
 	// building type that will considered as school (ou university) - for each type, the min and max age to go to this type of school.
-	map<list<int>,string> possible_schools <- [[3,18]::"school", [19,23]::"university"]; 
+	map<string, list<int>> possible_schools; 
 
 	
 	//Acvitity parameters 

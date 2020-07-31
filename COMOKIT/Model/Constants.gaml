@@ -53,6 +53,11 @@ global {
 	string gravity <- "gravity";
 	string closest <- "closest";
 	
+	//Modifier headers for configuration files
+	string WEIGHT <- "WEIGHT";
+	string RANGE <- "RANGE";
+	string SPLIT <- "::";
+	
 	//List of demogrphic attributes
 	string AGE <- "age";
 	string SEX <- "sex";

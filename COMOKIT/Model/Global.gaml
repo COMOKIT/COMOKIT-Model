@@ -81,11 +81,12 @@ global {
 		int min_student_age <- retirement_age;
 		int max_student_age <- 0;
 		map<list<int>,list<Building>> schools;
-		loop l over: possible_schools.keys {
-			max_student_age <- max(max_student_age, max(l));
-			min_student_age <- min(min_student_age, min(l));
-			string type <- possible_schools[l];
-			schools[l] <- (type in buildings_per_activity.keys) ? buildings_per_activity[type] : list<Building>([]);
+		loop t over: possible_schools.keys {
+			max_student_age <- max(max_student_age, max(possible_schools[t]));
+			min_student_age <- min(min_student_age, min(possible_schools[t]));
+			if schools contains_key possible_schools[t] { schools[possible_schools[t]] <<+ buildings_per_activity[t]; } 
+			else { schools[possible_schools[t]] <- buildings_per_activity[t]; }
+			
 		}
 		
 		do console_output("Start creating population from "+(csv_population!=nil?"file":"built-in generator"));	
@@ -97,12 +98,16 @@ global {
 		ask all_individuals {
 			do initialise_epidemio;
 		}
+		do console_output("Start assigning school and workplaces");
 		do assign_school_working_place(working_places,schools, min_student_age, max_student_age);
 		
+		do console_output("Start building friendship network");
 		do create_social_networks(min_student_age, max_student_age);	
 		
+		do console_output("Start defining agendas");
 		do define_agenda(min_student_age, max_student_age);	
 
+		do console_output("Introduce first infected cases");
 		ask num_infected_init among all_individuals {
 			do define_new_case;
 		}
@@ -115,23 +120,41 @@ global {
 	action init_building_type_parameters {
 		csv_parameters <- csv_file(building_type_per_activity_parameters,",",true);
 		matrix data <- matrix(csv_parameters);
+		// Modifiers can be weights, age range, or anything else
+		list<string> available_modifiers <- [WEIGHT,RANGE];
+		map<string,string> activity_modifiers;
 		//Loading the different rows number for the parameters in the file
 		loop i from: 0 to: data.rows-1{
 			string activity_type <- data[0,i];
+			bool modifier <- available_modifiers contains activity_type;
 			list<string> bd_type;
 			loop j from: 1 to: data.columns - 1 {
-				if (data[j,i] != nil) {
-					bd_type << data[j,i];
+				if (data[j,i] != nil) {	 
+					if modifier {
+						activity_modifiers[data[j,i-1]] <- data[j,i]; 
+					} else {
+						bd_type << data[j,i];
+					}
 				}
-				
 			}
-			activities[activity_type] <- bd_type;
+			if not(modifier) { activities[activity_type] <- bd_type; }
+		}
+		
+		loop acts over:activities[act_studying] where not(possible_schools contains_key each) {
+			pair age_range <- activity_modifiers contains_key acts ? 
+				pair(split_with(activity_modifiers[acts],SPLIT)) : pair(school_age::active_age); 
+			possible_schools[acts] <- [int(age_range.key),int(age_range.value)];
 		}
 		remove key: act_studying from:activities;
+		
+		loop actw over:activities[act_working] where not(possible_workplaces contains_key each) { 
+			possible_workplaces[actw] <- activity_modifiers contains_key actw ? 
+				float(activity_modifiers[actw]) : 1.0;
+		}
+		remove key: act_working from:activities;
+		
 		possible_homes<- activities[act_home];
 		remove key: act_home from:activities;
-		add all: activities[act_working] as_map (each::1.0) to: possible_workplaces;
-		remove key: act_working from:activities;
 	}
 
 	

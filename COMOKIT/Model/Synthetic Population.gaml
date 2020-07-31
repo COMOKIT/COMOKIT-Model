@@ -417,10 +417,15 @@ global {
 	//   schools :  map associating with each school Building its area (as a weight of the number of students that can be in the school)
 	//   min_student_age : minimum age to be in a school
 	//   max_student_age : maximum age to go to a school
-	action assign_school_working_place(map<Building,float> working_places,map<list<int>,list<Building>> schools, int min_student_age, int max_student_age) {
+	action assign_school_working_place(map<Building,float> working_places, map<list<int>,list<Building>> schools, int min_student_age, int max_student_age) {
 		// Assign to each individual a school and working_place depending of its age.
 		// in addition, school and working_place can be outside.
-		// Individuals too young or too old, do not have any working_place or school 
+		// Individuals too young or too old, do not have any working_place or school
+		
+		if empty(working_places) or empty(schools) {
+			error "There is no "+(empty(working_places)?"working place ":"school ")+" to bind agent with";
+		}
+		 
 		ask all_individuals {
 			last_activity <-first(staying_home);
 			do enter_building(home);
@@ -493,7 +498,7 @@ global {
 	// 
 	// Principles: each individual has a week agenda composed by 7 daily agendas (maps of hour::Activity).
 	//             The agenda depends on the age (students/workers, retired and young children).
-	//             Students and workers have an agenda with 6 working days and one leisure days.
+	//             Students and workers have an agenda with working and leisure days (see parameter non_working_days).
 	//             Retired have an agenda full of leisure days.
 	action define_agenda(int min_student_age, int max_student_age) {
 		if (csv_parameter_agenda != nil) {
