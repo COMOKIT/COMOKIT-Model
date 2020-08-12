@@ -120,7 +120,7 @@ global {
 		} 
 		
 		// Over each day
-		loop d over: days_of_activity collect each-1 {
+		loop d over: days_of_activity collect (each-1) {
 			
 			// Elicits the hours to start this activity (possibly several times the day)
 			list<int> starting_hours;
@@ -143,7 +143,11 @@ global {
 					
 					// Length of the activity
 					int l <- rnd(length.key,length.value);
-					int current_hour <- min(23,h+l);
+					int current_hour <- h+l;
+					if h+l>23 {
+						l <- l - (h + l - 23);
+						current_hour <- 23;
+					}
 					
 					// Skipped activities
 					map<int,pair<Activity,list<Individual>>> removed_activities;
@@ -193,7 +197,6 @@ global {
 				}	
 			}	
 		}
-		
 	}
 	
 }

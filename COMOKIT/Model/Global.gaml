@@ -98,14 +98,21 @@ global {
 		ask all_individuals {
 			do initialise_epidemio;
 		}
+		
 		do console_output("Start assigning school and workplaces");
+		float t <- machine_time;
 		do assign_school_working_place(working_places,schools, min_student_age, max_student_age);
+		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
 		
 		do console_output("Start building friendship network");
-		do create_social_networks(min_student_age, max_student_age);	
+		t <- machine_time;
+		do create_social_networks(min_student_age, max_student_age);
+		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
 		
 		do console_output("Start defining agendas");
-		do define_agenda(min_student_age, max_student_age);	
+		t <- machine_time;
+		do define_agenda(min_student_age, max_student_age);
+		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
 
 		do console_output("Introduce first infected cases");
 		ask num_infected_init among all_individuals {

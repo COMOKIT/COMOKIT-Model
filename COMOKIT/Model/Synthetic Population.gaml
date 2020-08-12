@@ -485,6 +485,7 @@ global {
 				}
 			}
 		}	
+		
 	}
 	
 	// ----------------- //
@@ -501,6 +502,8 @@ global {
 	//             Students and workers have an agenda with working and leisure days (see parameter non_working_days).
 	//             Retired have an agenda full of leisure days.
 	action define_agenda(int min_student_age, int max_student_age) {
+		
+		float t <- machine_time;
 		if (csv_parameter_agenda != nil) {
 			loop i from: 0 to: csv_parameter_agenda.contents.rows - 1 {
 				string parameter_name <- csv_parameter_agenda.contents[0,i];
@@ -547,9 +550,24 @@ global {
 		ask all_individuals {
 			loop times: 7 {agenda_week<<[];}
 		}
+		
+		do console_output("-- input parameters processed in "+(machine_time-t)/1000+"s","synthetic population.gaml");
+		t <- machine_time;
+		
+		list<Individual> active_people <- all_individuals where ((each.age < retirement_age) and (each.age >= min_student_age));
+		int nb_active_people <- length(active_people);
+		int loop_nb; 
 				
 		// Initialization for students or workers
-		ask all_individuals where ((each.age < retirement_age) and (each.age >= min_student_age))  {
+		ask active_people {
+			
+			loop_nb <- loop_nb+1;
+			if loop_nb mod (nb_active_people/10) = 0 {
+				ask world {do console_output(" || "+(loop_nb*1.0/nb_active_people)+" processed in "
+					+(machine_time-t)/1000+"s","synthetic population.gaml",first(levelList)
+				);}
+			}
+			
 			// Students and workers have an agenda similar for 6 days of the week ...
 			if ((is_unemployed and age >= max_student_age) or 
 				(age < max_student_age and flip(1.0-schoolarship_rate))
@@ -652,12 +670,18 @@ global {
 			}
 		}
 		
+		do console_output("-- active people agenda built in "+(machine_time-t)/1000+"s","synthetic population.gaml");
+		t <- machine_time;
+		
 		// Initialization for retired individuals
 		loop ind over: all_individuals where (each.age >= retirement_age) {
 			loop i from:1 to: 7 {
 				do manag_day_off(ind,i,possible_activities_without_rel,possible_activities_tot);
 			}
 		}
+		
+		do console_output("-- retired people agenda built in "+(machine_time-t)/1000+"s", "synthetic population.gaml");
+		t <- machine_time;
 		
 		ask all_individuals {
 			loop i from: 0 to: 6 {
@@ -670,6 +694,9 @@ global {
 				}
 			}
 		}
+		
+		do console_output("-- add return home action "+(machine_time-t)/1000+"s", "synthetic population.gaml");
+		t <- machine_time;
 		
 		if (choice_of_target_mode = gravity) {
 			ask all_individuals {
@@ -697,6 +724,9 @@ global {
 					}
 				}
 			}
+			
+			do console_output("-- gravity setup "+(machine_time-t)/1000+"s", "synthetic population.gaml");
+		
 		}
 				
 	}
