@@ -113,8 +113,9 @@ global {
 		t <- machine_time;
 		do define_agenda(min_student_age, max_student_age);
 		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
+		do console_output("Population of "+length(all_individuals)+" individuals");
 
-		do console_output("Introduce first infected cases");
+		do console_output("Introduce "+num_infected_init+" infected cases");
 		ask num_infected_init among all_individuals {
 			do define_new_case;
 		}
