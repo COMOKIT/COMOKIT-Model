@@ -177,7 +177,10 @@ global {
 		total_number_of_infected <- total_number_of_infected + _incidence;
 		_incidence <- 0;
 		Re <- mean(pseudo_individual where (each.nb_trans>0) collect (each.nb_trans));
-		if every(#month) {write string(int(cycle*step/#day))+" days = "+sample(Re)+" | "+sample(total_number_of_infected);}
+		if every(#month) {do console_output(string(int(cycle*step/#day))+" days = "
+			+sample(Re)+" | "+sample(total_number_of_infected),
+			string(self),first(levelList)
+		);}
 	}
 	
 	/*
