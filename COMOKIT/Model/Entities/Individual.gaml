@@ -254,9 +254,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	
 	//Reflex to trigger infection when outside of the commune
 	reflex become_infected_outside when: is_outside {
-		if flip(proba_outside_contamination_per_hour) {
-			do define_new_case;
-		}
+		ask outside {do outside_epidemiological_dynamic(myself);}
 	}
 	
 	//Reflex to trigger transmission to other individuals and environmental contamination
