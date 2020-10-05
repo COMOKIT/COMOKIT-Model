@@ -74,12 +74,13 @@ species Building {
 species outside parent: Building {
 	
 	string type <- "Outside";
+	int nb_contaminated;
 	
 	/*
 	 * The action that will be called to mimic epidemic outside of the studied area
 	 */
 	action outside_epidemiological_dynamic(BiologicalEntity indiv) {
-		if flip(proba_outside_contamination_per_hour) { ask indiv {do define_new_case;} }
+		if flip(proba_outside_contamination_per_hour) { ask indiv {do define_new_case; myself.nb_contaminated <- myself.nb_contaminated + 1;} }
 	}
 	
 }
