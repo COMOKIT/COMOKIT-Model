@@ -189,7 +189,7 @@ species DynamicSpatialPolicy parent: CompoundPolicy {
 	
 	action apply {
 		if(every(1#day)) {
-			list<Individual> infecteds <- Individual where(each.report_status = tested_positive);
+			list<Individual> infecteds <- all_individuals where(each.report_status = tested_positive);
 			ask targets {do die;}
 			targets <- [];
 			loop i over: infecteds {

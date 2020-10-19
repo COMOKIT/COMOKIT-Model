@@ -100,9 +100,14 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	bool is_already_positive <- false;
 	
 	//#############################################################
+	//Contact related variables
+	//#############################################################
+	agent infected_by;
+	int number_of_infected_individuals <- 0;
+	
+	//#############################################################
 	//Actions
 	//#############################################################
-	
 	
 	//Action to call when performing a test on a individual
 	action test_individual
@@ -186,6 +191,17 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		}
 
 	}
+	
+	// Allows to track who infect who and verify someone cannot be infected twice
+	action infect_someone(Individual succesful_contact) {
+		if succesful_contact.infected_by!=nil {error "One cannot be infected twice : "
+			+sample(succesful_contact)+" infected by "sample(self);
+		}
+		number_of_infected_individuals <- number_of_infected_individuals + 1; 
+		succesful_contact.infected_by <- self;
+		ask succesful_contact {do define_new_case;}
+	}
+	
 	//Action to call to update wearing a mask for a time step
 	action update_wear_mask
 	{
@@ -285,14 +301,14 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			//If the Individual is at home, perform transmission on the household level with a higher factor
 			if (is_at_home) {
 				float proba <- contact_rate*reduction_factor;
-				ask relatives where (each.is_at_home and flip(proba) and (each.state = susceptible)) {
-		 			do define_new_case;
+				loop succesful_contact over: relatives where (each.is_at_home and flip(proba) and (each.state = susceptible)) {
+					do infect_someone(succesful_contact);
 				}
 				if (current_place.nb_households > 1) {
 					proba <- proba * reduction_coeff_all_buildings_inhabitants;
-					ask current_place.individuals where (flip(proba) and (each.state = susceptible))
+					loop succesful_contact over:  current_place.individuals where (flip(proba) and (each.state = susceptible))
 			 		{
-			 			do define_new_case;
+			 			do infect_someone(succesful_contact);
 			 		}
 				}
 				
@@ -305,15 +321,13 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 					fellows <- fellows where (each.current_place = current_place); 
 				}
 				
-				ask fellows {
-					do define_new_case;
-				}
+				loop succesful_contact over: fellows { do infect_someone(succesful_contact); }
 				
 				//Perform slightly reduced transmission with people not being involved in the activity but still being present
 				proba <- proba * reduction_coeff_all_buildings_individuals;
-				ask current_place.individuals where (flip(proba) and (each.state = susceptible))
+				loop succesful_contact over: current_place.individuals where (flip(proba) and (each.state = susceptible))
 		 		{
-					do define_new_case;
+					do infect_someone(succesful_contact);
 		 		}
 		 	}
 		}
@@ -353,6 +367,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		{
 			if(flip(current_place.viral_load*successful_contact_rate_building))
 			{
+				infected_by <- current_place;
 				do define_new_case();
 			}
 		}

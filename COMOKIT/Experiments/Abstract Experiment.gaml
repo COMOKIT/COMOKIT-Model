@@ -142,7 +142,9 @@ experiment "Abstract Experiment" virtual: true {
 			}
 
 		}
-
+		
+		// OUTBREAK
+		
 		display "states_evolution_chart" virtual: true refresh: every(24#cycle) {
 			chart "Population epidemiological states evolution" background: #white axes: #black color: #black title_font: default legend_font: font("Helvetica", 14, #bold) {
 				data "Susceptible" value: length(all_individuals where (each.state = susceptible)) color: #green marker: false style: line;
@@ -158,7 +160,17 @@ experiment "Abstract Experiment" virtual: true {
 			chart "Cumulative incidence" background: #white axes: #black {
 				data "cumulative incidence" value: total_number_of_infected color: #red marker: false style: line;
 			}
-
+		}
+		
+		display "secondary_infection_distribution" virtual:true {
+			chart "Distribution of the number of people infected per individual" type: histogram {
+				loop i over:[pair(0,0),pair(1,1),pair(2,4),pair(5,9),pair(10,24),
+					pair(24,49),pair(50,99),pair(100,499),pair(500,10000)
+				] {
+					data i.key=i.value?string(i.key):string(i) 
+						value: all_individuals count (each.number_of_infected_individuals>=int(i.key) and each.number_of_infected_individuals<=int(i.value));
+				}
+			}
 		}
 		
 		// DEMOGRAPHICS
