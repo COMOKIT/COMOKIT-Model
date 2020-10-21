@@ -103,6 +103,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	//Contact related variables
 	//#############################################################
 	agent infected_by;
+	Activity infected_when;
 	int number_of_infected_individuals <- 0;
 	
 	//#############################################################
@@ -177,7 +178,8 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		{
 			add 1 to: total_incidence_age at: self.age;
 		}
-		
+		//Add the activity done while being infected
+		infected_when <- last_activity; 
 		
 		//Set the status of the Individual to latent (i.e. not infectious)
 		state <- "latent";
