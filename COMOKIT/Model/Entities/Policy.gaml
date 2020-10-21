@@ -44,6 +44,7 @@ species AbstractPolicy virtual: true {
 
 species NoPolicy parent: AbstractPolicy {
 
+	bool is_active { return false; }
 
 	action apply {
 	// Nothing to do
@@ -119,6 +120,9 @@ species FamilyOfPositiveAtHome parent: AbstractPolicy {
 species CompoundPolicy parent: AbstractPolicy {
 	list<AbstractPolicy> targets;
 
+	bool is_active {
+		return targets all_match (each.is_active());
+	}
 	
 	action apply {
 		ask targets {
@@ -246,9 +250,12 @@ species AllowedIndividualsPolicy parent: ForwardingPolicy {
  * A policy that restricts the duration of another policy. If before, or after, everything is allowed */
  
 species TemporaryPolicy parent: ForwardingPolicy {
-	date start <- starting_date;
-	bool started;
-	bool finished;
+	date start_date <- starting_date;
+	
+	date start;
+	bool started <- false;
+	bool finished <- false;
+	
 	int duration; // in seconds
 	
 	
@@ -259,7 +266,7 @@ species TemporaryPolicy parent: ForwardingPolicy {
 	action apply {
 		invoke apply();
 		if (!started and !finished) {
-			if (target.is_active()) {
+			if (target.is_active() and current_date >= start_date) {
 				started <- true;
 				finished <- false;
 				start <- current_date;
