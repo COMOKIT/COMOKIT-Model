@@ -59,9 +59,9 @@ experiment "Abstract Experiment" virtual: true {
 		string dfp <- with_path_termination(_datasets_folder_path);
 		string csfd <- with_path_termination(_case_study_folder_name);
 		if not (folder_exists(dfp)) {
-			error "Datasets folder does not exist : " + datasets_folder_path;
+			error "Datasets folder does not exist : " + _datasets_folder_path;
 		} else if not (folder_exists(dfp + csfd)) {
-			error "Case study folder  does not exist : " + dfp + case_study_folder_name;
+			error "Case study folder  does not exist : " + dfp + _case_study_folder_name;
 		}
 		return dfp + csfd;
 	}

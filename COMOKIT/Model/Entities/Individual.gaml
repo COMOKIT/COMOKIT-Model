@@ -197,7 +197,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	// Allows to track who infect who and verify someone cannot be infected twice
 	action infect_someone(Individual succesful_contact) {
 		if succesful_contact.infected_by!=nil {error "One cannot be infected twice : "
-			+sample(succesful_contact)+" infected by "sample(self);
+			+sample(succesful_contact)+" infected by "+sample(self);
 		}
 		number_of_infected_individuals <- number_of_infected_individuals + 1; 
 		succesful_contact.infected_by <- self;
