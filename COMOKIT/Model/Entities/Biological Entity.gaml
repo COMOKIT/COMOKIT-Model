@@ -157,6 +157,7 @@ species BiologicalEntity control:fsm{
 	//Reflex to trigger transmission to other individuals and environmental contamination
 	reflex infect_others when: is_infectious
 	{
+		float start <- BENCHMARK ? machine_time : 0.0;
 		//Computation of the reduction of the transmission when being asymptomatic/presymptomatic and/or wearing mask
 		float reduction_factor <- 1.0;
 		if(is_asymptomatic)
@@ -173,18 +174,23 @@ species BiologicalEntity control:fsm{
 				do define_new_case;
 			}
 	 	}
-		
+		if BENCHMARK {bench["Biological Entity.infect_others"] <- bench["Biological Entity.infect_others"] + machine_time - start; }
 	}
+	
 	//Reflex to update the time before death when an entity need to be admitted in ICU, but is not in ICU
 	reflex update_time_before_death when: (clinical_status = need_ICU) and (is_ICU = false) {
+		float start <- BENCHMARK ? machine_time : 0.0;
 		time_before_death <- time_before_death -1;
 		if(time_before_death<=0){
 			clinical_status <- dead;
 			state <- removed;
 		}
+		if BENCHMARK {bench["Biological Entity.update_time_before_death"] <- bench["Biological Entity.update_time_before_death"] + machine_time - start; }
 	}
+	
 	//Reflex used to update the time in ICU of the entity, and change the entity status accordingly
 	reflex update_time_in_ICU when: (clinical_status = need_ICU) and (is_ICU = true) {
+		float start <- BENCHMARK ? machine_time : 0.0;
 		time_ICU <- time_ICU -1;
 		if(time_ICU<=0){
 			//In the case of the entity being treated in ICU, but still dying
@@ -195,6 +201,7 @@ species BiologicalEntity control:fsm{
 				clinical_status <- need_hospitalisation;
 			}
 		}
+		if BENCHMARK {bench["Biological Entity.update_time_in_ICU"] <- bench["Biological Entity.update_time_in_ICU"] + machine_time - start; }
 	}
 	
 	

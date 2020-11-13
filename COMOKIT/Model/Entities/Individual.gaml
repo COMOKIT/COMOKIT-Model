@@ -272,12 +272,15 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	
 	//Reflex to trigger infection when outside of the commune
 	reflex become_infected_outside when: is_outside {
+		float start <- BENCHMARK ? machine_time : 0.0;
 		ask outside {do outside_epidemiological_dynamic(myself);}
+		if BENCHMARK {bench["Individual.become_infected_outside"] <- bench["Individual.become_infected_outside"] + machine_time - start;}
 	}
 	
 	//Reflex to trigger transmission to other individuals and environmental contamination
 	reflex infect_others when: not is_outside and is_infectious
 	{
+		float start <- BENCHMARK ? machine_time : 0.0;
 		//Computation of the reduction of the transmission when being asymptomatic/presymptomatic and/or wearing mask
 		float reduction_factor <- viral_factor;
 		if(is_asymptomatic)
@@ -300,9 +303,10 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		
 		//Perform human to human transmission
 		if allow_transmission_human {
+			float proba <- contact_rate*reduction_factor;
 			//If the Individual is at home, perform transmission on the household level with a higher factor
 			if (is_at_home) {
-				float proba <- contact_rate*reduction_factor;
+				
 				loop succesful_contact over: relatives where (each.is_at_home and flip(proba) and (each.state = susceptible)) {
 					do infect_someone(succesful_contact);
 				}
@@ -317,7 +321,6 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			}
 			else {
 				//Perform transmission with people doing the activity explicitly with the Individual
-				float proba <- contact_rate*reduction_factor;
 				list<Individual> fellows <- activity_fellows where (flip(proba) and (each.state = susceptible));
 				if (species(last_activity) != Activity) {
 					fellows <- fellows where (each.current_place = current_place); 
@@ -333,11 +336,13 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		 		}
 		 	}
 		}
+		if BENCHMARK {bench["Individual.infect_others"] <- bench["Individual.infect_others"] + machine_time - start;}
 	}
 	
 
 	//Reflex to execute the agenda	
 	reflex execute_agenda when:clinical_status!=dead{
+		float start <- BENCHMARK ? machine_time : 0.0;
 		pair<Activity,list<Individual>> act <- agenda_week[current_date.day_of_week - 1][current_date.hour];
 		if (act.key != nil) {
 			if (Authority[0].allows(self, act.key)) {
@@ -361,10 +366,12 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 				}
 			}
 		}
+		if BENCHMARK {bench["Individual.execute_agenda"] <- bench["Individual.execute_agenda"] + machine_time - start;}
 	}
 	
 	//Reflex to update disease cycle
 	reflex update_epidemiology when:(state!=removed) {
+		float start <- BENCHMARK ? machine_time : 0.0;
 		if(allow_transmission_building and (not is_infected)and(self.current_place!=nil))
 		{
 			if(flip(current_place.viral_load*successful_contact_rate_building))
@@ -374,23 +381,33 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			}
 		}
 		do update_wear_mask();
+		if BENCHMARK {bench["Individual.update_epidemiology"] <- bench["Individual.update_epidemiology"] + machine_time - start;}
 	}
 	
 	//Reflex to add to death monitor when dead
 	reflex add_to_dead when:(clinical_status=dead)and(is_counted_dead=false){
+		float start <- BENCHMARK ? machine_time : 0.0;
 		total_number_deaths <- total_number_deaths+1;
 		is_counted_dead <- true;
+		if BENCHMARK {bench["Individual.add_to_dead"] <- bench["Individual.add_to_dead"] + machine_time - start;}
 	}
+	
 	//Reflex to add to hospitalized monitor when dead
 	reflex add_to_hospitalised when:(is_hospitalised)and(is_counted_hospitalised=false){
+		float start <- BENCHMARK ? machine_time : 0.0;
 		total_number_hospitalised <- total_number_hospitalised+1;
 		is_counted_hospitalised <- true;
+		if BENCHMARK {bench["Individual.add_to_hospitalised"] <- bench["Individual.add_to_hospitalised"] + machine_time - start;}
 	}
+	
 	//Reflex to add to ICU monitor when dead
 	reflex add_to_ICU when:(is_ICU)and(is_counted_ICU=false){
+		float start <- BENCHMARK ? machine_time : 0.0;
 		total_number_ICU <- total_number_ICU+1;
 		is_counted_ICU <- true;
+		if BENCHMARK {bench["Individual.add_to_ICU"] <- bench["Individual.add_to_ICU"] + machine_time - start;}
 	}
+	
 	aspect default {
 		if not is_outside {
 			draw shape color: state = latent ? #pink : ((state = symptomatic)or(state=asymptomatic)or(state=presymptomatic)? #red : #green);

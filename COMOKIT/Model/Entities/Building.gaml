@@ -58,7 +58,9 @@ species Building {
 	}
 	//Action to update the viral load (i.e. trigger decreases)
 	reflex update_viral_load when: allow_transmission_building{
+		float start <- BENCHMARK ? machine_time : 0.0;
 		viral_load <- max(0.0,viral_load - basic_viral_decrease/nb_step_for_one_day);
+		if BENCHMARK {bench["Building.update_viral_load"] <- bench["Building.update_viral_load"] + machine_time - start; }
 	}
 
 	aspect default {

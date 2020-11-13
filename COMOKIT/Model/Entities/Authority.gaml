@@ -36,13 +36,17 @@ species Authority {
 	ActivitiesMonitor act_monitor;
 	
 	reflex apply_policy {
+		float start <- BENCHMARK ? machine_time : 0.0;
 		ask policy {
 			do apply();
 		}
+		if BENCHMARK {bench["Authority.apply_policy"] <- bench["Authority.apply_policy"] + machine_time - start;}
 	}
 
 	reflex init_stats when: every(#day) and (act_monitor != nil) {
+		float start <- BENCHMARK ? machine_time : 0.0;
 		ask act_monitor { do restart_day;}
+		if BENCHMARK {bench["Authority.init_stats"] <- bench["Authority.init_stats"] + machine_time - start;}
 	}
 	
 	action update_monitor(Activity act, bool allowed) {

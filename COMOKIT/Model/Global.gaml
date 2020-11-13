@@ -427,5 +427,28 @@ global {
 			}
 		}
 	}
+	
+	// --------- //
+	// BENCHMARK //
+	// --------- //
+	
+	bool BENCHMARK <- false;
+	
+	map<string,float> bench <- [
+		"Abstract Batch Experiment.observerPattern"::0.0,
+		"Authority.apply_policy"::0.0,
+		"Authority.init_stats"::0.0,
+		"Biological Entity.infect_others"::0.0,
+		"Biological Entity.update_time_before_death"::0.0,
+		"Biological Entity.update_time_in_ICU"::0.0,
+		"Building.update_viral_load"::0.0,
+		"Individual.become_infected_outside"::0.0,
+		"Individual.infect_others"::0.0,
+		"Individual.execute_agenda"::0.0,
+		"Individual.update_epidemiology"::0.0,
+		"Individual.add_to_dead"::0.0,
+		"Individual.add_to_hospitalised"::0.0,
+		"Individual.add_to_ICU"::0.0
+	];
 
 }

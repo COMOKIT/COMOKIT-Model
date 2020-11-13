@@ -41,6 +41,7 @@ global{
 	
 	// Save data at every cycle on the simulation
 	reflex observerPattern when: batch_enable_detailedCSV {
+		float start <- BENCHMARK ? machine_time : 0.0;
 		if(cycle=0)
 		{
 			save building_infections.keys type:"csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_building.csv" rewrite:true header:false;
@@ -88,6 +89,7 @@ global{
 				length(subIndividual where (each.clinical_status = dead))
 			] type: "csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_" + (i - ageCategory) + "-" + (i-1) + ".csv" rewrite: (cycle = 0);
 		}
+		if BENCHMARK { bench["Abstract Batch Experiment.observerPattern"] <- bench["Abstract Batch Experiment.observerPattern"] + machine_time - start;}
 	}
 }
 
