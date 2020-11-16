@@ -24,9 +24,12 @@ global {
 	string type_shp_attribute <- "type";
 	string flat_shp_attribute <- "flats";
 	
+	// TODO : turn it into a proper parameter (Parameters.gaml) or other 
+	bool BUILDING_TRANSMISSION_STRATEGY <- false;
+	
 }
 
-species Building {
+species Building schedules:Building where (each.is_active) {
 	//Viral load of the building
 	float viral_load <- 0.0;
 	//Type of the building
@@ -37,6 +40,12 @@ species Building {
 	list<Individual> individuals;
 	//Number of households in the building
 	int nb_households;
+	
+	// attribute that tells if the building needs to be schedul
+	bool is_active <- allow_transmission_building and viral_load > 0.0 ? true : false; 
+	
+	//---------//
+	// ACTIONS //
 	
 	//Action to return the neighbouring buildings
 	list<Building> get_neighbors {
@@ -56,12 +65,57 @@ species Building {
 			viral_load <- min(1.0,viral_load+value);
 		}
 	}
+	
+	//----------//
+	// REFLEXES //
+	
 	//Action to update the viral load (i.e. trigger decreases)
 	reflex update_viral_load when: allow_transmission_building{
 		float start <- BENCHMARK ? machine_time : 0.0;
 		viral_load <- max(0.0,viral_load - basic_viral_decrease/nb_step_for_one_day);
+		is_active <- viral_load > 0 ? true : false;
 		if BENCHMARK {bench["Building.update_viral_load"] <- bench["Building.update_viral_load"] + machine_time - start; }
 	}
+	
+		/*
+	 * Replace the infectious spreading by susceptible getting infected with building based monitoring of the process <br/>
+	 * 
+	 * TODO : better have to trigger infect_occupants when an infectious agent enter the building
+	 * 
+	 * 
+	 */
+	reflex infect_occupants when: BUILDING_TRANSMISSION_STRATEGY {
+		// List of susceptible and infectious agents
+		list<Individual> agent_infectious <- individuals where (each.is_infectious);
+		if empty(agent_infectious) {is_active <- false; /* TODO : is it correct to stop a relfex like this -> */return;}
+		list<Individual> agent_susceptibles <- individuals where (each.state = susceptible);
+		
+		// Computed factor of infectious, with mask and asymptomatic reduction factors
+		float proba <- mean(agent_infectious collect (each.contact_rate));
+		float viralfactor <- mean(agent_infectious collect (each.viral_factor));
+		float maskfactor <- mean(agent_infectious collect (each.is_wearing_mask ? each.factor_contact_rate_wearing_mask : 0));
+		float asympomaticfactor <- mean(agent_infectious collect (each.is_asymptomatic ? each.factor_contact_rate_asymptomatic : 1));
+		
+		// Probability for a susceptible to be infected
+		proba <- proba * viralfactor * maskfactor * asympomaticfactor;
+		
+		// Infection process
+		ask agent_susceptibles {
+			
+			// Determine close and loose contacts
+			int close_infected <- length(agent_infectious inter (relatives+activity_fellows));
+			float relationshipfactor <- (close_infected + (length(agent_infectious) - close_infected) * (is_at_home ? 
+				reduction_coeff_all_buildings_inhabitants : reduction_coeff_all_buildings_individuals
+			)) / length(agent_infectious);
+			proba <- proba * relationshipfactor;
+			ask world {do console_output("Proba to be infected = "+proba,"Building.gaml");}
+			
+			ask agent_infectious { if flip(proba) { do infect_someone(myself); break; } }
+		}
+	}
+	
+	//---------------//
+	// VISUALIZATION //
 
 	aspect default {
 		draw shape color: #gray empty: true;

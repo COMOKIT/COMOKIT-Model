@@ -35,9 +35,10 @@ global
 	
 	map<string, int> building_infections;
 	map<int,int> total_incidence_age;
+	
 }
 
-species Individual parent: BiologicalEntity schedules: shuffle(Individual where (each.clinical_status != dead)){
+species Individual parent: BiologicalEntity schedules: shuffle(Individual where (each.clinical_status != dead)) {
 	//Age of the individual
 	int age;
 	//Sex of the individual
@@ -259,6 +260,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	action enter_building(Building b) {
 		if (current_place != nil ){
 			current_place.individuals >> self;
+			if is_infectious and BUILDING_TRANSMISSION_STRATEGY {b.is_active <- true;}
 		}	
 		current_place <- b;
 		is_at_home <- current_place = home;
@@ -278,7 +280,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	}
 	
 	//Reflex to trigger transmission to other individuals and environmental contamination
-	reflex infect_others when: not is_outside and is_infectious
+	reflex infect_others when: not BUILDING_TRANSMISSION_STRATEGY and not is_outside and is_infectious
 	{
 		float start <- BENCHMARK ? machine_time : 0.0;
 		//Computation of the reduction of the transmission when being asymptomatic/presymptomatic and/or wearing mask
