@@ -24,9 +24,6 @@ global {
 	string type_shp_attribute <- "type";
 	string flat_shp_attribute <- "flats";
 	
-	// TODO : turn it into a proper parameter (Parameters.gaml) or other 
-	bool BUILDING_TRANSMISSION_STRATEGY <- false;
-	
 }
 
 species Building schedules:Building where (each.building_schedule) {
@@ -99,13 +96,12 @@ species Building schedules:Building where (each.building_schedule) {
 		proba <- proba * viralfactor * maskfactor * asympomaticfactor;
 		
 		// Infection process
-		// ask agent_susceptibles {
-		loop s_agent over:agent_susceptibles {
+		ask agent_susceptibles {
 			
 			// Determine close and loose contacts
-			int close_infected <- length(agent_infectious inter (s_agent.relatives+s_agent.activity_fellows));
+			int close_infected <- length(agent_infectious inter (relatives+activity_fellows));
 			
-			float relationshipfactor <- (close_infected + (length(agent_infectious) - close_infected) * (s_agent.is_at_home ? 
+			float relationshipfactor <- (close_infected + (length(agent_infectious) - close_infected) * (is_at_home ? 
 				reduction_coeff_all_buildings_inhabitants : reduction_coeff_all_buildings_individuals
 			)) / length(agent_infectious);
 			proba <- proba * relationshipfactor;
@@ -113,8 +109,9 @@ species Building schedules:Building where (each.building_schedule) {
 			
 			int iter <- 0;
 			loop while:iter<length(agent_infectious) {
-				if flip(proba) {ask agent_infectious[iter] {do infect_someone(s_agent);} iter <- length(agent_infectious);}
-				else {iter <- iter+1;}
+				// TODO : comment the line to have a functional model
+				if flip(proba) {ask agent_infectious[iter] {do infect_someone(myself);} iter <- length(agent_infectious);} else {iter <- iter+1;}
+				
 			}
 		}
 		
