@@ -25,6 +25,7 @@ import "../Abstract Experiment.gaml"
 
 global {
 	
+	string case_study_folder_name <- "Sample";
 	bool BUILDING_TRANSMISSION_STRATEGY <- true;
 	
 	action define_policy{   
@@ -36,16 +37,12 @@ global {
 		
 }
 
-experiment "No Containment" parent: "Abstract Experiment" autorun: true {
+experiment "Alternative transmission processes" parent: "Abstract Experiment" autorun: true {
 	output {
 		layout #split editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
 		
 		display "Main" parent: default_display {}
 		display "Plot" parent: states_evolution_chart refresh: every(#day) {}	
 		
-		display "Population age" parent: demographics_age refresh: every(#week) { }
-		display "Population gender" parent: demographics_sex refresh: every(#week)  { }
-		display "Population employment status" parent: demographics_employed refresh: every(#week) { }
-		display "Household size" parent: demographics_household_size refresh: every(#week)  { }
 	}
 }

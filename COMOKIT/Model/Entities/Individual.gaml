@@ -38,7 +38,7 @@ global
 	
 }
 
-species Individual parent: BiologicalEntity schedules: shuffle(Individual where (each.clinical_status != dead)) {
+species Individual parent: BiologicalEntity schedules: shuffle(all_individuals where (each.clinical_status != dead)) {
 	//Age of the individual
 	int age;
 	//Sex of the individual
@@ -260,7 +260,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	action enter_building(Building b) {
 		if (current_place != nil ){
 			current_place.individuals >> self;
-			if is_infectious and BUILDING_TRANSMISSION_STRATEGY {b.is_active <- true;}
+			if is_infectious and BUILDING_TRANSMISSION_STRATEGY {b.building_schedule <- true;}
 		}	
 		current_place <- b;
 		is_at_home <- current_place = home;
