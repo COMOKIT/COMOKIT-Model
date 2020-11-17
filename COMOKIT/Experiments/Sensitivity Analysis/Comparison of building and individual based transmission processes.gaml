@@ -54,11 +54,11 @@ experiment "Alternative transmission processes" parent: "Abstract Experiment" au
 experiment "Transmission processes comparison" parent: "Abstract Experiment" autorun: true {
 
 	action _init_ {
-		string case_study <- "Sample";
+		string case_study <- "Vinh Phuc";
 		float simulation_seed <- rnd(2000.0);
 		
 		/*
-		 * Initialize a simulation without disease transmission  
+		 * Initialize a simulation where buildings manage the transmission  
 		 */	
 		create simulation with: [case_study_folder_name::case_study, seed::simulation_seed, BUILDING_TRANSMISSION_STRATEGY::true, BENCHMARK::true] {
 			name <- "Building based transmission process";
@@ -66,9 +66,21 @@ experiment "Transmission processes comparison" parent: "Abstract Experiment" aut
 				policy <- create_no_containment_policy();
 			}
 		}
+		
+		/*
+		 * Initialize a simulation where buildings manage the transmission with inverse probability 
+		 */	
+		create simulation with: [case_study_folder_name::case_study, seed::simulation_seed, 
+			BUILDING_TRANSMISSION_STRATEGY::true, INVERSE_PROBABILITY::true, BENCHMARK::true
+		] {
+			name <- "Building based transmission process";
+			ask Authority {
+				policy <- create_no_containment_policy();
+			}
+		}
 
 		/*
-		 * Initialize a simulation with only transmission through environment 
+		 * Initialize a simulation where infectious individuals  manage the transmission
 		 */	
 		create simulation with: [case_study_folder_name::case_study, seed::simulation_seed, BUILDING_TRANSMISSION_STRATEGY::false, BENCHMARK::true]{
 			name <- "Individual based transmission process";

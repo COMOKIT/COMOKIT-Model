@@ -61,8 +61,9 @@ global {
 	bool allow_transmission_human <- true; //Allowing human to human transmission
 	bool allow_transmission_building <- true; //Allowing environment contamination and infection
 	bool allow_viral_individual_factor <- false; //Allowing individual effects on the beta and viral release
-	// TODO : turn it into a proper parameter (Parameters.gaml) or other 
+	//Building based transmission 
 	bool BUILDING_TRANSMISSION_STRATEGY <- false;
+	bool INVERSE_PROBABILITY <- false;
 	
 	//Environmental contamination
 	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period

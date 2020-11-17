@@ -24,7 +24,6 @@ global {
 	string type_shp_attribute <- "type";
 	string flat_shp_attribute <- "flats";
 	
-	bool AGGREGATED_TRANSMISSION <- false;
 }
 
 species Building schedules:shuffle(Building where (each.building_schedule)) {
@@ -83,60 +82,87 @@ species Building schedules:shuffle(Building where (each.building_schedule)) {
 		float start <- machine_time;
 		// List of susceptible and infectious agents
 		list<Individual> agent_infectious <- individuals where (each.is_infectious);
-		if empty(agent_infectious) {
+		list<Individual> agent_susceptibles <- individuals where (each.state = susceptible);
+		if empty(agent_infectious) or empty(agent_susceptibles) {
 			building_schedule <- false;
 		} else {
-		
-			// Computed factor of infectious, with mask and asymptomatic reduction factors
-			map<Individual,list<float>> infectious_individuals <- agent_infectious as_map (each::
-				[each.contact_rate,each.viral_factor,
-					(each.is_wearing_mask ? each.factor_contact_rate_wearing_mask : 1.0),
-					(each.is_asymptomatic ? each.factor_contact_rate_asymptomatic : 1)
-				]
-			);
-			
-			// Probability for a susceptible to be infected
-			list<float> probas <- [];
-			if AGGREGATED_TRANSMISSION {
-				probas <- list_with(length(infectious_individuals), 
-					mean(infectious_individuals.keys collect infectious_individuals[each][0]) * 
-					mean(infectious_individuals.keys collect infectious_individuals[each][1]) * 
-					mean(infectious_individuals.keys collect infectious_individuals[each][2]) * 
-					mean(infectious_individuals.keys collect infectious_individuals[each][3])
-				);
+			if INVERSE_PROBABILITY {
+				loop i over:agent_infectious {
+					// probability of an interaction with i to lead to an infection
+					float i_proba <- i.contact_rate * i.viral_factor * 
+						(i.is_wearing_mask ? i.factor_contact_rate_wearing_mask : 1) *
+						(i.is_asymptomatic ? i.factor_contact_rate_asymptomatic : 1);
+					
+					// Close interactions
+					list<Individual> close_susceptibles <- agent_susceptibles where (remove_duplicates(i.relatives+i.activity_fellows) contains each);
+					
+					// Probability that none of the close interactions lead to an infection
+					float i_inverse_close <- (1 - i_proba) ^ length(close_susceptibles); 
+					loop while:not(flip(i_inverse_close)) and not(empty(close_susceptibles)) {
+						ask any(close_susceptibles) {
+							close_susceptibles >- self;
+							agent_susceptibles >- self;
+							do define_new_case;
+							infected_by <- i;
+						}
+						i.number_of_infected_individuals <- i.number_of_infected_individuals + 1;
+					}
+					
+					// loose interactions
+					float i_inverse_other <- (1 - i_proba * (i.is_at_home ? reduction_coeff_all_buildings_inhabitants : reduction_coeff_all_buildings_individuals)) 
+						^ (length(agent_susceptibles) - length(close_susceptibles));
+					loop while:not(flip(i_inverse_other)) and not(empty(agent_susceptibles)) {
+						ask any(agent_susceptibles) {
+							agent_susceptibles >- self;
+							do define_new_case;
+							infected_by <- i;
+						}
+						i.number_of_infected_individuals <- i.number_of_infected_individuals + 1; 
+					}
+				}
 			} else {
+				// Computed factor of infectious, with mask and asymptomatic reduction factors
+				map<Individual,list<float>> infectious_individuals <- agent_infectious as_map (each::
+					[each.contact_rate,each.viral_factor,
+						(each.is_wearing_mask ? each.factor_contact_rate_wearing_mask : 1.0),
+						(each.is_asymptomatic ? each.factor_contact_rate_asymptomatic : 1)
+					]
+				);
+				
+				// Probability for a susceptible to be infected
+				list<float> probas <- [];
 				loop i over:infectious_individuals.keys {
 					probas <+ infectious_individuals[i][0] * infectious_individuals[i][1] * infectious_individuals[i][2] * infectious_individuals[i][3];
 				}
-			}
-			
-			// Infection process
-			loop i over: individuals where (each.state = susceptible) {
 				
-				int iter <- 0;
-				loop while:iter<length(agent_infectious) {
-					// TODO : understand why it is possible to manipulate list<Individual> but not direct reference to an Individual
-					list<Individual> infectious_one <- [agent_infectious[iter]];
+				// Infection process
+				loop i over: agent_susceptibles {
 					
-					float relationshipfactor <- (i.relatives+i.activity_fellows) contains first(infectious_one) ? 1 :
-						(i.is_at_home ? reduction_coeff_all_buildings_inhabitants : reduction_coeff_all_buildings_individuals);
-					
-					if flip(probas[iter]*relationshipfactor) {
-						ask i {
-							// TODO : understand why it turns the model impossible to launch
-							/*ask infectious_one {do infect_someone(i);} */
-							/*do infected_by_someone(first(infectious_one));*/
-							do define_new_case;
-							infected_by <- first(infectious_one);
-						} 
-						first(infectious_one).number_of_infected_individuals <- first(infectious_one).number_of_infected_individuals + 1; 
-						iter <- length(agent_infectious);
-					} else {
-						iter <- iter+1;
+					int iter <- 0;
+					loop while:iter<length(agent_infectious) {
+						// TODO : understand why it is possible to manipulate list<Individual> but not direct reference to an Individual
+						list<Individual> infectious_one <- [agent_infectious[iter]];
+						
+						float relationshipfactor <- (i.relatives+i.activity_fellows) contains first(infectious_one) ? 1 :
+							(i.is_at_home ? reduction_coeff_all_buildings_inhabitants : reduction_coeff_all_buildings_individuals);
+						
+						if flip(probas[iter]*relationshipfactor) {
+							ask i {
+								// TODO : understand why it turns the model impossible to launch
+								/*ask infectious_one {do infect_someone(i);} */
+								/*do infected_by_someone(first(infectious_one));*/
+								do define_new_case;
+								infected_by <- first(infectious_one);
+							} 
+							first(infectious_one).number_of_infected_individuals <- first(infectious_one).number_of_infected_individuals + 1; 
+							iter <- length(agent_infectious);
+						} else {
+							iter <- iter+1;
+						}
+						
 					}
 					
 				}
-				
 			}
 		}
 		bench["Building.infect_occupants"] <- bench["Building.infect_occupants"] + machine_time - start; 
