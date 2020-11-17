@@ -66,18 +66,6 @@ experiment "Transmission processes comparison" parent: "Abstract Experiment" aut
 				policy <- create_no_containment_policy();
 			}
 		}
-		
-		/*
-		 * Initialize a simulation where buildings manage the transmission with inverse probability 
-		 */	
-		create simulation with: [case_study_folder_name::case_study, seed::simulation_seed, 
-			BUILDING_TRANSMISSION_STRATEGY::true, INVERSE_PROBABILITY::true, BENCHMARK::true
-		] {
-			name <- "Building based transmission process";
-			ask Authority {
-				policy <- create_no_containment_policy();
-			}
-		}
 
 		/*
 		 * Initialize a simulation where infectious individuals  manage the transmission
