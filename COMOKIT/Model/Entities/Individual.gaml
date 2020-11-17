@@ -38,7 +38,7 @@ global
 	
 }
 
-species Individual parent: BiologicalEntity schedules: shuffle(all_individuals where (each.clinical_status != dead)) {
+species Individual parent: BiologicalEntity schedules: shuffle(Individual where (each.clinical_status != dead or each.unscheduled)) {
 	//Age of the individual
 	int age;
 	//Sex of the individual
@@ -85,6 +85,8 @@ species Individual parent: BiologicalEntity schedules: shuffle(all_individuals w
 	list<Individual> activity_fellows;
 	Activity last_activity;
 	map<Activity, map<string,list<Building>>> building_targets;
+	
+	bool unscheduled <- false;
 	
 	//#############################################################
 	//Intervention related attributes
