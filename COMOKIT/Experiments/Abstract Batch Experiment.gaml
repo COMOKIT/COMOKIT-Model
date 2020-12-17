@@ -70,23 +70,23 @@ global{
 				// Number of new cases (incidence) per step per age category
 				total_incidence,				
 				// Number of hospitalisations per step per age category
-				length(subIndividual where(each.clinical_status=need_hospitalisation)),
+				subIndividual count (each.clinical_status=need_hospitalisation),
 				// Number of ICU per step per age category
-				length(subIndividual where(each.clinical_status=need_ICU)),
+				subIndividual count (each.clinical_status=need_ICU),
 				// Number of susceptible per step per age category
-				length(subIndividual where (each.state=susceptible)),
+				subIndividual count (each.state=susceptible),
 				// Number of exposed per step per age category
-				length(subIndividual where (each.is_latent())),
+				subIndividual count (each.is_latent()),
 				// Number of asymptomatic permanent per step per age category
-				length(subIndividual where (each.state = asymptomatic)),
+				subIndividual count (each.state = asymptomatic),
 				// Number of asymptomatic temporary per step per age category
-				length(subIndividual where (each.state = presymptomatic)),
+				subIndividual count (each.state = presymptomatic),
 				// Number of symptomatic per step per age category
-				length(subIndividual where (each.state = symptomatic)),
+				subIndividual count (each.state = symptomatic),
 				// Number of recovered per step per age category
-				length(subIndividual where (each.clinical_status = recovered)),			
+				subIndividual count (each.clinical_status = recovered),			
 				// Number of dead per step per age category
-				length(subIndividual where (each.clinical_status = dead))
+				subIndividual count (each.clinical_status = dead)
 			] type: "csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_" + (i - ageCategory) + "-" + (i-1) + ".csv" rewrite: (cycle = 0);
 		}
 		if BENCHMARK { bench["Abstract Batch Experiment.observerPattern"] <- bench["Abstract Batch Experiment.observerPattern"] + machine_time - start;}

@@ -40,8 +40,7 @@ global {
 	 * 
 	 * The algorithm also bound agent with working places, schools and homes using related methods in Global.gaml #assign_school_working_place </p>
 	 */
-	action create_population_from_file(map<Building,float> working_places,map<list<int>,list<Building>> schools, list<Building> homes,
-		int min_student_age, int max_student_age
+	action create_population_from_file(list<Building> homes, int min_student_age, int max_student_age
 	) {
 		
 		map<string,list<Individual>> households <- [];
@@ -184,10 +183,13 @@ global {
 				match EMP { unemployed_var <- row[1]; unemployed_map <- map<string, bool>(read_var_map(row)); }
 				match HID { householdID <- row[1]; }
 				match IID { individualID <- row[1]; }
-				default {error "Failed to map variable "+var+" from Synthetic Entity Parameters.csv
+				default {error "Failed to map variable "+var+" from Population Records.csv
 						\n Should be in "+[AGE,SEX,EMP,HID,IID];}
 			}
 		}
+		//write sample(age_map);
+		//write sample(gender_map);
+		//write sample(unemployed_map);
 	}
 	
 	/*
