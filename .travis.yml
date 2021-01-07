@@ -76,11 +76,12 @@ script:
 before_deploy:
   # Remove latest release
   - LATEST_COMOKIT_URL=$(node -pe 'JSON.parse(process.argv[1]).url' "$(curl -s  https://api.github.com/repos/COMOKIT/COMOKIT-Model/releases/tags/latest)")
-  - if [ $LATEST_COMOKIT_HPC_URL == undefined ]; then 
+  - |
+    if [ $LATEST_COMOKIT_URL == undefined ]; then 
       echo "No continuous release to delete"; 
     else 
-      echo $LATEST_COMOKIT_HPC_URL;
-      "curl -H \"Authorization: token ${GITHUB_API_KEY}\" -X DELETE $LATEST_COMOKIT_URL";
+      echo $LATEST_COMOKIT_URL;
+      bash -c "curl -H \"Authorization: token ${GITHUB_API_KEY}\" -H \"Accept: application/vnd.github.v3+json\" -X DELETE ${LATEST_COMOKIT_URL}";
     fi
   # Update tag
   - git remote add master https://${GITHUB_API_KEY}@github.com/COMOKIT/COMOKIT-Model.git
