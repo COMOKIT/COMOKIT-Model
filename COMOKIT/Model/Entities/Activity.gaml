@@ -222,7 +222,7 @@ species Activity {
 		}	
 		switch choice_of_target_mode {
 			match closest {
-				return [bds closest_to self::[]];
+				return [bds closest_to i::[]];
 			}
 			match gravity {
 				return i.building_targets[self][type] as_map (each::[]);
