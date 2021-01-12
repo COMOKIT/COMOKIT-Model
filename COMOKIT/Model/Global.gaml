@@ -40,19 +40,14 @@ global {
 	list<string> possible_homes ;  //building type that will be considered as home	
 	map<string, list<string>> activities; //list of activities, and for each activity type, the list of possible building type
 	
-	
-	
 	map<int,map<string,list<string>>> map_epidemiological_parameters;
 	action global_init {
-		do init_building_type_parameters;
 		
 		do console_output("global init");
-		if (shp_boundary != nil) {
-			create Boundary from: shp_boundary;
-		}
-		if (shp_buildings != nil) {
-			create Building from: shp_buildings with: [type::string(read(type_shp_attribute)), nb_households::max(1,int(read(flat_shp_attribute)))];
-		}
+		do init_building_type_parameters;
+		
+		if (shp_boundary != nil) { create Boundary from: shp_boundary; }
+		do create_buildings();
 		
 		loop aBuilding_Type over: Building collect(each.type)
 		{
@@ -62,45 +57,37 @@ global {
 		add 0 at: "Hospital" to: building_infections;
 		add 0 at: "Outside" to: building_infections;
 		do console_output("building and boundary : done");
+		
 		create outside;
 		the_outside <- first(outside);
 		do create_activities;
-		do console_output("Activities : done");
 		do create_hospital;
+		do console_output("Activities and special buildings (hospitals and outside) : done");
 		
-		list<Building> homes <- Building where (each.type in possible_homes);
+		list<Building> homes <- Building where (each.type in possible_homes);	
 		map<string,list<Building>> buildings_per_activity <- Building group_by (each.type);
-		
-		map<Building,float> working_places;
-		loop wp over: possible_workplaces.keys {
-			if (wp in buildings_per_activity.keys) {
-					working_places <- working_places +  (buildings_per_activity[wp] as_map (each:: (each.shape.area * possible_workplaces[wp])));  
-			}
-		}
-		
-		int min_student_age <- retirement_age;
-		int max_student_age <- 0;
-		map<list<int>,list<Building>> schools;
-		loop t over: possible_schools.keys {
-			max_student_age <- max(max_student_age, max(possible_schools[t]));
-			min_student_age <- min(min_student_age, min(possible_schools[t]));
-			if schools contains_key possible_schools[t] { schools[possible_schools[t]] <<+ buildings_per_activity[t]; } 
-			else { schools[possible_schools[t]] <- buildings_per_activity[t]; }
-			
-		}
-		
-		do console_output("Start creating population from "+(csv_population!=nil?"file":"built-in generator"));	
+		map<Building,float> working_places <- gather_available_workplaces(buildings_per_activity);
+		map<list<int>,list<Building>> schools <- gather_available_schoolplaces(buildings_per_activity);
+		int min_student_age <- min(schools.keys accumulate (each));
+		int max_student_age <- max(schools.keys accumulate (each));
+		do console_output("Finding homes, workplaces and schools : done");
+				
+		do console_output("Start creating and locating population from "+(csv_population!=nil?"file":"built-in generator"));	
+		float t <- machine_time;
 		if(csv_population != nil) {
 			do create_population_from_file(homes, min_student_age, max_student_age);
 		} else {
 			do create_population(working_places, schools, homes, min_student_age, max_student_age);
 		}
-		ask all_individuals {
-			do initialise_epidemio;
-		}
+		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
+		
+		do console_output("Start init epidemiological state of people");
+		t <- machine_time;
+		ask all_individuals { do initialise_epidemio; }
+		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
 		
 		do console_output("Start assigning school and workplaces");
-		float t <- machine_time;
+		t <- machine_time;
 		do assign_school_working_place(working_places,schools, min_student_age, max_student_age);
 		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
 		
@@ -164,7 +151,39 @@ global {
 		possible_homes<- activities[act_home];
 		remove key: act_home from:activities;
 	}
-
+	
+	// Creating the buildings from a file (should be overloaded to add more attributes to buildings)
+	action create_buildings {
+		if (shp_buildings != nil) { 
+			create Building from: shp_buildings with: [type::string(read(type_shp_attribute)), nb_households::max(1,int(read(flat_shp_attribute)))];
+		}
+		else {error "The mandatory shapefile of buildings is missing !";}
+	}
+		
+	// gather all workplaces with the area
+	map<Building,float> gather_available_workplaces(map<string,list<Building>> blds_per_activity) {
+		map<Building,float> working_places <- [];
+		loop wp over: possible_workplaces.keys {
+			if (wp in blds_per_activity.keys) {
+					working_places <- working_places +  (blds_per_activity[wp] as_map (each:: (each.shape.area * possible_workplaces[wp])));  
+			}
+		}
+		return working_places;
+	}
+	
+	// gather all schoolplaces according to student age range
+	map<list<int>,list<Building>> gather_available_schoolplaces(map<string,list<Building>> blds_per_activity) {
+		int min_student_age <- retirement_age;
+		int max_student_age <- 0;
+		map<list<int>,list<Building>> schools;
+		loop t over: possible_schools.keys {
+			max_student_age <- max(max_student_age, max(possible_schools[t]));
+			min_student_age <- min(min_student_age, min(possible_schools[t]));
+			if schools contains_key possible_schools[t] { schools[possible_schools[t]] <<+ blds_per_activity[t]; } 
+			else { schools[possible_schools[t]] <- blds_per_activity[t]; }
+		}
+		return schools;
+	}
 	
 	//Action used to initialise epidemiological parameters according to the file and parameters forced by the user
 	action init_epidemiological_parameters
