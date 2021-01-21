@@ -58,8 +58,13 @@ species Authority {
 	}
 
 	bool allows (Individual i, Activity activity) { 
+		float start <- BENCHMARK ? machine_time : 0.0;
 		bool allowed <- policy.is_allowed(i,activity);
 		do update_monitor(activity, allowed);
+		if BENCHMARK {
+			bench["Authority.allows|action"] <- (bench contains_key "Authority.allows|action" ? 
+				bench["Authority.allows|action"] : 0.0) + machine_time - start;
+		}
 		return allowed ;
 	}
 	

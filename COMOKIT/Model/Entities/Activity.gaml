@@ -206,6 +206,7 @@ species Activity {
 	map<string,list<Building>> buildings;
 	
 	map<Building,list<Individual>> find_target (Individual i) {
+		float start <- BENCHMARK ? machine_time : 0.0; 
 		if not empty(i.activity_fellows ) {
 			Individual fellow <- i.activity_fellows first_with (each.last_activity = self);
 			if (fellow!= nil) {
@@ -215,11 +216,15 @@ species Activity {
 		if flip(proba_go_outside) {
 			return [the_outside::[]];
 		}
+		
 		string type <- world.building_type_choice(i,types_of_building);
 		list<Building> bds <- buildings[type];
-		if (empty(bds)) {
-			return [the_outside::[]];
-		}	
+		
+		if (empty(bds)) { return [the_outside::[]]; }	
+		if BENCHMARK { 
+			bench["Activity.find_target"] <- (bench contains_key "Activity.find_target" ? 
+				bench["Activity.find_target"] : 0.0) + machine_time - start;
+		}
 		switch choice_of_target_mode {
 			match closest {
 				return [bds closest_to i::[]];
@@ -242,13 +247,12 @@ species Activity {
 species visiting_neighbor parent: Activity {
 	string name <- act_neighbor;
 	map<Building,list<Individual>> find_target (Individual i) {
-		map<Building,list<Individual>> targets;
-		loop neigh over: i.current_place.get_neighbors() where not empty(each.individuals) {
-			Individual i <- one_of(neigh.individuals);
-			if (i != nil) {
-				targets[neigh] <- i.relatives + i;
-			}
-			
+		float start <- BENCHMARK ? machine_time : 0.0;
+		map<Building,list<Individual>> targets <- i.current_place.get_neighbors() where not empty(each.individuals)
+			as_map (each::each.individuals);
+		if BENCHMARK { 
+			bench["Activity.visiting_neighbor.find_target"] <- (bench contains_key "Activity.visiting_neighbor.find_target" ? 
+				bench["Activity.visiting_neighbor.find_target"] : 0.0) + machine_time - start;
 		}
 		return targets;
 	}
@@ -257,9 +261,14 @@ species visiting_neighbor parent: Activity {
 species visiting_friend parent: Activity {
 	string name <- act_friend;
 	map<Building,list<Individual>> find_target (Individual i) {
+		float start <- BENCHMARK ? machine_time : 0.0;
 		map<Building,list<Individual>> targets;
 		loop friend over: (i.friends where each.is_at_home) {
 			targets[i.home] <- i.relatives + i;
+		}
+		if BENCHMARK { 
+			bench["Activity.visiting_friend.find_target"] <- (bench contains_key "Activity.visiting_friend.find_target" ? 
+				bench["Activity.visiting_friend.find_target"] : 0.0) + machine_time - start;
 		}
 		return targets;
 	}
