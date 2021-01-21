@@ -128,28 +128,34 @@ global {
 					if modifier {
 						activity_modifiers[data[j,i-1]] <- data[j,i]; 
 					} else {
-						bd_type << data[j,i];
+						if data[j,i] != nil or data[j,i] != "" {bd_type << data[j,i];}
 					}
 				}
 			}
 			if not(modifier) { activities[activity_type] <- bd_type; }
 		}
 		
-		loop acts over:activities[act_studying] where not(possible_schools contains_key each) {
-			pair age_range <- activity_modifiers contains_key acts ? 
-				pair(split_with(activity_modifiers[acts],SPLIT)) : pair(school_age::active_age); 
-			possible_schools[acts] <- [int(age_range.key),int(age_range.value)];
+		if activities contains_key act_studying {
+			loop acts over:activities[act_studying] where not(possible_schools contains_key each) {
+				pair age_range <- activity_modifiers contains_key acts ? 
+					pair(split_with(activity_modifiers[acts],SPLIT)) : pair(school_age::active_age); 
+				possible_schools[acts] <- [int(age_range.key),int(age_range.value)];
+			}
+			remove key: act_studying from:activities;
 		}
-		remove key: act_studying from:activities;
 		
-		loop actw over:activities[act_working] where not(possible_workplaces contains_key each) { 
-			possible_workplaces[actw] <- activity_modifiers contains_key actw ? 
-				float(activity_modifiers[actw]) : 1.0;
+		if activities contains_key act_working {
+			loop actw over:activities[act_working] where not(possible_workplaces contains_key each) { 
+				possible_workplaces[actw] <- activity_modifiers contains_key actw ? 
+					float(activity_modifiers[actw]) : 1.0;
+			}
+			remove key: act_working from:activities;
 		}
-		remove key: act_working from:activities;
 		
-		possible_homes<- activities[act_home];
-		remove key: act_home from:activities;
+		if activities contains_key act_home {
+			possible_homes<- activities[act_home];
+			remove key: act_home from:activities;
+		}
 	}
 	
 	// Creating the buildings from a file (should be overloaded to add more attributes to buildings)
