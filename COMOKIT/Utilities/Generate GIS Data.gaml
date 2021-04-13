@@ -238,26 +238,26 @@ global {
 			}
 			//define the type of the buildings
 			ask Building parallel: parallel{
-			if (amenity_att != nil) {
+			if (amenity_att != nil) and amenity_att != ""{
 				type <- amenity_att;
-			} if (shop_att != nil) {
+			} else if (shop_att != nil) and shop_att != "" {
 				type <- shop_att;
 			}
-			 if (office_att != nil) {
+			else if (office_att != nil)and office_att != "" {
 				type <- office_att;
 			}
-			 if (leisure_att != nil) {
+			else  if (sport_att != nil)and sport_att != "" {
+				type <- sport_att;
+			}  else if (military_att != nil)and military_att != "" {
+				type <- military_att;
+			} else if (historic_att != nil) and historic_att != ""{
+				type <- historic_att;
+			} else if (leisure_att != nil) and leisure_att != "" {
 				type <- leisure_att;
 			}
-			 if (sport_att != nil) {
-				type <- sport_att;
-			}  if (military_att != nil) {
-				type <- military_att;
-			}  if (historic_att != nil) {
-				type <- historic_att;
-			}  if (building_att != nil) {
+			else if (building_att != nil)and building_att != "" {
 				type <- building_att;
-			} 
+			}
 		}
 			
 			//delete building with no type
