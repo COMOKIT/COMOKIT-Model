@@ -11,7 +11,7 @@
 ******************************************************************/
 
 
-model CoVid19
+model generate_gis_data
 
 global {
 	
@@ -93,7 +93,8 @@ global {
 	//coeffient used to apply a buffer to the building (distance = buffer_coeff * width of a pixel).
 	float buffer_coeff <- 0.5 min: 0.0;
 	
-
+	//parallel computation
+	bool parallel <- true;
 	/* ------------------------------------------------------------------ 
 	 * 
 	 *              DYNAMIC VARIABLES
@@ -123,6 +124,9 @@ global {
 		
 		//creation of the boundary of the studied area
 		create Boundary from: data_file;
+		if (not file_exists(dataset_path +"/boundary.shp")) {
+			save Boundary crs:"EPSG:3857" to:dataset_path +"/boundary.shp" type: shp ;
+		}
 		
 		//load OSM data (if necessary)
 		if (use_OSM_data) {
@@ -204,7 +208,7 @@ global {
 			
 			//create the building agents from the data
 			create Building from: geom with:[building_att:: get("building"),shop_att::get("shop"), historic_att::get("historic"), 
-				office_att::get("office"), military_att::get("military"),sport_att::get("sport"),leisure_att::get("lesure"),
+				office_att::get("office"), military_att::get("military"),sport_att::get("sport"),leisure_att::get("leisure"),
 				height::float(get("height")), flats::int(get("building:flats")), levels::int(get("building:levels"))
 			];
 			
@@ -215,9 +219,9 @@ global {
 			list<Building> bds <- Building where (each.shape.area > 0);
 			
 			//use the agent with a point geometry to define the type of building;
-			ask Building where (each.shape.area = 0) {
-				list<Building> bd <- bds overlapping self;
-				ask bd {
+			ask Building where ((each.shape.area = 0) and (each.shape.perimeter = 0)) parallel: parallel {
+				list<Building> bd <- Building overlapping self;
+				ask bd where (each.shape.area > 0) {
 					sport_att  <- myself.sport_att;
 					office_att  <- myself.office_att;
 					military_att  <- myself.military_att;
@@ -226,36 +230,35 @@ global {
 					shop_att  <- myself.shop_att;
 					historic_att <- myself.historic_att;
 				}
-				do die; 
 			}
-			
+				
 			//remove building which are too small.
 			ask Building where (each.shape.area < min_area_buildings) {
 				do die;
 			}
 			//define the type of the buildings
-			ask Building {
-				if (amenity_att != nil) {
-					type <- amenity_att;
-				}else if (shop_att != nil) {
-					type <- shop_att;
-				}
-				else if (office_att != nil) {
-					type <- office_att;
-				}
-				else if (leisure_att != nil) {
-					type <- leisure_att;
-				}
-				else if (sport_att != nil) {
-					type <- sport_att;
-				} else if (military_att != nil) {
-					type <- military_att;
-				} else if (historic_att != nil) {
-					type <- historic_att;
-				} else {
-					type <- building_att;
-				} 
+			ask Building parallel: parallel{
+			if (amenity_att != nil) {
+				type <- amenity_att;
+			} if (shop_att != nil) {
+				type <- shop_att;
 			}
+			 if (office_att != nil) {
+				type <- office_att;
+			}
+			 if (leisure_att != nil) {
+				type <- leisure_att;
+			}
+			 if (sport_att != nil) {
+				type <- sport_att;
+			}  if (military_att != nil) {
+				type <- military_att;
+			}  if (historic_att != nil) {
+				type <- historic_att;
+			}  if (building_att != nil) {
+				type <- building_att;
+			} 
+		}
 			
 			//delete building with no type
 			ask Building where (each.type = nil or each.type = "") {
@@ -263,7 +266,7 @@ global {
 			}
 			
 			//define the number of flats for each building;
-			ask Building {
+			ask Building  parallel: parallel{
 				if (flats = 0) {
 					if type = "apartments" {
 						if (levels = 0) {levels <- 1;}
@@ -636,6 +639,34 @@ species Building {
 species Boundary {
 	aspect default {
 		draw shape color: #violet empty: true;
+	}
+}
+
+experiment wizard_xp autorun: true {
+	action _init_ {
+		string title <- "Main properties";
+		map<string, map> results <-  wizard("Generation of the GIS environment",[ 
+			wizard_page(title,"Definition of the main properties" ,[
+					enter("Data set path", directory),
+					enter("Boundary file", file),
+					enter("Use OSM data", bool, true),
+					enter("Use Google Map data", bool, false),
+					enter("Download Bing Satellite image", bool, true)
+				], font("Arial", 10 , #bold))
+			] 
+		);
+		if empty(results) or results[title] = nil or empty(results[title]) {
+			ask world {do die;}
+		} else {
+			map values <- results[title];
+			create simulation with: (
+				dataset_path:: values["Data set path"],
+				data_file:: shape_file(values["Boundary file"]),
+				use_OSM_data:: bool(values["Use OSM data"]),
+				use_google_map_data:: bool(values["Use Google Map data"]),
+				download_satellite_image:: bool(values["Download Bing Satellite image"])
+			);	
+		}
 	}
 }
 
