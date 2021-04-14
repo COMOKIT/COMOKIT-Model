@@ -22,10 +22,13 @@ global {
 	 * ------------------------------------------------------------------
 	 */
 	//define the path to the dataset folder
-	string dataset_path <- "../Datasets/Test Generate GIS Data";	
-	
+	//string dataset_path <- "../Datasets/Test Generate GIS Data";	
+	string name_of_dataset <- "Test Generate GIS Data";
+	string project_path <- "..";
+	string dataset_path <- project_path +"/Datasets/" + name_of_dataset;
+	string boundary_path <- dataset_path + "/boundary.shp";
 	//mandatory: define the bounds of the studied area
-	file data_file <-shape_file(dataset_path + "/boundary.shp");
+	file data_file <-shape_file(boundary_path);
 	
 	//if true, GAMA is going to use OSM data to create the building file
 	bool use_OSM_data <- true;
@@ -120,6 +123,7 @@ global {
 	
 	
 	init {
+		
 		write "Start the pre-processing process";
 		
 		//creation of the boundary of the studied area
@@ -164,6 +168,9 @@ global {
 					}
 				}
 			}
+		}
+		ask Building where (each.type = nil) {
+			do die;
 		}
 	
 		//save the building using the pseudo mercator crs with the type, flats, heights and levels attributes
@@ -260,10 +267,7 @@ global {
 			}
 		}
 			
-			//delete building with no type
-			ask Building where (each.type = nil or each.type = "") {
-				do die;
-			}
+		
 			
 			//define the number of flats for each building;
 			ask Building  parallel: parallel{
@@ -647,7 +651,8 @@ experiment wizard_xp autorun: true {
 		string title <- "Main properties";
 		map<string, map> results <-  wizard("Generation of the GIS environment",[ 
 			wizard_page(title,"Definition of the main properties" ,[
-					enter("Data set path", directory),
+					enter("Project path", directory),
+					enter("Dataset name", "New dataset"),
 					enter("Boundary file", file),
 					enter("Use OSM data", bool, true),
 					enter("Use Google Map data", bool, false),
@@ -655,17 +660,37 @@ experiment wizard_xp autorun: true {
 				], font("Arial", 10 , #bold))
 			] 
 		);
-		if empty(results) or results[title] = nil or empty(results[title]) {
-			ask world {do die;}
-		} else {
+			
+		if not empty(results) and results[title] != nil and not empty(results[title]) {
 			map values <- results[title];
+			gama.pref_gis_auto_crs <- false;
+			gama.pref_gis_default_crs <- 3857;
+			
+	
 			create simulation with: (
-				dataset_path:: values["Data set path"],
-				data_file:: shape_file(values["Boundary file"]),
+				name_of_dataset:: values["Dataset name"],
+				project_path:: values["Project path"],
+				boundary_path:: values["Boundary file"],
+				data_file::shape_file(values["Boundary file"]),
 				use_OSM_data:: bool(values["Use OSM data"]),
 				use_google_map_data:: bool(values["Use Google Map data"]),
 				download_satellite_image:: bool(values["Download Bing Satellite image"])
 			);	
+		}
+	}
+	output {
+		display map type: opengl draw_env: false background: #black{
+			image (file_exists(googlemap_path) ? (googlemap_path): "white.png") transparency: 0.2;
+			image (file_exists(dataset_path+"/satellite.png") ? (dataset_path+"/satellite.png"): "white.png")  transparency: 0.2;
+			
+			graphics "tile" {
+				if bounds_tile != nil {
+					draw bounds_tile color: #red empty: true;
+				}
+			}
+			species Boundary;
+			species Building;
+			species marker;
 		}
 	}
 }
