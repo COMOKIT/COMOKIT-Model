@@ -28,7 +28,7 @@ global {
 
 species Building {
 	//Viral load of the building
-	float viral_load <- 0.0;
+	map<virus,float> viral_load <- [original_strain::0.0];
 	//Type of the building
 	string type;
 	//Building surrounding
@@ -50,16 +50,17 @@ species Building {
 	}
 	
 	//Action to add viral load to the building
-	action add_viral_load(float value){
+	action add_viral_load(float value, virus v <- original_strain){
 		if(allow_transmission_building)
 		{
-			viral_load <- min(1.0,viral_load+value);
+			viral_load[v] <- min(1.0,viral_load[v]+value);
 		}
 	}
+	
 	//Action to update the viral load (i.e. trigger decreases)
 	reflex update_viral_load when: allow_transmission_building{
 		float start <- BENCHMARK ? machine_time : 0.0;
-		viral_load <- max(0.0,viral_load - basic_viral_decrease/nb_step_for_one_day);
+		loop v over:viral_load.keys {viral_load[v] <- max(0.0,viral_load[v] - basic_viral_decrease/nb_step_for_one_day);}
 		if BENCHMARK {bench["Building.update_viral_load"] <- bench["Building.update_viral_load"] + machine_time - start; }
 	}
 

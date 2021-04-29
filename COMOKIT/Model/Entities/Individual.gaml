@@ -22,6 +22,7 @@ import "../Functions.gaml"
 import "Activity.gaml"
 import "Building.gaml"
 import "Biological Entity.gaml"
+import "Virus.gaml"
 
 
 global
@@ -159,7 +160,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	}
 	
 	//Action to call to define a new case, obtaining different time to key events
-	action define_new_case
+	action define_new_case(virus infectious_agent)
 	{
 		//Add the new case to the total number of infected (not mandatorily known)
 		total_number_of_infected <- total_number_of_infected +1;
@@ -181,6 +182,9 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		//Add the activity done while being infected
 		infected_when <- last_activity; 
 		
+		// Infected by
+		viral_agent <- infectious_agent;
+		
 		//Set the status of the Individual to latent (i.e. not infectious)
 		state <- "latent";
 		if(world.is_asymptomatic(self.age)){
@@ -201,7 +205,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		}
 		number_of_infected_individuals <- number_of_infected_individuals + 1; 
 		succesful_contact.infected_by <- self;
-		ask succesful_contact {do define_new_case;}
+		ask succesful_contact {do define_new_case(myself.viral_agent);}
 	}
 	
 	//Action to call to update wearing a mask for a time step
@@ -282,7 +286,8 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	{
 		float start <- BENCHMARK ? machine_time : 0.0;
 		//Computation of the reduction of the transmission when being asymptomatic/presymptomatic and/or wearing mask
-		float reduction_factor <- viral_factor;
+		float reduction_factor <- viral_factor * viral_agent.get_infectiousness_factor();
+		
 		if(is_asymptomatic)
 		{
 			reduction_factor <- reduction_factor * factor_contact_rate_asymptomatic;
@@ -297,7 +302,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		{
 			ask current_place
 			{
-				do add_viral_load(reduction_factor*myself.basic_viral_release);
+				do add_viral_load(reduction_factor*myself.basic_viral_release, myself.viral_agent);
 			}
 		}
 		
@@ -346,6 +351,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		pair<Activity,list<Individual>> act <- agenda_week[current_date.day_of_week - 1][current_date.hour];
 		if (act.key != nil) {
 			if (Authority[0].allows(self, act.key)) {
+				ask world {do console_output(sample(myself)+" is doing activity "+act.key, sample(self));}
 				int nb_fellows <- Authority[0].limitGroupActivity(self, act.key) - 1;
 					if (nb_fellows > 0) {
 					activity_fellows <-nb_fellows among act.value;
@@ -374,11 +380,14 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		float start <- BENCHMARK ? machine_time : 0.0;
 		if(allow_transmission_building and (not is_infected)and(self.current_place!=nil))
 		{
-			if(flip(current_place.viral_load*successful_contact_rate_building))
-			{
-				infected_by <- current_place;
-				do define_new_case();
+			loop v over: current_place.viral_load.keys {
+				if(flip(current_place.viral_load[v]*successful_contact_rate_building))
+				{
+					infected_by <- current_place;
+					do define_new_case(v);
+				}	
 			}
+			
 		}
 		do update_wear_mask();
 		if BENCHMARK {bench["Individual.update_epidemiology"] <- bench["Individual.update_epidemiology"] + machine_time - start;}

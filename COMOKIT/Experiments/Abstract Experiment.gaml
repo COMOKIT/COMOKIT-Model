@@ -102,7 +102,7 @@ experiment "Abstract Experiment" virtual: true {
 
 			image file: file_exists(dataset_path + "/satellite.png") ? (dataset_path + "/satellite.png") : "../Utilities/white.png" transparency: 0.5 refresh: false;
 			species Building {
-				draw shape color: viral_load > 0 ? rgb(255 * viral_load, 0, 0) : #lightgrey empty: true width: 2;
+				draw shape color: viral_load[original_strain] > 0 ? rgb(255 * viral_load[original_strain], 0, 0) : #lightgrey empty: true width: 2;
 			}
 
 			agents "Individual" value: all_individuals where not (each.is_outside) {

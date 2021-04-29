@@ -15,6 +15,7 @@ model BiologicalEntity
 
 /* Insert your model definition here */
 import "../Functions.gaml"
+import "Virus.gaml"
 
 //The biological entity is the mother species of the Individual agent, it could be used for other kinds of agent that
 // could be infected by the virus
@@ -57,6 +58,9 @@ species BiologicalEntity control:fsm{
 	int last_test <- 0;
 	//Age of the entity
 	int age;
+	
+	//The viral agent that infect this biological entity
+	virus viral_agent;
 	//Factor for the beta and the basic viral release
 	float viral_factor;
 	//Factor of the contact rate for asymptomatic and presymptomatic individuals (might be age-dependent, hence its presence here)
@@ -142,7 +146,7 @@ species BiologicalEntity control:fsm{
 	}
 	
 	//Action to define a new case, initialising it to latent and computing its latent period, and whether or not it will be symptomatic
-	action define_new_case{
+	action define_new_case(virus infectious_agent <- original_strain) {
 		state <- "latent";
 		if(world.is_asymptomatic(self.age)){
 			is_symptomatic <- false;

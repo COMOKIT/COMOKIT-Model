@@ -1,0 +1,93 @@
+/**
+* Name: Virus
+* Based on the internal empty template. 
+* Author: kevinchapuis
+* Tags:  
+*/
+
+
+model Virus
+
+/*
+ * Represent Sars-CoV-2 virus and all variants
+ * 
+ * For a global overview of strain evolution and prevalence: https://nextstrain.org/ncov/global
+ * 
+ */
+global {
+	
+	/*
+	 * The very first strain of Sars-Cov-2
+	 */
+	virus original_strain <- create_variant(nil,"",1.0,1.0,1.0);
+	
+	/*
+	 * List of variants of concern, as stated by WHO
+	 * source : https://www.cdc.gov/coronavirus/2019-ncov/cases-updates/variant-surveillance/variant-info.html#Concern
+	 */
+	list<sarscov2> VOC <- [
+		create_variant(sarscov2(original_strain),"B.1.1.7",1.1,1.5,1.4), // UK
+		create_variant(sarscov2(original_strain),"P.1",2.0,1.0,1.0), // Brazil
+		create_variant(sarscov2(original_strain),"B.1.351",2.0,1.5,1.0) // South-Africa
+	];
+	
+	/*
+	 * List of variants of interest, as stated by WHO
+	 * source : https://www.who.int/publications/m/item/weekly-epidemiological-update-on-covid-19---27-april-2021
+	 */
+	list<sarscov2> VOI <- [
+		 // B.1.615 FRANCE
+		create_variant(sarscov2(original_strain),"B.1.617",1.5,1.5,1.0) // INDIA
+	];
+	
+	sarscov2 create_variant(sarscov2 source, string variant_name, float immune_evasion, float infectiousness, float severity) {
+		create sarscov2 with:[
+			source_of_mutation::source,
+			name::variant_name,
+			immune_evasion::source=nil?immune_evasion:source.immune_evasion*immune_evasion,
+			infectiousness::source=nil?infectiousness:source.infectiousness*infectiousness,
+			phenotype_shift::source=nil?severity:source.phenotype_shift*severity
+		] returns:variants;
+		return first(variants);
+	}
+	
+}
+
+species virus virtual:true {
+	
+	/*
+	 * The original strain of this virus
+	 */
+	virus source_of_mutation;
+	
+	float get_infectiousness_factor {return 1.0;}
+	
+}
+
+/*
+ * Every attribute of the virus is based upon 
+ */
+species sarscov2 parent:virus {
+	
+	/*
+	 * TODO : clarify wehther it should be general or be tight to immune response to each sarscov2 and vax
+	 * e.g. CDC makes a difference between immune evastion from vax and monoclonal antibody treatments
+	 */ 
+	float immune_evasion;
+	
+	// Should impact the viral load of infected people
+	float infectiousness;
+	float get_infectiousness_factor {return infectiousness;}
+
+	/*
+	 * TODO : To be validated
+	 * Should impact the expected set of clinical outcomes : 
+	 * - simple hypothesis : the risk to develop a sever form of the disease
+	 * - complex hypothesis : piece by piece changes in the clinical picture, e.g. probability to develop symptoms or not, sever forms, timelines shift (onset to symptoms, infectious period, etc.)
+	 */ 
+	float phenotype_shift;
+	
+	// The ability of the virus to escape from testing
+	float test_prone <- 1.0;
+	
+}
