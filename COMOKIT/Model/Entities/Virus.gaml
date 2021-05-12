@@ -19,7 +19,7 @@ global {
 	/*
 	 * The very first strain of Sars-Cov-2
 	 */
-	virus original_strain <- create_variant(nil,"",1.0,1.0,1.0);
+	virus original_strain <- create_variant(nil,"SARS-CoV-2",1.0,1.0,1.0);
 	
 	/*
 	 * List of variants of concern, as stated by WHO
@@ -40,12 +40,26 @@ global {
 		create_variant(sarscov2(original_strain),"B.1.617",1.5,1.5,1.0) // INDIA
 	];
 	
-	sarscov2 create_variant(sarscov2 source, string variant_name, float immune_evasion, float infectiousness, float severity) {
+	/*
+	 * Create sarscov2 variants
+	 * 
+	 * - source : original strain from which this variant mutate from
+	 * - variant_name : name of the variant following "pango lineage"
+	 * 
+	 * => All numerical value hereafter are express based on a {1,1,1} profile of the source vector, 
+	 * meaning that a profile of {2,2,2} multiply by two every characteristics of the original (whatever value they can be)
+	 * 
+	 * - immune_evad : how much it can disrupt shielded measures from the source (vax, immunity due to prior infection or antibiotic)
+	 * - infect : how much more it is infectious compare to the source
+	 * - severity : how it is worse in term of clinical picture compare to original
+	 * 
+	 */
+	sarscov2 create_variant(sarscov2 source, string variant_name, float immune_evad, float infect, float severity) {
 		create sarscov2 with:[
 			source_of_mutation::source,
 			name::variant_name,
-			immune_evasion::source=nil?immune_evasion:source.immune_evasion*immune_evasion,
-			infectiousness::source=nil?infectiousness:source.infectiousness*infectiousness,
+			immune_evasion::source=nil?immune_evad:source.immune_evasion*immune_evad,
+			infectiousness::source=nil?infect:source.infectiousness*infect,
 			phenotype_shift::source=nil?severity:source.phenotype_shift*severity
 		] returns:variants;
 		return first(variants);
@@ -60,7 +74,7 @@ species virus virtual:true {
 	 */
 	virus source_of_mutation;
 	
-	float get_infectiousness_factor {return 1.0;}
+	float get_infectiousness_factor virtual:true;
 	
 }
 

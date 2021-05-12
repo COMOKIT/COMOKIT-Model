@@ -103,9 +103,7 @@ global {
 		do console_output("Population of "+length(all_individuals)+" individuals");
 
 		do console_output("Introduce "+num_infected_init+" infected cases");
-		ask num_infected_init among all_individuals {
-			do define_new_case;
-		}
+		ask num_infected_init among all_individuals { do define_new_case(original_strain); }
 		
 		total_number_individual <- length(all_individuals);
 

@@ -351,7 +351,6 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		pair<Activity,list<Individual>> act <- agenda_week[current_date.day_of_week - 1][current_date.hour];
 		if (act.key != nil) {
 			if (Authority[0].allows(self, act.key)) {
-				ask world {do console_output(sample(myself)+" is doing activity "+act.key, sample(self));}
 				int nb_fellows <- Authority[0].limitGroupActivity(self, act.key) - 1;
 					if (nb_fellows > 0) {
 					activity_fellows <-nb_fellows among act.value;

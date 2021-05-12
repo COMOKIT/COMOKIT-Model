@@ -146,8 +146,10 @@ species BiologicalEntity control:fsm{
 	}
 	
 	//Action to define a new case, initialising it to latent and computing its latent period, and whether or not it will be symptomatic
-	action define_new_case(virus infectious_agent <- original_strain) {
+	action define_new_case(virus infectious_agent) {
 		state <- "latent";
+		viral_agent <- infectious_agent;
+		write sample(viral_agent);
 		if(world.is_asymptomatic(self.age)){
 			is_symptomatic <- false;
 			latent_period <- world.get_incubation_period_asymptomatic(self.age);
