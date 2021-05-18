@@ -11,7 +11,7 @@
 ******************************************************************/
 
 
-model CoVid19
+model generate_gis_data
 
 global {
 	
@@ -22,10 +22,13 @@ global {
 	 * ------------------------------------------------------------------
 	 */
 	//define the path to the dataset folder
-	string dataset_path <- "../Datasets/Test Generate GIS Data";	
-	
+	//string dataset_path <- "../Datasets/Test Generate GIS Data";	
+	string name_of_dataset <- "Test Generate GIS Data";
+	string project_path <- "..";
+	string dataset_path <- project_path +"/Datasets/" + name_of_dataset;
+	string boundary_path <- dataset_path + "/boundary.shp";
 	//mandatory: define the bounds of the studied area
-	file data_file <-shape_file(dataset_path + "/boundary.shp");
+	file data_file <-shape_file(boundary_path);
 	
 	//if true, GAMA is going to use OSM data to create the building file
 	bool use_OSM_data <- true;
@@ -93,7 +96,8 @@ global {
 	//coeffient used to apply a buffer to the building (distance = buffer_coeff * width of a pixel).
 	float buffer_coeff <- 0.5 min: 0.0;
 	
-
+	//parallel computation
+	bool parallel <- true;
 	/* ------------------------------------------------------------------ 
 	 * 
 	 *              DYNAMIC VARIABLES
@@ -119,10 +123,14 @@ global {
 	
 	
 	init {
+		
 		write "Start the pre-processing process";
 		
 		//creation of the boundary of the studied area
 		create Boundary from: data_file;
+		if (not file_exists(dataset_path +"/boundary.shp")) {
+			save Boundary crs:"EPSG:3857" to:dataset_path +"/boundary.shp" type: shp ;
+		}
 		
 		//load OSM data (if necessary)
 		if (use_OSM_data) {
@@ -160,6 +168,9 @@ global {
 					}
 				}
 			}
+		}
+		ask Building where (each.type = nil) {
+			do die;
 		}
 	
 		//save the building using the pseudo mercator crs with the type, flats, heights and levels attributes
@@ -204,7 +215,7 @@ global {
 			
 			//create the building agents from the data
 			create Building from: geom with:[building_att:: get("building"),shop_att::get("shop"), historic_att::get("historic"), 
-				office_att::get("office"), military_att::get("military"),sport_att::get("sport"),leisure_att::get("lesure"),
+				office_att::get("office"), military_att::get("military"),sport_att::get("sport"),leisure_att::get("leisure"),
 				height::float(get("height")), flats::int(get("building:flats")), levels::int(get("building:levels"))
 			];
 			
@@ -215,9 +226,9 @@ global {
 			list<Building> bds <- Building where (each.shape.area > 0);
 			
 			//use the agent with a point geometry to define the type of building;
-			ask Building where (each.shape.area = 0) {
-				list<Building> bd <- bds overlapping self;
-				ask bd {
+			ask Building where ((each.shape.area = 0) and (each.shape.perimeter = 0)) parallel: parallel {
+				list<Building> bd <- Building overlapping self;
+				ask bd where (each.shape.area > 0) {
 					sport_att  <- myself.sport_att;
 					office_att  <- myself.office_att;
 					military_att  <- myself.military_att;
@@ -226,44 +237,40 @@ global {
 					shop_att  <- myself.shop_att;
 					historic_att <- myself.historic_att;
 				}
-				do die; 
 			}
-			
+				
 			//remove building which are too small.
 			ask Building where (each.shape.area < min_area_buildings) {
 				do die;
 			}
 			//define the type of the buildings
-			ask Building {
-				if (amenity_att != nil) {
-					type <- amenity_att;
-				}else if (shop_att != nil) {
-					type <- shop_att;
-				}
-				else if (office_att != nil) {
-					type <- office_att;
-				}
-				else if (leisure_att != nil) {
-					type <- leisure_att;
-				}
-				else if (sport_att != nil) {
-					type <- sport_att;
-				} else if (military_att != nil) {
-					type <- military_att;
-				} else if (historic_att != nil) {
-					type <- historic_att;
-				} else {
-					type <- building_att;
-				} 
+			ask Building parallel: parallel{
+			if (amenity_att != nil) and amenity_att != ""{
+				type <- amenity_att;
+			} else if (shop_att != nil) and shop_att != "" {
+				type <- shop_att;
 			}
+			else if (office_att != nil)and office_att != "" {
+				type <- office_att;
+			}
+			else  if (sport_att != nil)and sport_att != "" {
+				type <- sport_att;
+			}  else if (military_att != nil)and military_att != "" {
+				type <- military_att;
+			} else if (historic_att != nil) and historic_att != ""{
+				type <- historic_att;
+			} else if (leisure_att != nil) and leisure_att != "" {
+				type <- leisure_att;
+			}
+			else if (building_att != nil)and building_att != "" {
+				type <- building_att;
+			}
+		}
 			
-			//delete building with no type
-			ask Building where (each.type = nil or each.type = "") {
-				do die;
-			}
+		
 			
 			//define the number of flats for each building;
-			ask Building {
+			ask Building  parallel: parallel{
 				if (flats = 0) {
 					if type = "apartments" {
 						if (levels = 0) {levels <- 1;}
@@ -636,6 +643,55 @@ species Building {
 species Boundary {
 	aspect default {
 		draw shape color: #violet empty: true;
+	}
+}
+
+experiment wizard_xp autorun: true {
+	action _init_ {
+		string title <- "Main properties";
+		map<string, map> results <-  wizard("Generation of the GIS environment",[ 
+			wizard_page(title,"Definition of the main properties" ,[
+					enter("Project path", directory),
+					enter("Dataset name", "New dataset"),
+					enter("Boundary file", file),
+					enter("Use OSM data", bool, true),
+					enter("Use Google Map data", bool, false),
+					enter("Download Bing Satellite image", bool, true)
+				], font("Arial", 10 , #bold))
+			] 
+		);
+			
+		if not empty(results) and results[title] != nil and not empty(results[title]) {
+			map values <- results[title];
+			gama.pref_gis_auto_crs <- false;
+			gama.pref_gis_default_crs <- 3857;
+			
+	
+			create simulation with: (
+				name_of_dataset:: values["Dataset name"],
+				project_path:: values["Project path"],
+				boundary_path:: values["Boundary file"],
+				data_file::shape_file(values["Boundary file"]),
+				use_OSM_data:: bool(values["Use OSM data"]),
+				use_google_map_data:: bool(values["Use Google Map data"]),
+				download_satellite_image:: bool(values["Download Bing Satellite image"])
+			);	
+		}
+	}
+	output {
+		display map type: opengl draw_env: false background: #black{
+			image (file_exists(googlemap_path) ? (googlemap_path): "white.png") transparency: 0.2;
+			image (file_exists(dataset_path+"/satellite.png") ? (dataset_path+"/satellite.png"): "white.png")  transparency: 0.2;
+			
+			graphics "tile" {
+				if bounds_tile != nil {
+					draw bounds_tile color: #red empty: true;
+				}
+			}
+			species Boundary;
+			species Building;
+			species marker;
+		}
 	}
 }
 
