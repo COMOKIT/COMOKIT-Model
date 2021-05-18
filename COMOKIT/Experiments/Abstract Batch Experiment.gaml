@@ -20,12 +20,14 @@ global{
 	// Parameters for batch experiment
 	bool batch_enable_detailedCSV <- false;
 	int idSimulation <- -1;
-	int ageCategory <- 100;
 	
 	// Batch data export
 	string result_folder <- "../../batch_output/";
 	string modelName <- self.host.name;
 	list<string> list_shape_path <- [];
+	
+	// Observer parameters
+	int ageCategory <- 100;
 	
 	bool sim_stop { return (all_individuals all_match ([susceptible, removed] contains each.state)); }
 	
@@ -88,7 +90,23 @@ global{
 				// Number of dead per step per age category
 				subIndividual count (each.clinical_status = dead)
 			] type: "csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_" + (i - ageCategory) + "-" + (i-1) + ".csv" rewrite: (cycle = 0);
+			
 		}
+		
+		loop i from:0 to:max_age {
+			int age <- i;
+			int total <- all_individuals count (each.age=i);
+			int infected <- total_incidence_age contains_key i ? total_incidence_age[i] : 0;
+			int reported <- tn_reported contains_key i ? tn_reported[i] : 0;
+			int hospitalised <- tn_hostpialised contains_key i ? tn_hostpialised[i] : 0;
+			int icu <- tn_icu contains_key i ? tn_icu[i] : 0;
+			int death <- tn_deaths contains_key i ? tn_deaths[i] : 0;
+			save [age, total, infected, reported, hospitalised, icu, death] 
+				type: csv 
+				to: result_folder + "batchAggregated-"+modelName+"-"+idSimulation+".csv" 
+				rewrite: i=0;
+		}
+		
 		if BENCHMARK { bench["Abstract Batch Experiment.observerPattern"] <- bench["Abstract Batch Experiment.observerPattern"] + machine_time - start;}
 	}
 }

@@ -105,4 +105,11 @@ global {
 	string epidemiological_allow_viral_individual_factor <- "Allow_viral_individual_factor";
 	string epidemiological_viral_individual_factor <- "Viral_individual_factor";
 	
+	// Observer
+	string INFECTED <- "infected";
+	string REPORTED <- "reported";
+	string HOSPITALISED <- "hospitalised";
+	string ICU <- "icu";
+	string DEATH <- "death";
+	
 }
