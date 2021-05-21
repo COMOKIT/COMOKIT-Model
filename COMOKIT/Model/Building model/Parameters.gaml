@@ -53,8 +53,8 @@ global {
 	
 	float basic_viral_air_increase_per_day <- 0.1;
 	float basic_viral_local_increase_per_day <- 0.1 ;
-	float basic_viral_air_decrease_per_day <- 0.01;
-	float basic_viral_local_decrease_per_day <- 0.01 ;
+	float basic_viral_air_decrease_per_day <- 0.025;
+	float basic_viral_local_decrease_per_day <- 0.025 ;
 	float ventilated_viral_air_decrease_per_day <- 0.1;
 	
 	bool allow_air_transmission <- true;
@@ -89,21 +89,23 @@ global {
 	float coeff_visu_virus_load_room <- 3000.0;
 		
 	//PEDESTRIAN PARAMETERS
-	float P_shoulder_length <- 0.45 ;
+	float P_shoulder_length <- 0.45;
 	float P_proba_detour <- 0.5 ;
-	bool P_avoid_other <- false ;
+	bool P_avoid_other <- true ;
 	float P_obstacle_consideration_distance <- 3.0 ;
 	float P_pedestrian_consideration_distance <- 3.0 ;
-	float P_minimal_distance <- 0.0;
-	float P_tolerance_target <- 0.5;
+	float P_minimal_distance <- 0.0 ;
+	float P_tolerance_target <- 0.1 ;
 	bool P_use_geometry_target <- true ;
-	float P_A_pedestrian_SFM  ;
-	float P_A_obstacles_SFM ;
-	float P_B_pedestrian_SFM ;
-	float P_B_obstacles_SFM  ;
-	float P_relaxion_SFM ;
-	float P_gama_SFM ;
-	float P_lambda_SFM ;
+	
+	float P_A_pedestrian_SFM  <- 0.16  ;
+	float P_A_obstacles_SFM  <- 1.9  ;
+	float P_B_pedestrian_SFM  <- 0.1 ;
+	float P_B_obstacles_SFM  <- 1.0  ;
+	float P_relaxion_SFM <- 0.5  ;
+	float P_gama_SFM <- 0.35 ;
+	float P_lambda_SFM <- 0.1  ;
+	
 	
 	
 	

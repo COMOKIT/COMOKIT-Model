@@ -231,6 +231,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		if(target_place != nil and (has_place) ) {target_room.available_places << target_place;}
 		string n <- current_activity = nil ? "" : copy(current_activity.name);
 		Room prev_tr <- copy(target_room);
+		do release_path;
 		current_activity <- current_agenda_week.values[0];
 		current_agenda_week >> first(current_agenda_week);
 		target_room <- current_activity.get_place(self);
@@ -243,6 +244,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		is_outside <- false;
 		goto_entrance <- false;
 		target_place <- nil;
+		finished_goto <- false;
 		if (species(current_activity) = BuildingSanitation) {
 			waiting_sanitation <- true;
 		}
@@ -279,6 +281,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 				if (final_target = nil) {
 					do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target ;
 				}
+				
 				do walk;
 				finished_goto <- (final_target = nil) and (location != target);
 			}
@@ -288,6 +291,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 			}
 		}
 		if(arrived) {
+			
 			if (go_oustide_room) {
 				current_room <- nil;
 				the_entrance <- (target_room.entrances closest_to self);
@@ -349,6 +353,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 				}
 				if (species(target_room) = BuildingEntrance) {
 					is_outside <- true;
+					do release_path;
 				}
 				
 			}	

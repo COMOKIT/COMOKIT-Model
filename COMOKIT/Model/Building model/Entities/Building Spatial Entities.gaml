@@ -16,7 +16,7 @@ model CoVid19
 
 import "../Parameters.gaml"
 
-import "../Global.gaml"
+import "../Global.gaml" 
  
 import "BuildingIndividual.gaml"
 
@@ -151,7 +151,11 @@ species Wall frequency: 0{
 	}
 }
 
-species PedestrianPath skills: [pedestrian_road] frequency: 0{
+species PedestrianPath skills: [pedestrian_road]{
+	
+	reflex clean_ {
+		agents_on <-  agents_on where (not dead(each) and not BuildingIndividual(each).is_outside);
+	}
 	aspect default {
 		if (display_pedestrian_path) {
 			draw shape color: #red width:2;
@@ -291,7 +295,6 @@ species RoomEntrance {
 			geometry g1 <- create_queue(line_g rotated_by 90, nb_places);
 			geometry g2 <- create_queue(line_g rotated_by -90,nb_places);
 			
-			container<Room> rooms_list <- container<Room>(Room.population+(Room.subspecies accumulate each.population));
 			
 			if g1 != nil {
 				loop r over: rooms_list overlapping g1 {

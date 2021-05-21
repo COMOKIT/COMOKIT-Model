@@ -43,6 +43,9 @@ global {
 	int nb_latent <- 0 update: (BiologicalEntity count (each.state = latent));
 	int nb_infected <- 0 update: (BiologicalEntity count (each.state in [asymptomatic, presymptomatic, symptomatic]));
 	
+	container<Room> rooms_list -> {container<Room>(Room.population+(Room.subspecies accumulate each.population))};
+			
+			
 	geometry open_area ;
 	
 	
@@ -76,7 +79,7 @@ global {
 		} 
 		pedestrian_network <- pedestrian_network with_weights (PedestrianPath as_map (each::each.shape.perimeter * (empty(Room overlapping each) ? 1.0 : 10.0)));
 	
-		ask Room +BuildingEntrance + CommonArea{
+		ask rooms_list{
 			isVentilated <- flip(ventilation_proba);
 			list<Wall> ws <- Wall overlapping self;
 			loop w over: ws {
@@ -107,12 +110,12 @@ global {
 			}
 			
 		} 
-		ask Room + BuildingEntrance + CommonArea{
+		ask rooms_list{
 			do intialization;
 		}
 		
 		ask Wall {
-			if not empty((Room + BuildingEntrance + CommonArea) inside self ) {
+			if not empty((rooms_list) inside self ) {
 				shape <- shape.contour;
 			}
 		}
@@ -124,7 +127,7 @@ global {
 				}
 			}
 		}
-		ask Room + BuildingEntrance + CommonArea{
+		ask rooms_list{
 			geometry contour <- nil;
 			float dist <-0.5;
 			int cpt <- 0;
@@ -214,9 +217,15 @@ global {
 	reflex fast_forward when: (BuildingIndividual first_with !(each.is_outside)) = nil {
 		date next_date <- BuildingIndividual min_of (first(each.current_agenda_week.keys));
 		if (next_date != nil) and (next_date >  current_date){
+			float duration_period <- next_date - current_date;
 			ask BuildingIndividual where (each.state = susceptible) {
-				ask outside {do outside_epidemiological_dynamic(myself, next_date - current_date);}
+				ask outside {do outside_epidemiological_dynamic(myself, duration_period);}
+				tick <- tick + round(duration_period / step);
 			}
+			ask rooms_list  {
+				do decrease_viral_load(viral_decrease/nb_step_for_one_day * duration_period / step);
+			}
+		
 			starting_date <- next_date;
 		}
 	}
