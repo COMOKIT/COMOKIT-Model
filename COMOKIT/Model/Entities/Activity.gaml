@@ -201,7 +201,9 @@ global {
 	
 }
 
-species Activity {
+species AbstractActivity virtual: true;
+
+species Activity parent: AbstractActivity {
 	list<string> types_of_building <- [];
 	map<string,list<Building>> buildings;
 	
@@ -276,7 +278,7 @@ species visiting_friend parent: Activity {
 
 species working parent: Activity {
 	string name <- act_working;
-	map<Building,list<Individual>> find_target (Individual i) {
+	map<Building,list<Individual>> find_target (Individual i) { 
 		return [i.working_place::i.colleagues];
 	}
 

@@ -46,7 +46,7 @@ global
 	
 }
 
-species Individual parent: BiologicalEntity schedules: shuffle(Individual where (each.clinical_status != dead)){
+species AbstractIndividual parent:BiologicalEntity {
 	//Age of the individual
 	int age;
 	//Sex of the individual
@@ -67,32 +67,15 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	//#############################################################
 	//ID of the household of the individual
 	string household_id;
-	//Bool to consider if the individual is at home
-	bool is_at_home <- true;
-	//Home building of the individual
-	Building home;
-	//School building of the individual (if student)
-	Building school;
-	//Working place of the individual (if working)
-	Building working_place;
-	//Relatives (i.e. same household) of the individual
-	list<Individual> relatives;
-	//Friends (i.e. possibility of leisure activities together) of the individual
-	list<Individual> friends;
-	//Colleagues (i.e. same working place) of the individual
-	list<Individual> colleagues;
-	//Current building of the individual
-	Building current_place;
+	//Current place of the individual
+	AbstractPlace current_place; 
 	//Bool to consider if the individual is outside of the commune
 	bool is_outside <- false;
 	
-	//#############################################################
+	//############################################################# 
 	//Agenda and activities attributes
 	//#############################################################
-	list<map<int, pair<Activity,list<Individual>>>> agenda_week;
-	list<Individual> activity_fellows;
-	Activity last_activity;
-	map<Activity, map<string,list<Building>>> building_targets;
+	AbstractActivity last_activity;
 	
 	//#############################################################
 	//Intervention related attributes
@@ -112,7 +95,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	//Contact related variables
 	//#############################################################
 	agent infected_by;
-	Activity infected_when;
+	AbstractActivity infected_when;
 	int number_of_infected_individuals <- 0;
 	
 	//#############################################################
@@ -172,7 +155,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	{
 	
 		//Add the infection to the infections having been caused in the building
-		if(building_infections.keys contains(current_place.type))
+		if(current_place != nil and building_infections.keys contains(current_place.type))
 		{
 			building_infections[current_place.type] <- building_infections[current_place.type] +1;
 		}
@@ -197,7 +180,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	}
 	
 	// Allows to track who infect who and verify someone cannot be infected twice
-	action infect_someone(Individual succesful_contact) {
+	action infect_someone(AbstractIndividual succesful_contact) {
 		if succesful_contact.infected_by!=nil {error "One cannot be infected twice : "
 			+sample(succesful_contact)+" infected by "+sample(self);
 		}
@@ -214,8 +197,100 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		else { is_wearing_mask <- false; }
 	}
 	
+	// UTILS
+	// -----
+	// Increment count of "var" given the age of current Individual
+	action increment_total_of(string var) {
+		
+		switch var {
+			//Add the new case to the total number of infected (not mandatorily known)
+			match INFECTED { total_number_of_infected <- total_number_of_infected + 1; do increment_age_total(total_incidence_age);}
+			match REPORTED { total_number_reported <- total_number_reported + 1; do increment_age_total(tn_reported);}
+			match HOSPITALISED { total_number_hospitalised <- total_number_hospitalised + 1; do increment_age_total(tn_hostpialised);}
+			match ICU { total_number_ICU <- total_number_ICU + 1; do increment_age_total(tn_icu);}
+			match DEATH { total_number_deaths <- total_number_deaths + 1; do increment_age_total(tn_deaths);}
+		}
+		
+		
+	}
+	
+	action increment_age_total(map<int,int> var) {
+		if(var contains_key self.age) { var[self.age] <- var[self.age] + 1; }
+		else { add 1 to: var at: self.age; }
+	}
+	
+	//#############################################################
+	//Reflexes
+	//#############################################################
+	
+	
+	//Reflex to update disease cycle
+	reflex update_epidemiology when:(state!=removed) {
+		float start <- BENCHMARK ? machine_time : 0.0;
+		if(allow_transmission_building and (not is_infected)and(self.current_place!=nil))
+		{
+			if(flip(current_place.viral_load*successful_contact_rate_building))
+			{
+				infected_by <- current_place;
+				do define_new_case();
+			}
+		}
+		do update_wear_mask();
+		if BENCHMARK {bench["Individual.update_epidemiology"] <- bench["Individual.update_epidemiology"] + machine_time - start;}
+	}
+	
+	//Reflex to add to death monitor when dead
+	reflex add_to_dead when:(clinical_status=dead)and(is_counted_dead=false){
+		float start <- BENCHMARK ? machine_time : 0.0;
+		do increment_total_of(DEATH);
+		is_counted_dead <- true;
+		if BENCHMARK {bench["Individual.add_to_dead"] <- bench["Individual.add_to_dead"] + machine_time - start;}
+	}
+	
+	//Reflex to add to hospitalized monitor when dead
+	reflex add_to_hospitalised when:(is_hospitalised)and(is_counted_hospitalised=false){
+		float start <- BENCHMARK ? machine_time : 0.0;
+		do increment_total_of(HOSPITALISED);
+		is_counted_hospitalised <- true;
+		if BENCHMARK {bench["Individual.add_to_hospitalised"] <- bench["Individual.add_to_hospitalised"] + machine_time - start;}
+	}
+	
+	//Reflex to add to ICU monitor when dead
+	reflex add_to_ICU when:(is_ICU)and(is_counted_ICU=false){
+		float start <- BENCHMARK ? machine_time : 0.0;
+		do increment_total_of(ICU);
+		is_counted_ICU <- true;
+		if BENCHMARK {bench["Individual.add_to_ICU"] <- bench["Individual.add_to_ICU"] + machine_time - start;}
+	}
+	
+}
+
+species Individual parent: AbstractIndividual schedules: shuffle(Individual where (each.clinical_status != dead)){
+	//#############################################################
+	//Agenda and activities attributes
+	//#############################################################
+	list<map<int, pair<Activity,list<Individual>>>> agenda_week;
+	list<Individual> activity_fellows;
+	map<Activity, map<string,list<Building>>> building_targets;
+	Building current_place;
+	
+	//Bool to consider if the individual is at home
+	bool is_at_home <- true;
+	//Home building of the individual
+	Building home;
+	//School building of the individual (if student)
+	Building school;
+	//Working place of the individual (if working)
+	Building working_place;
+	//Relatives (i.e. same household) of the individual
+	list<Individual> relatives;
+	//Friends (i.e. possibility of leisure activities together) of the individual
+	list<Individual> friends;
+	//Colleagues (i.e. same working place) of the individual
+	list<Individual> colleagues;
+	
 	//Initialiase social network of the agents (colleagues, friends)
-	action initialise_social_network(map<Building,list<Individual>> working_places, map<Building,list<Individual>> schools, map<int,list<Individual>> ind_per_age_cat) {
+	action initialise_social_network(map<AbstractPlace,list<Individual>> working_places, map<AbstractPlace,list<Individual>> schools, map<int,list<Individual>> ind_per_age_cat) {
 		
 		int nb_friends <- max(0,round(gauss(nb_friends_mean,nb_friends_std)));
 		loop i over: ind_per_age_cat.keys {
@@ -255,39 +330,10 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		location <- any_location_in(current_place);
 	}
 	
-	// UTILS
-	// -----
-	// Increment count of "var" given the age of current Individual
-	action increment_total_of(string var) {
-		
-		switch var {
-			//Add the new case to the total number of infected (not mandatorily known)
-			match INFECTED { total_number_of_infected <- total_number_of_infected + 1; do increment_age_total(total_incidence_age);}
-			match REPORTED { total_number_reported <- total_number_reported + 1; do increment_age_total(tn_reported);}
-			match HOSPITALISED { total_number_hospitalised <- total_number_hospitalised + 1; do increment_age_total(tn_hostpialised);}
-			match ICU { total_number_ICU <- total_number_ICU + 1; do increment_age_total(tn_icu);}
-			match DEATH { total_number_deaths <- total_number_deaths + 1; do increment_age_total(tn_deaths);}
-		}
-		
-		
-	}
-	
-	action increment_age_total(map<int,int> var) {
-		if(var contains_key self.age) { var[self.age] <- var[self.age] + 1; }
-		else { add 1 to: var at: self.age; }
-	}
 	
 	//#############################################################
 	//Reflexes
 	//#############################################################
-	
-	//Reflex to trigger infection when outside of the commune
-	reflex become_infected_outside when: is_outside {
-		float start <- BENCHMARK ? machine_time : 0.0;
-		ask outside {do outside_epidemiological_dynamic(myself);}
-		if BENCHMARK {bench["Individual.become_infected_outside"] <- bench["Individual.become_infected_outside"] + machine_time - start;}
-	}
-	
 	//Reflex to trigger transmission to other individuals and environmental contamination
 	reflex infect_others when: not is_outside and is_infectious
 	{
@@ -351,6 +397,14 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	}
 	
 
+	//Reflex to trigger infection when outside of the commune
+	reflex become_infected_outside when: is_outside and (state = susceptible){
+		float start <- BENCHMARK ? machine_time : 0.0;
+		ask outside {do outside_epidemiological_dynamic(myself, step);}
+		if BENCHMARK {bench["Individual.become_infected_outside"] <- bench["Individual.become_infected_outside"] + machine_time - start;}
+	}
+	
+	
 	//Reflex to execute the agenda	
 	reflex execute_agenda when:clinical_status!=dead{
 		float start <- BENCHMARK ? machine_time : 0.0;
@@ -380,44 +434,6 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		if BENCHMARK {bench["Individual.execute_agenda"] <- bench["Individual.execute_agenda"] + machine_time - start;}
 	}
 	
-	//Reflex to update disease cycle
-	reflex update_epidemiology when:(state!=removed) {
-		float start <- BENCHMARK ? machine_time : 0.0;
-		if(allow_transmission_building and (not is_infected)and(self.current_place!=nil))
-		{
-			if(flip(current_place.viral_load*successful_contact_rate_building))
-			{
-				infected_by <- current_place;
-				do define_new_case();
-			}
-		}
-		do update_wear_mask();
-		if BENCHMARK {bench["Individual.update_epidemiology"] <- bench["Individual.update_epidemiology"] + machine_time - start;}
-	}
-	
-	//Reflex to add to death monitor when dead
-	reflex add_to_dead when:(clinical_status=dead)and(is_counted_dead=false){
-		float start <- BENCHMARK ? machine_time : 0.0;
-		do increment_total_of(DEATH);
-		is_counted_dead <- true;
-		if BENCHMARK {bench["Individual.add_to_dead"] <- bench["Individual.add_to_dead"] + machine_time - start;}
-	}
-	
-	//Reflex to add to hospitalized monitor when dead
-	reflex add_to_hospitalised when:(is_hospitalised)and(is_counted_hospitalised=false){
-		float start <- BENCHMARK ? machine_time : 0.0;
-		do increment_total_of(HOSPITALISED);
-		is_counted_hospitalised <- true;
-		if BENCHMARK {bench["Individual.add_to_hospitalised"] <- bench["Individual.add_to_hospitalised"] + machine_time - start;}
-	}
-	
-	//Reflex to add to ICU monitor when dead
-	reflex add_to_ICU when:(is_ICU)and(is_counted_ICU=false){
-		float start <- BENCHMARK ? machine_time : 0.0;
-		do increment_total_of(ICU);
-		is_counted_ICU <- true;
-		if BENCHMARK {bench["Individual.add_to_ICU"] <- bench["Individual.add_to_ICU"] + machine_time - start;}
-	}
 	
 	aspect default {
 		if not is_outside {

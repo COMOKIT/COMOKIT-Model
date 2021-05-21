@@ -26,11 +26,31 @@ global {
 	
 }
 
-species Building {
+species AbstractPlace virtual: true {
 	//Viral load of the building
 	float viral_load <- 0.0;
 	//Type of the building
 	string type;
+	bool allow_transmission -> {allow_transmission_building};
+	float viral_decrease -> {basic_viral_decrease};
+	//Action to add viral load to the building
+	action add_viral_load(float value){
+		viral_load <- min(1.0,viral_load+value);
+	}
+	
+	action decrease_viral_load(float val) {
+		viral_load <- max(0.0,viral_load - val);
+	}
+	//Action to update the viral load (i.e. trigger decreases)
+	reflex update_viral_load when: allow_transmission{
+		float start <- BENCHMARK ? machine_time : 0.0;
+		do decrease_viral_load(viral_decrease/nb_step_for_one_day);
+		if BENCHMARK {bench["Building.update_viral_load"] <- bench["Building.update_viral_load"] + machine_time - start; }
+	}
+	
+}
+
+species Building parent: AbstractPlace {
 	//Building surrounding
 	list<Building> neighbors;
 	//Individuals present in the building
@@ -49,20 +69,7 @@ species Building {
 		return neighbors;
 	}
 	
-	//Action to add viral load to the building
-	action add_viral_load(float value){
-		if(allow_transmission_building)
-		{
-			viral_load <- min(1.0,viral_load+value);
-		}
-	}
-	//Action to update the viral load (i.e. trigger decreases)
-	reflex update_viral_load when: allow_transmission_building{
-		float start <- BENCHMARK ? machine_time : 0.0;
-		viral_load <- max(0.0,viral_load - basic_viral_decrease/nb_step_for_one_day);
-		if BENCHMARK {bench["Building.update_viral_load"] <- bench["Building.update_viral_load"] + machine_time - start; }
-	}
-
+	
 	aspect default {
 		draw shape color: #gray empty: true;
 	}
@@ -81,8 +88,8 @@ species outside parent: Building {
 	/*
 	 * The action that will be called to mimic epidemic outside of the studied area
 	 */
-	action outside_epidemiological_dynamic(Individual indiv) {
-		if flip(proba_outside_contamination_per_hour) { 
+	action outside_epidemiological_dynamic(AbstractIndividual indiv, float periode_duration) {
+		if flip(proba_outside_contamination_per_hour / #h * periode_duration) { 
 			ask indiv {
 				do define_new_case;
 				infected_by <- myself; 

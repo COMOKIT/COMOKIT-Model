@@ -66,7 +66,7 @@ species BiologicalEntity control:fsm{
 	//Basic contact rate of the agent (might be age-dependent, hence its presence here)
 	float contact_rate;
 	//Current location of the entity (as we do not represent transportation, the entity can only be inside a building)
-	Building current_place;
+	AbstractPlace current_place;
 	//Number of times negatively tested
 	int number_negative_tests <- 0;
 	//#############################################################
@@ -221,7 +221,6 @@ species BiologicalEntity control:fsm{
 			do set_status;
 		}
 		tick <- tick+1;
-		
 		transition to: symptomatic when: (tick>=latent_period) and (self.is_symptomatic) and (presymptomatic_period>=0);
 		transition to: presymptomatic when: (tick>=latent_period) and (self.is_symptomatic) and (presymptomatic_period<0);
 		transition to: asymptomatic when: (tick>=latent_period) and (self.is_symptomatic=false);
