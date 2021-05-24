@@ -40,6 +40,9 @@ global {
 		create_variant(sarscov2(original_strain),"B.1.617",1.5,1.5,1.0) // INDIA
 	];
 	
+	list<virus> viruses <- VOC + VOI + original_strain;
+	
+	
 	/*
 	 * Create sarscov2 variants
 	 * 
