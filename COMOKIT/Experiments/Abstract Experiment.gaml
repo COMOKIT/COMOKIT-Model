@@ -156,6 +156,14 @@ experiment "Abstract Experiment" virtual: true {
 
 		}
 
+		display "infections_by_variant" virtual: true refresh: every(24#cycle) {
+			chart "Population epidemiological states evolution" background: #white axes: #black color: #black title_font: default legend_font: font("Helvetica", 14, #bold) {
+				loop v over:  viruses {
+					data ""+v.name value: all_individuals count (each.viral_agent =  v) marker: false style: line  legend: v.name;
+				}
+			}
+		}
+
 		display "cumulative_incidence" virtual: true {
 			chart "Cumulative incidence" background: #white axes: #black {
 				data "cumulative incidence" value: total_number_of_infected color: #red marker: false style: line;
