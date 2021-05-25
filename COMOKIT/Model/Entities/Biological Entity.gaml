@@ -20,30 +20,43 @@ import "Virus.gaml"
 //The biological entity is the mother species of the Individual agent, it could be used for other kinds of agent that
 // could be infected by the virus
 species BiologicalEntity control:fsm{
+	//Age of the entity
+	int age;
+	
+	// INFECTION PERIODS
+	
 	//The latent period, i.e., the time between exposure and being infectious
 	float latent_period;
 	//The presymptomatic period, used only for soon to be symptomatic entity that are already infectious
 	float presymptomatic_period;
 	//The infectious period, used as the time between onset and not being infectious for symptomatic entity, or the time after the latent period for asymptomatic ones
 	float infectious_period;
+	
+	// INFECTION TIMES (TODO: describe what 'time' stands for each variable)
+	
+	//Time attribute for the different epidemiological states of the entity
+	float tick <- 0.0;
+	
 	//Time between symptoms onset and hospitalisation of a symptomatic entity
 	float time_symptoms_to_hospitalisation <- -1.0;
 	//Time between hospitalisation and admission to intensive care unit
 	float time_hospitalisation_to_ICU <- -1.0;
+	//Time attribute to represent the time done in ICU
+	float time_ICU;
 	//Time of stay in intensive care unit
 	float time_stay_ICU;
+	//Time attribute for the time before death of the entity (i.e. the time allowed between needing ICU, and death due to not having been admitted to ICU
+	float time_before_death;
+		
+	// INFECTIOUS STATUS
+	
 	//Clinical status of the entity (no need hospitalisation, needing hospitalisation, needing ICU, dead, recovered)
 	string clinical_status <- no_need_hospitalisation;
+	
 	//Define if the entity is currently being treated in a hospital (but not ICU)
 	bool is_hospitalised <- false;
 	//Define if the entity is currently admitted in ICU
 	bool is_ICU <- false;
-	//Time attribute to represent the time done in ICU
-	float time_ICU;
-	//Time attribute for the different epidemiological states of the entity
-	float tick <- 0.0;
-	//Time attribute for the time before death of the entity (i.e. the time allowed between needing ICU, and death due to not having been admitted to ICU
-	float time_before_death;
 	//Boolean to determine if the agent is infected (i.e. latent, presymptomatic, symptomatic, asymptomatic)
 	bool is_infected;
 	//Boolean to determine if the agent is infectious (i.e. presymptomatic, symptomatic, asymptomatic)
@@ -52,27 +65,44 @@ species BiologicalEntity control:fsm{
 	bool is_asymptomatic;
 	//Boolean to determine if the agent is symptomatic
 	bool is_symptomatic;
+	
+	// TESTS
+	
 	//Report status of the entity if it has been tested, or not
 	string report_status <- not_tested;
 	//Number of step of the last test
 	int last_test <- 0;
-	//Age of the entity
-	int age;
+	//Number of times negatively tested
+	int number_negative_tests <- 0;
+	
+	// VIRUS and IMMUNITY
 	
 	//The viral agent that infect this biological entity
 	virus viral_agent;
-	//Factor for the beta and the basic viral release
+	//Immunity
+	map<virus,float> immunity;
+	
+	// TRANSMISSION Variables
+	
+	// Origi from Damian : Factor for the beta and the basic viral release
+	// TODO : should be seen as the viral load, rather than a factor
 	float viral_factor;
+	
+	// Origi from Damian : Basic contact rate of the agent (might be age-dependent, hence its presence here)
+	// Later from Kevin : this is a factor that establish the basic probability of one contact to turn into an infection
+	//				* It is basic because it will be changed based on several factors 
+	//				* It is a pure probability used within a flip() gama operator BUT without any control on its veracity (might end up being more than 1 when manipulated by "factors")
+	float contact_rate;
+	
 	//Factor of the contact rate for asymptomatic and presymptomatic individuals (might be age-dependent, hence its presence here)
 	float factor_contact_rate_asymptomatic;
+	
 	//Basic viral release of the agent (might be age-dependent, hence its presence here)
 	float basic_viral_release;
-	//Basic contact rate of the agent (might be age-dependent, hence its presence here)
-	float contact_rate;
+	
 	//Current location of the entity (as we do not represent transportation, the entity can only be inside a building)
 	Building current_place;
-	//Number of times negatively tested
-	int number_negative_tests <- 0;
+	
 	//#############################################################
 	//Actions
 	//#############################################################
@@ -159,6 +189,9 @@ species BiologicalEntity control:fsm{
 			latent_period <- presymptomatic_period<0?world.get_incubation_period_symptomatic(self.age)+presymptomatic_period:world.get_incubation_period_symptomatic(self.age);
 		}
 	}
+	
+	//Action to build an immune response to a given virus which is equal to 1 minus immune escapement
+	action build_immunity(virus va, float immune_escapement) { immunity[va] <- 1 - immune_escapement; }
 	
 	//Reflex to trigger transmission to other individuals and environmental contamination
 	reflex infect_others when: is_infectious
@@ -309,6 +342,10 @@ species BiologicalEntity control:fsm{
 	//State when the entity is not infectious anymore
 	state removed{
 		enter{
+			// If the agent recovered, then he build an immune response
+			if clinical_status != dead { 
+				do build_immunity(viral_agent, viral_agent.get_immune_escapement());
+			}
 			do set_status;
 		}
 	}

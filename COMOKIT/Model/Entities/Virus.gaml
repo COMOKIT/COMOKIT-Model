@@ -67,6 +67,12 @@ global {
 	
 }
 
+/*
+ * Abstract representation of a viruses, with very few and simple (often expressed as a unique floating number) traits:
+ * - source_of_mutation : the original strain (type virus) this virus derived from
+ * > get_infectiousness_factor : how infectious is this virus (simplified to unidimensional infectiousness)
+ * > get_immune_escapement : how much it is able to escape from immune defense (simplified to unidimensional immunity, pretty much like a shield amount)
+ */
 species virus virtual:true {
 	
 	/*
@@ -74,7 +80,15 @@ species virus virtual:true {
 	 */
 	virus source_of_mutation;
 	
+	/*
+	 * 
+	 */
 	float get_infectiousness_factor virtual:true;
+	
+	/*
+	 * 
+	 */
+	float get_immune_escapement virtual:true;
 	
 }
 
@@ -88,6 +102,7 @@ species sarscov2 parent:virus {
 	 * e.g. CDC makes a difference between immune evastion from vax and monoclonal antibody treatments
 	 */ 
 	float immune_evasion;
+	float get_immune_escapement {return immune_evasion < 1 ? 1.0 : 1.0 / immune_evasion;}
 	
 	// Should impact the viral load of infected people
 	float infectiousness;
