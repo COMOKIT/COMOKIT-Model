@@ -193,6 +193,20 @@ species BiologicalEntity control:fsm{
 	//Action to build an immune response to a given virus which is equal to 1 minus immune escapement
 	action build_immunity(virus va, float immune_escapement) { immunity[va] <- 1 - immune_escapement; }
 	
+	//Activate immune system to fight against infection of virus 'va' 
+	// return > true : means immunity prevents from the infection
+	// return > false : means failure of immune system
+	bool activate_immunity(virus va) {
+		
+		if immunity contains_key va {
+			return flip(immunity[va]);
+		} 
+		if immunity contains_key va.source_of_mutation {
+			return flip(immunity[va.source_of_mutation] * va.get_immune_escapement());
+		}
+		return false;
+	}
+	
 	//Reflex to trigger transmission to other individuals and environmental contamination
 	reflex infect_others when: is_infectious
 	{
@@ -253,6 +267,7 @@ species BiologicalEntity control:fsm{
 			do set_status;
 		}
 	}
+	
 	//State when the entity is latent
 	state latent {
 		enter{
@@ -265,6 +280,7 @@ species BiologicalEntity control:fsm{
 		transition to: presymptomatic when: (tick>=latent_period) and (self.is_symptomatic) and (presymptomatic_period<0);
 		transition to: asymptomatic when: (tick>=latent_period) and (self.is_symptomatic=false);
 	}
+	
 	//State when the entity is presymptomatic
 	state presymptomatic {
 		enter{
@@ -275,6 +291,7 @@ species BiologicalEntity control:fsm{
 		tick <- tick+1;
 		transition to: symptomatic when: (tick>=presymptomatic_period);
 	}
+	
 	//State when the entity is symptomatic
 	state symptomatic {
 		enter{
@@ -339,12 +356,13 @@ species BiologicalEntity control:fsm{
 			clinical_status <- recovered;
 		}
 	}
+	
 	//State when the entity is not infectious anymore
 	state removed{
 		enter{
 			// If the agent recovered, then he build an immune response
-			if clinical_status != dead { 
-				do build_immunity(viral_agent, viral_agent.get_immune_escapement());
+			if clinical_status != dead and not (immunity contains_key viral_agent) { 
+				do build_immunity(viral_agent, viral_agent.get_reinfection_probability());
 			}
 			do set_status;
 		}

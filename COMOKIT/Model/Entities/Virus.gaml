@@ -22,6 +22,11 @@ global {
 	virus original_strain <- create_variant(nil,"SARS-CoV-2",1.0,1.0,1.0);
 	
 	/*
+	 * Global property of sars_cov_2 for re-infection: 0 means no re-infection (by the very same strain/variant) 1 means no immunity through infection
+	 */
+	float sars_cov_2_reinfection_probability  <- 0.0;
+	
+	/*
 	 * List of variants of concern, as stated by WHO
 	 * source : https://www.cdc.gov/coronavirus/2019-ncov/cases-updates/variant-surveillance/variant-info.html#Concern
 	 */
@@ -34,14 +39,12 @@ global {
 	/*
 	 * List of variants of interest, as stated by WHO
 	 * source : https://www.who.int/publications/m/item/weekly-epidemiological-update-on-covid-19---27-april-2021
+	 * TODO : requalified the Indian into VOC
 	 */
 	list<sarscov2> VOI <- [
 		 // B.1.615 FRANCE
 		create_variant(sarscov2(original_strain),"B.1.617",1.5,1.5,1.0) // INDIA
 	];
-	
-	list<virus> viruses <- VOC + VOI + original_strain;
-	
 	
 	/*
 	 * Create sarscov2 variants
@@ -52,7 +55,7 @@ global {
 	 * => All numerical value hereafter are express based on a {1,1,1} profile of the source vector, 
 	 * meaning that a profile of {2,2,2} multiply by two every characteristics of the original (whatever value they can be)
 	 * 
-	 * - immune_evad : how much it can disrupt shielded measures from the source (vax, immunity due to prior infection or antibiotic)
+	 * - immune_evad : how much it can disrupt immune protection built against the viral source (vax, immunity due to prior infection or antibiotic)
 	 * - infect : how much more it is infectious compare to the source
 	 * - severity : how it is worse in term of clinical picture compare to original
 	 * 
@@ -84,15 +87,15 @@ species virus virtual:true {
 	virus source_of_mutation;
 	
 	/*
-	 * 
+	 * How much this virus is infectious on a one dimensional scale [0:+infinit]
 	 */
 	float get_infectiousness_factor virtual:true;
 	
 	/*
-	 * 
+	 * How much this virus is able to escape from immune defense compare to the original strain
 	 */
 	float get_immune_escapement virtual:true;
-	
+	float get_reinfection_probability {return 0.0;}
 }
 
 /*
@@ -106,6 +109,7 @@ species sarscov2 parent:virus {
 	 */ 
 	float immune_evasion;
 	float get_immune_escapement {return immune_evasion < 1 ? 1.0 : 1.0 / immune_evasion;}
+	float get_reinfection_probability {return sars_cov_2_reinfection_probability;}
 	
 	// Should impact the viral load of infected people
 	float infectiousness;

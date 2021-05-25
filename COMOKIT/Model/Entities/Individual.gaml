@@ -162,40 +162,41 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	//Action to call to define a new case, obtaining different time to key events
 	action define_new_case(virus infectious_agent)
 	{
-		//Add the new case to the total number of infected (not mandatorily known)
-		total_number_of_infected <- total_number_of_infected +1;
-		
-		//Add the infection to the infections having been caused in the building
-		if(building_infections.keys contains(current_place.type))
-		{
-			building_infections[current_place.type] <- building_infections[current_place.type] +1;
+		if not activate_immunity(infectious_agent) {
+			//Add the new case to the total number of infected (not mandatorily known)
+			total_number_of_infected <- total_number_of_infected +1;
+			
+			//Add the infection to the infections having been caused in the building
+			if(building_infections.keys contains(current_place.type))
+			{
+				building_infections[current_place.type] <- building_infections[current_place.type] +1;
+			}
+			//Add the infection to the infections of the same age
+			if(total_incidence_age.keys contains(self.age))
+			{
+				total_incidence_age[self.age] <- total_incidence_age[self.age] +1;
+			}
+			else
+			{
+				add 1 to: total_incidence_age at: self.age;
+			}
+			//Add the activity done while being infected
+			infected_when <- last_activity; 
+			
+			// Infected by
+			viral_agent <- infectious_agent;
+			
+			//Set the status of the Individual to latent (i.e. not infectious)
+			state <- "latent";
+			if(world.is_asymptomatic(self.age)){
+				is_symptomatic <- false;
+				latent_period <- world.get_incubation_period_asymptomatic(self.age);
+			}else{
+				is_symptomatic <- true;
+				presymptomatic_period <- world.get_serial_interval(self.age);
+				latent_period <- presymptomatic_period<0?world.get_incubation_period_symptomatic(self.age)+presymptomatic_period:world.get_incubation_period_symptomatic(self.age);
+			}
 		}
-		//Add the infection to the infections of the same age
-		if(total_incidence_age.keys contains(self.age))
-		{
-			total_incidence_age[self.age] <- total_incidence_age[self.age] +1;
-		}
-		else
-		{
-			add 1 to: total_incidence_age at: self.age;
-		}
-		//Add the activity done while being infected
-		infected_when <- last_activity; 
-		
-		// Infected by
-		viral_agent <- infectious_agent;
-		
-		//Set the status of the Individual to latent (i.e. not infectious)
-		state <- "latent";
-		if(world.is_asymptomatic(self.age)){
-			is_symptomatic <- false;
-			latent_period <- world.get_incubation_period_asymptomatic(self.age);
-		}else{
-			is_symptomatic <- true;
-			presymptomatic_period <- world.get_serial_interval(self.age);
-			latent_period <- presymptomatic_period<0?world.get_incubation_period_symptomatic(self.age)+presymptomatic_period:world.get_incubation_period_symptomatic(self.age);
-		}
-
 	}
 	
 	// Allows to track who infect who and verify someone cannot be infected twice
