@@ -57,11 +57,13 @@ global {
 		+"Epidemiological Parameters.csv"; //File for the parameters
 	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
 	
-	//Dynamics
+	//Epidemiological Dynamics
 	bool allow_transmission_human <- true; //Allowing human to human transmission
 	bool allow_transmission_building <- true; //Allowing environment contamination and infection
 	bool allow_viral_individual_factor <- false; //Allowing individual effects on the beta and viral release
 	
+	bool allow_reinfection <- true; // Allowing Individual to be infected by the sars-cov-2 virus multiple times
+	float basic_selfstrain_reinfection_probability <- 0.0; // The basic probability to be re-infected by the very same strain/variant - differ from immunity evasion of variants
 	
 	//Environmental contamination
 	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period

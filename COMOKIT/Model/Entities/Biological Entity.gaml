@@ -15,6 +15,7 @@ model BiologicalEntity
 
 /* Insert your model definition here */
 import "../Functions.gaml"
+import "../Parameters.gaml"
 import "Virus.gaml"
 
 //The biological entity is the mother species of the Individual agent, it could be used for other kinds of agent that
@@ -81,6 +82,8 @@ species BiologicalEntity control:fsm{
 	virus viral_agent;
 	//Immunity
 	map<virus,float> immunity;
+	//Infection history
+	map<virus,string> infection_history;
 	
 	// TRANSMISSION Variables
 	
@@ -364,7 +367,15 @@ species BiologicalEntity control:fsm{
 			if clinical_status != dead and not (immunity contains_key viral_agent) { 
 				do build_immunity(viral_agent, viral_agent.get_reinfection_probability());
 			}
-			do set_status;
+		}
+		
+		do set_status;
+		
+		// If there is re-infection in the model, then move back to susceptible
+		transition to:susceptible when:clinical_status != dead and allow_reinfection {
+			infection_history[viral_agent] <- clinical_status;
+			viral_agent <- nil;
+			// TODO : all epidemiological variable should be reset 
 		}
 	}
 	

@@ -3,10 +3,11 @@
 * Based on the internal empty template. 
 * Author: kevinchapuis
 * Tags:  
-*/
-
+*/ 
 
 model Virus
+
+import "../Parameters.gaml"
 
 /*
  * Represent Sars-CoV-2 virus and all variants
@@ -20,11 +21,6 @@ global {
 	 * The very first strain of Sars-Cov-2
 	 */
 	virus original_strain <- create_variant(nil,"SARS-CoV-2",1.0,1.0,1.0);
-	
-	/*
-	 * Global property of sars_cov_2 for re-infection: 0 means no re-infection (by the very same strain/variant) 1 means no immunity through infection
-	 */
-	float sars_cov_2_reinfection_probability  <- 0.0;
 	
 	/*
 	 * List of variants of concern, as stated by WHO
@@ -45,6 +41,11 @@ global {
 		 // B.1.615 FRANCE
 		create_variant(sarscov2(original_strain),"B.1.617",1.5,1.5,1.0) // INDIA
 	];
+	
+	/*
+	 * The comprehensive list of all sars-cov-2 strains
+	 */
+	list<virus> viruses <- VOC + VOI + original_strain;
 	
 	/*
 	 * Create sarscov2 variants
@@ -109,7 +110,7 @@ species sarscov2 parent:virus {
 	 */ 
 	float immune_evasion;
 	float get_immune_escapement {return immune_evasion < 1 ? 1.0 : 1.0 / immune_evasion;}
-	float get_reinfection_probability {return sars_cov_2_reinfection_probability;}
+	float get_reinfection_probability {return basic_selfstrain_reinfection_probability;}
 	
 	// Should impact the viral load of infected people
 	float infectiousness;
