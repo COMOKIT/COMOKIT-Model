@@ -83,11 +83,12 @@ species outside parent: Building {
 	 * The action that will be called to mimic epidemic outside of the studied area
 	 */
 	action outside_epidemiological_dynamic(Individual indiv) {
-		if flip(proba_outside_contamination_per_hour) { 
-			ask indiv {
-				do define_new_case;
-				infected_by <- myself; 
-				myself.nb_contaminated <- myself.nb_contaminated + 1;
+		loop v over:proba_outside_contamination_per_hour.keys {
+			if flip(proba_outside_contamination_per_hour[v]) { 
+				ask indiv {
+					infectious_contacts_with[myself] <- define_new_case(v); 
+					if infectious_contacts_with[myself] {myself.nb_contaminated <- myself.nb_contaminated + 1;}
+				}
 			}
 		}
 	}

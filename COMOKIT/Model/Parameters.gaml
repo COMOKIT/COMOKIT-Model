@@ -14,6 +14,7 @@
 model CoVid19
 
 import "Constants.gaml"
+import "Entities/Virus.gaml"
 
 global {
 	
@@ -208,7 +209,7 @@ global {
 	
 	float proba_work_outside <- 0.0; //proba for an individual to work outside the study area
 	float proba_go_outside <- 0.0; //proba for an individual to do an activity outside the study area
-	float proba_outside_contamination_per_hour <- 0.0; //proba per hour of being infected for Individual outside the study area 
+	map<virus,float> proba_outside_contamination_per_hour <- [original_strain::0.0]; //proba per hour of being infected for Individual outside the study area 
 	
 	//Activity parameters
 	float building_neighbors_dist <- 500 #m; //used by "visit to neighbors" activity (max distance of neighborhood).

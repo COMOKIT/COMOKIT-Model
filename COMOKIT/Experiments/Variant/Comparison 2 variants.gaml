@@ -21,14 +21,22 @@ global {
 	int num_infected_init <- 2; 
 	//number of infected individuals by the B.1.1.7  (UK) variant at the initialization of the simulation	
 	int num_infected_init_variant <- 2;
+	virus variant;
+	
+	//scenario of later introduction
+	bool delay_scenario <- true;
+	float new_variant_delay <- 1#month;
+	int infected_threshold <- 100;
 		
 	/*
 	 * Used to initialize a second variant infection
 	 */
 	action after_init {
-		virus variant <- VOC first_with (each.name = "B.1.1.7");
-		ask num_infected_init_variant among (all_individuals where (each.state = susceptible)) { 
-			do define_new_case(variant);
+		variant <- VOC first_with (each.name = "B.1.1.7");
+		if not delay_scenario {
+			ask num_infected_init_variant among (all_individuals where (each.state = susceptible)) { 
+				do define_new_case(variant);
+			}
 		}
 	}	
 	
@@ -38,11 +46,21 @@ global {
 			policy <- create_no_containment_policy();
 		}
 	}	
+	
+	reflex introduce_variant when:delay_scenario and cycle*step>=new_variant_delay or total_number_of_infected>=infected_threshold {
+		ask num_infected_init_variant among (all_individuals where (each.state = susceptible)) { 
+			do define_new_case(variant);
+		}
+		delay_scenario <- false;
+	}
 }
 
 experiment "No Containment" parent: "Abstract Experiment" autorun: true {
 	output {
 		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
+		
+		monitor nb_prevented_reinfection value:sum(all_individuals accumulate (each.infectious_contacts_with.values count (each=true)));
+		monitor nb_reinfection value:all_individuals count (length(each.infection_history)>1);
 		
 		display "Main" parent: default_display {}
 		display "Infections by variants" parent: infections_by_variant {}

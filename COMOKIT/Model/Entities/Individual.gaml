@@ -103,7 +103,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	//#############################################################
 	//Contact related variables
 	//#############################################################
-	agent infected_by;
+	map<agent,bool> infectious_contacts_with;
 	Activity infected_when;
 	int number_of_infected_individuals <- 0;
 	
@@ -160,7 +160,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	}
 	
 	//Action to call to define a new case, obtaining different time to key events
-	action define_new_case(virus infectious_agent)
+	bool define_new_case(virus infectious_agent)
 	{
 		if not activate_immunity(infectious_agent) {
 			//Add the new case to the total number of infected (not mandatorily known)
@@ -196,17 +196,15 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 				presymptomatic_period <- world.get_serial_interval(self.age);
 				latent_period <- presymptomatic_period<0?world.get_incubation_period_symptomatic(self.age)+presymptomatic_period:world.get_incubation_period_symptomatic(self.age);
 			}
+			return true;
 		}
+		return false;
 	}
 	
-	// Allows to track who infect who and verify someone cannot be infected twice
-	action infect_someone(Individual succesful_contact) {
-		if succesful_contact.infected_by!=nil {error "One cannot be infected twice : "
-			+sample(succesful_contact)+" infected by "+sample(self);
-		}
-		number_of_infected_individuals <- number_of_infected_individuals + 1; 
-		succesful_contact.infected_by <- self;
-		ask succesful_contact {do define_new_case(myself.viral_agent);}
+	// Allows to track who infect who 
+	action infect_someone(Individual succesful_contact) { 
+		ask succesful_contact { myself.infectious_contacts_with[succesful_contact] <-  define_new_case(myself.viral_agent); }
+		if infectious_contacts_with[succesful_contact] { number_of_infected_individuals <- number_of_infected_individuals + 1; }
 	}
 	
 	//Action to call to update wearing a mask for a time step
@@ -383,8 +381,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			loop v over: current_place.viral_load.keys {
 				if(flip(current_place.viral_load[v]*successful_contact_rate_building))
 				{
-					infected_by <- current_place;
-					do define_new_case(v);
+					infectious_contacts_with[current_place] <- define_new_case(v);
 				}	
 			}
 			
