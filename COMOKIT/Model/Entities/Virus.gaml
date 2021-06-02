@@ -46,6 +46,7 @@ global {
 	 * The comprehensive list of all sars-cov-2 strains
 	 */
 	list<virus> viruses <- VOC + VOI + original_strain;
+
 	
 	/*
 	 * Create sarscov2 variants

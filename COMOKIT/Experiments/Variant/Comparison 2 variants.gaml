@@ -25,8 +25,8 @@ global {
 	
 	//scenario of later introduction
 	bool delay_scenario <- true;
-	float new_variant_delay <- 1#month;
-	int infected_threshold <- 100;
+	float new_variant_delay <- 2#week;
+	int infected_threshold <- 50;
 		
 	/*
 	 * Used to initialize a second variant infection

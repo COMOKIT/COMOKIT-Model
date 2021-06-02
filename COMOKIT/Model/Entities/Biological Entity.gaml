@@ -201,12 +201,17 @@ species BiologicalEntity control:fsm{
 	// return > false : means failure of immune system
 	bool activate_immunity(virus va) {
 		
-		if immunity contains_key va {
-			return flip(immunity[va]);
-		} 
-		if immunity contains_key va.source_of_mutation {
-			return flip(immunity[va.source_of_mutation] * va.get_immune_escapement());
-		}
+		// Immunity for this particular train
+		if immunity contains_key va { return flip(immunity[va]); }
+		
+		// Immunity got from protection provided for the source strain of the variant 'va'
+		if immunity contains_key va.source_of_mutation { return flip(immunity[va.source_of_mutation] * va.get_immune_escapement()); }
+		
+		// Immunity got from protection provided for the variant of the source strain 'va'
+		// TODO : validate how protection against a variant protect from the source strain !!!
+		if immunity.keys collect (each.source_of_mutation) contains va { return flip(1 - va.get_reinfection_probability()); }
+		
+		// If there is no linked immunity, then no body protection
 		return false;
 	}
 	
