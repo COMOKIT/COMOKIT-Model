@@ -1,0 +1,38 @@
+name: Continous Relase
+
+# Run only on workflow dispatch
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+        # Runs a single command using the runners shell
+      - name: Build for Linux
+        run: bash mkrelease.sh --platform Linux --gama 1.8.2
+
+      - name: Build for Mac
+        run: bash mkrelease.sh --platform Mac --gama 1.8.2
+
+      - name: Build for Windows
+        run: bash mkrelease.sh --platform Win --gama 1.8.2
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "All-In-One Version Continuous"
+          files: |
+            COMOKIT-Linux.zip
+            COMOKIT-Mac.zip
+            COMOKIT-Win.zip
