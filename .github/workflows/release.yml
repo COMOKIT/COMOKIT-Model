@@ -1,9 +1,7 @@
-name: Continous Relase
+name: Stable Relase
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * *"
 
 jobs:
   build:
@@ -21,13 +19,17 @@ jobs:
       - name: Build for Windows
         run: bash mkrelease.sh --platform Win --gama 1.8.2
 
+      - name: Build standalone model files
+        run: zip COMOKIT-Model.zip -r COMOKIT
+
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "All-In-One Version Continuous"
+          automatic_release_tag: "stable"
+          prerelease: false
+          title: "COMOKIT Stable version"
           files: |
             COMOKIT-Linux.zip
             COMOKIT-Mac.zip
             COMOKIT-Win.zip
+            COMOKIT-Model.zip
