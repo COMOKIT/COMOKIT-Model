@@ -7,7 +7,7 @@
 
 model generate_pedestrian_path
 
-import "../Model/Building model/Constants.gaml"
+import "../../Model/Building model/Constants.gaml"
 
 global {
 	
