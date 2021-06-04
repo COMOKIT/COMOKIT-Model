@@ -1,0 +1,33 @@
+name: Continous Relase
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build for Linux
+        run: bash mkrelease.sh --platform Linux --gama 1.8.2
+
+      - name: Build for Mac
+        run: bash mkrelease.sh --platform Mac --gama 1.8.2
+
+      - name: Build for Windows
+        run: bash mkrelease.sh --platform Win --gama 1.8.2
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "All-In-One Version Continuous"
+          files: |
+            COMOKIT-Linux.zip
+            COMOKIT-Mac.zip
+            COMOKIT-Win.zip
