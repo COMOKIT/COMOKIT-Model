@@ -23,6 +23,7 @@ import "Activity.gaml"
 import "Building.gaml"
 import "Biological Entity.gaml"
 import "Virus.gaml"
+import "Vaccine.gaml"
 
 
 global
@@ -33,6 +34,9 @@ global
 	int total_number_deaths <- 0;
 	int total_number_hospitalised <- 0;
 	int total_number_ICU <- 0;
+	
+	list<int> total_number_doses <- [0,0,0];
+	map<covax,int> total_number_doses_per_vax;
 	
 	map<string, int> building_infections;
 	map<int,int> total_incidence_age;
@@ -100,6 +104,10 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	//Bool to uniquely count positive
 	bool is_already_positive <- false;
 	
+	//Vaccines
+	map<date, vax> vaccine_history;
+	float vax_willingness;
+	
 	//#############################################################
 	//Contact related variables
 	//#############################################################
@@ -156,6 +164,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		basic_viral_release <- world.get_basic_viral_release(age);
 		contact_rate <- world.get_contact_rate_human(age);
 		proba_wearing_mask <- world.get_proba_wearing_mask(age);
+		vax_willingness <- 1 - world.get_proba_antivax(age);
 		viral_factor <- world.get_viral_factor(age);
 	}
 	
@@ -267,6 +276,22 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		is_at_home <- current_place = home;
 		current_place.individuals << self;
 		location <- any_location_in(current_place);
+	}
+	
+	//Vaccination for Covid19 on the current date
+	//return the number of doses done
+	int vaccination(covax v){
+		int dose_nb <- vaccine_history.values count (each = v);
+		
+		// records
+		total_number_doses[dose_nb] <- total_number_doses[dose_nb] + 1;
+		if total_number_doses_per_vax contains_key v {total_number_doses_per_vax[v] <- total_number_doses_per_vax[v]+1;}
+		else {total_number_doses_per_vax[v] <- 1;} 
+		
+		do build_immunity(v.target,1-v.infection_prevention[dose_nb]);
+		vaccine_history[current_date] <- v;
+		
+		return vaccine_history.values count (each = v);
 	}
 	
 	//#############################################################

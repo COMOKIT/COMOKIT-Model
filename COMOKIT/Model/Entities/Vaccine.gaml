@@ -13,18 +13,21 @@ import "Biological Entity.gaml"
 
 global {
 	
+	string pfizer_biontech <- "COMIRNATY";
+	string astra_zeneca <- "VAXZEVRIA";
+	
 	/*
 	 * The list of mRNA based vaccines
 	 */
 	list<covax> ARNm <- [
-		create_covid19_vaccine("COMIRNATY",2,[pair<float,float>(3#week,6#week)],[0.6,0.95]) // Pfizer-BioNTech
+		create_covid19_vaccine(pfizer_biontech,2,[pair<float,float>(3#week,6#week)],[0.6,0.95])
 	];
 	
 	/*
 	 * The list of modified adenovirus based vaccines
 	 */
 	list<covax> Adeno <- [
-		create_covid19_vaccine("VAXZEVRIA",2,[pair<float,float>(4#week,12#week)],[0.5,0.75]) // AstraZeneca
+		create_covid19_vaccine(astra_zeneca,2,[pair<float,float>(4#week,12#week)],[0.5,0.75]) // AstraZeneca
 	];
 	
 	/*
@@ -44,16 +47,16 @@ global {
 	 * TODO : there is a 3rd injection possible for people with co-morbidities ... but it will required to change a little bit the way vaccins work - see covax
 	 * TODO : find information on symptomatic and sever case reduction !!!
 	 */
-	 covax create_covid19_vaccine(string vax_name, int doses, list<pair<float,float>> vax_plan,
+	 covax create_covid19_vaccine(string vax_name, int doses, list<pair<float,float>> vax_schedul,
 	 	list<float> protection_level, list<float> symptomatic_reduction <- nil, list<float> sever_case_reduction <- nil,
 	 	virus virus_target <- original_strain
 	 ) {
-	 	if length(protection_level) != doses or length(vax_plan)-1 != doses
+	 	if length(protection_level) != doses or length(vax_schedul)+1 != doses
 	 		{error "There is a mismatch between the number of doses and protection characteristic per doses";}
 	 	create covax with:[
 	 		name::vax_name,
 	 		target::virus_target,
-	 		vax_plan::vax_plan,
+	 		vax_schedul::vax_schedul,
 	 		infection_prevention::protection_level,
 	 		symptomatic_prevention::(symptomatic_reduction=nil?list_with(doses,default_sympt_value):symptomatic_reduction),
 	 		hospitalisation_prevention::(sever_case_reduction=nil?list_with(doses,default_care_value):sever_case_reduction)
@@ -68,7 +71,7 @@ global {
  */
 species vax { 
 	virus target;
-	list<pair<float,float>> vax_plan; 
+	list<pair<float,float>> vax_schedul; 
 }
 
 /*

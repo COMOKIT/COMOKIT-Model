@@ -86,7 +86,7 @@ experiment "Abstract Experiment" virtual: true {
 		string dfp <- with_path_termination(_datasets_folder_path);
 		list<string> dirs <- gather_dataset_names(dfp) - EXCLUDED_CASE_STUDY_FOLDERS_NAME;
 		string question <- "Choose one dataset among : " + dirs;
-		return dfp + "/" + user_input(question, [choose("Your choice", string, first(dirs), dirs)])["Your choice"] + "/";
+		return dfp + "/" + user_input_dialog(question, [choose("Your choice", string, first(dirs), dirs)])["Your choice"] + "/";
 	}
 
 	// ----------------------------------------------------- //

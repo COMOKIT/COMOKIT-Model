@@ -89,7 +89,6 @@ global {
 	string epidemiological_basic_viral_release <- "Basic_viral_release";
 	string epidemiological_probability_true_positive <- "Probability_true_positive";
 	string epidemiological_probability_true_negative <- "Probability_true_negative";
-	string epidemiological_proportion_wearing_mask <- "Proportion_wearing_mask";
 	string epidemiological_factor_wearing_mask <- "Factor_wearing_mask";
 	string epidemiological_incubation_period_symptomatic <-"Incubation_period_symptomatic";
 	string epidemiological_incubation_period_asymptomatic <-"Incubation_period_asymptomatic";
@@ -104,5 +103,8 @@ global {
 	string epidemiological_infectious_period_asymptomatic <- "Infectious_period_asymptomatic";
 	string epidemiological_allow_viral_individual_factor <- "Allow_viral_individual_factor";
 	string epidemiological_viral_individual_factor <- "Viral_individual_factor";
+	//Behavioral
+	string epidemiological_proportion_wearing_mask <- "Proportion_wearing_mask";
+	string proportion_antivax <- "Proportion_antivax";
 	
 }

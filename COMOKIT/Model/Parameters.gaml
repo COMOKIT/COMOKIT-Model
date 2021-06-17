@@ -73,6 +73,9 @@ global {
 	float basic_viral_release <- 3.0; //Viral load released in the environment by infectious individual
 	float basic_viral_decrease <- 0.33; //Value to decrement the viral load in the environment
 	
+	// Behavioral parameters
+	float init_all_ages_proportion_wearing_mask <- 0.0; //Proportion of people wearing a mask
+	float init_all_ages_proportion_antivax <- 0.4;//Proportion of people not willing to take the vaccin
 	
 	//These parameters are used when no CSV is loaded to build the matrix of parameters per age
 	float init_all_ages_successful_contact_rate_human <- 2.5 * 1/(14.69973);//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
@@ -81,7 +84,6 @@ global {
 	float init_all_ages_proportion_dead_symptomatic <- 0.01; //Proportion of symptomatic infections dying
 	float init_all_ages_probability_true_positive <- 0.89; //Probability of successfully identifying an infected
 	float init_all_ages_probability_true_negative <- 0.92; //Probability of successfully identifying a non infected
-	float init_all_ages_proportion_wearing_mask <- 0.0; //Proportion of people wearing a mask
 	float init_all_ages_factor_contact_rate_wearing_mask <- 0.5; //Factor of reduction for successful contact rate of an infectious individual wearing mask
 	string init_all_ages_distribution_type_incubation_period_symptomatic <- "Lognormal"; //Type of distribution of the incubation period; Among normal, lognormal, weibull, gamma
 	float init_all_ages_parameter_1_incubation_period_symptomatic <- 1.57; //First parameter of the incubation period distribution for symptomatic

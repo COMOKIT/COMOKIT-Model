@@ -205,6 +205,7 @@ global {
 			add list(epidemiological_fixed,string(init_all_ages_probability_true_positive)) to: tmp_map at: epidemiological_probability_true_positive;
 			add list(epidemiological_fixed,string(init_all_ages_probability_true_negative)) to: tmp_map at: epidemiological_probability_true_negative;
 			add list(epidemiological_fixed,string(init_all_ages_proportion_wearing_mask)) to: tmp_map at: epidemiological_proportion_wearing_mask;
+			add list(epidemiological_fixed,string(init_all_ages_proportion_antivax)) to:tmp_map at:proportion_antivax;
 			add list(epidemiological_fixed,string(init_all_ages_factor_contact_rate_wearing_mask)) to: tmp_map at: epidemiological_factor_wearing_mask;
 			add list(init_all_ages_distribution_type_incubation_period_symptomatic,string(init_all_ages_parameter_1_incubation_period_symptomatic),string(init_all_ages_parameter_2_incubation_period_symptomatic)) to: tmp_map at: epidemiological_incubation_period_symptomatic;
 			add list(init_all_ages_distribution_type_incubation_period_asymptomatic,string(init_all_ages_parameter_1_incubation_period_asymptomatic),string(init_all_ages_parameter_2_incubation_period_asymptomatic)) to: tmp_map at: epidemiological_incubation_period_asymptomatic;
@@ -399,6 +400,9 @@ global {
 				}
 				match epidemiological_stay_ICU{
 					list_value <- list<string>(init_all_ages_distribution_type_stay_ICU,string(init_all_ages_parameter_1_stay_ICU),string(init_all_ages_parameter_2_stay_ICU));
+				}
+				match proportion_antivax {
+					list_value <- list<string>(epidemiological_fixed,init_all_ages_proportion_antivax);
 				}
 				default{
 					

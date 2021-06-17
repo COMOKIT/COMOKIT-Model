@@ -131,10 +131,10 @@ global {
 			if not(age_map=nil) and not(empty(age_map)) {
 				if age_map contains_key input { return rnd(first(age_map[input]),last(age_map[input])); }
 			} else {
-				if int(input) is int { return int(input); }
+				if int(input) is int { return float(input); }
 			}
 		} 
-		return _get_age();
+		return float(_get_age());
 	}
 	
 	// Convert SP encoded gender into gama model specification (0=men, 1=women)

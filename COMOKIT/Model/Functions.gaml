@@ -249,5 +249,7 @@ global
 		return (float(map_epidemiological_parameters[age][epidemiological_proportion_wearing_mask][1]));
 	}
 	
+	float get_proba_antivax(int age) { return flip(float(map_epidemiological_parameters[age][proportion_antivax][1]))?1.0:0.0; }
+	
 	
 }

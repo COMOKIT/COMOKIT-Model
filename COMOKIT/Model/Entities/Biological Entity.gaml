@@ -177,67 +177,7 @@ species BiologicalEntity control:fsm{
 		is_infected <- define_is_infected();
 		is_asymptomatic <- define_is_asymptomatic();
 	}
-	
-	//Action to define a new case, initialising it to latent and computing its latent period, and whether or not it will be symptomatic
-	action define_new_case(virus infectious_agent) {
-		state <- "latent";
-		viral_agent <- infectious_agent;
-		write sample(viral_agent);
-		if(world.is_asymptomatic(self.age)){
-			is_symptomatic <- false;
-			latent_period <- world.get_incubation_period_asymptomatic(self.age);
-		}else{
-			is_symptomatic <- true;
-			presymptomatic_period <- world.get_serial_interval(self.age);
-			latent_period <- presymptomatic_period<0?world.get_incubation_period_symptomatic(self.age)+presymptomatic_period:world.get_incubation_period_symptomatic(self.age);
-		}
-	}
-	
-	//Action to build an immune response to a given virus which is equal to 1 minus immune escapement
-	action build_immunity(virus va, float immune_escapement) { immunity[va] <- 1 - immune_escapement; }
-	
-	//Activate immune system to fight against infection of virus 'va' 
-	// return > true : means immunity prevents from the infection
-	// return > false : means failure of immune system
-	bool activate_immunity(virus va) {
 		
-		// Immunity for this particular train
-		if immunity contains_key va { return flip(immunity[va]); }
-		
-		// Immunity got from protection provided for the source strain of the variant 'va'
-		if immunity contains_key va.source_of_mutation { return flip(immunity[va.source_of_mutation] * va.get_immune_escapement()); }
-		
-		// Immunity got from protection provided for the variant of the source strain 'va'
-		// TODO : validate how protection against a variant protect from the source strain !!!
-		if immunity.keys collect (each.source_of_mutation) contains va { return flip(1 - va.get_reinfection_probability()); }
-		
-		// If there is no linked immunity, then no body protection
-		return false;
-	}
-	
-	//Reflex to trigger transmission to other individuals and environmental contamination
-	reflex infect_others when: is_infectious
-	{
-		float start <- BENCHMARK ? machine_time : 0.0;
-		//Computation of the reduction of the transmission when being asymptomatic/presymptomatic and/or wearing mask
-		float reduction_factor <- 1.0;
-		if(is_asymptomatic)
-		{
-			reduction_factor <- reduction_factor * factor_contact_rate_asymptomatic;
-		}
-		
-		//Perform human to human transmission
-		if allow_transmission_human {
-			float proba <- contact_rate*reduction_factor;
-			list<BiologicalEntity> fellows <- BiologicalEntity where (flip(proba) and (each.state = susceptible));
-			ask world {do console_output(sample(fellows), caller::"Biological_Entity.gaml");}
-			ask fellows {
-				do define_new_case;
-			}
-	 	}
-		if BENCHMARK {bench["Biological Entity.infect_others"] <- bench["Biological Entity.infect_others"] + machine_time - start; }
-	}
-	
 	//Reflex to update the time before death when an entity need to be admitted in ICU, but is not in ICU
 	reflex update_time_before_death when: (clinical_status = need_ICU) and (is_ICU = false) {
 		float start <- BENCHMARK ? machine_time : 0.0;
@@ -263,6 +203,74 @@ species BiologicalEntity control:fsm{
 			}
 		}
 		if BENCHMARK {bench["Biological Entity.update_time_in_ICU"] <- bench["Biological Entity.update_time_in_ICU"] + machine_time - start; }
+	}
+	
+	//#############################################################
+	// INFECTION
+	//#############################################################
+	
+	//Action to define a new case, initialising it to latent and computing its latent period, and whether or not it will be symptomatic
+	action define_new_case(virus infectious_agent) {
+		state <- "latent";
+		viral_agent <- infectious_agent;
+		write sample(viral_agent);
+		if(world.is_asymptomatic(self.age)){
+			is_symptomatic <- false;
+			latent_period <- world.get_incubation_period_asymptomatic(self.age);
+		}else{
+			is_symptomatic <- true;
+			presymptomatic_period <- world.get_serial_interval(self.age);
+			latent_period <- presymptomatic_period<0?world.get_incubation_period_symptomatic(self.age)+presymptomatic_period:world.get_incubation_period_symptomatic(self.age);
+		}
+	}
+	
+	//Reflex to trigger transmission to other individuals and environmental contamination
+	reflex infect_others when: is_infectious
+	{
+		float start <- BENCHMARK ? machine_time : 0.0;
+		//Computation of the reduction of the transmission when being asymptomatic/presymptomatic and/or wearing mask
+		float reduction_factor <- 1.0;
+		if(is_asymptomatic)
+		{
+			reduction_factor <- reduction_factor * factor_contact_rate_asymptomatic;
+		}
+		
+		//Perform human to human transmission
+		if allow_transmission_human {
+			float proba <- contact_rate*reduction_factor;
+			list<BiologicalEntity> fellows <- BiologicalEntity where (flip(proba) and (each.state = susceptible));
+			ask world {do console_output(sample(fellows), caller::"Biological_Entity.gaml");}
+			ask fellows {
+				do define_new_case;
+			}
+	 	}
+		if BENCHMARK {bench["Biological Entity.infect_others"] <- bench["Biological Entity.infect_others"] + machine_time - start; }
+	}
+	
+	//#############################################################
+	// IMMUNITY
+	//#############################################################
+	
+	//Action to build an immune response to a given virus which is equal to 1 minus immune escapement
+	action build_immunity(virus va, float immune_escapement) { immunity[va] <- 1 - immune_escapement; }
+	
+	//Activate immune system to fight against infection of virus 'va' 
+	// return > true : means immunity prevents from the infection
+	// return > false : means failure of immune system
+	bool activate_immunity(virus va) {
+		
+		// Immunity for this particular train
+		if immunity contains_key va { return flip(immunity[va]); }
+		
+		// Immunity got from protection provided for the source strain of the variant 'va'
+		if immunity contains_key va.source_of_mutation { return flip(immunity[va.source_of_mutation] * va.get_immune_escapement()); }
+		
+		// Immunity got from protection provided for the variant of the source strain 'va'
+		// TODO : validate how protection against a variant protect from the source strain !!!
+		if immunity.keys collect (each.source_of_mutation) contains va { return flip(1 - va.get_reinfection_probability()); }
+		
+		// If there is no linked immunity, then no body protection
+		return false;
 	}
 	
 	
