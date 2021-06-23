@@ -21,6 +21,9 @@ jobs:
       - name: Build for Windows
         run: bash mkrelease.sh --platform Win --gama 1.8.2
 
+      - name: Build raw Model release
+        run: zip -r COMOKIT-Model.zip COMOKIT
+
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -31,3 +34,4 @@ jobs:
             COMOKIT-Linux.zip
             COMOKIT-Mac.zip
             COMOKIT-Win.zip
+            COMOKIT-Model.zip
