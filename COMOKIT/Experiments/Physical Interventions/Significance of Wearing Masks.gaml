@@ -47,7 +47,7 @@ experiment "Wearing Masks" parent: "Abstract Experiment" autorun: true {
 			create simulation with: [color::(colors at int(proportion*5)), dataset_path::shape_path, seed::simulation_seed,   
 				init_all_ages_factor_contact_rate_wearing_mask::factor, 
 				init_all_ages_proportion_wearing_mask::proportion, 
-				force_parameters::list(epidemiological_proportion_wearing_mask, epidemiological_factor_wearing_mask)
+				forced_epidemiological_parameters::list(epidemiological_proportion_wearing_mask, epidemiological_factor_wearing_mask)
 			] {
 				name <- string(int(proportion*100)) + "% with mask";
 				// Automatically call define_policy action

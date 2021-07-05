@@ -13,8 +13,9 @@
 
 model CoVid19
 
-import "Entities/Building.gaml"
-import "Parameters.gaml"
+//import "Entities/Building.gaml"
+//import "Parameters.gaml"
+import "Global.gaml"
 
 /*
  * All functions to initialize demographic attribute of the agent. It feature two type of initialization:

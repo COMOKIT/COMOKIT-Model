@@ -15,7 +15,6 @@ model CoVid19
 
 import "Individual.gaml"
 
-
 species AbstractPolicy virtual: true {
 	int max_number_individual_group <- int(#max_int);
 	list<Individual> targeted_individuals <- list(all_individuals);

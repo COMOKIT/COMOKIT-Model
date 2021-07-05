@@ -14,6 +14,7 @@
 model BiologicalEntity
 
 /* Insert your model definition here */
+import "../Global.gaml"
 import "../Functions.gaml"
 import "../Parameters.gaml"
 import "Virus.gaml"
@@ -67,6 +68,9 @@ species BiologicalEntity control:fsm{
 	//Boolean to determine if the agent is symptomatic
 	bool is_symptomatic;
 	
+	// Comorbidities
+	int comorbidities <- 0;
+	
 	// TESTS
 	
 	//Report status of the entity if it has been tested, or not
@@ -111,10 +115,13 @@ species BiologicalEntity control:fsm{
 	//#############################################################
 	//Initialise epidemiological parameters according to the age of the Entity
 	action initialise_epidemio {
-		factor_contact_rate_asymptomatic <- world.get_factor_contact_rate_asymptomatic(age);
-		basic_viral_release <- world.get_basic_viral_release(age);
-		contact_rate <- world.get_contact_rate_human(age);
-		viral_factor <- world.get_viral_factor(age);
+		
+		// Virus dependant
+		factor_contact_rate_asymptomatic <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_factor_asymptomatic);
+		basic_viral_release <-  viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_basic_viral_release);
+		contact_rate <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_successful_contact_rate_human);
+		viral_factor <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_viral_individual_factor);
+	
 	}
 	
 	//Action to call when performing a test on a individual
@@ -123,7 +130,7 @@ species BiologicalEntity control:fsm{
 		//If the Individual is infected, we check for true positive
 		if(self.is_infected)
 		{
-			if(world.is_true_positive(self.age))
+			if(viral_agent.flip_epidemiological_aspect(nil, epidemiological_probability_true_positive))
 			{
 				report_status <- tested_positive;
 			}
@@ -135,7 +142,7 @@ species BiologicalEntity control:fsm{
 		else
 		{
 			//If the Individual is not infected, we check for true negative
-			if(world.is_true_negative(self.age))
+			if(viral_agent.flip_epidemiological_aspect(nil, epidemiological_probability_true_negative))
 			{
 				report_status <- tested_negative;
 				
@@ -195,7 +202,7 @@ species BiologicalEntity control:fsm{
 		time_ICU <- time_ICU -1;
 		if(time_ICU<=0){
 			//In the case of the entity being treated in ICU, but still dying
-			if(world.is_fatal(self.age)){
+			if(viral_agent.flip_epidemiological_aspect(self,epidemiological_proportion_death_symptomatic)){
 				clinical_status <- dead;
 				state <- removed;
 			}else{
@@ -213,15 +220,15 @@ species BiologicalEntity control:fsm{
 	action define_new_case(virus infectious_agent) {
 		state <- "latent";
 		viral_agent <- infectious_agent;
-		write sample(viral_agent);
-		if(world.is_asymptomatic(self.age)){
+		if(viral_agent.flip_epidemiological_aspect(nil,epidemiological_proportion_asymptomatic)){
 			is_symptomatic <- false;
-			latent_period <- world.get_incubation_period_asymptomatic(self.age);
-		}else{
-			is_symptomatic <- true;
-			presymptomatic_period <- world.get_serial_interval(self.age);
-			latent_period <- presymptomatic_period<0?world.get_incubation_period_symptomatic(self.age)+presymptomatic_period:world.get_incubation_period_symptomatic(self.age);
-		}
+				latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_asymptomatic);
+			}else{
+				is_symptomatic <- true;
+				presymptomatic_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_serial_interval);
+				latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_symptomatic) + 
+					(presymptomatic_period<0 ? presymptomatic_period : 0);
+			}
 	}
 	
 	//Reflex to trigger transmission to other individuals and environmental contamination
@@ -236,7 +243,7 @@ species BiologicalEntity control:fsm{
 		}
 		
 		//Perform human to human transmission
-		if allow_transmission_human {
+		if init_selfstrain_reinfection_probability {
 			float proba <- contact_rate*reduction_factor;
 			list<BiologicalEntity> fellows <- BiologicalEntity where (flip(proba) and (each.state = susceptible));
 			ask world {do console_output(sample(fellows), caller::"Biological_Entity.gaml");}
@@ -263,11 +270,11 @@ species BiologicalEntity control:fsm{
 		if immunity contains_key va { return flip(immunity[va]); }
 		
 		// Immunity got from protection provided for the source strain of the variant 'va'
-		if immunity contains_key va.source_of_mutation { return flip(immunity[va.source_of_mutation] * va.get_immune_escapement()); }
+		if immunity contains_key va.source_of_mutation { return flip(immunity[va.source_of_mutation] * va.get_value_for_epidemiological_aspect(self, epidemiological_immune_evasion)); }
 		
 		// Immunity got from protection provided for the variant of the source strain 'va'
 		// TODO : validate how protection against a variant protect from the source strain !!!
-		if immunity.keys collect (each.source_of_mutation) contains va { return flip(1 - va.get_reinfection_probability()); }
+		if immunity.keys collect (each.source_of_mutation) contains va { return flip(1 - va.get_value_for_epidemiological_aspect(self, epidemiological_reinfection_probability)); }
 		
 		// If there is no linked immunity, then no body protection
 		return false;
@@ -313,20 +320,20 @@ species BiologicalEntity control:fsm{
 		enter{
 			tick <- 0.0;
 			do set_status;
-			infectious_period <- world.get_infectious_period_symptomatic(self.age);
-			if(world.is_hospitalised(self.age)){
+			infectious_period <-  viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_infectious_period_symptomatic);
+			if(viral_agent.flip_epidemiological_aspect(self,epidemiological_proportion_hospitalisation)){
 				//Compute the time before hospitalisation knowing the current biological status of the agent
-				time_symptoms_to_hospitalisation <- world.get_time_onset_to_hospitalisation(self.age,self.infectious_period);
+				time_symptoms_to_hospitalisation <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_onset_to_hospitalisation, self.infectious_period); 
 				if(time_symptoms_to_hospitalisation>infectious_period)
 				{
 					time_symptoms_to_hospitalisation <- infectious_period;
 				}
 				//Check if the Individual will need to go to ICU
-				if(world.is_ICU(self.age))
+				if(viral_agent.flip_epidemiological_aspect(self,epidemiological_proportion_icu))
 				{
 					//Compute the time before going to ICU once hospitalised
-					time_hospitalisation_to_ICU <- world.get_time_hospitalisation_to_ICU(self.age, self.time_symptoms_to_hospitalisation);
-					time_stay_ICU <- world.get_time_ICU(self.age);
+					time_hospitalisation_to_ICU <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_hospitalisation_to_ICU, self.time_symptoms_to_hospitalisation);
+					time_stay_ICU <-  viral_agent.get_value_for_epidemiological_aspect(self, epidemiological_stay_ICU);
 					if(time_symptoms_to_hospitalisation+time_hospitalisation_to_ICU>=infectious_period)
 					{
 						time_symptoms_to_hospitalisation <- infectious_period-time_hospitalisation_to_ICU;
@@ -365,7 +372,7 @@ species BiologicalEntity control:fsm{
 		enter{
 			tick <- 0.0;
 			do set_status;
-			infectious_period <- world.get_infectious_period_asymptomatic(self.age);
+			infectious_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_infectious_period_asymptomatic);
 		}
 		tick <- tick+1;
 		transition to:removed when: (tick>=infectious_period){
@@ -378,7 +385,7 @@ species BiologicalEntity control:fsm{
 		enter{
 			// If the agent recovered, then he build an immune response
 			if clinical_status != dead and not (immunity contains_key viral_agent) { 
-				do build_immunity(viral_agent, viral_agent.get_reinfection_probability());
+				do build_immunity(viral_agent, viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_reinfection_probability));
 			}
 		}
 		

@@ -65,23 +65,39 @@ global {
 	string HID <- "household_id";
 	string IID <- "individual_id";
 	
+	//Epi attributes
+	string COMORBIDITIES <- "comorbidities";
+	
+	//Virus and variant
+	string SARS_CoV_2 <- "SARS-CoV-2";
+	
 	//number of the column for the epidemiological parameters CSV file
 	int epidemiological_csv_column_name <- 0; //Name of the parameter
-	int epidemiological_csv_column_age <- 1; //Lower bound of the age category
-	int epidemiological_csv_column_detail <- 2; //Detail of the parameter (i.e. Fixed, or following a distribution)
-	int epidemiological_csv_column_parameter_one <- 3; //Value of the parameter (only this one is used for fixed, else it is the first parameter of the distribution)
-	int epidemiological_csv_column_parameter_two <- 4; //Value of the parameter (only used as the second parameter for distribution)
+	int epidemiological_age_entry <- 0;
+	int epidemiological_gender_entry <- 1;
+	int epidemiological_comorbidities_entry <- 2;
+	//  From last column  - python like syntax  ;)
+	int epidemiological_csv_params_number <- 3; // Number of parameter per epistemological variable x entry
+	
+	// Default para of the epidemiological distribution
+	list<string> epidemiological_csv_entries <- [AGE,SEX,COMORBIDITIES];
+	// TODO  : there is a huge issue related to the fact that biological entities does not have Sex var.
+	list<int> epidemiological_default_entry <- [-1,-1,-1];
 	
 	//Keys of the map of epidemiological parameters, must also be used in the CSV
 	string epidemiological_transmission_human <- "Transmission_human";
 	string epidemiological_transmission_building <- "Transmission_building";
 	string epidemiological_basic_viral_decrease <- "Basic_viral_decrease";
+	
+	// Available distributions to parameter the epidemiological values of the model
 	string epidemiological_fixed <- "Fixed";
 	string epidemiological_lognormal <- "Lognormal";
 	string epidemiological_normal <- "Normal";
 	string epidemiological_weibull <- "Weibull";
 	string epidemiological_gamma <- "Gamma";
 	string epidemiological_uniform <- "Uniform";
+	
+	// Virus specific parameter value
 	string epidemiological_successful_contact_rate_human <- "Successful_contact_rate_human";
 	string epidemiological_successful_contact_rate_building <- "Successful_contact_rate_building";
 	string epidemiological_factor_asymptomatic <-"Factor_asymptomatic";
@@ -103,6 +119,9 @@ global {
 	string epidemiological_infectious_period_asymptomatic <- "Infectious_period_asymptomatic";
 	string epidemiological_allow_viral_individual_factor <- "Allow_viral_individual_factor";
 	string epidemiological_viral_individual_factor <- "Viral_individual_factor";
+	string epidemiological_immune_evasion <- "Immune_evasion";
+	string epidemiological_reinfection_probability <- "Re_infection_probability";
+	
 	//Behavioral
 	string epidemiological_proportion_wearing_mask <- "Proportion_wearing_mask";
 	string proportion_antivax <- "Proportion_antivax";

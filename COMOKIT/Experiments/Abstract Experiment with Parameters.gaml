@@ -13,14 +13,14 @@ experiment "With parameters" parent: "Abstract Experiment" autorun: true virtual
 	/** 
 	* Enabling parameters being loaded from a csv file  
 	*/
-	parameter "Epidemiological from file" category: "Epidemiology" var: load_epidemiological_parameter_from_file <- false enables: [epidemiological_parameters];
+	parameter "Epidemiological from file" category: "Epidemiology" var: load_epidemiological_parameter_from_file <- false enables: [sars_cov_2_parameters];
 	//File for the parameters
-	parameter "Path of Epidemiological from file" category: "Epidemiology" var: epidemiological_parameters <- "../Parameters/Epidemiological Parameters.csv";
+	parameter "Path of Epidemiological from file" category: "Epidemiology" var: sars_cov_2_parameters <- "../Parameters/Epidemiological Parameters.csv";
 
 	/** 
 	 * Enabling human to human transmission
 	 */
-	parameter "Enables inter-human transmission" category: "Epidemiology" var: allow_transmission_human <- true enables:
+	parameter "Enables inter-human transmission" category: "Epidemiology" var: init_selfstrain_reinfection_probability <- true enables:
 	[init_all_ages_successful_contact_rate_human, init_all_ages_proportion_asymptomatic, init_all_ages_factor_contact_rate_asymptomatic, init_all_ages_proportion_dead_symptomatic];
 	//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
 	parameter "Successful contact rate for human" category: "Epidemiology" var: init_all_ages_successful_contact_rate_human <- 2.5 * 1 / (14.69973 * nb_step_for_one_day);

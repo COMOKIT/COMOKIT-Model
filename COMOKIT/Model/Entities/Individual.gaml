@@ -18,13 +18,14 @@
 
 model CoVid19
 
+import "../Global.gaml"
 import "../Functions.gaml"
+import "Authority.gaml"
 import "Activity.gaml"
 import "Building.gaml"
 import "Biological Entity.gaml"
-import "Virus.gaml"
 import "Vaccine.gaml"
-
+import "Virus.gaml"
 
 global
 {
@@ -125,7 +126,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		//If the Individual is infected, we check for true positive
 		if(self.is_infected)
 		{
-			if(world.is_true_positive(self.age))
+			if(viral_agent.flip_epidemiological_aspect(self, epidemiological_probability_true_positive))
 			{
 				report_status <- tested_positive;
 				if(is_already_positive=false){
@@ -141,7 +142,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		else
 		{
 			//If the Individual is not infected, we check for true negative
-			if(world.is_true_negative(self.age))
+			if(viral_agent.flip_epidemiological_aspect(self, epidemiological_probability_true_negative))
 			{
 				report_status <- tested_negative;
 				
@@ -159,13 +160,15 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	}
 	//Initialise epidemiological parameters according to the age of the Entity
 	action initialise_epidemio {
-		factor_contact_rate_asymptomatic <- world.get_factor_contact_rate_asymptomatic(age);
+		// Not virus dependant
 		factor_contact_rate_wearing_mask <- world.get_factor_contact_rate_wearing_mask(age);
-		basic_viral_release <- world.get_basic_viral_release(age);
-		contact_rate <- world.get_contact_rate_human(age);
 		proba_wearing_mask <- world.get_proba_wearing_mask(age);
 		vax_willingness <- 1 - world.get_proba_antivax(age);
-		viral_factor <- world.get_viral_factor(age);
+		// Virus dependant
+		factor_contact_rate_asymptomatic <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_factor_asymptomatic);
+		basic_viral_release <-  viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_basic_viral_release);
+		contact_rate <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_successful_contact_rate_human);
+		viral_factor <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_viral_individual_factor);
 	}
 	
 	//Action to call to define a new case, obtaining different time to key events
@@ -197,13 +200,15 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			
 			//Set the status of the Individual to latent (i.e. not infectious)
 			state <- "latent";
-			if(world.is_asymptomatic(self.age)){
+			
+			if(viral_agent.flip_epidemiological_aspect(self,epidemiological_proportion_asymptomatic)){ 
 				is_symptomatic <- false;
-				latent_period <- world.get_incubation_period_asymptomatic(self.age);
+				latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_asymptomatic);
 			}else{
 				is_symptomatic <- true;
-				presymptomatic_period <- world.get_serial_interval(self.age);
-				latent_period <- presymptomatic_period<0?world.get_incubation_period_symptomatic(self.age)+presymptomatic_period:world.get_incubation_period_symptomatic(self.age);
+				presymptomatic_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_serial_interval);
+				latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_symptomatic) + 
+					(presymptomatic_period<0 ? presymptomatic_period : 0);
 			}
 			return true;
 		}
@@ -310,7 +315,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	{
 		float start <- BENCHMARK ? machine_time : 0.0;
 		//Computation of the reduction of the transmission when being asymptomatic/presymptomatic and/or wearing mask
-		float reduction_factor <- viral_factor * viral_agent.get_infectiousness_factor();
+		float reduction_factor <- viral_factor;
 		
 		if(is_asymptomatic)
 		{

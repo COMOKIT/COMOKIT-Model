@@ -119,7 +119,7 @@ species covax parent:vax {
 		}
 		dose <- dose <= 1 ? 0 : (dose >= length(protection) ? length(protection)-1 : dose);
 		if target = v or target.source_of_mutation = v { return  protection[dose]; }
-		if target = v.source_of_mutation { return protection[dose] * v.get_immune_escapement(); }
+		if target = v.source_of_mutation { return protection[dose] * v.get_value_for_epidemiological_aspect(nil,epidemiological_immune_evasion); }
 		return 0.0;
 	}
 	

@@ -97,7 +97,7 @@ species pseudo_individual parent:BiologicalEntity
 		}
 		
 		//Perform human to human transmission
-		if allow_transmission_human {
+		if init_selfstrain_reinfection_probability {
 			float proba <- contact_rate*reduction_factor;
 			list<pseudo_individual> fellows <- pseudo_individual where (flip(proba) and (each.state = susceptible));
 			ask fellows {
