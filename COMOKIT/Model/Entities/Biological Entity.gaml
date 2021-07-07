@@ -243,7 +243,7 @@ species BiologicalEntity control:fsm{
 		}
 		
 		//Perform human to human transmission
-		if init_selfstrain_reinfection_probability {
+		if allow_transmission_human {
 			float proba <- contact_rate*reduction_factor;
 			list<BiologicalEntity> fellows <- BiologicalEntity where (flip(proba) and (each.state = susceptible));
 			ask world {do console_output(sample(fellows), caller::"Biological_Entity.gaml");}

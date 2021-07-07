@@ -33,6 +33,7 @@ global {
 		do before_init;
 		do init_epidemiological_parameters;
 		do init_sars_cov_2;
+		do init_vaccines;
 		do global_init;
 		do create_authority;
 		do after_init;

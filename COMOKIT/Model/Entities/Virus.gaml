@@ -100,6 +100,7 @@ global {
 	 * The list of individual determinant in epidemiological expression of SARS-CoV-2
 	 */
 	list<string> EPI_ENTRIES  <- [AGE,SEX,COMORBIDITIES];
+	
 	/*
 	 * The list of <b>epidemiological parameters</b> for SARS-CoV-2. Can be: 
 	 * <ul>
@@ -148,7 +149,7 @@ global {
 		epidemiological_reinfection_probability
 	];
 	
-	list<string> SARS_COV_2_PARAMETERS <- SARS_COV_2_EPI_PARAMETERS+SARS_COV_2_EPI_PARAMETERS;
+	list<string> SARS_COV_2_PARAMETERS <- SARS_COV_2_EPI_PARAMETERS+SARS_COV_2_EPI_FLIP_PARAMETERS;
 	
 	/*
 	 * Gives antecedant of individuals
@@ -280,7 +281,9 @@ species sarscov2 parent:virus {
 	 */
 	float get_value_for_epidemiological_aspect(BiologicalEntity indiv, string aspect, float mod <- nil) {
 		if not(SARS_COV_2_EPI_PARAMETERS  contains aspect) {error "Trying to retrieve an unknown epidemiological aspect "+aspect;}
-		return world.get_epi_val(aspect,epidemiological_distribution[world.get_individual_entries(indiv)][aspect],mod);
+		list<int> indiv_entry <- world.get_individual_entries(indiv);
+		map<string,list<string>> epi_aspect_parameters <- epidemiological_distribution contains_key  indiv_entry ? epidemiological_distribution[indiv_entry] : epidemiological_distribution[epidemiological_default_entry];  
+		return world.get_epi_val(aspect,epi_aspect_parameters[aspect],mod);
 	}
 	
 	/*
@@ -288,7 +291,9 @@ species sarscov2 parent:virus {
 	 */
 	bool flip_epidemiological_aspect(BiologicalEntity indiv, string aspect) {
 		if not(SARS_COV_2_EPI_FLIP_PARAMETERS contains aspect) {error "Trying to flip over an unknow epidemiological aspect"+aspect;}
-		return flip(float(epidemiological_distribution[world.get_individual_entries(indiv)][aspect][1]));
+		list<int> indiv_entry <- world.get_individual_entries(indiv);
+		map<string,list<string>> epi_aspect_parameters <- epidemiological_distribution contains_key  indiv_entry ? epidemiological_distribution[indiv_entry] : epidemiological_distribution[epidemiological_default_entry];
+		return flip(float(epi_aspect_parameters[aspect][1]));
 	}	
 	
 }

@@ -60,9 +60,49 @@ global {
 	
 	string variants_folder <- (last(parameters_folder_path)="/"?parameters_folder_path:parameters_folder_path+"/")+"Variants";
 	
+	// --------------------
+	// ----------------------------------
+	// EPIDEMIOLOGICAL PARAMETERS
+	// ----------------------------------
+	// --------------------
+	
+	// -------
+	// Globals
+	// -------
+	// Basic transmission mechanisms
+	bool allow_transmission_human <- true; //Allowing human to human transmission
+	bool allow_transmission_building <- true; //Allowing environment contamination and infection
+	bool allow_viral_individual_factor <- false; //Allowing individual effects on the beta and viral release
+	
+	//Environmental contamination
+	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period
+	float reduction_coeff_all_buildings_inhabitants <- 0.01; //reduction of the contact rate for individuals belonging to different households leaving in the same building
+	float reduction_coeff_all_buildings_individuals <- 0.05; //reduction of the contact rate for individuals belonging to different households leaving in the same building
+	float basic_viral_release <- 3.0; //Viral load released in the environment by infectious individual
+	float basic_viral_decrease <- 0.33; //Value to decrement the viral load in the environment
+	
+	// Re-infections
+	bool allow_reinfection <- true; // Allowing Individual to be infected by the sars-cov-2 virus multiple times
+	
+	// Behavioral parameters
+	float init_all_ages_proportion_wearing_mask <- 0.0; //Proportion of people wearing a mask
+	float init_all_ages_proportion_antivax <- 0.4;//Proportion of people not willing to take the vaccin
+	
+	float init_all_ages_factor_contact_rate_wearing_mask <- 0.5; //Factor of reduction for successful contact rate of an infectious individual wearing mask
+	
+	
+	// HOSP - ICU CAPACITY
+	int ICU_capacity<-17; //Capacity of ICU for one hospital (from file)
+	int hospitalisation_capacity <- 200; //Capacity of hospitalisation admission for one hospital (assumed)
+	
+	list<string> forced_sars_cov_2_parameters;
+	list<string> forced_epidemiological_parameters;
+	
+	
 	//These parameters are used when no CSV is loaded to build the matrix of parameters per age
-	// VIRUS INIT
-	// -----------
+	// -----------------
+	// SARS-CoV-2 INIT
+	// -----------------
 	// infectiousness
 	float init_all_ages_successful_contact_rate_human <- 2.5 * 1/(14.69973);//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
 	float init_all_ages_factor_contact_rate_asymptomatic <- 0.55; //Factor of the reduction for successful contact rate for  human to human transmission for asymptomatic individual
@@ -120,41 +160,33 @@ global {
 	float init_immune_escapement <- 1.0; // The extends to which the virus escape from previous exposition and/or vaccines (TODO : is there a distinction ?)
 	float init_selfstrain_reinfection_probability <- 0.0; // The basic probability to be re-infected by the very same strain/variant - differ from immunity evasion of variants
 	
-	// -------------------------------------
+	// --------------
+	// VACCINE INIT
+	// --------------
 	
-	// 
-	// EPIDEMIOLOGICAL PARAMETERS
-	// --------
-	// Basic transmission mechanisms
-	bool allow_transmission_human <- true; //Allowing human to human transmission
-	bool allow_transmission_building <- true; //Allowing environment contamination and infection
-	bool allow_viral_individual_factor <- false; //Allowing individual effects on the beta and viral release
+	string pfizer_biontech <- "COMIRNATY";
+	list pfizer_doses_schedule <- [pair<float,float>(3#week,6#week)];
+	list<float> pfizer_doses_immunity <- [0.6,0.95];
+	list<float> pfizer_doses_sympto;
+	list<float> pfizer_doses_sever;
 	
-	//Environmental contamination
-	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period
-	float reduction_coeff_all_buildings_inhabitants <- 0.01; //reduction of the contact rate for individuals belonging to different households leaving in the same building
-	float reduction_coeff_all_buildings_individuals <- 0.05; //reduction of the contact rate for individuals belonging to different households leaving in the same building
-	float basic_viral_release <- 3.0; //Viral load released in the environment by infectious individual
-	float basic_viral_decrease <- 0.33; //Value to decrement the viral load in the environment
-	
-	// Re-infections
-	bool allow_reinfection <- true; // Allowing Individual to be infected by the sars-cov-2 virus multiple times
-	
-	// Behavioral parameters
-	float init_all_ages_proportion_wearing_mask <- 0.0; //Proportion of people wearing a mask
-	float init_all_ages_proportion_antivax <- 0.4;//Proportion of people not willing to take the vaccin
-	
-	float init_all_ages_factor_contact_rate_wearing_mask <- 0.5; //Factor of reduction for successful contact rate of an infectious individual wearing mask
+	string astra_zeneca <- "VAXZEVRIA";
+	list astra_doses_schedule <- [pair<float,float>(4#week,12#week)];
+	list<float> astra_doses_immunity <- [0.5,0.75];
+	list<float> astra_doses_sympto;
+	list<float> astra_doses_sever;
+		
+	// PROTECTIVE DIMENSION OF COVID19 VACCINES
 	
 	
-	// HOSP - ICU CAPACITY
-	int ICU_capacity<-17; //Capacity of ICU for one hospital (from file)
-	int hospitalisation_capacity <- 200; //Capacity of hospitalisation admission for one hospital (assumed)
+	// --------------------
+	// ----------------------------------------
+	// SYNTHETIC POPULATION AND AGENDA
+	// ----------------------------------------
+	// --------------------
 	
-	list<string> forced_sars_cov_2_parameters;
-	list<string> forced_epidemiological_parameters;
-	
-	//Synthetic population parameters
+	// ---------
+	// Synthetic population parameters
 	
 	// ------ From file
 	string OTHER <- "OTHER" const:true;
@@ -200,6 +232,10 @@ global {
 	// --------------
 	list<int> comorbidities_range <- [0];
 	
+	// -----------
+	// Localisation and synthetic agenda
+	// -----------
+	
 	 //building type that will be considered as home - for each type, the coefficient to apply to this type for this choice of working place
 	 //weight of a working place = area * this coefficient
 	map<string, float> possible_workplaces;
@@ -215,8 +251,6 @@ global {
 	string choice_of_target_mode <- gravity among: ["random", "gravity","closest"]; // model used for the choice of building for an activity 
 	int nb_candidates <- 4; // number of building considered for the choice of building for a particular activity
 	float gravity_power <- 0.5;  // power used for the gravity model: weight_of_building <- area of the building / (distance to it)^gravity_power
-	
-	
 	
 	//Agenda paramaters
 	list<int> non_working_days <- [7]; //list of non working days (1 = monday; 7 = sunday)

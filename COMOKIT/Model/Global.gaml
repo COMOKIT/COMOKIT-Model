@@ -192,26 +192,50 @@ global {
 	 * Initialization of global epidemiological mechanism in the model, such as environmental contamination, allow individual viral load or not, proportion of agent wearing mask, etc.
 	 */
 	action init_epidemiological_parameters {
-		if(load_epidemiological_parameter_from_file and file_exists(sars_cov_2_parameters)) {
-			csv_parameters <- csv_file(sars_cov_2_parameters,true);
+		do console_output("Init epidemiological global parameters ---");
+		if(load_epidemiological_parameter_from_file and file_exists(epidemiological_parameters)) {
+			float t <- machine_time;
+			// Read the file data
+			csv_parameters <- csv_file(epidemiological_parameters,true);
 			matrix data <- matrix(csv_parameters);
 			
+			// found header schem
+			int detail_idx <- data.columns - epidemiological_csv_params_number;
+			int val_idx <- detail_idx+1;
 			
-			// TODO  : init from the old file
+			map<string,int> read_entry_idx;
+			loop h from:1 to:data.columns-epidemiological_csv_params_number-1 { 
+				switch  data[0,h] { match AGE {read_entry_idx[AGE] <- h;} match SEX {read_entry_idx[SEX] <- h;}  match COMORBIDITIES {read_entry_idx[COMORBIDITIES] <- h;} }
+			}
 			
-			loop aParam over:forced_epidemiological_parameters  {
-				switch aParam {
-					match epidemiological_transmission_human { init_selfstrain_reinfection_probability <- init_selfstrain_reinfection_probability; }
-					match epidemiological_allow_viral_individual_factor{ allow_viral_individual_factor <- allow_viral_individual_factor; }
-					match epidemiological_transmission_building{ allow_transmission_building <- allow_transmission_building;   }
-					match epidemiological_basic_viral_decrease { basic_viral_decrease <- basic_viral_decrease; }
-					match epidemiological_basic_viral_release{  basic_viral_release  <- basic_viral_release; }
-					match epidemiological_successful_contact_rate_building{ successful_contact_rate_building <- successful_contact_rate_building; }
-					match proportion_antivax { init_all_ages_proportion_antivax <-  init_all_ages_proportion_antivax; }
-					match epidemiological_proportion_wearing_mask{ init_all_ages_proportion_wearing_mask <- init_all_ages_proportion_wearing_mask; }
-					match epidemiological_factor_wearing_mask{ init_all_ages_factor_contact_rate_wearing_mask <- init_all_ages_factor_contact_rate_wearing_mask; }
+			if not(empty(read_entry_idx)) {error "Global epidemiological parameters dependant over "+read_entry_idx.keys
+				+" are not yet supported, please consider raising an issue if feature required - https://github.com/COMOKIT/COMOKIT-Model/issues";
+			}
+			
+			loop l from:1 to:data.rows-1 {
+				
+				string param <- data[l,epidemiological_csv_column_name];
+				
+				if not(forced_epidemiological_parameters contains param) {
+					
+					string detail  <- data[l,detail_idx];
+					float val <- detail=epidemiological_fixed ?  float(data[l,val_idx]) : world.get_rnd_from_distribution(detail, float(data[l,val_idx]),float(data[l,val_idx+1]));
+					
+					switch param {
+						match epidemiological_transmission_human { init_selfstrain_reinfection_probability <- val; }
+						match epidemiological_allow_viral_individual_factor{ allow_viral_individual_factor <- bool(data[l,val_idx]); }
+						match epidemiological_transmission_building{ allow_transmission_building <- bool(data[l,val_idx]); }
+						match epidemiological_basic_viral_decrease { basic_viral_decrease <- val; }
+						match epidemiological_basic_viral_release{  basic_viral_release  <- val; }
+						match epidemiological_successful_contact_rate_building{ successful_contact_rate_building <- val; }
+						match proportion_antivax { init_all_ages_proportion_antivax <-  val; }
+						match epidemiological_proportion_wearing_mask{ init_all_ages_proportion_wearing_mask <- val; }
+						match epidemiological_factor_wearing_mask{ init_all_ages_factor_contact_rate_wearing_mask <- val; }
+					}
 				}
-			} 
+				
+			}
+			do console_output("\t process parameter files in "+with_precision((machine_time-t)/1000,2)+"s");
 		}
 	}
 	
@@ -220,7 +244,8 @@ global {
 	 * TODO : test it - damne it's so complicated -  and is clearly not flexible enough for Individual and Biological Entity (they do not have sex)
 	 */
 	action init_sars_cov_2  {
-		
+		do console_output("Init sars-cov-2 and variants ---");
+		float t <- machine_time;
 		map<list<int>,map<string,list<string>>> virus_epidemiological_default_profile <- map([]);
 		
 		// build empty individual entries
@@ -228,36 +253,43 @@ global {
 		loop a from:0  to:max_age  { loop s over:[0,1] { loop c over:comorbidities_range { epi_keys <+ [a,s,c]; } }  }
 		
 		//build the empty virus profile
+		//write "Debug init_sars_cov_2 action in Global.gaml";
 		
 		// If there is a parameter file
 		if(load_epidemiological_parameter_from_file and file_exists(sars_cov_2_parameters)){
 			
-			csv_file epi_params <- csv_file(sars_cov_2_parameters); 
+			csv_file epi_params <- csv_file(sars_cov_2_parameters,false); 
 			matrix data <- matrix(epi_params);
 			
 			// FOUND HEADERS
 			map<string,int> read_entry_idx;
 			loop h from:1 to:data.columns-epidemiological_csv_params_number-1 { 
-				switch  data[0,h] { match AGE {read_entry_idx[AGE] <- h;} match SEX {read_entry_idx[SEX] <- h;}  match COMORBIDITIES {read_entry_idx[COMORBIDITIES] <- h;} }
+				switch lower_case(string(data[h,0])) { match AGE {read_entry_idx[AGE] <- h;} match SEX {read_entry_idx[SEX] <- h;}  match COMORBIDITIES {read_entry_idx[COMORBIDITIES] <- h;} }
 			}
+			
+			// write sample(read_entry_idx);
 			
 			// FIRST ROUND TO FOUND USE ENTRIES
 			map<string,list<pair<map<string,int>,list<string>>>> var_to_user_entries_and_params  <- [];
 			list<int> params_idx;
 			loop pi from:1 to:epidemiological_csv_params_number { params_idx <+ data.columns - pi; }
+			params_idx <-  params_idx sort each;
 			
 			loop i from:  1 to:data.rows-1 {
-				string var <- data[i,epidemiological_csv_column_name];
+				string var <- data[epidemiological_csv_column_name,i];
 				
 				map<string,int> entry <- [];
 				loop e over:read_entry_idx.keys {
-					string v <-  data[i,read_entry_idx[e]];
+					string v <-  data[read_entry_idx[e],i];
 					if v != nil and v != "" and not(empty(v)) { entry[e] <- int(v); }
 				}
 				
 				list<string> params;
-				loop pi over:params_idx { params <+ data[i,pi]; }
+				loop pi over:params_idx { params <+ data[pi,i]; }
 				
+				// write "Process (l"+i+") var "+var+" "+sample(entry)+" => "+params;
+				
+				if not(var_to_user_entries_and_params contains_key var) {var_to_user_entries_and_params[var] <- [];}
 				var_to_user_entries_and_params[var] <+ pair<map<string,int>,list<string>>(entry,params);
 			}
 			
@@ -273,14 +305,14 @@ global {
 					}  else {
 						if (read_entry_idx contains_key AGE) and (potential_match all_match (each.key contains_key AGE)) {
 							list<int> age_range <- potential_match collect (each.key[AGE]) sort (each);
-							int a_match  <- age_range first_with  (each > k[epidemiological_age_entry]);
+							int a_match  <- age_range first_with  (each > k[epidemiological_csv_entries index_of AGE]);
 							potential_match <- potential_match where (each.key[AGE]=a_match);
 						}
 						if (read_entry_idx contains_key SEX) and (potential_match all_match (each.key contains_key SEX)) {
-							potential_match <- potential_match where (each.key[SEX]=k[epidemiological_gender_entry]);
+							potential_match <- potential_match where (each.key[SEX]=k[epidemiological_csv_entries index_of SEX]);
 						}
 						if read_entry_idx contains_key COMORBIDITIES and (potential_match all_match (each.key contains_key COMORBIDITIES)) {
-							potential_match <- potential_match where (each.key[COMORBIDITIES]=k[epidemiological_csv_params_number]);
+							potential_match <- potential_match where (each.key[COMORBIDITIES]=k[epidemiological_csv_entries index_of COMORBIDITIES]);
 						}
 						if length(potential_match) != 1 {error "Found more than one potential match for epidemiological parameter distribution entry "+k;}
 						matching_params <- first(potential_match).value;
@@ -300,6 +332,7 @@ global {
 		
 		
 		map<string,list<string>> default_vals;
+		//write "Init default and missing parameters - "+sample(SARS_COV_2_PARAMETERS);
 		
 		//In the case the user wanted to load parameters from the file, but change the value of some of them for an experiment, 
 		// the force_parameters list should contain the key for the parameter, so that the value given will replace the one already
@@ -339,8 +372,12 @@ global {
 				}
 				match epidemiological_stay_ICU{ params  <- [init_all_ages_distribution_type_stay_ICU,string(init_all_ages_parameter_1_stay_ICU),string(init_all_ages_parameter_2_stay_ICU)];}
 				default{ /*There is no sens to have a default value for all parameters, or may be 42 */}
-				default_vals[aParameter] <- params;
-				if forced_sars_cov_2_parameters  contains aParameter { loop e over:epi_keys  { virus_epidemiological_default_profile[e][aParameter] <- params;} }
+			}
+				
+			default_vals[aParameter] <- params;
+			if forced_sars_cov_2_parameters contains aParameter or
+				virus_epidemiological_default_profile none_matches (each contains_key aParameter) { 
+				loop e over:epi_keys  { virus_epidemiological_default_profile[e][aParameter] <- params;}
 			}
 		}
 		
@@ -352,11 +389,37 @@ global {
 		create sarscov2 with:[source_of_mutation::nil,name::SARS_CoV_2,epidemiological_distribution::virus_epidemiological_default_profile] returns: original_sars_cov_2;
 		original_strain <- first(original_sars_cov_2);
 		
+		do console_output("\tSars-CoV-2 original strain created ("+with_precision((machine_time-t)/1000,2)+"s)");
+		t <- machine_time;
+		
 		// Creation of variant
 		if folder_exists(variants_folder) and not(empty(folder(variants_folder))) {
 			// TODO : loop over files to init variants, based on name and var.
-		} else { do init_variants; } 
+		} else { do init_variants; }
+		
+		do console_output("\tVariants created "+sample(VOC)+" - "+sample(VOI)+" ("+with_precision((machine_time-t)/1000,2)+"s)");
 	}
+	
+		 
+	 /*
+	  * Initialize vaccines based on given parameters (default or TODO parameter file)
+	  */
+	 action init_vaccines {
+	 	do console_output("Init vaccines ----");
+	 	float t <- machine_time;
+	 	
+	 	ARNm <+ create_covid19_vaccine(pfizer_biontech,length(pfizer_doses_immunity),pfizer_doses_schedule,pfizer_doses_immunity,
+	 		pfizer_doses_sympto=nil?list_with(length(pfizer_doses_immunity),0.0):pfizer_doses_sympto,
+	 		pfizer_doses_sever=nil?list_with(length(pfizer_doses_immunity),0.0):pfizer_doses_sever
+	 	);
+	 	Adeno <+ create_covid19_vaccine(astra_zeneca,length(pfizer_doses_immunity),astra_doses_schedule,astra_doses_immunity,
+	 		astra_doses_sympto=nil?list_with(length(astra_doses_immunity),0.0):astra_doses_sympto,
+	 		astra_doses_sever=nil?list_with(length(astra_doses_immunity),0.0):astra_doses_sever
+	 	);
+	 	vaccines <- ARNm + Adeno;
+	 	
+	 	do console_output("\t"+sample(vaccines)+" created ("+with_precision((machine_time-t)/1000,2)+"s)");
+	 }
 	
 	// ------------- //
 	// EMPTY METHODS // 
