@@ -20,7 +20,7 @@ experiment "With parameters" parent: "Abstract Experiment" autorun: true virtual
 	/** 
 	 * Enabling human to human transmission
 	 */
-	parameter "Enables inter-human transmission" category: "Epidemiology" var: init_selfstrain_reinfection_probability <- true enables:
+	parameter "Enables inter-human transmission" category: "Epidemiology" var: allow_transmission_human <- true enables:
 	[init_all_ages_successful_contact_rate_human, init_all_ages_proportion_asymptomatic, init_all_ages_factor_contact_rate_asymptomatic, init_all_ages_proportion_dead_symptomatic];
 	//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
 	parameter "Successful contact rate for human" category: "Epidemiology" var: init_all_ages_successful_contact_rate_human <- 2.5 * 1 / (14.69973 * nb_step_for_one_day);

@@ -136,7 +136,7 @@ global {
 				do load_google_image;
 			} else {
 				//otherwise propose to download the image from google (WARNING: direct access to google map image without using the google api (and key) is recommended).
-				map input_values <- user_input("Do you want to download google maps to fill in the data? (warning: risk of being blocked by google!)",[enter("Download data",false), enter("Delay (in s) between two requests",5.0)]);
+				map input_values <- user_input_dialog("Do you want to download google maps to fill in the data? (warning: risk of being blocked by google!)",[enter("Download data",false), enter("Delay (in s) between two requests",5.0)]);
 				experiment.minimum_cycle_duration <- max(0.5, float(input_values["Delay (in s) between two requests"]));
 	
 				//if the user choose to download the data anyway, build and store the url to the needed tiles.

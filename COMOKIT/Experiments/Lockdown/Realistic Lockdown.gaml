@@ -27,7 +27,7 @@ experiment "Realistic Lockdown" parent: "Abstract Experiment" autorun: true {
 		float p <- -1.0;
 		map<string, unknown> result;
 		loop while: (p > 1) or (p < 0) {
-			result <- user_input("Initialization", [enter("Proportion (between 0 and 1) of essential workers allowed to go out",0.1), enter("Daily number of tests",300)]);
+			result <- user_input_dialog("Initialization", [enter("Proportion (between 0 and 1) of essential workers allowed to go out",0.1), enter("Daily number of tests",300)]);
 			p <- float(result["Proportion (between 0 and 1) of essential workers allowed to go out"]);
 		}
 
