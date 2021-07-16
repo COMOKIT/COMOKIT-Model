@@ -274,7 +274,7 @@ species BiologicalEntity control:fsm{
 		
 		// Immunity got from protection provided for the variant of the source strain 'va'
 		// TODO : validate how protection against a variant protect from the source strain !!!
-		if immunity.keys collect (each.source_of_mutation) contains va { return flip(1 - va.get_value_for_epidemiological_aspect(self, epidemiological_reinfection_probability)); }
+		if immunity.keys collect (each.source_of_mutation) contains va { return va.flip_epidemiological_aspect(self, epidemiological_reinfection_probability); }
 		
 		// If there is no linked immunity, then no body protection
 		return false;

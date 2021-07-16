@@ -51,11 +51,16 @@ global {
 	/*
 	 * Init the variants
 	 */
-	action init_variants {
-		VOC <+ create_simple_variant(sarscov2(original_strain),"Alpha",1.1,1.5,[1.4,1.0,1.0]); // UK
-		VOC <+ create_simple_variant(sarscov2(original_strain),"Gamma",2.0,1.0,[1.0,1.0,1.0]); // Brazil
-		VOC <+ create_simple_variant(sarscov2(original_strain),"Beta",2.0,1.5,[1.0,1.0,1.0]); // South-Africa
-		VOC <+  create_simple_variant(sarscov2(original_strain),"Delta",1.5,2.0,[1.5,1.5,1.5]); // INDIA
+	action init_variants(list<string> variants_name <- nil) {
+		if variants_name = nil { variants_name <- ["Alpha","Beta","Delta","Gamma"]; }
+		loop vn over:variants_name {
+			switch vn {
+				match "Alpha" {VOC <+ create_simple_variant(sarscov2(original_strain),"Alpha",1.1,1.5,[1.0,1.4,1.0,1.0]); }// UK
+				match "Gamma" {VOC <+ create_simple_variant(sarscov2(original_strain),"Gamma",2.0,1.0,[1.0,1.0,1.0,1.0]); }// Brazil
+				match "Beta" {VOC <+ create_simple_variant(sarscov2(original_strain),"Beta",2.0,1.5,[1.0,1.0,1.0,1.0]); }// South-Africa
+				match "Delta" {VOC <+  create_simple_variant(sarscov2(original_strain),"Delta",1.5,2.0,[1.0,1.5,1.5,1.5]); }// INDIA
+			}
+		}
 	}
 	
 	/*
@@ -65,7 +70,6 @@ global {
 	 * - variant_name : name of the variant following "pango lineage"
 	 * 
 	 * => All numerical value hereafter are express based on a {1,1,1} profile of the source vector, 
-	 * meaning that a profile of {2,2,2} multiply by two every characteristics of the original (whatever value they can be)
 	 * 
 	 * - immune_evad : how much it can disrupt immune protection built against the viral source (vax, immunity due to prior infection or antibiotic)
 	 * - infect : how much more it is infectious compare to the source
@@ -75,17 +79,42 @@ global {
 	sarscov2 create_simple_variant(sarscov2 source, string variant_name, float immune_evad, float infect, list<float> severity) {
 		create sarscov2 with:[
 			source_of_mutation::source,
+			mutation_profile::[immune_evad,infect]+severity,
 			name::variant_name
 		] returns:variants {
-			map<list<int>,map<string,list<string>>> inherited_epidemiological_distribution <- copy(source.epidemiological_distribution);
-			loop dist over:inherited_epidemiological_distribution {
-				dist[epidemiological_immune_evasion] <- [epidemiological_fixed, string(float(dist[epidemiological_immune_evasion][1])/immune_evad)]; // = source evastion / immune_evad
-				dist[epidemiological_successful_contact_rate_human] <- [epidemiological_fixed, string(float(dist[epidemiological_successful_contact_rate_human][1])*infect)]; // = source rate * infect
-				// Severity
-				dist[epidemiological_proportion_hospitalisation] <- [epidemiological_fixed, string(float(dist[epidemiological_proportion_hospitalisation][1])*infect)]; // Hosp
-				dist[epidemiological_proportion_icu] <- [epidemiological_fixed, string(float(dist[epidemiological_proportion_icu][1])*infect)]; // ICU
-				dist[epidemiological_proportion_death_symptomatic] <- [epidemiological_fixed, string(float(dist[epidemiological_proportion_death_symptomatic][1])*infect)]; // Death
+			map<map<string,int>,map<string,list<string>>> inherited_epidemiological_distribution <- copy(source.epidemiological_distribution);
+			
+			// Immune evasion mutation (division)
+			loop iem over:inherited_epidemiological_distribution where (each contains_key epidemiological_immune_evasion) {
+				iem[epidemiological_immune_evasion] <-  [epidemiological_fixed, string(float(iem[epidemiological_immune_evasion][1])/immune_evad)]; // = source evastion / immune_evad
 			}
+			
+			// Infectiousness mutation (multiplicator)
+			loop im over:inherited_epidemiological_distribution where (each contains_key epidemiological_successful_contact_rate_human) {
+				im[epidemiological_successful_contact_rate_human] <- [epidemiological_fixed, string(float(im[epidemiological_successful_contact_rate_human][1])*infect)]; // = source rate * infect
+			}
+			
+			// Severity - phenotypical picture
+			// Proportion of asymptomatic mutation
+			loop sym over:inherited_epidemiological_distribution where (each contains_key epidemiological_proportion_asymptomatic) {
+				sym[epidemiological_proportion_asymptomatic] <- [epidemiological_fixed, string(float(sym[epidemiological_proportion_asymptomatic][1])*severity[0])]; // Hosp
+			}
+			// Proportion of  hosp mutation
+			loop hm over:inherited_epidemiological_distribution where (each contains_key epidemiological_proportion_hospitalisation) {
+				hm[epidemiological_proportion_hospitalisation] <- [epidemiological_fixed, string(float(hm[epidemiological_proportion_hospitalisation][1])*severity[1])]; // Hosp
+			}
+			// Proportion of ICU mutation
+			loop icum over:inherited_epidemiological_distribution where (each contains_key epidemiological_proportion_icu) {
+				icum[epidemiological_proportion_icu] <- [epidemiological_fixed, string(float(icum[epidemiological_proportion_icu][1])*severity[2])]; // ICU
+			}
+			// Proportion of death mutation
+			loop dm over:inherited_epidemiological_distribution where (each contains_key epidemiological_proportion_death_symptomatic) {
+				dm[epidemiological_proportion_death_symptomatic] <- [epidemiological_fixed, string(float(dm[epidemiological_proportion_death_symptomatic][1])*severity[3])]; // Death
+			}
+			
+			// New epidemiological profile based on mutation
+			epidemiological_distribution <- inherited_epidemiological_distribution;
+			ask world {do console_output(sample(myself.get_epi_id()),sample(myself),first(levelList));}
 		}
 		return first(variants);
 	}
@@ -154,9 +183,9 @@ global {
 	/*
 	 * Gives antecedant of individuals
 	 */
-	list<int> get_individual_entries(BiologicalEntity indiv) { 
-		if indiv is Individual { Individual i <- Individual(indiv); return [i.age,i.sex,i.comorbidities]; }
-		if indiv is BiologicalEntity { return [indiv.age,epidemiological_default_entry[1],indiv.comorbidities]; } 
+	map<string,int> get_individual_entries(BiologicalEntity indiv) { 
+		if indiv is Individual { Individual i <- Individual(indiv); return [AGE::i.age,SEX::i.sex,COMORBIDITIES::i.comorbidities]; }
+		if indiv is BiologicalEntity { return [AGE::indiv.age,COMORBIDITIES::indiv.comorbidities]; } 
 		return epidemiological_default_entry;
 	}
 	
@@ -171,8 +200,6 @@ global {
 			match epidemiological_basic_viral_release { return get_rate(parameters,true); }
 			//Basic viral release in the environment of an infectious individual of a given age MUST BE A DISTRIBUTION -  or can be a CONSTANT = 1.0 based on 'allow_viral_individual_factor'
 			match epidemiological_viral_individual_factor { return get_factor(parameters,allow_viral_individual_factor,1.0);}
-			//The amount of protection guaranteed by previous infection and / or vaccine
-			match epidemiological_immune_evasion {return get_factor(parameters);}
 			
 			// ALL EPI STATE PERIODS
 			//Time between exposure and symptom onset of an individual of a given age - PERIOD
@@ -249,21 +276,58 @@ species virus virtual:true {
 	
 	// ------------------------------------------------------------------ //
 	// 		EPIDEMIOLOGICAL PROFILE OF THE VIRUS			    //
-	map<list<int>,map<string,list<string>>> epidemiological_distribution;
+	map<map<string, int>,map<string,list<string>>> epidemiological_distribution;
 	
 	float get_value_for_epidemiological_aspect(BiologicalEntity indiv, string aspect, float mod <- nil) virtual:true;
 	bool flip_epidemiological_aspect(BiologicalEntity indiv, string aspect) virtual:true; 
 	
-	string get_epi_id {
-		string ie <-  "Immune escapment:"; string cr <- "Infectiousness:"; string ph  <- "Severity (Hosp):"; string pi <- "Severity (ICU):";  string pd <- "Severity (Death):";
-		loop entry over:epidemiological_distribution {
-			ie <- ie + entry[epidemiological_immune_evasion];
-			cr <- cr + entry[epidemiological_successful_contact_rate_human];
-			ph  <- ph + entry[epidemiological_proportion_hospitalisation];
-			pi <- pi + entry[epidemiological_proportion_icu];
-			pd <- pd + entry[epidemiological_proportion_death_symptomatic];
+	// UTILS //
+	
+	/*
+	 * Find corresponding virus parameters based on individual profile
+	 */
+	list<string> get_param_from_dist(BiologicalEntity indiv, string aspect) {
+		// Retrieve individual profile
+		map<string,int> indiv_entry <- world.get_individual_entries(indiv);
+		map<string,list<string>> epi_aspect_parameters;
+		// Find a match
+		if (epidemiological_distribution contains_key  indiv_entry
+			and epidemiological_distribution[indiv_entry] contains_key aspect
+		) {
+			epi_aspect_parameters  <- epidemiological_distribution[indiv_entry];
+		} else { // If there is no straigfoward match, then proceed iteratively
+			list<map<string,int>> matching_entries;
+			// Find all the possible match,i.e. there is an entry for this age, or sex or comorbidities or a specific union of them
+			loop e over:epidemiological_distribution.keys { 
+				if (e.keys one_matches (indiv_entry contains_key  each and indiv_entry[each] = e[each])
+					and epidemiological_distribution[e] contains_key aspect
+				) { matching_entries <+ e; }
+			}
+			// If there is no match in the distribution, then returns default entry
+			if empty(matching_entries) {epi_aspect_parameters <- epidemiological_distribution[epidemiological_default_entry];}
+			else if length(matching_entries)=1 {epi_aspect_parameters <- epidemiological_distribution[first(matching_entries)];}
+			else {
+				// If there is matching entries, find the largest one (more than 1 dimension that matches)
+				map<int,list<map<string,int>>> length_of_matching_entries <- matching_entries group_by (length(each));
+				matching_entries <- length_of_matching_entries[max(length_of_matching_entries.keys)];
+				if length(matching_entries)=1 {epi_aspect_parameters  <- epidemiological_distribution[first(matching_entries)];}
+				else  {
+					// Prioritize age determinant
+					map<string,int> age_priority_entry <- matching_entries first_with (each contains_key AGE);
+					if age_priority_entry!=nil {epi_aspect_parameters  <- epidemiological_distribution[age_priority_entry];}
+					else {
+						// Second order priority on comorbidities
+						map<string,int> comorbidities_priority_entry <- matching_entries first_with (each contains_key COMORBIDITIES);
+						if comorbidities_priority_entry!=nil {epi_aspect_parameters <- epidemiological_distribution[comorbidities_priority_entry];}
+						else { ask world {do console_output("There is an error when accessing epidemiological distribution with "
+							+sample(indiv_entry),sample(myself),last(levelList));}
+						}
+					}
+				}
+			}
 		}
-		return ie+cr+ph+pi+pd;
+		if empty(epi_aspect_parameters[aspect]) { ask world {do console_output("Not able to retrieve parameters for "+sample(aspect),sample(myself),last(levelList));} }
+		return epi_aspect_parameters[aspect];
 	}
 	
 }
@@ -273,17 +337,25 @@ species virus virtual:true {
  */
 species sarscov2 parent:virus {
 	
+	list<float> mutation_profile <- [1.0,1.0,1.0,1.0,1.0,1.0]; // immune escapement ; infectiousness ; severity-asymptomatic ; severity-hosp ; severity-icu ; severity-death 
+		
+	string get_epi_id {
+		if epi_id=nil {
+			epi_id <- (self!=original_strain? "source:"+source_of_mutation.name+"-mutation:" : "") + self.name + "|" + sample(mutation_profile);
+		}
+		return epi_id;
+	}
+	
 	// ----------------------------------------------------- //
-	// EPI PARAMETER 
+	// EPI PARAMETER UTILS
 	
 	/*
 	 * Get parameter from the virus distribution (according to age, gender and comorbidities for sars-cov-2) and validate the epidemiological aspect (see list above)
 	 */
 	float get_value_for_epidemiological_aspect(BiologicalEntity indiv, string aspect, float mod <- nil) {
-		if not(SARS_COV_2_EPI_PARAMETERS  contains aspect) {error "Trying to retrieve an unknown epidemiological aspect "+aspect;}
-		list<int> indiv_entry <- world.get_individual_entries(indiv);
-		map<string,list<string>> epi_aspect_parameters <- epidemiological_distribution contains_key  indiv_entry ? epidemiological_distribution[indiv_entry] : epidemiological_distribution[epidemiological_default_entry];  
-		return world.get_epi_val(aspect,epi_aspect_parameters[aspect],mod);
+		if not(SARS_COV_2_PARAMETERS  contains aspect) {error "Trying to retrieve an unknown epidemiological aspect "+aspect;}
+		list<string> params  <- get_param_from_dist(indiv,aspect);
+		return world.get_epi_val(aspect,params,mod);
 	}
 	
 	/*
@@ -291,9 +363,10 @@ species sarscov2 parent:virus {
 	 */
 	bool flip_epidemiological_aspect(BiologicalEntity indiv, string aspect) {
 		if not(SARS_COV_2_EPI_FLIP_PARAMETERS contains aspect) {error "Trying to flip over an unknow epidemiological aspect"+aspect;}
-		list<int> indiv_entry <- world.get_individual_entries(indiv);
-		map<string,list<string>> epi_aspect_parameters <- epidemiological_distribution contains_key  indiv_entry ? epidemiological_distribution[indiv_entry] : epidemiological_distribution[epidemiological_default_entry];
-		return flip(float(epi_aspect_parameters[aspect][1]));
+		list<string> params <- get_param_from_dist(indiv,aspect);
+		return flip(float(params[1]));
 	}	
+	
+	
 	
 }

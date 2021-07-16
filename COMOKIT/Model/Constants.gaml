@@ -79,7 +79,7 @@ global {
 	// Default para of the epidemiological distribution
 	list<string> epidemiological_csv_entries <- [AGE,SEX,COMORBIDITIES];
 	// TODO  : there is a huge issue related to the fact that biological entities does not have Sex var.
-	list<int> epidemiological_default_entry <- [-1,-1,-1];
+	map<string,int> epidemiological_default_entry <- ["DEFAULT"::0];
 	
 	// Available distributions to parameter the epidemiological values of the model
 	string epidemiological_fixed <- "Fixed";

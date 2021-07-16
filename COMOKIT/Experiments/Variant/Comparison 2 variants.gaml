@@ -27,12 +27,14 @@ global {
 	bool delay_scenario <- true;
 	float new_variant_delay <- 2#week;
 	int infected_threshold <- 50;
+	
+	bool DEBUG <- true;
 		
 	/*
 	 * Used to initialize a second variant infection
 	 */
 	action after_init {
-		variant <- VOC first_with (each.name = "B.1.1.7");
+		variant <- VOC first_with (each.name = "Beta");
 		if not delay_scenario {
 			ask num_infected_init_variant among (all_individuals where (each.state = susceptible)) { 
 				do define_new_case(variant);
