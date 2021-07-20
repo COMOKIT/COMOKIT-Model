@@ -90,6 +90,7 @@ global {
 	string epidemiological_uniform <- "Uniform";
 	
 	// Virus specific parameter value
+	string epidemiological_viral_individual_factor <- "Viral_individual_factor";
 	string epidemiological_successful_contact_rate_human <- "Successful_contact_rate_human";
 	string epidemiological_successful_contact_rate_building <- "Successful_contact_rate_building";
 	string epidemiological_factor_asymptomatic <-"Factor_asymptomatic";
@@ -112,11 +113,10 @@ global {
 	string epidemiological_reinfection_probability <- "Re_infection_probability";
 	
 	// General epidemiological parameters
-	string epidemiological_viral_individual_factor <- "Viral_individual_factor";
 	string epidemiological_factor_wearing_mask <- "Factor_wearing_mask";
-	string epidemiological_basic_viral_release <- "Basic_viral_release";
 	string epidemiological_transmission_human <- "Transmission_human";
 	string epidemiological_transmission_building <- "Transmission_building";
+	string epidemiological_basic_viral_release <- "Basic_viral_release";
 	string epidemiological_basic_viral_decrease <- "Basic_viral_decrease";
 	
 	//Behavioral parameters

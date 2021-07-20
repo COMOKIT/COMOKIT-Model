@@ -119,10 +119,10 @@ species BiologicalEntity control:fsm{
 		
 		// Virus dependant
 		factor_contact_rate_asymptomatic <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_factor_asymptomatic);
-		basic_viral_release <-  viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_basic_viral_release);
 		contact_rate <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_successful_contact_rate_human);
 		viral_factor <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_viral_individual_factor);
-	
+		// TODO : move this elsewhere
+		basic_viral_release <-  world.get_basic_viral_release(self.age);
 	}
 	
 	//#############################################################

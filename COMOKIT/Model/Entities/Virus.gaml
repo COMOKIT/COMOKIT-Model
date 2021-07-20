@@ -152,7 +152,6 @@ global {
 	list<string> SARS_COV_2_EPI_PARAMETERS <- [
 		epidemiological_successful_contact_rate_human, // RATE - CONSTANT PER  DAY
 		epidemiological_factor_asymptomatic, //  FACTOR - CONSTANT (DEFAULT)
-		epidemiological_basic_viral_release, // DISTRIBUTION (PER DAY ???)
 		epidemiological_viral_individual_factor, // DISTRIBUTION or CONSTANT
 		epidemiological_incubation_period_symptomatic, // PERIOD
 		epidemiological_incubation_period_asymptomatic,

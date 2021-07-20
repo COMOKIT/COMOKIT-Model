@@ -58,6 +58,9 @@ global
 
 	//Successful contact rate of the building - MUST BE FIXED (i.e not relying on a distribution)
 	float get_contact_rate_building { return successful_contact_rate_building/nb_step_for_one_day;  }
+	
+	//Amount of viral agent realeased in the environment - is it actually a rate of release ???
+	float get_basic_viral_release(int age) { return basic_viral_release/nb_step_for_one_day; }
 
 	//Reduction of the successful contact rate of an infectious individual of a given age
 	float get_factor_contact_rate_wearing_mask(int age) {
