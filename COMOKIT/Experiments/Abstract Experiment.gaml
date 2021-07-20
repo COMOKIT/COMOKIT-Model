@@ -207,9 +207,8 @@ experiment "Abstract Experiment" virtual: true {
 		
 		display "demographics_household_size" virtual: true {
 			chart "Household size" type:histogram {
-				loop i from: 0 to:max(all_individuals collect (length(each.relatives))) { 
-					data string(i) value: all_individuals count (length(each.relatives)=i);
-				}
+				map<int,list<Individual>> hhs <- all_individuals group_by (length(each.relatives)+1);
+				loop i over:hhs.keys { data string(i) value: length(hhs[i]); }
 			}
 		}	 
 
