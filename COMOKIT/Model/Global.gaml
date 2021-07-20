@@ -80,11 +80,6 @@ global {
 		}
 		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
 		
-		do console_output("Start init epidemiological state of people");
-		t <- machine_time;
-		ask all_individuals { do initialise_epidemio; }
-		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
-		
 		do console_output("Start assigning school and workplaces");
 		t <- machine_time;
 		do assign_school_working_place(working_places,schools, min_student_age, max_student_age);
@@ -100,6 +95,14 @@ global {
 		do define_agenda(min_student_age, max_student_age);
 		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
 		do console_output("Population of "+length(all_individuals)+" individuals");
+		
+		do console_output("Give people an epidemic behavior");
+		t <- machine_time;
+		ask all_individuals  { do initialise_epidemiological_behavior();}
+		do console_output("-- "+with_precision(all_individuals count (each.is_wearing_mask) * 1.0 / length(all_individuals),2)+"% wearing a mask  | "
+			+with_precision(mean(all_individuals collect (each.vax_willingness)),2)+" average vax hesitancy"
+		);
+		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
 
 		do console_output("Introduce "+num_infected_init+" infected cases");
 		ask num_infected_init among all_individuals { do define_new_case(original_strain); }

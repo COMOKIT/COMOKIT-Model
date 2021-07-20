@@ -35,15 +35,12 @@ global {
 		create pseudo_individual number:noi
 		{
 			age <- rnd(max_age);
-			do initialise_epidemio;
 		}
 	}
 	
 	action create_realistic_indiv {
 		do read_mapping();
-		create pseudo_individual from:csv_population with:[age::convert_age(get(age_var))] {
-			do initialise_epidemio;
-		}
+		create pseudo_individual from:csv_population with:[age::convert_age(get(age_var))];
 	}
 	
 	/******************/
@@ -214,7 +211,7 @@ global {
 			loop aYear from:0 to: max_age {
 				loop s over:[0,1]  {
 					loop c over:comorbidities_range {
-						original_strain.epidemiological_distribution[[aYear,s,c]][epidemiological_successful_contact_rate_human][1] <- string(_estimated_beta);
+						original_strain.epidemiological_distribution[[AGE::aYear,SEX::s,COMORBIDITIES::c]][epidemiological_successful_contact_rate_human][1] <- string(_estimated_beta);
 					}
 				}
 			}

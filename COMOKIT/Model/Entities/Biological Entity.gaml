@@ -109,12 +109,13 @@ species BiologicalEntity control:fsm{
 	
 	//Current location of the entity (as we do not represent transportation, the entity can only be inside a building)
 	Building current_place;
+		
+	//#############################################################
+	// -- Initialization
+	//#############################################################
 	
-	//#############################################################
-	//Actions
-	//#############################################################
 	//Initialise epidemiological parameters according to the age of the Entity
-	action initialise_epidemio {
+	action initialise_disease {
 		
 		// Virus dependant
 		factor_contact_rate_asymptomatic <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_factor_asymptomatic);
@@ -123,6 +124,10 @@ species BiologicalEntity control:fsm{
 		viral_factor <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_viral_individual_factor);
 	
 	}
+	
+	//#############################################################
+	//Actions
+	//#############################################################
 	
 	//Action to call when performing a test on a individual
 	action test_individual
@@ -220,15 +225,16 @@ species BiologicalEntity control:fsm{
 	action define_new_case(virus infectious_agent) {
 		state <- "latent";
 		viral_agent <- infectious_agent;
+		do initialise_disease;
 		if(viral_agent.flip_epidemiological_aspect(nil,epidemiological_proportion_asymptomatic)){
 			is_symptomatic <- false;
-				latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_asymptomatic);
-			}else{
-				is_symptomatic <- true;
-				presymptomatic_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_serial_interval);
-				latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_symptomatic) + 
-					(presymptomatic_period<0 ? presymptomatic_period : 0);
-			}
+			latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_asymptomatic);
+		}else{
+			is_symptomatic <- true;
+			presymptomatic_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_serial_interval);
+			latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_symptomatic) + 
+				(presymptomatic_period<0 ? presymptomatic_period : 0);
+		}
 	}
 	
 	//Reflex to trigger transmission to other individuals and environmental contamination

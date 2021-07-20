@@ -117,6 +117,69 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	int number_of_infected_individuals <- 0;
 	
 	//#############################################################
+	// -- Initialization
+	//#############################################################
+	
+	// Initialization of bahavioral aspect related to epidemiology, e.g. wearing a mask, willigness to vaccine
+	action initialise_epidemiological_behavior {
+		// Not virus dependant
+		factor_contact_rate_wearing_mask <- world.get_factor_contact_rate_wearing_mask(age);
+		proba_wearing_mask <- world.get_proba_wearing_mask(age);
+		vax_willingness <- 1 - world.get_proba_antivax(age);
+	}
+	
+	//Initialise epidemiological parameters according to the age of the Entity
+	action initialise_disease {
+		// Virus dependant
+		factor_contact_rate_asymptomatic <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_factor_asymptomatic);
+		basic_viral_release <-  viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_basic_viral_release);
+		contact_rate <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_successful_contact_rate_human);
+		viral_factor <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_viral_individual_factor);
+		
+		//Set the status of the Individual to latent (i.e. not infectious)
+		state <- "latent";
+		
+		if(viral_agent.flip_epidemiological_aspect(self,epidemiological_proportion_asymptomatic)){ 
+			is_symptomatic <- false;
+			latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_asymptomatic);
+		}else{
+			is_symptomatic <- true;
+			presymptomatic_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_serial_interval);
+			latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_symptomatic) + 
+				(presymptomatic_period<0 ? presymptomatic_period : 0);
+		}
+	}
+	
+	//Initialiase social network of the agents (colleagues, friends)
+	action initialise_social_network(map<Building,list<Individual>> working_places, map<Building,list<Individual>> schools, map<int,list<Individual>> ind_per_age_cat) {
+		
+		int nb_friends <- max(0,round(gauss(nb_friends_mean,nb_friends_std)));
+		loop i over: ind_per_age_cat.keys {
+			if age < i {
+				friends <- nb_friends among ind_per_age_cat[i];
+				friends <- friends - self;
+				break;
+			}
+		}
+		
+		if (working_place != nil) {
+			int nb_colleagues <- max(0,int(gauss(nb_work_colleagues_mean,nb_work_colleagues_std)));
+			if nb_colleagues > 1 {
+				colleagues <- nb_colleagues among working_places[working_place];
+				colleagues <- colleagues - self;
+			}
+		} 
+		if (school != nil) {
+			int nb_classmates <- max(0,int(gauss(nb_classmates_mean,nb_classmates_std)));
+			if nb_classmates > 1 {
+				//colleagues <- nb_classmates among ((schools[school] where ((each.age >= (age -1)) and (each.age <= (age + 1))))- self);
+				colleagues <- nb_classmates among schools[school];
+				colleagues <- colleagues - self;
+			}
+		}
+ 	}
+	
+	//#############################################################
 	//Actions
 	//#############################################################
 	
@@ -158,18 +221,6 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		}
 		last_test <- cycle;
 	}
-	//Initialise epidemiological parameters according to the age of the Entity
-	action initialise_epidemio {
-		// Not virus dependant
-		factor_contact_rate_wearing_mask <- world.get_factor_contact_rate_wearing_mask(age);
-		proba_wearing_mask <- world.get_proba_wearing_mask(age);
-		vax_willingness <- 1 - world.get_proba_antivax(age);
-		// Virus dependant
-		factor_contact_rate_asymptomatic <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_factor_asymptomatic);
-		basic_viral_release <-  viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_basic_viral_release);
-		contact_rate <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_successful_contact_rate_human);
-		viral_factor <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_viral_individual_factor);
-	}
 	
 	//Action to call to define a new case, obtaining different time to key events
 	bool define_new_case(virus infectious_agent)
@@ -197,19 +248,9 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			
 			// Infected by
 			viral_agent <- infectious_agent;
+			do initialise_disease;
 			
-			//Set the status of the Individual to latent (i.e. not infectious)
-			state <- "latent";
 			
-			if(viral_agent.flip_epidemiological_aspect(self,epidemiological_proportion_asymptomatic)){ 
-				is_symptomatic <- false;
-				latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_asymptomatic);
-			}else{
-				is_symptomatic <- true;
-				presymptomatic_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_serial_interval);
-				latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_symptomatic) + 
-					(presymptomatic_period<0 ? presymptomatic_period : 0);
-			}
 			return true;
 		}
 		return false;
@@ -241,35 +282,6 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			}
 		}
 	}
-	
-	//Initialiase social network of the agents (colleagues, friends)
-	action initialise_social_network(map<Building,list<Individual>> working_places, map<Building,list<Individual>> schools, map<int,list<Individual>> ind_per_age_cat) {
-		
-		int nb_friends <- max(0,round(gauss(nb_friends_mean,nb_friends_std)));
-		loop i over: ind_per_age_cat.keys {
-			if age < i {
-				friends <- nb_friends among ind_per_age_cat[i];
-				friends <- friends - self;
-				break;
-			}
-		}
-		
-		if (working_place != nil) {
-			int nb_colleagues <- max(0,int(gauss(nb_work_colleagues_mean,nb_work_colleagues_std)));
-			if nb_colleagues > 1 {
-				colleagues <- nb_colleagues among working_places[working_place];
-				colleagues <- colleagues - self;
-			}
-		} 
-		if (school != nil) {
-			int nb_classmates <- max(0,int(gauss(nb_classmates_mean,nb_classmates_std)));
-			if nb_classmates > 1 {
-				//colleagues <- nb_classmates among ((schools[school] where ((each.age >= (age -1)) and (each.age <= (age + 1))))- self);
-				colleagues <- nb_classmates among schools[school];
-				colleagues <- colleagues - self;
-			}
-		}
- 	}
 	
 	
 	//Action to call when entering a new building to update the list of individuals of the buildings
@@ -443,6 +455,10 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		is_counted_ICU <- true;
 		if BENCHMARK {bench["Individual.add_to_ICU"] <- bench["Individual.add_to_ICU"] + machine_time - start;}
 	}
+	
+	//#############################################################
+	//Visualization
+	//#############################################################
 	
 	aspect default {
 		if not is_outside {
