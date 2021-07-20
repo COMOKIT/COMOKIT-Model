@@ -249,16 +249,48 @@ global {
 	action init_sars_cov_2  {
 		do console_output("Init sars-cov-2 and variants ---");
 		float t <- machine_time;
-		map<map<string,int>,map<string,list<string>>> virus_epidemiological_default_profile <- map([]);
 		
-		//build the empty virus profile
-		//write "Debug init_sars_cov_2 action in Global.gaml";
+		csv_file epi_params <- load_epidemiological_parameter_from_file and file_exists(sars_cov_2_parameters) ? csv_file(sars_cov_2_parameters,false) : nil;
+		map<map<string,int>,map<string,list<string>>> virus_epidemiological_default_profile <- init_sarscov2_epidemiological_profile(epi_params);
+		
+		// ----------------------------
+		//  CREATION OF SARS-CoV-2
+		create sarscov2 with:[source_of_mutation::nil,name::SARS_CoV_2,epidemiological_distribution::virus_epidemiological_default_profile] returns: original_sars_cov_2;
+		original_strain <- first(original_sars_cov_2);
+		do console_output("\t----"+sample(first(original_sars_cov_2).get_epi_id()));
+		do console_output("\tSars-CoV-2 original strain created ("+with_precision((machine_time-t)/1000,2)+"s)");
+		t <- machine_time;
+		
+		// Creation of variant
+		if folder_exists(variants_folder) and not(empty(folder(variants_folder))) {
+			list<string> variant_files <- folder(variants_folder).contents;
+			loop vf over:variant_files where (file_exists(each)) {
+				map<map<string,int>,map<string,list<string>>> variant_profile <- init_sarscov2_epidemiological_profile(csv_file(vf,false));
+				string variant_name <- first(last(vf split_with "/") split_with ".");
+				create sarscov2 with:[source_of_mutation::original_strain,epidemiological_distribution::variant_profile] returns: variants;
+				VOC <+  first(variants); // TODO should specify the source of mutation and type of variant (i.e. VOC or VOI)
+			}
+		} else { do init_variants; }
+		
+		do console_output("\tVariants created - VOC:"+VOC collect each.name+" - VOI:"+VOI collect each.name+" ("+with_precision((machine_time-t)/1000,2)+"s)");
+	}
+	
+	/*
+	 * Initialize an epidemiological profile: <p>
+	 * <ul>
+	 *  <i> key - AGE-SEXE-COMORBIDITIES
+	 *  <i> value::key - epidemiological aspect
+	 *  <i> value::value - type of distribution, param1, param2
+	 * </ul>
+	 * Can be used to init any variants - csv file should be loaded without header
+	 */
+	map<map<string,int>,map<string,list<string>>> init_sarscov2_epidemiological_profile(csv_file parameters <- nil) {
+		map<map<string,int>,map<string,list<string>>> profile <- map([]);
 		
 		// If there is a parameter file
-		if(load_epidemiological_parameter_from_file and file_exists(sars_cov_2_parameters)){
+		if(parameters != nil){
 			
-			csv_file epi_params <- csv_file(sars_cov_2_parameters,false); 
-			matrix data <- matrix(epi_params);
+			matrix data <- matrix(parameters);
 			
 			// FOUND HEADERS
 			map<string,int> read_entry_idx;
@@ -309,8 +341,8 @@ global {
 				
 				// If there is only one parameter line for this variable, then ignore all entry (i.e. no age, sex or comorbidities determinants)
 				if length(matches) = 1 {
-					if not(virus_epidemiological_default_profile contains_key epidemiological_default_entry) { virus_epidemiological_default_profile[epidemiological_default_entry] <- [];} 
-					virus_epidemiological_default_profile[epidemiological_default_entry][v] <- first(matches).value;
+					if not(profile contains_key epidemiological_default_entry) { profile[epidemiological_default_entry] <- [];} 
+					profile[epidemiological_default_entry][v] <- first(matches).value;
 				}  else {
 					//  Turn parameter file age range into fully explicit integer age
 					map<int,list<int>>  age_entry_mapping <- [];
@@ -335,14 +367,14 @@ global {
 						if empty(age_entry_mapping) { 
 							current_entry[] >- AGE;
 							if empty(current_entry) { current_entry <- epidemiological_default_entry;}
-							if not(virus_epidemiological_default_profile contains_key current_entry) {virus_epidemiological_default_profile[current_entry]  <- [];}
-							virus_epidemiological_default_profile[current_entry][v] <- em.value;
+							if not(profile contains_key current_entry) {profile[current_entry]  <- [];}
+							profile[current_entry][v] <- em.value;
 						} else {
 							loop actual_age over:age_entry_mapping[current_entry[AGE]] {
 								map<string,int> actual_entry  <- copy(current_entry);
 								actual_entry[AGE] <- actual_age;
-								if not(virus_epidemiological_default_profile contains_key actual_entry) { virus_epidemiological_default_profile[actual_entry]  <- []; }
-								virus_epidemiological_default_profile[actual_entry][v] <- em.value;
+								if not(profile contains_key actual_entry) { profile[actual_entry]  <- []; }
+								profile[actual_entry][v] <- em.value;
 							}
 						}
 					}	
@@ -356,7 +388,6 @@ global {
 		else {
 			 forced_sars_cov_2_parameters <-  SARS_COV_2_EPI_PARAMETERS + SARS_COV_2_EPI_FLIP_PARAMETERS;
 		}
-		
 		
 		map<string,list<string>> default_vals;
 		//write "Init default and missing parameters - "+sample(SARS_COV_2_PARAMETERS);
@@ -377,23 +408,32 @@ global {
 				match epidemiological_immune_evasion { params <- [epidemiological_fixed, init_immune_escapement]; }
 				match epidemiological_reinfection_probability {  params <- [epidemiological_fixed, init_selfstrain_reinfection_probability];}
 				
+				match epidemiological_viral_individual_factor { params <- 
+					[init_all_ages_distribution_viral_individual_factor,string(init_all_ages_parameter_1_viral_individual_factor),string(init_all_ages_parameter_2_viral_individual_factor)];
+				}
+				
 				match epidemiological_incubation_period_symptomatic{ params <- 
 					[init_all_ages_distribution_type_incubation_period_symptomatic, string(init_all_ages_parameter_1_incubation_period_symptomatic),string(init_all_ages_parameter_2_incubation_period_symptomatic)]; 
 				}
+				
 				match epidemiological_incubation_period_asymptomatic{params <- 
 					[init_all_ages_distribution_type_incubation_period_asymptomatic,string(init_all_ages_parameter_1_incubation_period_asymptomatic),string(init_all_ages_parameter_2_incubation_period_asymptomatic)]; 
 				}
+				
 				match epidemiological_serial_interval{params <- [init_all_ages_distribution_type_serial_interval,string(init_all_ages_parameter_1_serial_interval),string(init_all_ages_parameter_2_serial_interval)]; }
 				match epidemiological_infectious_period_symptomatic{ params <-
 					[init_all_ages_distribution_type_infectious_period_symptomatic,string(init_all_ages_parameter_1_infectious_period_symptomatic),string(init_all_ages_parameter_2_infectious_period_symptomatic)];
 				}
+				
 				match epidemiological_infectious_period_asymptomatic{ params <- 
 					[init_all_ages_distribution_type_infectious_period_asymptomatic,string(init_all_ages_parameter_1_infectious_period_asymptomatic),string(init_all_ages_parameter_2_infectious_period_asymptomatic)];
 				}
+				
 				match epidemiological_proportion_hospitalisation{ params <- [epidemiological_fixed,init_all_ages_proportion_hospitalisation]; }
 				match epidemiological_onset_to_hospitalisation{ params <- 
 					[init_all_ages_distribution_type_onset_to_hospitalisation,string(init_all_ages_parameter_1_onset_to_hospitalisation),string(init_all_ages_parameter_2_onset_to_hospitalisation)];
 				}
+				
 				match epidemiological_proportion_icu{ params  <- [epidemiological_fixed,init_all_ages_proportion_icu]; }
 				match epidemiological_hospitalisation_to_ICU{ params <- 
 					[init_all_ages_distribution_type_hospitalisation_to_ICU,string(init_all_ages_parameter_1_hospitalisation_to_ICU),string(init_all_ages_parameter_2_hospitalisation_to_ICU)];
@@ -404,37 +444,23 @@ global {
 				
 			default_vals[aParameter] <- params;
 			if forced_sars_cov_2_parameters contains aParameter { 
-				loop k over:virus_epidemiological_default_profile.keys {
-					if virus_epidemiological_default_profile[k] contains_key aParameter {
-						virus_epidemiological_default_profile[k][aParameter] <- params;
+				loop k over:profile.keys {
+					if profile[k] contains_key aParameter {
+						profile[k][aParameter] <- params;
 					}
 				}
 			}
 		}
 		
 		// In any case, we should have a default value in the distribution of epidemiological attributes, that gives a value whatever epidemiological entry is
-		if not(virus_epidemiological_default_profile contains_key epidemiological_default_entry) { virus_epidemiological_default_profile[epidemiological_default_entry] <-  default_vals; }
+		if not(profile contains_key epidemiological_default_entry) { profile[epidemiological_default_entry] <-  default_vals; }
 		else {
-			loop p over:default_vals.keys - virus_epidemiological_default_profile[epidemiological_default_entry].keys {  
-				virus_epidemiological_default_profile[epidemiological_default_entry][p] <-  default_vals[p]; 
+			loop p over:default_vals.keys - profile[epidemiological_default_entry].keys {  
+				profile[epidemiological_default_entry][p] <-  default_vals[p]; 
 			}
 		}
 		
-		
-		// ----------------------------
-		//  CREATION OF SARS-CoV-2
-		create sarscov2 with:[source_of_mutation::nil,name::SARS_CoV_2,epidemiological_distribution::virus_epidemiological_default_profile] returns: original_sars_cov_2;
-		original_strain <- first(original_sars_cov_2);
-		do console_output("\t----"+sample(first(original_sars_cov_2).get_epi_id()));
-		do console_output("\tSars-CoV-2 original strain created ("+with_precision((machine_time-t)/1000,2)+"s)");
-		t <- machine_time;
-		
-		// Creation of variant
-		if folder_exists(variants_folder) and not(empty(folder(variants_folder))) {
-			// TODO : loop over files to init variants, based on name and var.
-		} else { do init_variants; }
-		
-		do console_output("\tVariants created - VOC:"+VOC collect each.name+" - VOI:"+VOI collect each.name+" ("+with_precision((machine_time-t)/1000,2)+"s)");
+		return profile;
 	}
 	
 		 
