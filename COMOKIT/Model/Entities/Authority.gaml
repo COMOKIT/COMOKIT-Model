@@ -21,6 +21,15 @@ global {
 	action create_authority {
 		create Authority;
 		do define_policy;
+		if (use_activity_precomputation) {
+			ask Authority {
+				ask policy {
+					do apply;
+					politic_is_active <- is_active();
+				}
+			}
+		}
+		
 		ask world { do console_output("Create authority: "+Authority[0].name, caller::"Authority.gaml");}
 	}
 	

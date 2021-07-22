@@ -172,12 +172,10 @@ species PartialPolicy parent: ForwardingPolicy {
 	float tolerance; // between 0 (no tolerance) and 1.0
 	
 	bool is_allowed (Individual i, Activity activity) {
-		bool allowed <- super.is_allowed(i, activity);
-		if (!allowed) {
-			allowed <- flip(tolerance);
+		if flip(tolerance) {
+			return true;
 		}
-
-		return allowed;
+		return super.is_allowed(i, activity);
 	}
 
 }

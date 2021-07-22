@@ -17,6 +17,8 @@ import "Constants.gaml"
 
 global {
 	
+	
+	
 	// Parameter folder path
 	string parameters_folder_path <- experiment.project_path+"Parameters";
 	// The case study name and dataset path variable to be used in models
@@ -28,6 +30,20 @@ global {
 	string DEFAULT_DATASETS_FOLDER_NAME <- "Datasets"  const: true;
 	// The actual dataset path
 	string dataset_path <- build_dataset_path();
+	
+	// precomputation parameters
+	bool use_activity_precomputation <- false; //if true, use precomputation model
+	bool udpate_for_display <- false; // if true, do some additional computation only for display purpose
+	bool load_activity_precomputation_from_file <- false; //if true, use file to generate the population and their agenda and activities
+	int nb_weeks_ref <- 2 min: 1; // number of weeks precomputed used (should not be higher than the number precomputed in the file)
+	
+	string file_activity_with_policy_precomputation_path <- "activity_with_policy_precomputation.data"; //file to use for precomputed activity when the policy is active
+	string file_activity_without_policy_precomputation_path <- "activity_without_policy_precomputation.data"; //file to use for precomputed activity when the policy is not active
+	
+	string precomputation_folder <- "generated/"; //folder where are located all the precomputed files
+	string file_population_precomputation_path <- dataset_path+ precomputation_folder + "population_precomputation.shp";
+	string file_agenda_precomputation_path <- dataset_path+ precomputation_folder + "agenda_precomputation.data";
+	
 	
 	//GIS data
 	file shp_boundary <- file_exists(dataset_path+"boundary.shp") ? shape_file(dataset_path+"boundary.shp"):nil;

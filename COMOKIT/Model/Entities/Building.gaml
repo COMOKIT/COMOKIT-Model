@@ -12,11 +12,11 @@
 
 @no_experiment
 
-model CoVid19
+model CoVid19 
 
 import "Individual.gaml"
 
-global {
+global { 
 	
 	// TODO : turn it into parameters, more generaly it may require to smoothly init building attribute
 	// from shape_file not using only OSM standard (might be the internal standard though), but relying also on custom bindings
@@ -37,6 +37,11 @@ species Building {
 	list<Individual> individuals;
 	//Number of households in the building
 	int nb_households;
+	 
+	bool need_reinit <- false;
+	list<list<list<list<list<Individual>>>>> entities_inside;
+	list<Individual> indiviudals;
+	int nb_currents  update: use_activity_precomputation and udpate_for_display ?  length(entities_inside[current_week][current_day][current_hour] accumulate each) : 0;
 	
 	//Action to return the neighbouring buildings
 	list<Building> get_neighbors {
@@ -56,15 +61,41 @@ species Building {
 			viral_load <- min(1.0,viral_load+value);
 		}
 	}
+	
+	action compute_individuals{
+		individuals <- entities_inside[current_week][current_day][current_hour] accumulate each;
+		need_reinit <- true;
+		
+	}
 	//Action to update the viral load (i.e. trigger decreases)
 	reflex update_viral_load when: allow_transmission_building{
 		float start <- BENCHMARK ? machine_time : 0.0;
 		viral_load <- max(0.0,viral_load - basic_viral_decrease/nb_step_for_one_day);
 		if BENCHMARK {bench["Building.update_viral_load"] <- bench["Building.update_viral_load"] + machine_time - start; }
 	}
-
+	
+	reflex reinit_individuals when: need_reinit  {
+		individuals <- [];
+		need_reinit <- false;
+	}
+	
+	
+	//Reflex to update disease cycle
+	reflex transmission_building when: allow_transmission_building and use_activity_precomputation and viral_load > 0{
+		float start <- BENCHMARK ? machine_time : 0.0;
+		ask individuals {
+			if(flip(current_place.viral_load*successful_contact_rate_building))
+			{
+				infected_by <- myself;
+				do define_new_case();
+			}
+		}
+		if BENCHMARK {bench["Building.transmission_building"] <- bench["Building.transmission_building"] + machine_time - start;}
+	}
+	
+	
 	aspect default {
-		draw shape color: #gray empty: true;
+		draw shape color: #gray wireframe: true;
 	}
 
 }
@@ -89,6 +120,15 @@ species outside parent: Building {
 				myself.nb_contaminated <- myself.nb_contaminated + 1;
 			}
 		}
+	}
+	
+	//Reflex to trigger infection when outside of the commune
+	reflex transmission_outside when: use_activity_precomputation{
+		float start <- BENCHMARK ? machine_time : 0.0;
+		loop i over: entities_inside[current_week][current_day][current_hour] accumulate each {
+			do outside_epidemiological_dynamic(i);	
+		}
+		if BENCHMARK {bench["Building.transmission_outside"] <- bench["Building.transmission_outside"] + machine_time - start;}
 	}
 	
 }

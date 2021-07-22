@@ -143,10 +143,10 @@ global {
 					
 					// Length of the activity
 					int l <- rnd(length.key,length.value);
-					int current_hour <- h+l;
+					int current_hour_ <- h+l;
 					if h+l>23 {
 						l <- l - (h + l - 23);
-						current_hour <- 23;
+						current_hour_ <- 23;
 					}
 					
 					// Skipped activities
@@ -160,33 +160,33 @@ global {
 					
 					// If there is no skipped activity, then return to previous activity
 					if empty(removed_activities) {
-						agenda_week[d][current_hour] <- current_act;
+						agenda_week[d][current_hour_] <- current_act;
 					} else if length(removed_activities) = 1 { 
 						// If one activity have been skipped, just move to it and carry on with normal agenda
-						agenda_week[d][current_hour] <- first(removed_activities.values);
+						agenda_week[d][current_hour_] <- first(removed_activities.values);
 					} else { // There is more than one activity skipped
 						// That contains last return home activity
 						if removed_activities contains_key end_day {
-							agenda_week[d][current_hour] <- staying_home[0]::[];
+							agenda_week[d][current_hour_] <- staying_home[0]::[];
 						} else {
 							// Fill available time with removed activities
-							int available_time <- agenda_week[d].keys[(agenda_week[d].keys index_of h + 1)]-current_hour;
+							int available_time <- agenda_week[d].keys[(agenda_week[d].keys index_of h + 1)]-current_hour_;
 							if available_time > 0 {
 								int total_time_removed <- last(removed_activities.keys) - first(removed_activities.keys);
 								map<Activity,pair<int,list<Individual>>> r_act <- removed_activities.keys 
 									as_map (removed_activities[each].key::(each::removed_activities[each].value));
 								if total_time_removed <= available_time {
 									loop a over:r_act.keys {
-										agenda_week[d][current_hour] <- a::r_act[a].value;
+										agenda_week[d][current_hour_] <- a::r_act[a].value;
 										if last(r_act.keys) != a {
-											current_hour <- current_hour + r_act[a].key - r_act[r_act.keys[r_act.keys index_of a + 1]].key;
+											current_hour_ <- current_hour_ + r_act[a].key - r_act[r_act.keys[r_act.keys index_of a + 1]].key;
 										} 
 									}
 								} else {
 									loop while:available_time > 0 {
 										Activity a <- any(r_act.keys where (r_act[each].key <= available_time));
 										if a = nil { a <- any(r_act.keys); }
-										agenda_week[d][current_hour] <- a::r_act[a].value;
+										agenda_week[d][current_hour_] <- a::r_act[a].value;
 										available_time <- available_time + r_act[a].key - r_act[r_act.keys[r_act.keys index_of a + 1]].key;
 										r_act[] >- a; 
 									}
