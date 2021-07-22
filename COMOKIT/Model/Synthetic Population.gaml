@@ -1042,7 +1042,7 @@ global {
 	action precompute_activities {
 		write "precompute_activities start";
 		map<Building, int> to_index;
-		loop i from: 0 to: length(all_buildings - 1) {
+		loop i from: 0 to: length(all_buildings) - 1 {
 			to_index[all_buildings[i]] <- i;
 		}
 		ask all_individuals {
