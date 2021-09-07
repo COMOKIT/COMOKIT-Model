@@ -37,6 +37,11 @@ species Building {
 	list<Individual> individuals;
 	//Number of households in the building
 	int nb_households;
+	 
+	bool need_reinit <- false;
+	list<list<list<list<list<Individual>>>>> entities_inside;
+	list<Individual> indiviudals;
+	int nb_currents  update: use_activity_precomputation and udpate_for_display ?  length(entities_inside[current_week][current_day][current_hour] accumulate each) : 0;
 	
 	//Action to return the neighbouring buildings
 	list<Building> get_neighbors {
@@ -57,15 +62,40 @@ species Building {
 		}
 	}
 	
+	action compute_individuals{
+		individuals <- entities_inside[current_week][current_day][current_hour] accumulate each;
+		need_reinit <- true;
+	}
+
 	//Action to update the viral load (i.e. trigger decreases)
 	reflex update_viral_load when: allow_transmission_building{
 		float start <- BENCHMARK ? machine_time : 0.0;
 		loop v over:viral_load.keys {viral_load[v] <- max(0.0,viral_load[v] - basic_viral_decrease/nb_step_for_one_day);}
 		if BENCHMARK {bench["Building.update_viral_load"] <- bench["Building.update_viral_load"] + machine_time - start; }
 	}
-
+	
+	reflex reinit_individuals when: need_reinit  {
+		individuals <- [];
+		need_reinit <- false;
+	}
+	
+	//Reflex to update disease cycle
+	reflex transmission_building when: allow_transmission_building and use_activity_precomputation and viral_load.values one_matches (each > 0) {
+		float start <- BENCHMARK ? machine_time : 0.0;
+		ask individuals {
+			loop v over: current_place.viral_load.keys {
+				if(flip(current_place.viral_load[v]*successful_contact_rate_building))
+				{
+					infectious_contacts_with[current_place] <- define_new_case(v);
+				}	
+			}
+		}
+		if BENCHMARK {bench["Building.transmission_building"] <- bench["Building.transmission_building"] + machine_time - start;}
+	}
+	
+	
 	aspect default {
-		draw shape color: #gray empty: true;
+		draw shape color: #gray; //wireframe: true;
 	}
 
 }
@@ -91,6 +121,15 @@ species outside parent: Building {
 				}
 			}
 		}
+	}
+	
+	//Reflex to trigger infection when outside of the commune
+	reflex transmission_outside when: use_activity_precomputation{
+		float start <- BENCHMARK ? machine_time : 0.0;
+		loop i over: entities_inside[current_week][current_day][current_hour] accumulate each {
+			do outside_epidemiological_dynamic(i);	
+		}
+		if BENCHMARK {bench["Building.transmission_outside"] <- bench["Building.transmission_outside"] + machine_time - start;}
 	}
 	
 }

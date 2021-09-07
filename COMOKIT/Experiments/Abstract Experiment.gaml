@@ -36,6 +36,7 @@ global {
 		do init_vaccines;
 		do global_init;
 		do create_authority;
+		if(use_activity_precomputation) {do update_precomputed_activity;}
 		do after_init;
 	}
 
@@ -101,13 +102,19 @@ experiment "Abstract Experiment" virtual: true {
 				draw ("Day " + int((current_date - starting_date) / #day)) + " | " + ("Cases " + world.number_of_infectious) font: default at: {20 #px, 50 #px} anchor: #top_left color:
 				text_color;
 			}
-
 			image file: file_exists(dataset_path + "/satellite.png") ? (dataset_path + "/satellite.png") : "../Utilities/white.png" transparency: 0.5 refresh: false;
 			species Building {
+				/* 
+				if (use_activity_precomputation) {
+					int val <- round(255 * (1 - nb_currents / 10.0));
+					draw shape color: nb_currents > 0 ? rgb(val,val,255) : #white;
+				}
+				* 
+				*/
 				draw shape color: viral_load[original_strain] > 0 ? rgb(255 * viral_load[original_strain], 0, 0) : #lightgrey empty: true width: 2;
 			}
 
-			agents "Individual" value: all_individuals where not (each.is_outside) {
+			agents "Individual" value: all_individuals where  (not each.is_outside and each.is_active) {
 				draw square(state = susceptible or clinical_status = recovered ? 10 : 20) color: state = latent ? #yellow : (self.is_infectious ? #orangered : (clinical_status = recovered ?
 				#blue : #green));
 			}

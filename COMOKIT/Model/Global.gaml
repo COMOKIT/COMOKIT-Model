@@ -34,12 +34,21 @@ global {
 	 
 	species<Individual> individual_species <- Individual; // by default
 	container<Individual> all_individuals -> {container<Individual>(individual_species.population+(individual_species.subspecies accumulate each.population))};
+	list<Building> all_buildings;
 	geometry shape <- envelope(shp_buildings);
 	outside the_outside;
 	
 	list<string> possible_homes ;  //building type that will be considered as home	
 	map<string, list<string>> activities; //list of activities, and for each activity type, the list of possible building type
+
 	
+	int current_week <- starting_date.week_of_year mod nb_weeks_ref update: current_date.week_of_year mod nb_weeks_ref;
+	int current_day <- starting_date.day_of_week - 1 update: current_date.day_of_week - 1;
+	int current_hour <- starting_date.hour update: current_date.hour;
+	
+	bool politic_is_active <- false;
+	float t_ref <- machine_time;
+	float t_ref2 <- machine_time;
 	action global_init {
 		
 		do console_output("global init");
@@ -61,6 +70,7 @@ global {
 		the_outside <- first(outside);
 		do create_activities;
 		do create_hospital;
+		all_buildings <- list<Building>(Building.population+(Building.subspecies accumulate each.population));
 		do console_output("Activities and special buildings (hospitals and outside) : done");
 		
 		list<Building> homes <- Building where (each.type in possible_homes);	
@@ -73,45 +83,69 @@ global {
 				
 		do console_output("Start creating and locating population from "+(csv_population!=nil?"file":"built-in generator"));	
 		float t <- machine_time;
-		if(csv_population != nil) {
-			do create_population_from_file(homes, min_student_age, max_student_age);
+		
+		//optimized COMOKIT - read all the information from files
+		if (load_activity_precomputation_from_file ) {
+			do load_population_and_agenda_from_file();
+			ask all_individuals  { do initialise_epidemiological_behavior(); }
 		} else {
-			do create_population(working_places, schools, homes, min_student_age, max_student_age);
-		}
-		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
-		
-		do console_output("Start assigning school and workplaces");
-		t <- machine_time;
-		do assign_school_working_place(working_places,schools, min_student_age, max_student_age);
-		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
-		
-		do console_output("Start building friendship network");
-		t <- machine_time;
-		do create_social_networks(min_student_age, max_student_age);
-		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
-		
-		do console_output("Start defining agendas");
-		t <- machine_time;
-		do define_agenda(min_student_age, max_student_age);
-		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
-		do console_output("Population of "+length(all_individuals)+" individuals");
-		
-		do console_output("Give people an epidemic behavior");
-		t <- machine_time;
-		ask all_individuals  { do initialise_epidemiological_behavior();}
-		do console_output("-- "+with_precision(all_individuals count (each.is_wearing_mask) * 1.0 / length(all_individuals),2)+"% wearing a mask  | "
-			+with_precision(mean(all_individuals collect (each.vax_willingness)),2)+" average vax hesitancy"
-		);
-		do console_output("-- achieved in "+(machine_time-t)/1000+"s");
+			if(csv_population != nil) {
+				do create_population_from_file(homes, min_student_age, max_student_age);
+			} else {
+				do create_population(working_places, schools, homes, min_student_age, max_student_age);
+			}
+			do console_output("-- achieved in "+(machine_time-t)/1000+"s");
+			
+			do console_output("Start assigning school and workplaces");
+			t <- machine_time;
+			do assign_school_working_place(working_places,schools, min_student_age, max_student_age);
+			do console_output("-- achieved in "+(machine_time-t)/1000+"s");
+			
+			do console_output("Start building friendship network");
+			t <- machine_time;
+			do create_social_networks(min_student_age, max_student_age);
+			do console_output("-- achieved in "+(machine_time-t)/1000+"s");
+			
+			do console_output("Start defining agendas");
+			t <- machine_time;
+			do define_agenda(min_student_age, max_student_age);
+			do console_output("-- achieved in "+(machine_time-t)/1000+"s");
 
+            do console_output("Give people an epidemic behavior");
+            t <- machine_time;
+            ask all_individuals  { do initialise_epidemiological_behavior();}
+            do console_output("-- "+with_precision(all_individuals count (each.is_wearing_mask) * 1.0 / length(all_individuals),2)+"% wearing a mask  | "
+                +with_precision(mean(all_individuals collect (each.vax_willingness)),2)+" average vax hesitancy");
+            do console_output("-- achieved in "+(machine_time-t)/1000+"s");
+
+			do console_output("Population of "+length(all_individuals)+" individuals");
+		}
+		
+		if (use_activity_precomputation) {
+			ask all_individuals {
+				is_active <- false;
+			}
+		}
 		do console_output("Introduce "+num_infected_init+" infected cases");
 		ask num_infected_init among all_individuals { do define_new_case(original_strain); }
 		
 		total_number_individual <- length(all_individuals);
 
 	}
-
-
+	
+	bool firsts <- true;
+	reflex e when: firsts {
+		t_ref2 <- machine_time;
+		firsts <- false;
+	}
+	
+	reflex end when:cycle > 24 and (all_individuals count (each.is_susceptible or (each.state = removed))) = length(all_individuals) {
+		write "nb cycle: " + cycle;
+		write "time tot: " + (machine_time - t_ref);
+		write "time cycle: " + (machine_time - t_ref2) / cycle;
+		do pause;
+		
+	}
 	action init_building_type_parameters {
 		csv_parameters <- csv_file(building_type_per_activity_parameters,",",true);
 		matrix data <- matrix(csv_parameters);
@@ -463,6 +497,29 @@ global {
 		return profile;
 	}
 	
+	
+	reflex need_to_load when: use_activity_precomputation and (Authority[0].policy.is_active()  != politic_is_active){
+		politic_is_active <- Authority[0].policy.is_active();
+		do update_precomputed_activity;
+	}
+
+	action update_precomputed_activity {
+		if (load_activity_precomputation_from_file) {
+			do load_activity_building(all_individuals as list, all_buildings as_map (to_bd_id(each)::each), not politic_is_active ? (dataset_path+ precomputation_folder + file_activity_without_policy_precomputation_path): (dataset_path+ precomputation_folder + file_activity_with_policy_precomputation_path));
+		} else {
+			do precompute_activities;
+		}
+		if udpate_for_display {
+			ask container<Building>(Building.population+(Building.subspecies accumulate each.population)) {
+				nb_currents  <- length(entities_inside[current_week][current_day][current_hour] accumulate each);		
+			}
+		}
+		ask all_individuals where not each.is_susceptible {
+			loop l over: to_remove_if_actif {
+				all_buildings[l[0]].entities_inside[l[1]][l[2]][l[3]][l[4]] >> self;
+			}
+		}
+	}
 		 
 	 /*
 	  * Initialize vaccines based on given parameters (default or TODO parameter file)
