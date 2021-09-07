@@ -13,9 +13,9 @@ experiment "With parameters" parent: "Abstract Experiment" autorun: true virtual
 	/** 
 	* Enabling parameters being loaded from a csv file  
 	*/
-	parameter "Epidemiological from file" category: "Epidemiology" var: load_epidemiological_parameter_from_file <- false enables: [epidemiological_parameters];
+	parameter "Epidemiological from file" category: "Epidemiology" var: load_epidemiological_parameter_from_file <- false enables: [sars_cov_2_parameters];
 	//File for the parameters
-	parameter "Path of Epidemiological from file" category: "Epidemiology" var: epidemiological_parameters <- "../Parameters/Epidemiological Parameters.csv";
+	parameter "Path of Epidemiological from file" category: "Epidemiology" var: sars_cov_2_parameters <- "../Parameters/Epidemiological Parameters.csv";
 
 	/** 
 	 * Enabling human to human transmission

@@ -26,7 +26,7 @@ global {
 	float ask_tolerance {
 		float t <- -1.0;
 		loop while: (t > 1) or (t < 0) {
-			t <- float(user_input("Tolerance with respect to activites (between 0.0: no tolerance, and 1.0: no constraint) ", [enter("Your choice",0.1)])["Your choice"]);
+			t <- float(user_input_dialog("Tolerance with respect to activites (between 0.0: no tolerance, and 1.0: no constraint) ", [enter("Your choice",0.1)])["Your choice"]);
 		}
 		return t;
 	}

@@ -18,11 +18,14 @@
 
 model CoVid19
 
+import "../Global.gaml"
 import "../Functions.gaml"
+import "Authority.gaml"
 import "Activity.gaml"
 import "Building.gaml"
 import "Biological Entity.gaml"
-
+import "Vaccine.gaml"
+import "Virus.gaml"
 
 global
 {
@@ -41,6 +44,9 @@ global
 	map<int,int> tn_hostpialised;
 	int total_number_ICU <- 0;
 	map<int,int> tn_icu;
+	
+	list<int> total_number_doses <- [0,0,0];
+	map<covax,int> total_number_doses_per_vax;
 	
 	map<string, int> building_infections;
 	
@@ -108,110 +114,51 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	//Bool to uniquely count positive
 	bool is_already_positive <- false;
 	
+	//Vaccines
+	map<date, vax> vaccine_history;
+	float vax_willingness;
+	
 	//#############################################################
 	//Contact related variables
 	//#############################################################
-	agent infected_by;
+	map<agent,bool> infectious_contacts_with;
 	Activity infected_when;
 	int number_of_infected_individuals <- 0;
 	
 	//#############################################################
-	//Actions
+	// -- Initialization
 	//#############################################################
 	
-	//Action to call when performing a test on a individual
-	action test_individual
-	{
-		//If the Individual is infected, we check for true positive
-		if(self.is_infected)
-		{
-			if(world.is_true_positive(self.age))
-			{
-				report_status <- tested_positive;
-				if(is_already_positive=false){
-					is_already_positive <- true;
-					do increment_total_of(REPORTED);
-				}
-			}
-			else
-			{
-				report_status <- tested_negative;
-			}
-		}
-		else
-		{
-			//If the Individual is not infected, we check for true negative
-			if(world.is_true_negative(self.age))
-			{
-				report_status <- tested_negative;
-				
-			}
-			else
-			{
-				report_status <- tested_positive;
-				if(is_already_positive=false){
-					is_already_positive <- true;
-					do increment_total_of(REPORTED);
-				}
-			}
-		}
-		last_test <- cycle;
-	}
-	//Initialise epidemiological parameters according to the age of the Entity
-	action initialise_epidemio {
-		factor_contact_rate_asymptomatic <- world.get_factor_contact_rate_asymptomatic(age);
+	// Initialization of bahavioral aspect related to epidemiology, e.g. wearing a mask, willigness to vaccine
+	action initialise_epidemiological_behavior {
+		// Not virus dependant
 		factor_contact_rate_wearing_mask <- world.get_factor_contact_rate_wearing_mask(age);
-		basic_viral_release <- world.get_basic_viral_release(age);
-		contact_rate <- world.get_contact_rate_human(age);
 		proba_wearing_mask <- world.get_proba_wearing_mask(age);
-		viral_factor <- world.get_viral_factor(age);
+		vax_willingness <- 1 - world.get_proba_antivax(age);
 	}
 	
-	//Action to call to define a new case, obtaining different time to key events
-	action define_new_case
-	{
-	
-		//Add the infection to the infections having been caused in the building
-		if(building_infections.keys contains(current_place.type))
-		{
-			building_infections[current_place.type] <- building_infections[current_place.type] +1;
-		}
+	//Initialise epidemiological parameters according to the age of the Entity
+	action initialise_disease {
+		// Virus dependant
+		factor_contact_rate_asymptomatic <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_factor_asymptomatic);
+		contact_rate <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_successful_contact_rate_human);
+		viral_factor <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_viral_individual_factor);
 		
-		//Add the infection to the infections of the same age
-		do increment_total_of(INFECTED);
-		
-		//Add the activity done while being infected
-		infected_when <- last_activity; 
+		// TODO : move this elsewhere - rate of viral agent release in the environment
+		basic_viral_release <-  world.get_basic_viral_release(self.age);
 		
 		//Set the status of the Individual to latent (i.e. not infectious)
 		state <- "latent";
-		if(world.is_asymptomatic(self.age)){
+		
+		if(viral_agent.flip_epidemiological_aspect(self,epidemiological_proportion_asymptomatic)){ 
 			is_symptomatic <- false;
-			latent_period <- world.get_incubation_period_asymptomatic(self.age);
+			latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_asymptomatic);
 		}else{
 			is_symptomatic <- true;
-			presymptomatic_period <- world.get_serial_interval(self.age);
-			latent_period <- presymptomatic_period<0?world.get_incubation_period_symptomatic(self.age)+presymptomatic_period:world.get_incubation_period_symptomatic(self.age);
+			presymptomatic_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_serial_interval);
+			latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_symptomatic) + 
+				(presymptomatic_period<0 ? presymptomatic_period : 0);
 		}
-
-	}
-	
-	// Allows to track who infect who and verify someone cannot be infected twice
-	action infect_someone(Individual succesful_contact) {
-		if succesful_contact.infected_by!=nil {error "One cannot be infected twice : "
-			+sample(succesful_contact)+" infected by "+sample(self);
-		}
-		number_of_infected_individuals <- number_of_infected_individuals + 1; 
-		succesful_contact.infected_by <- self;
-		ask succesful_contact {do define_new_case;}
-	}
-	
-	//Action to call to update wearing a mask for a time step
-	action update_wear_mask
-	{
-		//If the Individual is a free rider, it will not care for masks
-		if not free_rider and flip(proba_wearing_mask) { is_wearing_mask <- true; }
-		else { is_wearing_mask <- false; }
 	}
 	
 	//Initialiase social network of the agents (colleagues, friends)
@@ -243,6 +190,110 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		}
  	}
 	
+	//#############################################################
+	//Actions
+	//#############################################################
+	
+	//Action to call when performing a test on a individual
+	action test_individual
+	{
+		//If the Individual is infected, we check for true positive
+		if(self.is_infected)
+		{
+			if(viral_agent.flip_epidemiological_aspect(self, epidemiological_probability_true_positive))
+			{
+				report_status <- tested_positive;
+				if(is_already_positive=false){
+					is_already_positive <- true;
+					total_number_reported <- total_number_reported+1;
+				}
+			}
+			else
+			{
+				report_status <- tested_negative;
+			}
+		}
+		else
+		{
+			//If the Individual is not infected, we check for true negative
+			if(viral_agent.flip_epidemiological_aspect(self, epidemiological_probability_true_negative))
+			{
+				report_status <- tested_negative;
+				
+			}
+			else
+			{
+				report_status <- tested_positive;
+				if(is_already_positive=false){
+					is_already_positive <- true;
+					total_number_reported <- total_number_reported+1;
+				}
+			}
+		}
+		last_test <- cycle;
+	}
+	
+	//Action to call to define a new case, obtaining different time to key events
+	bool define_new_case(virus infectious_agent)
+	{
+		if not activate_immunity(infectious_agent) {
+			//Add the new case to the total number of infected (not mandatorily known)
+			total_number_of_infected <- total_number_of_infected +1;
+			
+			//Add the infection to the infections having been caused in the building
+			if(building_infections.keys contains(current_place.type))
+			{
+				building_infections[current_place.type] <- building_infections[current_place.type] +1;
+			}
+			//Add the infection to the infections of the same age
+			if(total_incidence_age.keys contains(self.age))
+			{
+				total_incidence_age[self.age] <- total_incidence_age[self.age] +1;
+			}
+			else
+			{
+				add 1 to: total_incidence_age at: self.age;
+			}
+			//Add the activity done while being infected
+			infected_when <- last_activity; 
+			
+			// Infected by
+			viral_agent <- infectious_agent;
+			do initialise_disease;
+			
+			
+			return true;
+		}
+		return false;
+	}
+	
+	// Allows to track who infect who 
+	action infect_someone(Individual succesful_contact) { 
+		ask succesful_contact { myself.infectious_contacts_with[succesful_contact] <-  define_new_case(myself.viral_agent); }
+		if infectious_contacts_with[succesful_contact] { number_of_infected_individuals <- number_of_infected_individuals + 1; }
+	}
+	
+	//Action to call to update wearing a mask for a time step
+	action update_wear_mask
+	{
+		//If the Individual is a free rider, it will not care for masks
+		if(free_rider)
+		{
+			is_wearing_mask <- false;
+		}
+		else
+		{
+			if(flip(proba_wearing_mask))
+			{
+				is_wearing_mask <- true;
+			}
+			else
+			{
+				is_wearing_mask <- false;
+			}
+		}
+	}
+	
 	
 	//Action to call when entering a new building to update the list of individuals of the buildings
 	action enter_building(Building b) {
@@ -253,6 +304,22 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		is_at_home <- current_place = home;
 		current_place.individuals << self;
 		location <- any_location_in(current_place);
+	}
+	
+	//Vaccination for Covid19 on the current date
+	//return the number of doses done
+	int vaccination(covax v){
+		int dose_nb <- vaccine_history.values count (each = v);
+		
+		// records
+		total_number_doses[dose_nb] <- total_number_doses[dose_nb] + 1;
+		if total_number_doses_per_vax contains_key v {total_number_doses_per_vax[v] <- total_number_doses_per_vax[v]+1;}
+		else {total_number_doses_per_vax[v] <- 1;}
+		
+		do build_immunity(v.target,1-v.infection_prevention[dose_nb]);
+		vaccine_history[current_date] <- v;
+		
+		return vaccine_history.values count (each = v);
 	}
 	
 	// UTILS
@@ -294,6 +361,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		float start <- BENCHMARK ? machine_time : 0.0;
 		//Computation of the reduction of the transmission when being asymptomatic/presymptomatic and/or wearing mask
 		float reduction_factor <- viral_factor;
+		
 		if(is_asymptomatic)
 		{
 			reduction_factor <- reduction_factor * factor_contact_rate_asymptomatic;
@@ -308,7 +376,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		{
 			ask current_place
 			{
-				do add_viral_load(reduction_factor*myself.basic_viral_release);
+				do add_viral_load(reduction_factor*myself.basic_viral_release, myself.viral_agent);
 			}
 		}
 		
@@ -385,11 +453,13 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		float start <- BENCHMARK ? machine_time : 0.0;
 		if(allow_transmission_building and (not is_infected)and(self.current_place!=nil))
 		{
-			if(flip(current_place.viral_load*successful_contact_rate_building))
-			{
-				infected_by <- current_place;
-				do define_new_case();
+			loop v over: current_place.viral_load.keys {
+				if(flip(current_place.viral_load[v]*successful_contact_rate_building))
+				{
+					infectious_contacts_with[current_place] <- define_new_case(v);
+				}	
 			}
+			
 		}
 		do update_wear_mask();
 		if BENCHMARK {bench["Individual.update_epidemiology"] <- bench["Individual.update_epidemiology"] + machine_time - start;}
@@ -418,6 +488,10 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		is_counted_ICU <- true;
 		if BENCHMARK {bench["Individual.add_to_ICU"] <- bench["Individual.add_to_ICU"] + machine_time - start;}
 	}
+	
+	//#############################################################
+	//Visualization
+	//#############################################################
 	
 	aspect default {
 		if not is_outside {

@@ -48,7 +48,6 @@ global
 		create pseudo_individual number:nb_individual
 		{
 			age <- rnd(0,90);
-			do initialise_epidemio;
 		}
 		
 		ask num_infected_init among pseudo_individual {
