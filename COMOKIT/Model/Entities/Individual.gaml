@@ -305,7 +305,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		// records
 		total_number_doses[dose_nb] <- total_number_doses[dose_nb] + 1;
 		if total_number_doses_per_vax contains_key v {total_number_doses_per_vax[v] <- total_number_doses_per_vax[v]+1;}
-		else {total_number_doses_per_vax[v] <- 1;} 
+		else {total_number_doses_per_vax[v] <- 1;}
 		
 		do build_immunity(v.target,1-v.infection_prevention[dose_nb]);
 		vaccine_history[current_date] <- v;

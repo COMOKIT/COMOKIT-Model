@@ -16,22 +16,19 @@ global {
 	bool DEBUG <- false;
 	int num_infected_init <- 20; 
 	
-	covax pfizer <- vaccines first_with (each.name=pfizer_biontech);
-	covax astra <- vaccines first_with (each.name=astra_zeneca);
-	
-	map<covax,int> vaxxins <- [pfizer::2000,astra::5000];
-	map<covax,int> vax_a_day <- [pfizer::20,astra::50];
-	map<covax,point> vax_age_target <- [pfizer::point(18,45),astra::point(46,120)];
+	map<string,int> vaxxins <- [pfizer_biontech::2000,astra_zeneca::5000];
+	map<string,int> vax_a_day <- [pfizer_biontech::20,astra_zeneca::50];
+	map<string,point> vax_age_target <- [pfizer_biontech::point(18,45),astra_zeneca::point(46,120)];
 	
 	map<covax,date> vax_start;
 	map<covax,int> vax_day_duration;
 	
-	action define_policy{   
+	action define_policy{
 		ask Authority {
 			name <- "Vaccination strategy";
 			list<AbstractPolicy> policies;
 			loop v over:vaxxins.keys {
-				policies <+ create_vax_policy(v,vaxxins[v],vax_a_day[v],vax_age_target[v],true);
+				policies <+ create_vax_policy(vaccines first_with (each.name=v),vaxxins[v],vax_a_day[v],vax_age_target[v],true);
 			}
 			policy <- combination(policies);
 		}
@@ -50,9 +47,9 @@ global {
 }
 
 
-experiment "Vaccination campaign" parent: "Abstract Experiment" autorun: true {
+experiment "Vaccination campaign" parent: "Abstract Experiment" autorun: false {
 	output {
-		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
+		layout #split consoles: true editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
 		
 		display "Main" parent: default_display {}
 		display "States evolution" parent:states_evolution_chart {}
@@ -95,10 +92,11 @@ experiment "Vaccination campaign" parent: "Abstract Experiment" autorun: true {
 		
 		display "vax doses" refresh: every(#day) {
 			chart "Vax doses" background: #white axes: #black color: #black title_font: default legend_font: font("Helvetica", 14, #bold) {
-				data "Nb of"+pfizer.name+"doses" value: total_number_doses_per_vax[pfizer] marker: false style: line  legend: pfizer.name;
-				data "Nb of"+astra.name+"doses" value: total_number_doses_per_vax[astra] marker: false style: line  legend: astra.name;
+				data "Nb of "+pfizer_biontech+" doses" value: total_number_doses_per_vax[vaccines first_with (each.name=pfizer_biontech)] marker: false style: line  legend: pfizer_biontech;
+				data "Nb of "+astra_zeneca+" doses" value: total_number_doses_per_vax[vaccines first_with (each.name=astra_zeneca)] marker: false style: line  legend: astra_zeneca;
 			}
 		}
+		
 	}
 }
 
