@@ -131,8 +131,6 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	//if false, do not simulate it
 	bool is_active <- true;
 	
-	bool is_susceptible <- true;
-	
 	bool is_activity_allowed <- true;
 	int nb_max_fellow <- #max_int;
 	int index_home;
@@ -165,7 +163,6 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		
 		//Set the status of the Individual to latent (i.e. not infectious)
 		state <- "latent";
-		is_susceptible <- false;
 		
 		if(viral_agent.flip_epidemiological_aspect(self,epidemiological_proportion_asymptomatic)){ 
 			is_symptomatic <- false;

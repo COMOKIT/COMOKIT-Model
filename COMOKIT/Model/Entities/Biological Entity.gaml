@@ -68,6 +68,10 @@ species BiologicalEntity control:fsm{
 	//Boolean to determine if the agent is symptomatic
 	bool is_symptomatic;
 	
+	//Boolean to determine if the agent is suceptible
+	bool is_susceptible <- true;
+	
+	
 	// Comorbidities
 	int comorbidities <- 0;
 	
@@ -109,7 +113,9 @@ species BiologicalEntity control:fsm{
 	
 	//Current location of the entity (as we do not represent transportation, the entity can only be inside a building)
 	Building current_place;
-		
+	
+	
+	
 	//#############################################################
 	// -- Initialization
 	//#############################################################
@@ -188,6 +194,7 @@ species BiologicalEntity control:fsm{
 		is_infectious <- define_is_infectious();
 		is_infected <- define_is_infected();
 		is_asymptomatic <- define_is_asymptomatic();
+		
 	}
 		
 	//Reflex to update the time before death when an entity need to be admitted in ICU, but is not in ICU
@@ -302,6 +309,7 @@ species BiologicalEntity control:fsm{
 		enter{
 			tick <- 0.0;
 			do set_status;
+			is_susceptible <- false;
 		}
 		tick <- tick+1;
 		
@@ -401,6 +409,7 @@ species BiologicalEntity control:fsm{
 		transition to:susceptible when:clinical_status != dead and allow_reinfection {
 			infection_history[viral_agent] <- clinical_status;
 			viral_agent <- nil;
+			is_susceptible <- false;
 			// TODO : all epidemiological variable should be reset 
 		}
 	}
