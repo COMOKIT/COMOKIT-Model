@@ -104,13 +104,13 @@ experiment "Abstract Experiment" virtual: true {
 			}
 			image file: file_exists(dataset_path + "/satellite.png") ? (dataset_path + "/satellite.png") : "../Utilities/white.png" transparency: 0.5 refresh: false;
 			species Building {
-				/* 
+				
 				if (use_activity_precomputation) {
 					int val <- round(255 * (1 - nb_currents / 10.0));
 					draw shape color: nb_currents > 0 ? rgb(val,val,255) : #white;
 				}
-				* 
-				*/
+				
+				
 				draw shape color: viral_load[original_strain] > 0 ? rgb(255 * viral_load[original_strain], 0, 0) : #lightgrey empty: true width: 2;
 			}
 
