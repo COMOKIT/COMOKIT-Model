@@ -165,6 +165,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		
 		//Set the status of the Individual to latent (i.e. not infectious)
 		state <- "latent";
+		is_susceptible <- false;
 		
 		if(viral_agent.flip_epidemiological_aspect(self,epidemiological_proportion_asymptomatic)){ 
 			is_symptomatic <- false;
@@ -286,7 +287,6 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			// Infected by
 			viral_agent <- infectious_agent;
 			do initialise_disease;
-			
 			
 			return true;
 		}
