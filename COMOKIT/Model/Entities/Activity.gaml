@@ -28,7 +28,7 @@ global {
 		}
 		
 		// Local variable sorting all the Building agents given their type
-		map<string,list<Building>> buildings_per_activity <- Building group_by (each.type);
+		map<string,list<Building>> buildings_per_activity <- build_buildings_per_function(); 
 		
 		// Create in addition one Activity species for each meta-type of Activity as defined in the activities map
 		loop tb over: activities.keys { 
@@ -40,7 +40,7 @@ global {
 					} 
 				}
 				
-			}
+			} 
 		}
 		
 		if (csv_building_type_weights != nil) {

@@ -53,6 +53,7 @@ global
 }
 
 species Individual parent: BiologicalEntity schedules: shuffle(Individual where (each.is_active and (each.clinical_status != dead))){
+	int id_int;
 	//Age of the individual
 	int age;
 	//Sex of the individual
@@ -266,10 +267,13 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			total_number_of_infected <- total_number_of_infected +1;
 			
 			//Add the infection to the infections having been caused in the building
-			if(building_infections.keys contains(current_place.type))
-			{
-				building_infections[current_place.type] <- building_infections[current_place.type] +1;
+			loop fct over: current_place.functions  {
+				if(building_infections.keys contains(fct))
+				{
+					building_infections[fct] <- building_infections[fct] +1;
+				}
 			}
+			
 			//Add the infection to the infections of the same age
 			if(total_incidence_age.keys contains(self.age))
 			{

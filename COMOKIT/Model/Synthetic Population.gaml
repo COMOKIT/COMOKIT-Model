@@ -233,8 +233,8 @@ global {
 		
 		loop hh over:hhs {
 			Building homeplace <- any(avlb_homes); // Uniform distribution | should we take HH size vs size of the building ?
-			
-			ask hh { home <- homeplace; relatives <- hh - self; }
+			ask hh { home <- homeplace; relatives <- hh - self; 
+			}
 			avlb_homes >- homeplace;
 			
 			if empty(avlb_homes) {avlb_homes <- copy(homeplaces);} // Reset available homeplace to be every home
@@ -276,7 +276,6 @@ global {
 			}
 		}
 		list<list<Individual>> households;
-		
 		ask homes {
 			loop times: nb_households {
 				list<Individual> household;
@@ -1046,19 +1045,33 @@ global {
 		loop i from: 0 to: length(all_buildings) - 1 {
 			to_index[all_buildings[i]] <- i;
 		}
+		
 		ask all_individuals {
 			last_activity <- first(staying_home);
 			activity_fellows <- relatives;
+		}
+		int i <- 0;
+		ask individual_species {
+			id_int <- i;
+			i <- i + 1;
 		}
 
 		do init_user_activity_precomputation;
 		date date_ref <- copy(starting_date);
 		date date_end <- copy(date_ref) add_weeks nb_weeks_ref;
+		write sample(length(individual_species));
 		loop while: date_ref <= date_end {
+			write "Generate agenda for date: " + date_ref;
 			int w <- int((date_ref - starting_date) / #week);
 			int d <- date_ref.day_of_week - 1;
 			int h <- date_ref.hour;
+			int cpt <- 0;
+			list<int> ref_group;
+			loop times: length(individual_species) {ref_group<<-1;}
 			ask individual_species {
+				if (cpt mod int(length(individual_species)/100) = 0) {
+					write "processing precomputation: " + int(cpt * 100 / length(individual_species))  + "%";
+				}
 				pair<Activity, list<Individual>> act <- agenda_week[d][h];
 				if (act.key != nil) {
 					if (Authority[0].allows(self, act.key)) {
@@ -1079,35 +1092,49 @@ global {
 				}
 				list<list<Individual>> ent <- current_place.entities_inside[w][d][h];
 				bool added <- false;
-				loop e over: ent {
+				int index <- ref_group[cpt];
+				if (index != -1) {
+					ent[index] << self; 
+					index_building_agenda[w][d][h] <- current_place;
+					index_group_in_building_agenda[w][d][h] <- index;
+					to_remove_if_actif << [to_index[current_place], w, d, h, index];
+				} else {
+					current_place.entities_inside[w][d][h] << [self];
+					index <- length(current_place.entities_inside[w][d][h]) - 1;
+					index_group_in_building_agenda[w][d][h] <- index;
+					to_remove_if_actif << [to_index[current_place], w, d, h, index];
+					index_building_agenda[w][d][h] <- current_place;
+					if (activity_fellows != nil) {
+						loop f over: activity_fellows {
+							ref_group[f.id_int] <- index;
+						}
+					}
+					
+				}
+				cpt <- cpt + 1;
+				
+				/*loop e over: ent {
 					if world.inGroup(e, activity_fellows) {
 						e << self;
 						added <- true;
 						index_building_agenda[w][d][h] <- current_place;
 						int index <- ent index_of e;
-						//if is_susceptible {
 						index_group_in_building_agenda[w][d][h] <- index;
 						to_remove_if_actif << [to_index[current_place], w, d, h, index];
-						//}
 						break;
 					}
 
 				}
 
 				if not added {
-				//	if is_susceptible {
 					current_place.entities_inside[w][d][h] << [self];
 					int index <- length(current_place.entities_inside[w][d][h]) - 1;
 					index_group_in_building_agenda[w][d][h] <- index;
 					to_remove_if_actif << [to_index[current_place], w, d, h, index];
-					//}
 					index_building_agenda[w][d][h] <- current_place;
 				} else {
-				//if is_susceptible {
 					current_place.entities_inside[w][d][h] <- ent;
-					//}
-
-				}
+				}*/
 
 			}
 

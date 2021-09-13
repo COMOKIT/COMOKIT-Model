@@ -40,7 +40,7 @@ global {
 	
 	list<string> possible_homes ;  //building type that will be considered as home	
 	map<string, list<string>> activities; //list of activities, and for each activity type, the list of possible building type
-
+	
 	
 	int current_week <- starting_date.week_of_year mod nb_weeks_ref update: current_date.week_of_year mod nb_weeks_ref;
 	int current_day <- starting_date.day_of_week - 1 update: current_date.day_of_week - 1;
@@ -57,10 +57,11 @@ global {
 		if (shp_boundary != nil) { create Boundary from: shp_boundary; }
 		do create_buildings();
 		
-		loop aBuilding_Type over: Building collect(each.type)
+		list<string> all_building_functions <- remove_duplicates(Building accumulate(each.functions)); 
+		loop aBuilding_Type over: all_building_functions
 		{
 			add 0 at: aBuilding_Type to: building_infections;
-		}
+		} 
 		//THIS SHOULD BE REMOVED ONCE WE FINALLY HAVE HOSPITAL IN SHAPEFILE
 		add 0 at: "Hospital" to: building_infections;
 		add 0 at: "Outside" to: building_infections;
@@ -73,8 +74,9 @@ global {
 		all_buildings <- list<Building>(Building.population+(Building.subspecies accumulate each.population));
 		do console_output("Activities and special buildings (hospitals and outside) : done");
 		
-		list<Building> homes <- Building where (each.type in possible_homes);	
-		map<string,list<Building>> buildings_per_activity <- Building group_by (each.type);
+		map<string,list<Building>> buildings_per_activity <- build_buildings_per_function();
+		list<Building> homes <- remove_duplicates(possible_homes accumulate buildings_per_activity[each]);	
+		homes >> nil;
 		map<Building,float> working_places <- gather_available_workplaces(buildings_per_activity);
 		map<list<int>,list<Building>> schools <- gather_available_schoolplaces(buildings_per_activity);
 		int min_student_age <- min(schools.keys accumulate (each));
@@ -132,6 +134,8 @@ global {
 		total_number_individual <- length(all_individuals);
 
 	}
+	
+	
 	
 	bool firsts <- true;
 	reflex e when: firsts {
@@ -195,10 +199,10 @@ global {
 	// Creating the buildings from a file (should be overloaded to add more attributes to buildings)
 	action create_buildings {
 		if (shp_buildings != nil) { 
-			create Building from: shp_buildings with: [type::string(read(type_shp_attribute)), nb_households::max(1,int(read(flat_shp_attribute)))];
+			create Building from: shp_buildings with: [fcts::string(read(type_shp_attribute)), nb_households::max(1,int(read(flat_shp_attribute)))];
 		}
 		else {error "The mandatory shapefile of buildings is missing !";}
-	}
+	} 
 		
 	// gather all workplaces with the area
 	map<Building,float> gather_available_workplaces(map<string,list<Building>> blds_per_activity) {

@@ -24,13 +24,37 @@ global {
 	string type_shp_attribute <- "type";
 	string flat_shp_attribute <- "flats";
 	
+	
+	map<string,list<Building>> build_buildings_per_function {
+		list<string> all_building_functions <- remove_duplicates(Building accumulate(each.functions)); 
+		if not("" in all_building_functions) {
+			all_building_functions << "";
+		}
+		map<string,list<Building>> buildings_per_activity <- all_building_functions as_map (each::[]);
+	 	ask Building {
+	 		if empty(functions) {
+	 			buildings_per_activity[""] << self;
+	 		}else {
+	 			loop fct over: functions {
+					buildings_per_activity[fct] << self;
+				} 
+			}
+		}
+		loop v over: buildings_per_activity.values {
+			v >> nil;
+		}
+		return buildings_per_activity;
+	}
+	
 }
 
 species Building {
 	//Viral load of the building
 	map<virus,float> viral_load <- [original_strain::0.0];
-	//Type of the building
-	string type;
+
+	string fcts;
+	//Usages of the building
+	list<string> functions;
 	//Building surrounding
 	list<Building> neighbors;
 	//Individuals present in the building
@@ -43,6 +67,14 @@ species Building {
 	list<Individual> indiviudals;
 	int nb_currents  update: use_activity_precomputation and udpate_for_display ?  length(entities_inside[current_week][current_day][current_hour] accumulate each) : 0;
 	
+	init {
+		if (fcts != nil) {
+			functions <- fcts split_with "$" ;
+			
+		}else {
+			functions << "";
+		}
+	}
 	//Action to return the neighbouring buildings
 	list<Building> get_neighbors {
 		if empty(neighbors) {

@@ -30,14 +30,30 @@ global {
 	 * Gloabl three steps initialization of a any simulation
 	 */
 	init {
+		do console_output("Start experiment ---");
+		
 		do before_init;
+		do console_output("finished before init ---");
 		do init_epidemiological_parameters;
+		do console_output("finished setting epidemiological parameters ---");
 		do init_sars_cov_2;
 		do init_vaccines;
+		do console_output("finished initializing of vaccines and variants ---");
+		
+		
 		do global_init;
+		
+		do console_output("finished global init ---");
+	
+		
 		do create_authority;
 		if(use_activity_precomputation) {do update_precomputed_activity;}
+		do console_output("finished creating authority ---");
+	
+		
 		do after_init;
+		do console_output("finished after init ---");
+	
 	}
 
 }

@@ -16,8 +16,7 @@ model CoVid19
 import "Constants.gaml"
 
 global {
-	
-	
+		
 	
 	// Parameter folder path
 	string parameters_folder_path <- experiment.project_path+"Parameters";
@@ -26,7 +25,7 @@ global {
 	string datasets_folder_path; // The path from root project to the data set folder (can contains several case studies)
 	// Default dataset management
 	list<string> EXCLUDED_CASE_STUDY_FOLDERS_NAME <- ["Test Generate GIS Data"] const:true;
-	string DEFAULT_CASE_STUDY_FOLDER_NAME <- "Vinh Phuc" const: true;
+	string DEFAULT_CASE_STUDY_FOLDER_NAME <- "Ben Tre" const: true;
 	string DEFAULT_DATASETS_FOLDER_NAME <- "Datasets"  const: true;
 	// The actual dataset path
 	string dataset_path <- build_dataset_path();
