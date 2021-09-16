@@ -101,7 +101,7 @@ global {
 	// Behavioral parameters
 	float init_all_ages_proportion_wearing_mask <- 0.0; //Proportion of people wearing a mask
 	float init_all_ages_proportion_antivax <- 0.4;//Proportion of people not willing to take the vaccin
-	
+	float init_all_ages_proportion_freerider <- 0.0;
 	float init_all_ages_factor_contact_rate_wearing_mask <- 0.5; //Factor of reduction for successful contact rate of an infectious individual wearing mask
 	
 	

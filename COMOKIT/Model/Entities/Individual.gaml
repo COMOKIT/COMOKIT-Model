@@ -150,6 +150,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		factor_contact_rate_wearing_mask <- world.get_factor_contact_rate_wearing_mask(age);
 		proba_wearing_mask <- world.get_proba_wearing_mask(age);
 		vax_willingness <- 1 - world.get_proba_antivax(age);
+		free_rider <- flip(world.get_proba_free_rider(age));
 	}
 	
 	//Initialise epidemiological parameters according to the age of the Entity

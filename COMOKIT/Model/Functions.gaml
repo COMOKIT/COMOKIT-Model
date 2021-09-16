@@ -76,10 +76,15 @@ global
 		//return (float(map_epidemiological_parameters[age][epidemiological_proportion_wearing_mask][1]));
 	}
 	
+	//Gives a probability to be antivax given the age of the person
 	float get_proba_antivax(int age) { 
 		return init_all_ages_proportion_antivax;
 		// TODO : replace a parameter based initialization
 		// return flip(float(map_epidemiological_parameters[age][proportion_antivax][1]))?1.0:0.0;
+	}
+	
+	float get_proba_free_rider(int age) {
+		return init_all_ages_proportion_freerider;
 	}
 	
 }
