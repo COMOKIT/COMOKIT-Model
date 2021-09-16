@@ -115,7 +115,7 @@ global {
 		ask indiv {
 			if is_at_home { 
 				contacts <- contacts + relatives count each.is_at_home; 
-				contacts <- contacts + (length(current_place.individuals)-contacts)*reduction_coeff_all_buildings_inhabitants;
+				contacts <- contacts + (length(current_place.individuals)-contacts)*reduction_coeff_all_buildings_individuals;
 			} else { 
 				contacts <- contacts + length(activity_fellows); 
 				contacts <- contacts + (length(current_place.individuals)-contacts)*reduction_coeff_all_buildings_individuals;

@@ -91,8 +91,7 @@ global {
 	
 	//Environmental contamination
 	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period
-	float reduction_coeff_all_buildings_inhabitants <- 0.01; //reduction of the contact rate for individuals belonging to different households leaving in the same building
-	float reduction_coeff_all_buildings_individuals <- 0.05; //reduction of the contact rate for individuals belonging to different households leaving in the same building
+	float reduction_coeff_all_buildings_individuals <- 0.05; //reduction of the contact rate for unknown individuals in the same place
 	float basic_viral_release <- 3.0; //Viral load released in the environment by infectious individual
 	float basic_viral_decrease <- 0.33; //Value to decrement the viral load in the environment
 	

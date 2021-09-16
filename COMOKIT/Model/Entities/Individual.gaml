@@ -443,7 +443,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 				}
 				
 				if (not is_at_home or current_place.nb_households > 1) {
-					float proba_actual <- proba * reduction_coeff_all_buildings_inhabitants;
+					float proba_actual <- proba * reduction_coeff_all_buildings_individuals;
 					loop ag over: current_place.individuals {
 						if  flip(proba_actual){
 							do infect_someone(ag);
@@ -461,7 +461,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 						do infect_someone(succesful_contact);
 					}
 					if (current_place.nb_households > 1) {
-						proba <- proba * reduction_coeff_all_buildings_inhabitants;
+						proba <- proba * reduction_coeff_all_buildings_individuals;
 						loop succesful_contact over:  current_place.individuals where (flip(proba) and (each.state = susceptible))
 				 		{
 				 			do infect_someone(succesful_contact);
