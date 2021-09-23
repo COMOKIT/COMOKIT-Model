@@ -233,7 +233,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		else
 		{
 			//If the Individual is not infected, we check for true negative
-			if(viral_agent.flip_epidemiological_aspect(self, epidemiological_probability_true_negative))
+			if(original_strain.flip_epidemiological_aspect(self, epidemiological_probability_true_negative))
 			{
 				report_status <- tested_negative;
 				
