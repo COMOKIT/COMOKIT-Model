@@ -127,8 +127,11 @@ global {
 	float init_all_ages_parameter_2_viral_individual_factor <- 0.5; //Second parameter of distribution of the individual factor for beta and viral release
 	
 	// test prone
-	float init_all_ages_probability_true_positive <- 0.89; //Probability of successfully identifying an infected
-	float init_all_ages_probability_true_negative <- 0.92; //Probability of successfully identifying a non infected
+	// https://www.medrxiv.org/content/10.1101/2020.04.26.20080911v1.full
+	float init_all_ages_probability_true_positive <- 0.96; //Probability of successfully identifying an infected
+	// https://www.eurosurveillance.org/content/10.2807/1560-7917.ES.2020.25.50.2000568
+	// Higly dependant over time after symptom onsets but: "a false-negative test probability of 16.7%"
+	float init_all_ages_probability_true_negative <- 0.833; //Probability of successfully identifying a non infected
 	
 	// asympto
 	float init_all_ages_proportion_asymptomatic <- 0.3; //Proportion of asymptomatic infections
