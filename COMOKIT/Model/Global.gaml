@@ -128,8 +128,9 @@ global {
 				is_active <- false;
 			}
 		}
-		do console_output("Introduce "+num_infected_init+" infected cases");
-		ask num_infected_init among all_individuals { do define_new_case(original_strain); }
+		
+		do init_covid_cases();
+		do console_output("Introduce "+all_individuals count (each.is_infected)+" infected cases");
 		
 		total_number_individual <- length(all_individuals);
 
@@ -543,6 +544,13 @@ global {
 	 	vaccines <- ARNm + Adeno;
 	 	
 	 	do console_output("\tVaccines: "+vaccines collect (each.name)+" created ("+with_precision((machine_time-t)/1000,2)+"s)");
+	 }
+	 
+	 /*
+	  * Initialize sars-cov-2 infected agents at start
+	  */
+	 action init_covid_cases {
+	 	ask num_infected_init among all_individuals { do define_new_case(original_strain); }
 	 }
 	
 	// ------------- //
