@@ -91,7 +91,7 @@ species BiologicalEntity control:fsm{
 	//Immunity
 	map<virus,float> immunity;
 	//Infection history
-	map<virus,string> infection_history;
+	map<virus,map<date,string>> infection_history;
 	
 	// TRANSMISSION Variables
 	
@@ -407,7 +407,7 @@ species BiologicalEntity control:fsm{
 		
 		// If there is re-infection in the model, then move back to susceptible
 		transition to:susceptible when:clinical_status != dead and allow_reinfection {
-			infection_history[viral_agent] <- clinical_status;
+			infection_history[viral_agent] <+ current_date::clinical_status;
 			viral_agent <- nil;
 			is_susceptible <- false;
 			// TODO : all epidemiological variable should be reset 

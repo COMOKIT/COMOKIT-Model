@@ -220,6 +220,8 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			if(viral_agent.flip_epidemiological_aspect(self, epidemiological_probability_true_positive))
 			{
 				report_status <- tested_positive;
+				infection_history[viral_agent] <+ current_date::report_status; // Keep track of reported true positive
+				
 				if(is_already_positive=false){
 					is_already_positive <- true;
 					total_number_reported <- total_number_reported+1;
@@ -241,12 +243,15 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			else
 			{
 				report_status <- tested_positive;
+				infection_history[nil] <- map(current_date::"False positive");
+				
 				if(is_already_positive=false){
 					is_already_positive <- true;
 					total_number_reported <- total_number_reported+1;
 				}
 			}
 		}
+		
 		last_test <- cycle;
 	}
 	
@@ -284,11 +289,14 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			{
 				add 1 to: total_incidence_age at: self.age;
 			}
-			//Add the activity done while being infected
-			infected_when <- last_activity; 
 			
+			// Add the activity done while being infected
+			infected_when <- last_activity; 
 			// Infected by
 			viral_agent <- infectious_agent;
+			// Start history of the infetion
+			infection_history[infectious_agent] <- map(current_date::INFECTED); 
+			 
 			do initialise_disease;
 			
 			return true;
