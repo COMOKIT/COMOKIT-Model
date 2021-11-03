@@ -36,15 +36,39 @@ global {
 	//define a lockdown policy for num_days number of days starting at cycle 0 - the individual has a probability "tolerance" to carry out their activity in spite of the lockdown (only acitivity allowed: stay at home)
 	action define_policy{
 		ask Authority {
+			name <- "No containment policy";
+			policy <- create_no_containment_policy();
+		}
+		/*ask Authority {
 			if (num_days > 0) {
 				policy <- with_tolerance(create_lockdown_policy_except([act_home]),tolerance); 
 				policy <- during(policy, num_days); 
 			}
-		}
+		}*/
 	}
 
 }
 
+experiment "all data" parent: "Abstract Experiment" autorun: true{
+	action _init_ {
+		create simulation with:(
+			load_activity_precomputation_from_file: true, //if true, load file (in the generated folder) for the population, agenda, and activity precomputation.
+			use_activity_precomputation:true, //if true, used the precomputation mode
+			nb_weeks_ref:1, // number of different weeks precomputated - agents are going to always use them - increasing this value requires to recompute the building activity file (see Utilities/Generate activity precomputation)
+			udpate_for_display:false, // if true, make some additional computations to be able to display movement of people (color of buildings)
+			file_activity_with_policy_precomputation_path:nil, //precomputed activity file used when the policy is not applied
+			file_activity_without_policy_precomputation_path:"activity_without_policy_precomputation", //precomputed activity  file used when the policy is applied
+			num_infected_init: 20 //init number of infected individuals
+		);
+	}
+	
+	/*output {
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
+		
+		display "Main" refresh: display_map ? true : false parent: default_display {}
+		display "Plot" parent: states_evolution_chart {}	
+	}*/
+}
 experiment "Lockdown" parent: "Abstract Experiment" autorun: true{
 	action _init_ {
 		create simulation with:(
@@ -58,10 +82,10 @@ experiment "Lockdown" parent: "Abstract Experiment" autorun: true{
 		);
 	}
 	
-	output {
+	/*output {
 		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
 		
 		display "Main" refresh: display_map ? true : false parent: default_display {}
 		display "Plot" parent: states_evolution_chart {}	
-	}
+	}*/
 }

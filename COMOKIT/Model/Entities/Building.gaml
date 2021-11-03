@@ -43,12 +43,17 @@ global {
 		loop v over: buildings_per_activity.values {
 			v >> nil;
 		}
+		
+		
 		return buildings_per_activity;
 	}
 	
 }
 
-species Building {
+species Building  {
+	int id;
+	int index_bd;
+	string zone_id;
 	//Viral load of the building
 	map<virus,float> viral_load <- [original_strain::0.0];
 
@@ -66,6 +71,7 @@ species Building {
 	list<list<list<list<list<Individual>>>>> entities_inside;
 	list<Individual> indiviudals;
 	int nb_currents  update: use_activity_precomputation and udpate_for_display ?  length(entities_inside[current_week][current_day][current_hour] accumulate each) : 0;
+	bool has_virus <- false;
 	
 	init {
 		if (fcts != nil) {
@@ -91,6 +97,7 @@ species Building {
 		if(allow_transmission_building)
 		{
 			viral_load[v] <- min(1.0,viral_load[v]+value);
+			has_virus <- true;
 		}
 	}
 	
@@ -100,9 +107,10 @@ species Building {
 	}
 
 	//Action to update the viral load (i.e. trigger decreases)
-	reflex update_viral_load when: allow_transmission_building{
+	reflex update_viral_load when: allow_transmission_building and has_virus{
 		float start <- BENCHMARK ? machine_time : 0.0;
 		loop v over:viral_load.keys {viral_load[v] <- max(0.0,viral_load[v] - basic_viral_decrease/nb_step_for_one_day);}
+		has_virus <- viral_load.values one_matches (each > 0);
 		if BENCHMARK {bench["Building.update_viral_load"] <- bench["Building.update_viral_load"] + machine_time - start; }
 	}
 	
@@ -112,7 +120,7 @@ species Building {
 	}
 	
 	//Reflex to update disease cycle
-	reflex transmission_building when: allow_transmission_building and use_activity_precomputation and viral_load.values one_matches (each > 0) {
+	reflex transmission_building when: allow_transmission_building and use_activity_precomputation and has_virus {
 		float start <- BENCHMARK ? machine_time : 0.0;
 		ask individuals {
 			loop v over: current_place.viral_load.keys {
@@ -158,9 +166,9 @@ species outside parent: Building {
 	//Reflex to trigger infection when outside of the commune
 	reflex transmission_outside when: use_activity_precomputation{
 		float start <- BENCHMARK ? machine_time : 0.0;
-		loop i over: entities_inside[current_week][current_day][current_hour] accumulate each {
+		/*loop i over: entities_inside[current_week][current_day][current_hour] accumulate each {
 			do outside_epidemiological_dynamic(i);	
-		}
+		}*/
 		if BENCHMARK {bench["Building.transmission_outside"] <- bench["Building.transmission_outside"] + machine_time - start;}
 	}
 	

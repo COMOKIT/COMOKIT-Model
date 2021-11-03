@@ -129,6 +129,8 @@ global {
 			}
 		}
 		
+		write sample(all_individuals count each.is_active);
+		
 		do init_covid_cases();
 		do console_output("Introduce "+all_individuals count (each.is_infected)+" infected cases");
 		
@@ -144,7 +146,7 @@ global {
 		firsts <- false;
 	}
 	
-	reflex end when:cycle > 24 and (all_individuals count (each.is_susceptible or (each.state = removed))) = length(all_individuals) {
+	reflex end when: cycle > 24 and (all_individuals count (each.is_susceptible or (each.state = removed))) = length(all_individuals) {
 		write "nb cycle: " + cycle;
 		write "time tot: " + (machine_time - t_ref);
 		write "time cycle: " + (machine_time - t_ref2) / cycle;
@@ -571,7 +573,7 @@ global {
 	// ----- //
 	
 	// Global debug mode to print in console all messages called from #console_output()
-	bool DEBUG <- false;
+	bool DEBUG <- true;
 	list<string> levelList const:true <- ["trace","debug","warning","error"]; 
 	// the available level of debug among debug, error and warning (default = debug)
 	string LEVEL init:"debug" among:["trace","debug","warning","error"];
@@ -593,7 +595,7 @@ global {
 	// BENCHMARK //
 	// --------- //
 	
-	bool BENCHMARK <- false;
+	bool BENCHMARK <- true;
 	
 	map<string,float> bench <- [
 		"Abstract Batch Experiment.observerPattern"::0.0,
@@ -611,5 +613,9 @@ global {
 		"Individual.add_to_hospitalised"::0.0,
 		"Individual.add_to_ICU"::0.0
 	];
+	
+	reflex benchmark_info when: every(10#cycle) {
+		write bench;
+	}
 
 }

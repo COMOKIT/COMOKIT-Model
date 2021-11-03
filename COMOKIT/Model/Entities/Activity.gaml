@@ -19,12 +19,20 @@ global {
 	// A map of all possible activities
 	map<string, Activity> Activities;
 	
+	list<string> activities_to_remove;
 	action create_activities {
 		
 		// Create one Activity agent for each species inheriting from Activity
 		loop s over: Activity.subspecies { 
 			create s returns: new_activity;
-			Activities[first(new_activity).name] <- Activity(first(new_activity)) ;
+			Activity act <- Activity(first(new_activity));
+			if act != nil and (empty(activities_to_remove) or not (act.name in activities_to_remove)) {
+				Activities[act.name] <- act ;
+			} else {
+				ask act {do die;}
+			}
+			
+			
 		}
 		
 		// Local variable sorting all the Building agents given their type
@@ -201,7 +209,7 @@ global {
 	
 }
 
-species Activity {
+species Activity frequency: 0{
 	list<string> types_of_building <- [];
 	map<string,list<Building>> buildings;
 	
@@ -210,10 +218,18 @@ species Activity {
 		if not empty(i.activity_fellows ) {
 			Individual fellow <- i.activity_fellows first_with (each.last_activity = self);
 			if (fellow!= nil) {
+				if BENCHMARK { 
+					bench["Activity."+ name+ ".find_target"] <- (bench contains_key ("Activity."+ name+ ".find_target") ? 
+					bench[("Activity."+ name+ ".find_target") ] : 0.0) + machine_time - start;
+				}
 				return [fellow.current_place::[]];
 			} 
 		}
 		if flip(proba_go_outside) {
+			if BENCHMARK { 
+					bench["Activity."+ name+ ".find_target"] <- (bench contains_key ("Activity."+ name+ ".find_target") ? 
+					bench[("Activity."+ name+ ".find_target") ] : 0.0) + machine_time - start;
+				}
 			return [the_outside::[]];
 		}
 		
@@ -221,16 +237,18 @@ species Activity {
 		list<Building> bds <- buildings[type];
 		
 		if (empty(bds)) { return [the_outside::[]]; }	
-		if BENCHMARK { 
-			bench["Activity.find_target"] <- (bench contains_key "Activity.find_target" ? 
-				bench["Activity.find_target"] : 0.0) + machine_time - start;
-		}
+	
 		switch choice_of_target_mode {
 			match closest {
 				return [bds closest_to i::[]];
 			}
 			match gravity {
-				return i.building_targets[self][type] as_map (each::[]);
+				map<Building,list<Individual>> targets <- i.building_targets[self][type] as_map (each::[]);
+				if BENCHMARK { 
+					bench["Activity."+ name+ ".find_target"] <- (bench contains_key ("Activity."+ name+ ".find_target") ? 
+					bench[("Activity."+ name+ ".find_target") ] : 0.0) + machine_time - start;
+				}
+				return targets;
 			}
 			match random {
 				return (nb_candidates among bds) as_map(each::[]);

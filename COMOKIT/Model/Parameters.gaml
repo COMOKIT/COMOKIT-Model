@@ -25,11 +25,13 @@ global {
 	string datasets_folder_path; // The path from root project to the data set folder (can contains several case studies)
 	// Default dataset management
 	list<string> EXCLUDED_CASE_STUDY_FOLDERS_NAME <- ["Test Generate GIS Data"] const:true;
-	string DEFAULT_CASE_STUDY_FOLDER_NAME <- "Ben Tre" const: true;
+	string DEFAULT_CASE_STUDY_FOLDER_NAME <-"Ben Tre" const: true;
 	string DEFAULT_DATASETS_FOLDER_NAME <- "Datasets"  const: true;
 	// The actual dataset path
 	string dataset_path <- build_dataset_path();
 	
+	
+	bool parallel_computation <- false;
 	// precomputation parameters
 	bool use_activity_precomputation <- false; //if true, use precomputation model
 	bool udpate_for_display <- false; // if true, do some additional computation only for display purpose
@@ -266,6 +268,7 @@ global {
 		+"Building type per activity type.csv"; //File for the parameters
 	
 	string choice_of_target_mode <- gravity among: ["random", "gravity","closest"]; // model used for the choice of building for an activity 
+	int limitation_of_candidates <- -1; //  number of buildings considered (-1 = all buildings)
 	int nb_candidates <- 4; // number of building considered for the choice of building for a particular activity
 	float gravity_power <- 0.5;  // power used for the gravity model: weight_of_building <- area of the building / (distance to it)^gravity_power
 	
@@ -299,7 +302,8 @@ global {
 	
 	float proba_work_outside <- 0.0; //proba for an individual to work outside the study area
 	float proba_go_outside <- 0.0; //proba for an individual to do an activity outside the study area 
-	
+	int min_age_obligatory_school <- 3; //age from which children have to go to school
+	float proba_kindergarden <- 0.1; //proba for an children to go to kindergarden
 	//Activity parameters
 	float building_neighbors_dist <- 500 #m; //used by "visit to neighbors" activity (max distance of neighborhood).
 	
