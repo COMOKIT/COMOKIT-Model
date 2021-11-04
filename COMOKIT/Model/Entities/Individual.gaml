@@ -179,30 +179,29 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	}
 	
 	//Initialiase social network of the agents (colleagues, friends)
-	action initialise_social_network(map<Building,list<Individual>> working_places, map<Building,list<Individual>> schools, map<int,list<Individual>> ind_per_age_cat) {
-		
+	action initialise_social_network(map<Building,list<Individual>> working_places, map<Building,map<int,list<Individual>>> schools, map<int,list<Individual>> ind_per_age_cat) {
 		int nb_friends <- max(0,round(gauss(nb_friends_mean,nb_friends_std)));
 		loop i over: ind_per_age_cat.keys {
 			if age < i {
 				friends <- nb_friends among ind_per_age_cat[i];
-				friends <- friends - self;
+				friends >> self;
 				break;
 			}
 		}
 		
 		if (working_place != nil) {
-			int nb_colleagues <- max(0,int(gauss(nb_work_colleagues_mean,nb_work_colleagues_std)));
+			int nb_colleagues <-int(gauss(nb_work_colleagues_mean,nb_work_colleagues_std));
 			if nb_colleagues > 1 {
 				colleagues <- nb_colleagues among working_places[working_place];
-				colleagues <- colleagues - self;
+				colleagues >> self;
 			}
 		} 
 		if (school != nil) {
-			int nb_classmates <- max(0,int(gauss(nb_classmates_mean,nb_classmates_std)));
+			int nb_classmates <- int(gauss(nb_classmates_mean,nb_classmates_std));
 			if nb_classmates > 1 {
 				//colleagues <- nb_classmates among ((schools[school] where ((each.age >= (age -1)) and (each.age <= (age + 1))))- self);
-				colleagues <- nb_classmates among schools[school];
-				colleagues <- colleagues - self;
+				colleagues <- nb_classmates among schools[school][age];
+				colleagues >> self;
 			}
 		}
  	}
