@@ -61,7 +61,7 @@ info "Release: $release"
 echo "=============== $platform build ==============="
 
 # Download GAMA
-GAMA=$(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/$gama | grep "with_JDK" | grep $platform | grep https | cut -d ':' -f 2,3 | tr -d \")
+GAMA=$(curl -s https://api.github.com/repos/gama-platform/gama/releases/tags/$gama | grep "with_JDK" | grep $platform | grep https | grep zip | cut -d ':' -f 2,3 | tr -d \")
 info "Downloading GAMA from:"
 info "GAMA: $GAMA"
 curl -o gama-$platform.zip -fSL $GAMA
