@@ -128,7 +128,8 @@ species Room parent: AbstractPlace {
 	
 	aspect default {
 		if (display_room_status) {
-			draw shape color: blend(#red, #green, min(1,viral_load*coeff_visu_virus_load_room/(shape.area)));
+			// TODO: viral_load is now a map
+			draw shape color: blend(#red, #green, min(1,viral_load[original_strain]*coeff_visu_virus_load_room/(shape.area)));
 		}
 		if (type in [ELEVATOR, STAIRWAY]) {
 			draw shape color: rgb(#yellow, 0.5);
@@ -402,12 +403,14 @@ species RoomEntrance {
 	}
 }
 
-grid unit_cell parent: AbstractPlace cell_width: unit_cell_size cell_height: unit_cell_size neighbors: 8 schedules: unit_cell where (each.viral_load > 0) {
+// TODO: viral_load is now a map
+grid unit_cell parent: AbstractPlace cell_width: unit_cell_size cell_height: unit_cell_size neighbors: 8 schedules: unit_cell where (each.viral_load[original_strain] > 0) {
 	bool allow_transmission -> {allow_local_transmission};
 	float viral_decrease -> {basic_viral_local_decrease_per_day };
 	aspect default{
 		if (display_infection_grid){
-			 draw shape color:blend(#green, #red, 1 - (coeff_visu_virus_load_cell * viral_load))  ;	
+			//TODO: viral_load is now a map
+			draw shape color:blend(#green, #red, 1 - (coeff_visu_virus_load_cell * viral_load[original_strain]))  ;	
 		}
 	}
 }

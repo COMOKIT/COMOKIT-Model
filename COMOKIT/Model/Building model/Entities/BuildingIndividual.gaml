@@ -53,7 +53,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 	
 	init {
 		is_outside <- true;
-		do initialise_epidemio;
+		do initialise_epidemiological_behavior;
 	
 		pedestrian_species <- [BuildingIndividual];
 		obstacle_species <- [BuildingIndividual, Wall];
@@ -163,19 +163,18 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		float start <- BENCHMARK ? machine_time : 0.0;
 		if(allow_air_transmission and (not is_infected)and(self.current_room!=nil))
 		{
-			if(flip(current_room.viral_load*successful_contact_rate_building/ (current_room.shape.area * current_room.ceiling_height)))
+			// TODO: viral_load is now a map, but idk how to properly update these formula
+			if(flip(current_room.viral_load[original_strain]*successful_contact_rate_building/ (current_room.shape.area * current_room.ceiling_height)))
 			{
-				infected_by <- current_place;
-				do define_new_case();
+				infectious_contacts_with[current_place] <- define_new_case(original_strain);
 			}
 		}
 		if(allow_local_transmission and (not is_infected))
 		{
 			unit_cell current_cell <- unit_cell(location);
-			if(flip(current_cell.viral_load*successful_contact_rate_building))
+			if(flip(current_cell.viral_load[original_strain]*successful_contact_rate_building))
 			{
-				infected_by <- current_place;
-				do define_new_case();
+				infectious_contacts_with[current_place] <- define_new_case(original_strain);
 			}
 		}
 		do update_wear_mask();

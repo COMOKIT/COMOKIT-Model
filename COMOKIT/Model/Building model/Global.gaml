@@ -215,7 +215,6 @@ global {
 		point world_center <- {world_w / 2, world_h / 2};
 		loop floor_name over: floor_dirs {
 			shape_file rooms_shape_file <- shape_file("../../Datasets/" + floor_name + "/rooms.shp");
-			shape_file entrances_shape_file <- shape_file("../../Datasets/" + floor_name + "/entrances.shp");
 			shape_file walls_shape_file <- shape_file("../../Datasets/" + floor_name + "/walls.shp");
 			shape_file pedestrian_path_shape_file <- shape_file("../../generated/" + floor_name + "/pedestrian_paths.shp");
 			shape_file free_spaces_shape_file <- shape_file("../../generated/" + floor_name + "/free_spaces.shp");
@@ -289,4 +288,9 @@ global {
 	reflex end_simulation when: current_date >= final_date {
 		do pause;	
 	}
+
+	// Disable these reflexes inherited from parent Global.gaml 
+	reflex end when: false {}
+	
+	reflex benchmark_info when: false {}
 }

@@ -18,9 +18,9 @@ import "Entities/Hospital Individuals.gaml"
 
 global {
 	action create_recurring_people {
-		create Doctor number: 5;
-		create Nurse number: 20;
-		create Inpatient number: 40;
+		create Doctor number: 10;
+		create Nurse number: 40;
+		create Inpatient number: 80;
 		create Visitor number: 1;
 	}
 }

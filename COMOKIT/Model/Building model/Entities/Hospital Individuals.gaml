@@ -117,7 +117,7 @@ species Nurse parent: BuildingIndividual {
 	map<date, BuildingActivity> get_daily_agenda {
 		map<date, BuildingActivity> agenda;
 		
-		date arriving_time <- date("05:30", TIME_FORMAT_STR);// + rnd(arrival_time_interval);
+		date arriving_time <- date("05:30", TIME_FORMAT_STR) + rnd(arrival_time_interval);
 		// Daily meeting
 		date meeting_time <- date("06:00", TIME_FORMAT_STR);
 		if arriving_time >= meeting_time {
