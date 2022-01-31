@@ -15,9 +15,9 @@ model CoVid19
 
 import "Individual.gaml"
 
-
 species AbstractPolicy virtual: true {
 	int max_number_individual_group <- int(#max_int);
+	list<Individual> targeted_individuals <- list(all_individuals);
 	
 	bool is_active {
 		return true;
@@ -172,12 +172,10 @@ species PartialPolicy parent: ForwardingPolicy {
 	float tolerance; // between 0 (no tolerance) and 1.0
 	
 	bool is_allowed (Individual i, Activity activity) {
-		bool allowed <- super.is_allowed(i, activity);
-		if (!allowed) {
-			allowed <- flip(tolerance);
+		if flip(tolerance) {
+			return true;
 		}
-
-		return allowed;
+		return super.is_allowed(i, activity);
 	}
 
 }
@@ -244,6 +242,46 @@ species AllowedIndividualsPolicy parent: ForwardingPolicy {
 		}
 	}
 
+}
+
+/*
+ * Abstract method to limit the targeted population of a policy  
+ */
+species GroupTargetPolicy parent: ForwardingPolicy {
+	
+	action apply {
+		if empty(targeted_individuals) { targeted_individuals <- targeted_individuals();}
+		invoke apply();
+	}
+	
+	list<Individual> targeted_individuals virtual:true {}
+	
+}
+
+//Target a sub-set of individuals based on an age range (age_range)
+species AgeTargetPolicy parent:GroupTargetPolicy {
+	point age_range;
+	list<Individual> targeted_individuals  { return all_individuals where (not(each.clinical_status!=dead) and age_range.x <= each.age and each.age <= age_range.y);}	
+}
+
+//Target a sub-set of individuals based on their epidemiological states
+species StateTargetPolicy parent:GroupTargetPolicy {
+	list<string> states;
+	
+	list<string> hidden_states <- [latent, presymptomatic, asymptomatic]; 
+	bool real_state <- false;
+	float test_time_frame <- #week;
+	
+	list<Individual> targeted_individuals  {
+		if not(real_state) and states one_matches ([latent, presymptomatic, asymptomatic] contains each) {
+			list<string> current_hidden_states <- [latent, presymptomatic, asymptomatic] where (states contains each);
+			list<string> current_observable_states <- states - current_hidden_states;
+			return all_individuals where (current_observable_states contains each.state or 
+				(each.last_test*step < test_time_frame and current_hidden_states contains each.state));
+		}  else {
+			return all_individuals where (states contains each.clinical_status);
+		}
+	}
 }
 
 /**
@@ -331,6 +369,79 @@ species DetectionPolicy parent: AbstractPolicy {
 	}
 
 }
+
+/**
+ * Vax policy 
+ */
+ species VaxPolicy parent:AbstractPolicy {
+
+	covax v; 	
+	
+	int remaining_doses;
+	int pending_doses;
+	
+ 	float nb_vax_per_step;
+ 	
+ 	map<int,list<Individual>> schedule;
+ 	
+ 	action apply {
+ 		
+ 		int remaining_vax <- int(nb_vax_per_step) + (flip(nb_vax_per_step-int(nb_vax_per_step))?1:0);
+ 		
+ 		if cycle = 0 {ask world {do console_output("Vax plan for "+myself.v.name+" with "+string(remaining_vax)+" doses this step and "+string(length(myself.targeted_individuals))+" vax target","VaxPolicy | Policy.gaml");}}
+ 		
+ 		// Start by scheduled vax
+ 		if schedule contains_key cycle {
+	 		loop i over:schedule[cycle] {
+	 			if pending_doses > 0 and remaining_vax > 0 { 
+	 				ask i {do vaccination(myself.v);} 
+	 				pending_doses <-  pending_doses - 1; 
+	 				remaining_vax <- remaining_vax - 1;
+	 			}
+	 		}
+ 		}
+ 		
+ 		// Try to spent remaining vax 
+ 		loop times:remaining_vax {
+ 			
+ 			// Find relevant individual
+ 			list<Individual> targets <- targeted_individuals - schedule accumulate (each);
+ 			
+ 			// Pick one and...
+ 			Individual i <- any(targets);
+ 			
+ 			ask world {do console_output("Trying to vaccine "+i+"("+sample(i.vax_willingness)+") with "+myself.v,"VaxPolicy.apply",first(levelList));}
+ 			
+ 			// she/he is not an antivax, proceed to vaccination 
+ 			if flip(i.vax_willingness) {
+ 				
+ 				int dose_nb;
+ 				ask i {dose_nb <- vaccination(myself.v);} 
+ 				remaining_doses <-  remaining_doses - 1;
+ 				
+ 				// If it is not last doses
+ 				if dose_nb <= length(v.vax_schedul) {
+ 					
+ 					// Randomly find a date corresponding to vax posology
+ 					pair<float,float> next_vax_sched <- v.vax_schedul[dose_nb-1]; 
+ 					float next_vax_time <- rnd(next_vax_sched.key, next_vax_sched.value);
+ 					int scheduled_cycle <- int(cycle+next_vax_time/step); 
+ 					
+ 					// Schedul future appointment
+ 					if schedule contains_key scheduled_cycle { schedule[scheduled_cycle] <+ i;}
+ 					else {schedule[scheduled_cycle] <- [i];}
+ 					remaining_doses <- remaining_doses - 1;
+ 					pending_doses <- pending_doses + 1; 
+ 				}
+ 			}
+ 		}
+ 		
+ 	}
+ 	
+ 	bool is_allowed (Individual i, Activity activity) { return true; }
+ 	
+ }
+ 
 
 /**
  * The policy used to use hospitals for cure  */

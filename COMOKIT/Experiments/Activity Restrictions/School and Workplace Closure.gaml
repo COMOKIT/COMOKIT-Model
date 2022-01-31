@@ -35,7 +35,7 @@ global {
 	}
 	
 	list<bool> ask_closures {
-		map res <- user_input("Select closure politics: ", [enter("School closure",true),enter("Workplace closure",true)]);
+		map res <- user_input_dialog("Select closure politics: ", [enter("School closure",true),enter("Workplace closure",true)]);
 		return list<bool>(res["School closure"],res["Workplace closure"]);
 	}
 		

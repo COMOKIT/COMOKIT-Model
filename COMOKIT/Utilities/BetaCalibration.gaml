@@ -20,6 +20,7 @@ global {
 		if _contact_tracking {
 			do before_init;
 			do init_epidemiological_parameters;
+			do init_sars_cov_2;
 			do global_init;
 			do create_authority;
 			do after_init;
@@ -27,26 +28,27 @@ global {
 			world.shape <- square(1000#m);
 			do init_pseudo_outbreak;
 		}
+		if viral_agent=nil {viral_agent <- sarscov2(original_strain);}
 	}
 	
 	action create_uniform_indiv {
 		create pseudo_individual number:noi
 		{
 			age <- rnd(max_age);
-			do initialise_epidemio;
 		}
 	}
 	
 	action create_realistic_indiv {
 		do read_mapping();
-		create pseudo_individual from:csv_population with:[age::convert_age(get(age_var))] {
-			do initialise_epidemio;
-		}
+		create pseudo_individual from:csv_population with:[age::convert_age(get(age_var))];
 	}
 	
-	/**************/
+	/******************/
 	/* PARAMETERS */
-	/**************/
+	/******************/
+	
+	// Studied strain of the virus
+	sarscov2 viral_agent;
 	
 	// Expected R0 for both estimation and calibration of beta value
 	float target_R0 <- 2.7 min:0.1;
@@ -113,7 +115,7 @@ global {
 		ask indiv {
 			if is_at_home { 
 				contacts <- contacts + relatives count each.is_at_home; 
-				contacts <- contacts + (length(current_place.individuals)-contacts)*reduction_coeff_all_buildings_inhabitants;
+				contacts <- contacts + (length(current_place.individuals)-contacts)*reduction_coeff_all_buildings_individuals;
 			} else { 
 				contacts <- contacts + length(activity_fellows); 
 				contacts <- contacts + (length(current_place.individuals)-contacts)*reduction_coeff_all_buildings_individuals;
@@ -130,16 +132,13 @@ global {
 	float global_infectious_period {
 		float gip;
 		
-		map<int,int> demography;
-		ask all_individuals { 
-			if demography contains_key age {demography[age] <- demography[age]+1;}
-			else {demography[age] <- 1;}
-		}
-		
-		loop i over:demography.keys { 
-			float prop_ia <- float(map_epidemiological_parameters[i][epidemiological_proportion_asymptomatic][1]);
-			gip <- gip + get_infectious_period_symptomatic(i)*demography[i]*(1-prop_ia) +
-					get_infectious_period_asymptomatic(i)*demography[i]*prop_ia;
+		ask all_individuals {
+			if viral_agent.flip_epidemiological_aspect(self,epidemiological_proportion_asymptomatic) {
+				gip <-  gip +viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_infectious_period_asymptomatic); 
+			} else {
+				gip <- gip +  viral_agent.get_value_for_epidemiological_aspect(self, epidemiological_infectious_period_symptomatic);
+			}
+			 
 		}
 		
 		return gip/length(all_individuals);
@@ -163,7 +162,7 @@ global {
 	float _estimated_beta;
 	
 	// COMOKIT PARAMETERS
-	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
+	file csv_parameters <- file_exists(sars_cov_2_parameters)?csv_file(sars_cov_2_parameters):nil;
 	int num_infected_init <- 1;
 	bool load_epidemiological_parameter_from_file <- true;
 	
@@ -193,6 +192,7 @@ global {
 		
 		do create_authority;
 		do init_epidemiological_parameters;
+		do init_sars_cov_2;
 		
 		if init_from_contact_tracking and file_exists(output_folder+output_contact_tracking_file) {
 			csv_file contact_csv <- csv_file(output_folder+output_contact_tracking_file,true);
@@ -209,7 +209,11 @@ global {
 			_estimated_beta <- mean(estimated_betas);
 			
 			loop aYear from:0 to: max_age {
-				map_epidemiological_parameters[aYear][epidemiological_successful_contact_rate_human][1] <- string(_estimated_beta);
+				loop s over:[0,1]  {
+					loop c over:comorbidities_range {
+						original_strain.epidemiological_distribution[[AGE::aYear,SEX::s,COMORBIDITIES::c]][epidemiological_successful_contact_rate_human][1] <- string(_estimated_beta);
+					}
+				}
 			}
 			do console_output("-- estimated beta is "+_estimated_beta,string(self));
 		} else if actual_contact_rate=0 {

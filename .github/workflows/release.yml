@@ -1,0 +1,35 @@
+name: Stable Relase
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build for Linux
+        run: bash mkrelease.sh --platform Linux --gama 1.8.2
+
+      - name: Build for Mac
+        run: bash mkrelease.sh --platform Mac --gama 1.8.2
+
+      - name: Build for Windows
+        run: bash mkrelease.sh --platform Win --gama 1.8.2
+
+      - name: Build standalone model files
+        run: zip COMOKIT-Model.zip -r COMOKIT
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "stable"
+          prerelease: false
+          title: "COMOKIT Stable version"
+          files: |
+            COMOKIT-Linux.zip
+            COMOKIT-Mac.zip
+            COMOKIT-Win.zip
+            COMOKIT-Model.zip

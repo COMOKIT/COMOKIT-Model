@@ -13,8 +13,9 @@
 
 model CoVid19
 
-import "Entities/Building.gaml"
-import "Parameters.gaml"
+//import "Entities/Building.gaml"
+//import "Parameters.gaml"
+import "Global.gaml"
 
 /*
  * All functions to initialize demographic attribute of the agent. It feature two type of initialization:
@@ -131,10 +132,10 @@ global {
 			if not(age_map=nil) and not(empty(age_map)) {
 				if age_map contains_key input { return rnd(first(age_map[input]),last(age_map[input])); }
 			} else {
-				if int(input) is int { return int(input); }
+				if int(input) is int { return float(input); }
 			}
 		} 
-		return _get_age();
+		return float(_get_age());
 	}
 	
 	// Convert SP encoded gender into gama model specification (0=men, 1=women)
@@ -232,8 +233,8 @@ global {
 		
 		loop hh over:hhs {
 			Building homeplace <- any(avlb_homes); // Uniform distribution | should we take HH size vs size of the building ?
-			
-			ask hh { home <- homeplace; relatives <- hh - self; }
+			ask hh { home <- homeplace; relatives <- hh - self; 
+			}
 			avlb_homes >- homeplace;
 			
 			if empty(avlb_homes) {avlb_homes <- copy(homeplaces);} // Reset available homeplace to be every home
@@ -275,8 +276,7 @@ global {
 			}
 		}
 		list<list<Individual>> households;
-		
-		ask homes {
+		ask homes parallel: parallel_computation{
 			loop times: nb_households {
 				list<Individual> household;
 				if flip(proba_active_family) {
@@ -392,10 +392,17 @@ global {
 	 * - nb_classmates_std :: standard deviation of the number of classmates per individual  </br>
 	 * 
 	 */
+	 
 	action create_social_networks(int min_student_age, int max_student_age) {
 		map<Building, list<Individual>> WP<- (all_individuals where (each.working_place != nil)) group_by each.working_place;
 		map<Building, list<Individual>> Sc<- (all_individuals where (each.school != nil)) group_by each.school;
-		list<int> age_cat <- [min_age_for_evening_act,min_student_age,max_student_age,
+		
+		map<Building, map<int,list<Individual>>> Scs;
+		loop bd over: Sc.keys {
+			list<Individual> inds <- Sc[bd];
+			Scs[bd] <- inds group_by each.age;
+		}
+		list<int> age_cat <- [5, 10, min_age_for_evening_act,min_student_age,max_student_age, 35, 50,
 			retirement_age, max_age] sort (each);
 		map<int,list<Individual>> ind_per_age_cat <- age_cat as_map (each::[]);
 		
@@ -407,7 +414,19 @@ global {
 				}  
 			}
 		}
-		ask all_individuals { do initialise_social_network(WP, Sc,ind_per_age_cat); }
+		int cpt;
+		ask all_individuals  parallel:parallel_computation{ 
+			cpt <- cpt + 1;
+			if cpt mod (length(all_individuals)/100) = 0 {
+				ask world {do console_output("" + (cpt*100.0/length(all_individuals))+ " processed" );}
+			}
+			 
+			do initialise_social_network(WP, Scs,ind_per_age_cat);
+			 
+			
+		}
+		
+		
 	}
 	
 	// ------------------------------------------------------- //
@@ -428,7 +447,7 @@ global {
 			error "There is no "+(empty(working_places)?"working place ":"school ")+" to bind agent with";
 		}
 		 
-		ask all_individuals {
+		ask all_individuals parallel: parallel_computation {
 			last_activity <-first(staying_home);
 			do enter_building(home);
 			if (age >= min_student_age) {
@@ -564,7 +583,7 @@ global {
 		ask active_people {
 			
 			loop_nb <- loop_nb+1;
-			if loop_nb mod (nb_active_people/10) = 0 {
+			if loop_nb mod (nb_active_people/100) = 0 {
 				ask world {do console_output(" || "+(loop_nb*1.0/nb_active_people)+" processed in "
 					+(machine_time-t)/1000+"s","synthetic population.gaml",first(levelList)
 				);}
@@ -581,13 +600,13 @@ global {
 				loop i over: ([1,2,3,4,5,6,7] - non_working_days) {
 					map<int,pair<Activity,list<Individual>>> agenda_day <- agenda_week[i - 1];
 					list<Activity> possible_activities <- empty(friends) ? possible_activities_without_rel : possible_activities_tot;
-					int current_hour;
+					int current_hour_;
 					if (age < max_student_age) {
-						current_hour <- rnd(school_hours_begin_min,school_hours_begin_max);
-						agenda_day[current_hour] <- studying[0]::[];
+						current_hour_ <- rnd(school_hours_begin_min,school_hours_begin_max);
+						agenda_day[current_hour_] <- studying[0]::[];
 					} else {
-						current_hour <-rnd(work_hours_begin_min,work_hours_begin_max);
-						agenda_day[current_hour] <- working[0]::[];
+						current_hour_ <-rnd(work_hours_begin_min,work_hours_begin_max);
+						agenda_day[current_hour_] <- working[0]::[];
 					}
 					bool already <- false;
 					loop h from: lunch_hours_min to: lunch_hours_max {
@@ -598,67 +617,67 @@ global {
 					}
 					if not already {
 						if (flip(proba_lunch_outside_workplace)) {
-							current_hour <- rnd(lunch_hours_min,lunch_hours_max);
+							current_hour_ <- rnd(lunch_hours_min,lunch_hours_max);
 							int dur <- rnd(1,2);
 							if (not flip(proba_lunch_at_home) and (eating_act != nil) and not empty(eating_act.buildings)) {
 								list<Individual> inds <- max(0,gauss(nb_activity_fellows_mean,nb_activity_fellows_std)) among colleagues;
 								loop ind over: inds {
 									map<int,pair<Activity,list<Individual>>> agenda_day_ind <- ind.agenda_week[i - 1];
-									agenda_day_ind[current_hour] <- eating_act::(inds - ind + self);
+									agenda_day_ind[current_hour_] <- eating_act::(inds - ind + self);
 									if (ind.age < max_student_age) {
-										agenda_day_ind[current_hour + dur] <- studying[0]::[];
+										agenda_day_ind[current_hour_ + dur] <- studying[0]::[];
 									} else {
-										agenda_day_ind[current_hour + dur] <- working[0]::[];
+										agenda_day_ind[current_hour_ + dur] <- working[0]::[];
 									}
 								}
-								agenda_day[current_hour] <- eating_act::inds ;
+								agenda_day[current_hour_] <- eating_act::inds ;
 							} else {
-								agenda_day[current_hour] <- staying_home[0]::[];
+								agenda_day[current_hour_] <- staying_home[0]::[];
 							}
-							current_hour <- current_hour + dur;
+							current_hour_ <- current_hour_ + dur;
 							if (age < max_student_age) {
-								agenda_day[current_hour] <- studying[0]::[];
+								agenda_day[current_hour_] <- studying[0]::[];
 							} else {
-								agenda_day[current_hour] <- working[0]::[];
+								agenda_day[current_hour_] <- working[0]::[];
 							}
 						}
 					}
 					if (age < max_student_age) {
-						current_hour <- rnd(school_hours_end_min,school_hours_end_max);
+						current_hour_ <- rnd(school_hours_end_min,school_hours_end_max);
 					} else {
-						current_hour <-rnd(work_hours_end_min,work_hours_end_max);
+						current_hour_ <-rnd(work_hours_end_min,work_hours_end_max);
 					}
-					agenda_day[current_hour] <- staying_home[0]::[];
+					agenda_day[current_hour_] <- staying_home[0]::[];
 					
 					already <- false;
-					loop h2 from: current_hour to: 23 {
+					loop h2 from: current_hour_ to: 23 {
 						if (h2 in agenda_day.keys) {
 							already <- true;
 							break;
 						}
 					}
 					if not already and (age >= min_age_for_evening_act) and flip(proba_activity_evening) {
-						current_hour <- current_hour + rnd(1,max_duration_lunch);
+						current_hour_ <- current_hour_ + rnd(1,max_duration_lunch);
 						Activity act <- myself.activity_choice(self, possible_activities);
-						int current_hour <- min(23,current_hour + rnd(1,max_duration_default));
-						int end_hour <- min(23,current_hour + rnd(1,max_duration_default));
+						current_hour_ <- min(23,current_hour_ + rnd(1,max_duration_default));
+						int end_hour <- min(23,current_hour_ + rnd(1,max_duration_default));
 						if (species(act) = Activity) {
-							list<Individual> cands <- friends where ((each.agenda_week[i - 1][current_hour]) = nil);
+							list<Individual> cands <- friends where ((each.agenda_week[i - 1][current_hour_]) = nil);
 							list<Individual> inds <- max(0,gauss(nb_activity_fellows_mean,nb_activity_fellows_std)) among cands;
 							loop ind over: inds {
 								map<int,pair<Activity,list<Individual>>> agenda_day_ind <- ind.agenda_week[i - 1];
-								agenda_day_ind[current_hour] <- act::(inds - ind + self);
+								agenda_day_ind[current_hour_] <- act::(inds - ind + self);
 								bool return_home <- true;
-								loop h from: current_hour + 1 to: end_hour {
+								loop h from: current_hour_ + 1 to: end_hour {
 									return_home <- agenda_day_ind[h] = nil;
 									if (not return_home) {break;}
 								}
 								if (return_home) {agenda_day_ind[end_hour] <- staying_home[0]::[];}
 								
 							}
-							agenda_day[current_hour] <- act::inds;
+							agenda_day[current_hour_] <- act::inds;
 						} else {
-							agenda_day[current_hour] <- act::[];
+							agenda_day[current_hour_] <- act::[];
 						}
 						agenda_day[end_hour] <- staying_home[0]::[];
 					}
@@ -701,7 +720,15 @@ global {
 		t <- machine_time;
 		
 		if (choice_of_target_mode = gravity) {
-			ask all_individuals {
+			do manage_gravity_model;
+			do console_output("-- gravity setup "+(machine_time-t)/1000+"s", "synthetic population.gaml");
+		
+		}
+				
+	}
+	
+	action manage_gravity_model {
+		ask all_individuals parallel: parallel_computation{
 				list<Activity> acts <- remove_duplicates((agenda_week accumulate each.values) collect each.key) inter list(Activity) ;
 				loop act over: acts {
 					map<string, list<Building>> bds;
@@ -727,10 +754,6 @@ global {
 				}
 			}
 			
-			do console_output("-- gravity setup "+(machine_time-t)/1000+"s", "synthetic population.gaml");
-		
-		}
-				
 	}
 	
 	Activity activity_choice(Individual ind, list<Activity> possible_activities) {
@@ -771,56 +794,472 @@ global {
 				}
 			}
 		}
-		int current_hour <- rnd(first_act_hour_non_working_min,first_act_hour_non_working_max);
+		int current_hour_ <- rnd(first_act_hour_non_working_min,first_act_hour_non_working_max);
 		loop times: num_activity {
-			if (current_hour in forbiden_hours) {
-				current_hour <- current_hour + 1;
-				if (current_hour > 22) {
+			if (current_hour_ in forbiden_hours) {
+				current_hour_ <- current_hour_ + 1;
+				if (current_hour_ > 22) {
 					break;
 				} 
 			}
 			
-			int end_hour <- min(23,current_hour + rnd(1,max_duration_default));
+			int end_hour <- min(23,current_hour_ + rnd(1,max_duration_default));
 			if (end_hour in forbiden_hours) {
-				end_hour <- forbiden_hours first_with (each > current_hour) - 1;
+				end_hour <- forbiden_hours first_with (each > current_hour_) - 1;
 			}
-			if (current_hour >= end_hour) {
+			if (current_hour_ >= end_hour) {
 				break;
 			}
 			Activity act <-activity_choice(current_ind, possible_activities);
 			if (species(act) = Activity) {
 				
-				list<Individual> cands <- current_ind.friends where ((each.agenda_week[day - 1][current_hour]) = nil);
+				list<Individual> cands <- current_ind.friends where ((each.agenda_week[day - 1][current_hour_]) = nil);
 				list<Individual> inds <- max(0,gauss(nb_activity_fellows_mean,nb_activity_fellows_std)) among cands;
-				ask world {do console_output(
-					current_ind.name + " : " + current_ind.age + " nb friends: " + length(current_ind.friends) 
-					+ " inds: "+ length(inds) + " friend age: "+ (current_ind.friends collect each.age),
-					caller::"Synthetic Population.gaml",level::"trace"
-				);}
 				loop ind over: inds {
 					map<int,pair<Activity,list<Individual>>> agenda_day_ind <- ind.agenda_week[day - 1];
-					agenda_day_ind[current_hour] <- act::(inds - ind + current_ind);
+					agenda_day_ind[current_hour_] <- act::(inds - ind + current_ind);
 					bool return_home <- true;
-					loop h from: current_hour + 1 to: end_hour {
+					loop h from: current_hour_ + 1 to: end_hour {
 						return_home <- agenda_day_ind[h] = nil;
 						if not (return_home) {break;}
 					}
 					if (return_home) {agenda_day_ind[end_hour] <- staying_home[0]::[];}
-					ask world {do console_output( 
-						"ind.agenda_week: " + day + " -> "+ ind.agenda_week[day - 1], 
-						caller::"Synthetic Population.gaml",level::"trace"
-					);}
 				}
-				agenda_day[current_hour] <- act::inds;
+				agenda_day[current_hour_] <- act::inds;
 			} else {
-				agenda_day[current_hour] <- act::[];
+				agenda_day[current_hour_] <- act::[];
 			}
 			agenda_day[end_hour] <- staying_home[0]::[];
-			current_hour <- end_hour + 1;
+			current_hour_ <- end_hour + 1;
 		}
 		current_ind.agenda_week[day-1] <- agenda_day;
 	}
 	
 	
+	action load_population_and_agenda_from_file {
+		create individual_species from: file(file_population_precomputation_path) returns: individuals;
+		map<string,Building> all_buildings_map <- all_buildings as_map (to_bd_id(each)::each);
+		ask individuals {
+			individual_id <- (string(shape get("id")));
+			household_id <- (string(shape get("h_id")));
+			is_unemployed <- bool(string(shape get("is_unempl")));
+			home <- all_buildings_map[string(shape get("home_id"))];
+			if (home = nil) {
+				write sample(name) +" -> " + sample(string(shape get("home_id")));
+			}
+			school <- all_buildings_map[string(shape get("school_id"))];
+			working_place <- all_buildings_map[string(shape get("wp_id"))];
+			relatives <- world.from_ids(string(shape get("rel_id")));
+			friends <- world.from_ids(string(shape get("friends_id")));
+			colleagues <- world.from_ids(string(shape get("col_id")));
+			last_activity <-first(staying_home);
+			activity_fellows <- relatives;
+			
+			do enter_building(home);
+		}
+		do load_agenda(individuals,all_buildings_map);
+		
+	} 
+	
+	action init_user_activity_precomputation {
+		ask all_buildings {
+			entities_inside  <- [];
+		}
+		loop times: nb_weeks_ref {
+			ask all_buildings {
+				list<list<list<list<Individual>>>> week_act <- [];
+				loop times: 7 {
+					list<list<list<Individual>>> day_act <- [];
+					loop times: 24 {
+						day_act << [];
+					}
+					week_act<<day_act; 
+				}
+				entities_inside << week_act;
+			}
+			ask all_individuals {
+				to_remove_if_actif <- [];
+				list<list<Building>> week_act <- [];
+				list<list<int>> week_act2 <- [];
+				loop times: 7 {
+					list<Building> day_act <- [];
+					list<int> day_act2 <- [];
+					
+					loop times: 24 {
+						day_act << nil;
+						day_act2 << 0;
+					}
+					week_act<<day_act; 
+					week_act2<<day_act2; 
+				}
+				index_building_agenda << week_act;
+				index_group_in_building_agenda << week_act2;
+			}
+			 	
+		}	
+	}
+	
+	
+	action load_activity_building(list<Individual> entities, map<string,Building> all_buildings_map, string file_activity_precomputation_path ) {
+		do init_user_activity_precomputation;
+		bool is_folder <- folder_exists(file_activity_precomputation_path);
+		int cpt <- 0;
+		list<string> files <- is_folder ? (folder(file_activity_precomputation_path) collect (file_activity_precomputation_path+"/" + each)): [file_activity_precomputation_path];
+		//float p1;float p2;float p3;float p4;float p5;float p6; float p7;float p8;float p9;
+		int  i_bd <- 0;
+		ask all_buildings {
+			index_bd <- i_bd;
+			i_bd <- i_bd +1;
+		}
+		loop fp over: files {
+		//	float t_t <- machine_time;
+			cpt <- cpt + 1;
+			write "" + cpt +"/" + length(files) +" ->"+ fp;
+			file ff <- file(fp);
+			//p1 <- p1 + machine_time - t_t;
+			// t_t <- machine_time;
+			loop line over: ff {
+				
+				if line != nil and not empty(line) {
+					float t_p <- machine_time;
+					list<string> l1 <- line split_with "|";
+					Building bd <- all_buildings_map[l1[0]];
+					//p3 <- p3 + machine_time - t_p;
+					//t_p <- machine_time;
+					if bd != nil { 
+					
+						loop ll1 over: l1[1] split_with "&" {
+							//float t <- machine_time;
+		
+							list<string> l2 <- ll1 split_with ";";
+							
+							int w <- int(l2[0]);
+							int d <- int(l2[1]);
+							int h <- int(l2[2]);
+							
+							int bd_ind <- bd.index_bd;//all_buildings index_of bd;
+							//p5 <- p5 + machine_time - t;
+							//t <- machine_time;
+				
+							loop l3 over: l2[3] split_with "$" {
+								if l3 != nil and not empty(l3) {
+									list<string> l33 <-  l3 split_with ",";
+									
+									list<Individual> inds <- [];
+									int index <- length(bd.entities_inside[w][d][h]);
+									//float tt <- machine_time;
+									loop l4 over: l33{
+										if l4 != nil and not empty(l4) {
+											Individual ind <- entities[int(l4)]; 
+											ind.index_building_agenda[w][d][h] <- bd ;
+											ind.to_remove_if_actif<<[bd_ind, w,d,h, index] ;
+											ind.index_group_in_building_agenda[w][d][h] <- index ;
+											inds << ind;
+											
+										}
+									}
+									//p6 <- p6 + machine_time - tt;
+									//tt <- machine_time;
+									if not empty(inds) {
+										bd.entities_inside[w][d][h] <<inds;
+									}
+									//p7 <- p7 + machine_time - tt;
+								}
+							}
+							//p8 <- p8 + machine_time - t;
+				
+				
+						}
+						
+					}
+					//p4 <- p4 + machine_time - t_p;
+				}
+			}
+			//p2 <- p2 + machine_time - t_t;
+			
+			//write sample(p1) + " " + sample(p2)+ " " + sample(p3)+ " " + sample(p4)+ " " + sample(p5)+ " " + sample(p6)+ " " + sample(p7)+ " " + sample(p8)+ " " + sample(p9);
+			
+		}
+		write "file loaded";
+		
+	}
+	
+	action load_agenda(list<Individual> individuals,map<string,Building> all_buildings_map) {
+		loop line over: file(file_agenda_precomputation_path) {
+			if "%%" in line {
+				list<string> l_pre <- line split_with "%%";
+				list<string> l <- l_pre[0] split_with "!!";
+				if (length(l) > 1) {
+					Individual ind <- individuals[int(l[0])];
+					list<map<int, pair<Activity,list<Individual>>>> week <- [];
+							
+					if (ind != nil) {
+						if (length(l_pre) > 1) and (l_pre[1] != nil){
+							ind.building_targets <- world.from_targets_id(l_pre[1], all_buildings_map);
+						}
+						loop d over: l[1] split_with "&&" {
+							if d != nil and not empty(d) {
+								map<int, pair<Activity,list<Individual>>> day <- [];
+								loop a over: d split_with "$$" {
+									if a != nil and not empty(a) {
+										list<string> act <- a split_with "@@";
+										Activity activity <- nil;
+										list<Individual> others <- [];
+										if ("," in act[1]) {
+											list<string> aa <- act[1] split_with ",";
+											activity <- Activities[aa[0]];
+											loop i from: 1 to: length(aa) - 1 {
+												others << individuals[int(aa[i])];
+											}
+										} else {
+											activity <- Activities[act[1]];
+											
+										}
+										if activity != nil {
+											pair<Activity,list<Individual>> to_add <- activity::others;
+											int h <- int(act[0]);
+											day[h] <- to_add;
+											
+										} else {
+											write sample(activity);
+										}
+									}
+								}
+								week << day;
+							} else {
+								week << [];
+							}
+						}
+						ind.agenda_week <- week;
+						if(length(ind.agenda_week) < 7) {
+							loop times: 7 - length(ind.agenda_week) {
+								ind.agenda_week << [];
+							}
+						}
+					}
+				}
+			}	
+		}
+	}
+	
+	map<Activity, map<string,list<Building>>> from_targets_id(string ids, map<string,Building> all_buildings_map ) {
+		map<Activity, map<string,list<Building>>> targets <- map([]);
+		if ids = nil or empty(ids) {return targets;}
+		list<string> acts <- ids split_with "$$";
+		loop a_id over: acts {
+			if a_id != nil and not empty(a_id) {
+				list<string> id_a <- (a_id split_with "!");
+				Activity act <- Activities[id_a[0]];
+				if (length(id_a) = 1) {
+					targets[act] <- [];
+					break;
+				}
+				map<string,list<Building>> map_types <- [];
+				list<string> id_a_s <- id_a[1] split_with "&&";
+				loop types over: id_a_s {
+					
+					list<string> tbd <- types split_with "@@";
+					string type <- tbd[0];
+					list<Building> bds <- [];
+					if ( length(tbd) > 1 and tbd[1] != nil and not empty( tbd[1])) {
+						loop bd over: tbd[1] split_with ",,"{
+							if (bd != nil and not empty(bd)) {
+								bds << all_buildings_map[bd];
+							}
+						}	
+					}
+					map_types[type] <- bds;
+				}
+				targets[act] <- map_types;
+			}
+		}
+		return targets;
+	}
+	
+
+	
+	list<Individual> from_ids(string ids) {
+		list<Individual> list_ind <- [];
+		if ids = nil or empty(ids) {return list_ind;}
+		loop id over: ids split_with "," {
+			list_ind << individual_species[int(id)];
+		}
+		return list_ind;
+	}
+	 
+	string to_bd_id(Building bd) {
+		if bd = nil {
+			return "";
+		}
+		return string(species(bd)) +"_"+ int(bd);
+	}
+	float t1;float t2;float t3;float t4;float t5;float t6;float t7;float t8;float t9;
+	map<Activity,float> time_act;
+	
+	action precompute_activities {
+		float t <- machine_time;
+		 do console_output( "precompute_activities start");
+		map<Building, int> to_index;
+		loop i from: 0 to: length(all_buildings) - 1 {
+			to_index[all_buildings[i]] <- i;
+		}
+		
+		ask all_individuals {
+			last_activity <- first(staying_home);
+			activity_fellows <- relatives;
+		}
+		int i <- 0;
+		ask individual_species {
+			id_int <- i;
+			i <- i + 1;
+		}
+
+		do init_user_activity_precomputation;
+		date date_ref <- copy(starting_date);
+		date date_end <- copy(date_ref) add_weeks nb_weeks_ref;
+		
+		t1 <- t1 + machine_time - t;
+		do console_output( "end of first step of precomputation: " + t1);
+		loop act over: Activities.values {
+			time_act[ act] <- 0.0;
+		}
+		ask experiment {do compact_memory;}
+		loop while: date_ref <= date_end {
+		 	float ttt <- machine_time;
+		 	do console_output( "Generate agenda for date: " + date_ref);
+			int w <- int((date_ref - starting_date) / #week);
+			if w > nb_weeks_ref {
+				
+				break;
+			}
+			int d <- date_ref.day_of_week - 1;
+			int h <- date_ref.hour;
+			int cpt <- 0;
+			list<int> ref_group;
+			loop times: length(individual_species) {ref_group<<-1;}
+			t2 <- t2 + machine_time - ttt;
+			ttt <- machine_time;
+			ask individual_species parallel: parallel_computation{
+				if (cpt mod int(length(individual_species)/100) = 0) {
+					ask world{ do console_output( "processing precomputation: " + int(cpt * 100 / length(individual_species))  + "% " +
+						sample(t1) +" " + sample(t2)+" " + sample(t3)+" " + sample(t4)+" " + sample(t5)+" " + sample(t6)+" " + sample(t7)+" " + sample(t8) +" " + sample(t9) +" " + sample(time_act)
+						
+					);}
+				}
+				float tttt <- machine_time;
+				pair<Activity, list<Individual>> act <- agenda_week[d][h];
+				if (act.key != nil) {
+					if (Authority[0].allows(self, act.key)) {
+						float tt <- machine_time;
+				
+						int nb_fellows <- Authority[0].limitGroupActivity(self, act.key) - 1;
+						if (nb_fellows > 0) {
+							activity_fellows <- nb_fellows among act.value;
+						} else {
+							activity_fellows <- [];
+						}
+					
+					if BENCHMARK { 
+										bench["Precompute_activity_fellows"] <- (bench contains_key "Precompute_activity_fellows" ? 
+											bench["Precompute_activity_fellows"] : 0.0) + machine_time - tttt;
+									}
+					t5 <- t5 + machine_time - tttt;
+					tttt <- machine_time;
+				
+						map<Building, list<Individual>> bds_ind <- act.key.find_target(self);
+						float t6t <- machine_time - tttt;
+						time_act[ act.key] <- time_act[ act.key] + t6t;
+							t6<- t6 + t6t;
+					tttt <- machine_time;
+				
+						if not empty(bds_ind) {
+							current_place <- any(bds_ind.keys);
+							activity_fellows <- bds_ind[current_place];
+						}
+							t7 <- t7 + machine_time - tttt;
+				
+							if BENCHMARK { 
+										bench["Precompute_chose_place"] <- (bench contains_key "Precompute_chose_place" ? 
+											bench["Precompute_chose_place"] : 0.0) + machine_time - tttt;
+									}
+					}
+					if (current_place = nil) {
+					write name + "->" + act + " "+ agenda_week[d];
+				}else {
+					if (current_place.entities_inside = nil) {
+					write name + "->" + current_place;
+				}
+				}
+
+				}
+				if BENCHMARK { 
+					bench["Precompute_ind"] <- (bench contains_key "Precompute_ind" ? 
+						bench["Precompute_ind"] : 0.0) + machine_time - t;
+				}
+						
+				cpt <- cpt + 1;
+			}
+			t3 <- t3 + machine_time - ttt;
+			ttt <- machine_time;
+			
+			int ind <- 0;
+			ask individual_species {
+				if (w < length(current_place.entities_inside)) {
+					list<list<list<list<Individual>>>> ent_w <-current_place.entities_inside[w] ;
+					if (d < length(ent_w)) {
+						list<list<list<Individual>>> ent_d <- ent_w[d];
+						if (h < length(ent_d)) {
+							list<list<Individual>> ent <- ent_d[h];
+							bool added <- false;
+							int index <- ref_group[ind];
+							if (index != -1) and index < length(ent) {
+								ent[index] << self; 
+								index_building_agenda[w][d][h] <- current_place;
+								index_group_in_building_agenda[w][d][h] <- index;
+								to_remove_if_actif << [to_index[current_place], w, d, h, index];
+							} else {
+								current_place.entities_inside[w][d][h] << [self];
+								index <- length(current_place.entities_inside[w][d][h]) - 1;
+								index_group_in_building_agenda[w][d][h] <- index;
+								to_remove_if_actif << [to_index[current_place], w, d, h, index];
+								index_building_agenda[w][d][h] <- current_place;
+								if (activity_fellows != nil) {
+									loop f over: activity_fellows {
+										ref_group[f.id_int] <- index;
+									}
+								}
+								
+							}
+							ind <- ind + 1;
+						}
+					}
+					
+				}
+			}
+			t4 <- t4+ machine_time - ttt;
+			
+
+			date_ref <- date_ref + step;
+		}
+
+		ask all_individuals {
+			last_activity <- first(staying_home);
+			activity_fellows <- relatives;
+			current_place <- home;
+		}
+
+		 do console_output( "precompute_activities end");
+	}
+	
+	bool inGroup(list<BiologicalEntity> g1, list<BiologicalEntity> g2) {
+		loop g over: g1 {
+			if g in g2 {
+				return true;
+			}
+		}
+		return false;
+	}
 }
+
+
 

@@ -112,7 +112,7 @@ global{
 }
 
 // This experiment is needed to run batch within GAMA
-experiment "Abstract Batch" type:batch repeat: 80 until: world.sim_stop() keep_simulations: false
+experiment "Abstract Batch" type:batch repeat: 50 until: world.sim_stop() keep_simulations: false
 		 virtual:true  parent: "Abstract Experiment"
 {
 	init {

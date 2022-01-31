@@ -30,11 +30,30 @@ global {
 	 * Gloabl three steps initialization of a any simulation
 	 */
 	init {
+		do console_output("Start experiment ---");
+		
 		do before_init;
+		do console_output("finished before init ---");
 		do init_epidemiological_parameters;
+		do console_output("finished setting epidemiological parameters ---");
+		do init_sars_cov_2;
+		do init_vaccines;
+		do console_output("finished initializing of vaccines and variants ---");
+		
+		
 		do global_init;
+		
+		do console_output("finished global init ---");
+	
+		
 		do create_authority;
+		if(use_activity_precomputation) {do update_precomputed_activity;}
+		do console_output("finished creating authority ---");
+	
+		
 		do after_init;
+		do console_output("finished after init ---");
+	
 	}
 
 }
@@ -86,7 +105,7 @@ experiment "Abstract Experiment" virtual: true {
 		string dfp <- with_path_termination(_datasets_folder_path);
 		list<string> dirs <- gather_dataset_names(dfp) - EXCLUDED_CASE_STUDY_FOLDERS_NAME;
 		string question <- "Choose one dataset among : " + dirs;
-		return dfp + "/" + user_input(question, [choose("Your choice", string, first(dirs), dirs)])["Your choice"] + "/";
+		return dfp + "/" + user_input_dialog(question, [choose("Your choice", string, first(dirs), dirs)])["Your choice"] + "/";
 	}
 
 	// ----------------------------------------------------- //
@@ -99,13 +118,19 @@ experiment "Abstract Experiment" virtual: true {
 				draw ("Day " + int((current_date - starting_date) / #day)) + " | " + ("Cases " + world.number_of_infectious) font: default at: {20 #px, 50 #px} anchor: #top_left color:
 				text_color;
 			}
-
 			image file: file_exists(dataset_path + "/satellite.png") ? (dataset_path + "/satellite.png") : "../Utilities/white.png" transparency: 0.5 refresh: false;
 			species Building {
-				draw shape color: viral_load > 0 ? rgb(255 * viral_load, 0, 0) : #lightgrey empty: true width: 2;
+				
+				if (use_activity_precomputation) {
+					int val <- round(255 * (1 - nb_currents / 10.0));
+					draw shape color: nb_currents > 0 ? rgb(val,val,255) : #white;
+				}
+				
+				
+				draw shape color: viral_load[original_strain] > 0 ? rgb(255 * viral_load[original_strain], 0, 0) : #lightgrey empty: true width: 2;
 			}
 
-			agents "Individual" value: all_individuals where not (each.is_outside) {
+			agents "Individual" value: all_individuals where  (not each.is_outside and each.is_active) {
 				draw square(state = susceptible or clinical_status = recovered ? 10 : 20) color: state = latent ? #yellow : (self.is_infectious ? #orangered : (clinical_status = recovered ?
 				#blue : #green));
 			}
@@ -156,6 +181,14 @@ experiment "Abstract Experiment" virtual: true {
 
 		}
 
+		display "infections_by_variant" virtual: true refresh: every(24#cycle) {
+			chart "Population epidemiological states evolution" background: #white axes: #black color: #black title_font: default legend_font: font("Helvetica", 14, #bold) {
+				loop v over:  viruses {
+					data ""+v.name value: all_individuals count (each.viral_agent =  v) marker: false style: line  legend: v.name;
+				}
+			}
+		}
+
 		display "cumulative_incidence" virtual: true {
 			chart "Cumulative incidence" background: #white axes: #black {
 				data "cumulative incidence" value: total_number_of_infected color: #red marker: false style: line;
@@ -197,9 +230,8 @@ experiment "Abstract Experiment" virtual: true {
 		
 		display "demographics_household_size" virtual: true {
 			chart "Household size" type:histogram {
-				loop i from: 0 to:max(all_individuals collect (length(each.relatives))) { 
-					data string(i) value: all_individuals count (length(each.relatives)=i);
-				}
+				map<int,list<Individual>> hhs <- all_individuals group_by (length(each.relatives)+1);
+				loop i over:hhs.keys { data string(i) value: length(hhs[i]); }
 			}
 		}	 
 
@@ -222,6 +254,6 @@ experiment "Abstract Experiment" virtual: true {
 				}
 			}
 		}		
-	}	
+	}	 
 
 }

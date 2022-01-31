@@ -1,0 +1,81 @@
+name: Continous Relase
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      ### Activity check
+      ### uses GitHub API to check last non-automagic commit in repository
+      ### if it's older than a week, all other steps are skipped
+      ## From here : https://github.com/rotators/Fo1in2/blob/1ccbc7e4f74d569bd49c82f22f1b069c86cba0dc/.github/workflows/schedule.yml#L50-L91
+      - name: Activity check
+        id:   activity-check
+        run:  |
+              :
+              # old check, requires already cloned repository; left for reference
+              curl -sL https://api.github.com/repos/$GITHUB_REPOSITORY/commits | jq -r '[.[]][0]' > $HOME/commit.json
+              date="$(jq -r '.commit.author.date' $HOME/commit.json)"
+              timestamp=$(date --utc -d "$date" +%s)
+              author="$(jq -r '.commit.author.name' $HOME/commit.json)"
+              url="$(jq -r '.html_url' $HOME/commit.json)"
+              days=$(( ( $(date --utc +%s) - $timestamp ) / 86400 ))
+              rm -f $HOME/commit.json
+              echo "Repository activity : $timestamp $author $url"
+              alive=0
+              if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+                 echo "[WARNING] Ignoring activity limits : workflow triggered manually"
+                 alive=1
+              else
+                 if [ $days -lt 1 ]; then
+                    echo Repository active : ${days}d
+                    alive=1
+                 else
+                    echo "[WARNING] Repository not updated : event<${{ github.event_name }}> not allowed to modify stale repository"
+                 fi
+              fi
+              if [ $alive -eq 1 ]; then
+                 echo GHA_REPO_ALIVE=true >> $GITHUB_ENV
+                 echo "::set-output name=repo-alive::true
+              else
+                 echo "::set-output name=repo-alive::false
+              fi
+
+
+      - uses: actions/checkout@v2
+        if:   env.GHA_REPO_ALIVE == 'true'
+
+      - name: Build for Linux
+        if:   env.GHA_REPO_ALIVE == 'true'
+        run: bash mkrelease.sh --platform Linux --gama 1.8.2
+
+      - name: Build for Mac
+        if:   env.GHA_REPO_ALIVE == 'true'
+        run: bash mkrelease.sh --platform Mac --gama 1.8.2
+
+      - name: Build for Windows
+        if:   env.GHA_REPO_ALIVE == 'true'
+        run: bash mkrelease.sh --platform Win --gama 1.8.2
+
+      - name: Build raw Model release
+        if:   env.GHA_REPO_ALIVE == 'true'
+        run: zip -r COMOKIT-Model.zip COMOKIT
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        if:   env.GHA_REPO_ALIVE == 'true'
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "All-In-One Version Continuous"
+          files: |
+            COMOKIT-Linux.zip
+            COMOKIT-Mac.zip
+            COMOKIT-Win.zip
+            COMOKIT-Model.zip
