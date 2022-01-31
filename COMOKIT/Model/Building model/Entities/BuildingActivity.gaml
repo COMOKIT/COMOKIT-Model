@@ -26,71 +26,86 @@ global {
 		map<string, list<Room>> rooms_type <- Room group_by each.type;
 		sanitation_rooms <- rooms_type[sanitation];
 		if (use_sanitation and not empty(sanitation_rooms)) {
-			create BuildingSanitation with:[activity_places:: sanitation_rooms];
+			create BuildingSanitation with:[activity_places::sanitation_rooms];
 		}
-		
-		loop ty over: rooms_type.keys  - [workplace_layer, entrance, sanitation]{
-			create BuildingActivity {
-				name <-  ty;
-				activity_places <- rooms_type[ty];
-			}
-		}
-		
-		create BuildingWorking;
-		create BuildingGoingHome with:[activity_places:: BuildingEntrance as list];
-		create BuildingEatingOutside with:[activity_places:: BuildingEntrance as list];
-		create BuildingMultiActivity with:[activity_places::CommonArea where (each.type = multi_act)];
+
+		create ActivityLeaveBuilding;
+		create ActivityGoToOffice;
+		create ActivityVisitInpatient;
+		create ActivityGoToMeeting;
+		create ActivityGoToAdmissionRoom;
 	}
 }
 
-species BuildingActivity {
+// A "singleton" species that provides the destination for different activities
+species BuildingActivity virtual: true {
 	list<Room> activity_places;
 	
-	Room get_place(BuildingIndividual p) {
-		if flip(0.3) {
-			return activity_places with_max_of length(each.available_places);
-		} else {
-			list<Room> rs <- (activity_places where not empty(each.available_places));
-			if empty(rs) {
-				rs <- activity_places;
-			}
-			return rs closest_to p;
+	pair<Room, point> get_destination(BuildingIndividual p) virtual: true;
+}
+
+species ActivityGoToOffice parent: BuildingActivity {
+	pair<Room, point> get_destination(BuildingIndividual p) {
+		Room r <- p.working_place;
+		point pt <- p.working_desk.location;
+		return r::pt;
+	}
+}
+
+species ActivityVisitInpatient parent: BuildingActivity {
+	pair<Room, point> get_destination(BuildingIndividual p) {
+		// Find a ward with at least 1 patient, and a new one if this visitor has just visited another ward 
+		list<Room> wards <- Room where (
+			each.type = WARD and each != p.dst_room and 
+			!empty(each.people_inside where (species(each) = Inpatient))
+		);
+		if empty(wards) {
+			error p.name + " is trying to visit an inpatient but there are none in any ward!";
 		}
-	}
-	
-}
-species BuildingMultiActivity parent: BuildingActivity {
-	Room get_place(BuildingIndividual p) {
-		return first(activity_places);
-	}
-}
-species BuildingWorking parent: BuildingActivity {
-	Room get_place(BuildingIndividual p) {
-		return p.working_place;
+		Room r <- one_of(wards);
+
+		// Select a patient to go near
+		BuildingIndividual patient_to_visit <- one_of(r.people_inside where (species(each) = Inpatient));
+		geometry area_around_patient <- circle(rnd(1#m, 2#m), patient_to_visit.location); 
+		point pt <- any_location_in(inter(r, area_around_patient));
+
+		return r::pt;
 	}
 }
 
-species BuildingGoingHome parent: BuildingActivity  {
-	string name <- going_home;
-	Room get_place(BuildingIndividual p) {
-		return BuildingEntrance closest_to p;
+species ActivityGoToAdmissionRoom parent: BuildingActivity {
+	pair<Room, point> get_destination(BuildingIndividual p) {
+		Room r <- one_of(Room where (each.type = ADMISSION_ROOM));
+		point pt <- any_location_in(r);
+		return r::pt; 
 	}
 }
 
-species BuildingEatingOutside parent: BuildingActivity  {
-	string name <- eating_outside;
-	Room get_place(BuildingIndividual p) {
-		return BuildingEntrance closest_to p;
+species ActivityGoToMeeting parent: BuildingActivity {
+	pair<Room, point> get_destination(BuildingIndividual p) {
+		Room r <- first(Room where (each.type = MEETING_ROOM));
+		point pt <- any_location_in(r);
+		return r::pt; 
 	}
 }
 
-species BuildingSanitation parent: BuildingActivity{
-	Room get_place(BuildingIndividual p) {
+species ActivityLeaveBuilding parent: BuildingActivity {
+	pair<Room, point> get_destination(BuildingIndividual p) {
+		Room r <- BuildingEntrance closest_to p;
+		point pt <- r.location;
+		return r::pt; 
+	}
+}
+
+species BuildingSanitation parent: BuildingActivity {
+	pair<Room, point> get_destination(BuildingIndividual p) {
+		Room r;
 		if flip(0.3) {
-			return shuffle(activity_places) with_min_of length(first(each.entrances).people_waiting);
+			r <- shuffle(activity_places) with_min_of length(first(each.entrances).people_waiting);
 		} else {
-			return activity_places closest_to p;
+			r <- activity_places closest_to p;
 		}
+		point pt <- any_location_in(r);
+		return r::pt;
 	}
-	
 }

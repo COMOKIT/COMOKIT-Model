@@ -22,7 +22,7 @@ import "BuildingIndividual.gaml"
 
 import "../Constants.gaml"
 	
-species Room parent: AbstractPlace{
+species Room parent: AbstractPlace {
 	int nb_affected;
 	PedestrianPath closest_path; 
 	geometry init_place;
@@ -36,6 +36,7 @@ species Room parent: AbstractPlace{
 	bool allow_transmission -> {allow_air_transmission};
 	float viral_decrease -> {(isVentilated ? ventilated_viral_air_decrease_per_day : basic_viral_air_decrease_per_day)} ;
 	float ceiling_height <- default_ceiling_height;
+	int floor;
 	
 	action intialization {
 		inside_geom <- (copy(shape) - P_shoulder_length);
@@ -128,7 +129,9 @@ species Room parent: AbstractPlace{
 	aspect default {
 		if (display_room_status) {
 			draw shape color: blend(#red, #green, min(1,viral_load*coeff_visu_virus_load_room/(shape.area)));
-			
+		}
+		if (type in [ELEVATOR, STAIRWAY]) {
+			draw shape color: rgb(#yellow, 0.5);
 		}
 		if display_room_entrance {
 			loop e over: entrances {draw circle(0.2)-circle(0.1) at: {e.location.x,e.location.y,0.001} color: #yellow border: #black;}
@@ -136,7 +139,7 @@ species Room parent: AbstractPlace{
 		if display_desk {
 			loop p over: places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #gray border: #black;}
 		}
-		if(isVentilated ){
+		if(isVentilated){
 		 	draw image_file("../../../Images/fan.png") size: 3;	
 		}
 	}
@@ -407,5 +410,4 @@ grid unit_cell parent: AbstractPlace cell_width: unit_cell_size cell_height: uni
 			 draw shape color:blend(#green, #red, 1 - (coeff_visu_virus_load_cell * viral_load))  ;	
 		}
 	}
-	
 }
