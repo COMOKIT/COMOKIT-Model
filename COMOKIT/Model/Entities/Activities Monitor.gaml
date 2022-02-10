@@ -12,13 +12,13 @@ import "Authority.gaml"
 
 global {
 	float decrease_act_study <- 0.0 
-		update: (first(Authority).act_monitor != nil) ? (first(Authority).act_monitor.get_activity_decrease(act_studying)) : 0.0;
+		update: first(Authority) = nil ? 0.0 : ((first(Authority).act_monitor != nil) ? (first(Authority).act_monitor.get_activity_decrease(act_studying)) : 0.0);
 	float decrease_act_work <- 0.0 
-		update: (first(Authority).act_monitor != nil) ? (first(Authority).act_monitor.get_activity_decrease(act_working)) : 0.0;
+		update: first(Authority) = nil ? 0.0 : ((first(Authority).act_monitor != nil) ? (first(Authority).act_monitor.get_activity_decrease(act_working)) : 0.0);
 	float decrease_act_eat <- 0.0 
-		update: (first(Authority).act_monitor != nil) ? (first(Authority).act_monitor.get_activity_decrease(act_eating)) : 0.0;
+		update: first(Authority) = nil ? 0.0 : ((first(Authority).act_monitor != nil) ? (first(Authority).act_monitor.get_activity_decrease(act_eating)) : 0.0);
 	float decrease_act_shopping <- 0.0 
-		update: (first(Authority).act_monitor != nil) ? (first(Authority).act_monitor.get_activity_decrease(act_shopping)) : 0.0;
+		update: first(Authority) = nil ? 0.0 : ((first(Authority).act_monitor != nil) ? (first(Authority).act_monitor.get_activity_decrease(act_shopping)) : 0.0);
 }
 
 species ActivitiesMonitor schedules: [] {

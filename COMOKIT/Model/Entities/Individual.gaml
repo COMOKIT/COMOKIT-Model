@@ -52,7 +52,7 @@ global
 	
 }
 
-species Individual parent: BiologicalEntity schedules: shuffle(Individual where (each.is_active and (each.clinical_status != dead))){
+species AbstractIndividual parent:BiologicalEntity {
 	int id_int;
 	//Age of the individual
 	int age;
@@ -74,32 +74,15 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	//#############################################################
 	//ID of the household of the individual
 	string household_id;
-	//Bool to consider if the individual is at home
-	bool is_at_home <- true;
-	//Home building of the individual
-	Building home;
-	//School building of the individual (if student)
-	Building school;
-	//Working place of the individual (if working)
-	Building working_place;
-	//Relatives (i.e. same household) of the individual
-	list<Individual> relatives;
-	//Friends (i.e. possibility of leisure activities together) of the individual
-	list<Individual> friends;
-	//Colleagues (i.e. same working place) of the individual
-	list<Individual> colleagues;
-	//Current building of the individual
-	Building current_place;
+	//Current place of the individual
+	AbstractPlace current_place; 
 	//Bool to consider if the individual is outside of the commune
 	bool is_outside <- false;
 	
-	//#############################################################
+	//############################################################# 
 	//Agenda and activities attributes
 	//#############################################################
-	list<map<int, pair<Activity,list<Individual>>>> agenda_week;
-	list<Individual> activity_fellows;
-	Activity last_activity;
-	map<Activity, map<string,list<Building>>> building_targets;
+	AbstractActivity last_activity;
 	
 	//#############################################################
 	//Intervention related attributes
@@ -123,7 +106,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	//Contact related variables
 	//#############################################################
 	map<agent,bool> infectious_contacts_with;
-	Activity infected_when;
+	AbstractActivity infected_when;
 	int number_of_infected_individuals <- 0;
 	
 	//#############################################################
@@ -177,34 +160,6 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 				(presymptomatic_period<0 ? presymptomatic_period : 0);
 		}
 	}
-	
-	//Initialiase social network of the agents (colleagues, friends)
-	action initialise_social_network(map<Building,list<Individual>> working_places, map<Building,map<int,list<Individual>>> schools, map<int,list<Individual>> ind_per_age_cat) {
-		int nb_friends <- max(0,round(gauss(nb_friends_mean,nb_friends_std)));
-		loop i over: ind_per_age_cat.keys {
-			if age < i {
-				friends <- nb_friends among ind_per_age_cat[i];
-				friends >> self;
-				break;
-			}
-		}
-		
-		if (working_place != nil) {
-			int nb_colleagues <-int(gauss(nb_work_colleagues_mean,nb_work_colleagues_std));
-			if nb_colleagues > 1 {
-				colleagues <- nb_colleagues among working_places[working_place];
-				colleagues >> self;
-			}
-		} 
-		if (school != nil) {
-			int nb_classmates <- int(gauss(nb_classmates_mean,nb_classmates_std));
-			if nb_classmates > 1 {
-				//colleagues <- nb_classmates among ((schools[school] where ((each.age >= (age -1)) and (each.age <= (age + 1))))- self);
-				colleagues <- nb_classmates among schools[school][age];
-				colleagues >> self;
-			}
-		}
- 	}
 	
 	//#############################################################
 	//Actions
@@ -273,7 +228,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			
 			//Add the infection to the infections having been caused in the building
 			loop fct over: current_place.functions  {
-				if(building_infections.keys contains(fct))
+				if (current_place != nil and building_infections.keys contains(fct))
 				{
 					building_infections[fct] <- building_infections[fct] +1;
 				}
@@ -304,7 +259,7 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	}
 	
 	// Allows to track who infect who 
-	action infect_someone(Individual succesful_contact) { 
+	action infect_someone(AbstractIndividual succesful_contact) { 
 		ask succesful_contact { myself.infectious_contacts_with[succesful_contact] <-  define_new_case(myself.viral_agent); }
 		if infectious_contacts_with[succesful_contact] { number_of_infected_individuals <- number_of_infected_individuals + 1; }
 	}
@@ -328,34 +283,6 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 				is_wearing_mask <- false;
 			}
 		}
-	}
-	
-	
-	//Action to call when entering a new building to update the list of individuals of the buildings
-	action enter_building(Building b) {
-		if (current_place != nil ){
-			current_place.individuals >> self;
-		}	
-		current_place <- b;
-		is_at_home <- current_place = home;
-		current_place.individuals << self;
-		location <- any_location_in(current_place);
-	}
-	
-	//Vaccination for Covid19 on the current date
-	//return the number of doses done
-	int vaccination(covax v){
-		int dose_nb <- vaccine_history.values count (each = v);
-		
-		// records
-		total_number_doses[dose_nb] <- total_number_doses[dose_nb] + 1;
-		if total_number_doses_per_vax contains_key v {total_number_doses_per_vax[v] <- total_number_doses_per_vax[v]+1;}
-		else {total_number_doses_per_vax[v] <- 1;}
-		
-		do build_immunity(v.target,1-v.infection_prevention[dose_nb]);
-		vaccine_history[current_date] <- v;
-		
-		return vaccine_history.values count (each = v);
 	}
 	
 	// UTILS
@@ -384,10 +311,142 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 	//Reflexes
 	//#############################################################
 	
-	//Reflex to trigger infection when outside of the commune
-	reflex become_infected_outside when: is_outside and not use_activity_precomputation{
+	//Remove recoevred agent (no specific behavior anymore)
+	reflex become_inactive when:use_activity_precomputation and(state = removed){
+		is_active <- false;
+	}
+
+	//Reflex to update disease cycle
+	reflex update_epidemiology when:not use_activity_precomputation and (state!=removed) {
 		float start <- BENCHMARK ? machine_time : 0.0;
-		ask outside {do outside_epidemiological_dynamic(myself);}
+		if(allow_transmission_building and (not is_infected)and(self.current_place!=nil))
+		{
+			loop v over: current_place.viral_load.keys {
+				if(flip(current_place.viral_load[v]*successful_contact_rate_building))
+				{
+					infectious_contacts_with[current_place] <- define_new_case(v);
+				}	
+			}
+		}
+		do update_wear_mask();
+		if BENCHMARK {bench["Individual.update_epidemiology"] <- bench["Individual.update_epidemiology"] + machine_time - start;}
+	}
+	
+	//Reflex to add to death monitor when dead
+	reflex add_to_dead when:(clinical_status=dead)and(is_counted_dead=false){
+		float start <- BENCHMARK ? machine_time : 0.0;
+		do increment_total_of(DEATH);
+		is_counted_dead <- true;
+		if BENCHMARK {bench["Individual.add_to_dead"] <- bench["Individual.add_to_dead"] + machine_time - start;}
+	}
+	
+	//Reflex to add to hospitalized monitor when dead
+	reflex add_to_hospitalised when:(is_hospitalised)and(is_counted_hospitalised=false){
+		float start <- BENCHMARK ? machine_time : 0.0;
+		do increment_total_of(HOSPITALISED);
+		is_counted_hospitalised <- true;
+		if BENCHMARK {bench["Individual.add_to_hospitalised"] <- bench["Individual.add_to_hospitalised"] + machine_time - start;}
+	}
+	
+	//Reflex to add to ICU monitor when dead
+	reflex add_to_ICU when:(is_ICU)and(is_counted_ICU=false){
+		float start <- BENCHMARK ? machine_time : 0.0;
+		do increment_total_of(ICU);
+		is_counted_ICU <- true;
+		if BENCHMARK {bench["Individual.add_to_ICU"] <- bench["Individual.add_to_ICU"] + machine_time - start;}
+	}
+}
+
+species Individual parent: AbstractIndividual 
+		schedules: shuffle(Individual where (each.is_active and (each.clinical_status != dead))) {
+	//#############################################################
+	//Agenda and activities attributes
+	//#############################################################
+	list<map<int, pair<Activity,list<Individual>>>> agenda_week;
+	list<Individual> activity_fellows;
+	map<Activity, map<string,list<Building>>> building_targets;
+	Building current_place;
+	
+	//Bool to consider if the individual is at home
+	bool is_at_home <- true;
+	//Home building of the individual
+	Building home;
+	//School building of the individual (if student)
+	Building school;
+	//Working place of the individual (if working)
+	Building working_place;
+	//Relatives (i.e. same household) of the individual
+	list<Individual> relatives;
+	//Friends (i.e. possibility of leisure activities together) of the individual
+	list<Individual> friends;
+	//Colleagues (i.e. same working place) of the individual
+	list<Individual> colleagues;
+	
+	//Initialiase social network of the agents (colleagues, friends)
+	action initialise_social_network(map<AbstractPlace,list<Individual>> working_places, 
+			map<AbstractPlace,map<int,list<Individual>>> schools, map<int,list<Individual>> ind_per_age_cat) {
+		int nb_friends <- max(0,round(gauss(nb_friends_mean,nb_friends_std)));
+		loop i over: ind_per_age_cat.keys {
+			if age < i {
+				friends <- nb_friends among ind_per_age_cat[i];
+				friends <- friends - self;
+				break;
+			}
+		}
+
+		if (working_place != nil) {
+			int nb_colleagues <-int(gauss(nb_work_colleagues_mean,nb_work_colleagues_std));
+			if nb_colleagues > 1 {
+				colleagues <- nb_colleagues among working_places[working_place];
+				colleagues >> self;
+			}
+		} 
+		if (school != nil) {
+			int nb_classmates <- int(gauss(nb_classmates_mean,nb_classmates_std));
+			if nb_classmates > 1 {
+				//colleagues <- nb_classmates among ((schools[school] where ((each.age >= (age -1)) and (each.age <= (age + 1))))- self);
+				colleagues <- nb_classmates among schools[school][age];
+				colleagues >> self;
+			}
+		}
+	}
+	
+	//Action to call when entering a new building to update the list of individuals of the buildings
+	action enter_building(Building b) {
+		if (current_place != nil ){
+			current_place.individuals >> self;
+		}	
+		current_place <- b;
+		is_at_home <- current_place = home;
+		current_place.individuals << self;
+		location <- any_location_in(current_place);
+	}
+	
+	//Vaccination for Covid19 on the current date
+	//return the number of doses done
+	int vaccination(covax v){
+		int dose_nb <- vaccine_history.values count (each = v);
+		
+		// records
+		total_number_doses[dose_nb] <- total_number_doses[dose_nb] + 1;
+		if total_number_doses_per_vax contains_key v {total_number_doses_per_vax[v] <- total_number_doses_per_vax[v]+1;}
+		else {total_number_doses_per_vax[v] <- 1;}
+		
+		do build_immunity(v.target,1-v.infection_prevention[dose_nb]);
+		vaccine_history[current_date] <- v;
+		
+		return vaccine_history.values count (each = v);
+	}
+	
+	//#############################################################
+	//Reflexes
+	//#############################################################
+	
+	//Reflex to trigger infection when outside of the commune
+	reflex become_infected_outside when: is_outside and (state = susceptible) and 
+			not use_activity_precomputation {
+		float start <- BENCHMARK ? machine_time : 0.0;
+		ask outside {do outside_epidemiological_dynamic(myself, step);}
 		if BENCHMARK {bench["Individual.become_infected_outside"] <- bench["Individual.become_infected_outside"] + machine_time - start;}
 	}
 	
@@ -498,7 +557,6 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 		if BENCHMARK {bench["Individual.infect_others"] <- bench["Individual.infect_others"] + machine_time - start;}
 	}
 	
-
 	//Reflex to execute the agenda	
 	reflex execute_agenda when:  clinical_status!=dead{
 		float start <- BENCHMARK ? machine_time : 0.0;
@@ -530,51 +588,6 @@ species Individual parent: BiologicalEntity schedules: shuffle(Individual where 
 			}
 		}
 		if BENCHMARK {bench["Individual.execute_agenda"] <- bench["Individual.execute_agenda"] + machine_time - start;}
-	}
-	
-	//Remove recoevred agent (no specific behavior anymore)
-	reflex become_inactive when:use_activity_precomputation and(state = removed){
-		is_active <- false;
-	}
-
-	//Reflex to update disease cycle
-	reflex update_epidemiology when:not use_activity_precomputation and (state!=removed) {
-		float start <- BENCHMARK ? machine_time : 0.0;
-		if(allow_transmission_building and (not is_infected)and(self.current_place!=nil))
-		{
-			loop v over: current_place.viral_load.keys {
-				if(flip(current_place.viral_load[v]*successful_contact_rate_building))
-				{
-					infectious_contacts_with[current_place] <- define_new_case(v);
-				}	
-			}
-		}
-		do update_wear_mask();
-		if BENCHMARK {bench["Individual.update_epidemiology"] <- bench["Individual.update_epidemiology"] + machine_time - start;}
-	}
-	
-	//Reflex to add to death monitor when dead
-	reflex add_to_dead when:(clinical_status=dead)and(is_counted_dead=false){
-		float start <- BENCHMARK ? machine_time : 0.0;
-		do increment_total_of(DEATH);
-		is_counted_dead <- true;
-		if BENCHMARK {bench["Individual.add_to_dead"] <- bench["Individual.add_to_dead"] + machine_time - start;}
-	}
-	
-	//Reflex to add to hospitalized monitor when dead
-	reflex add_to_hospitalised when:(is_hospitalised)and(is_counted_hospitalised=false){
-		float start <- BENCHMARK ? machine_time : 0.0;
-		do increment_total_of(HOSPITALISED);
-		is_counted_hospitalised <- true;
-		if BENCHMARK {bench["Individual.add_to_hospitalised"] <- bench["Individual.add_to_hospitalised"] + machine_time - start;}
-	}
-	
-	//Reflex to add to ICU monitor when dead
-	reflex add_to_ICU when:(is_ICU)and(is_counted_ICU=false){
-		float start <- BENCHMARK ? machine_time : 0.0;
-		do increment_total_of(ICU);
-		is_counted_ICU <- true;
-		if BENCHMARK {bench["Individual.add_to_ICU"] <- bench["Individual.add_to_ICU"] + machine_time - start;}
 	}
 	
 	//#############################################################

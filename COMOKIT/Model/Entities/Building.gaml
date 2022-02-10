@@ -50,16 +50,46 @@ global {
 	
 }
 
-species Building  {
+species AbstractPlace virtual: true {
+	//Viral load of the building
+	map<virus,float> viral_load <- [original_strain::0.0];
+	bool has_virus <- false;
+	//Type of the building
+	string type;
+	//Usages of the building
+	list<string> functions;
+	bool allow_transmission -> {allow_transmission_building};
+
+	//Action to add viral load to the building
+	action add_viral_load(float value, virus v <- original_strain){
+		if(allow_transmission_building)
+		{
+			viral_load[v] <- min(1.0,viral_load[v]+value);
+			has_virus <- true;
+		}
+	}
+
+	action decrease_viral_load(float val) {
+		loop v over:viral_load.keys {
+			viral_load[v] <- max(0.0,viral_load[v] - val);
+		}
+	}
+	
+	//Action to update the viral load (i.e. trigger decreases)
+	reflex update_viral_load when: allow_transmission_building and has_virus{
+		float start <- BENCHMARK ? machine_time : 0.0;
+		do decrease_viral_load(basic_viral_decrease/nb_step_for_one_day);
+		has_virus <- viral_load.values one_matches (each > 0);
+		if BENCHMARK {bench["Building.update_viral_load"] <- bench["Building.update_viral_load"] + machine_time - start; }
+	}
+}
+
+species Building parent: AbstractPlace {
 	int id;
 	int index_bd;
 	string zone_id;
-	//Viral load of the building
-	map<virus,float> viral_load <- [original_strain::0.0];
 
 	string fcts;
-	//Usages of the building
-	list<string> functions;
 	//Building surrounding
 	list<Building> neighbors;
 	//Individuals present in the building
@@ -91,29 +121,12 @@ species Building  {
 		}
 		return neighbors;
 	}
-	
-	//Action to add viral load to the building
-	action add_viral_load(float value, virus v <- original_strain){
-		if(allow_transmission_building)
-		{
-			viral_load[v] <- min(1.0,viral_load[v]+value);
-			has_virus <- true;
-		}
-	}
-	
+
 	action compute_individuals{
 		individuals <- entities_inside[current_week][current_day][current_hour] accumulate each;
 		need_reinit <- true;
 	}
 
-	//Action to update the viral load (i.e. trigger decreases)
-	reflex update_viral_load when: allow_transmission_building and has_virus{
-		float start <- BENCHMARK ? machine_time : 0.0;
-		loop v over:viral_load.keys {viral_load[v] <- max(0.0,viral_load[v] - basic_viral_decrease/nb_step_for_one_day);}
-		has_virus <- viral_load.values one_matches (each > 0);
-		if BENCHMARK {bench["Building.update_viral_load"] <- bench["Building.update_viral_load"] + machine_time - start; }
-	}
-	
 	reflex reinit_individuals when: need_reinit  {
 		individuals <- [];
 		need_reinit <- false;
@@ -132,8 +145,7 @@ species Building  {
 		}
 		if BENCHMARK {bench["Building.transmission_building"] <- bench["Building.transmission_building"] + machine_time - start;}
 	}
-	
-	
+
 	aspect default {
 		draw shape color: #gray; //wireframe: true;
 	}
@@ -152,9 +164,9 @@ species outside parent: Building {
 	/*
 	 * The action that will be called to mimic epidemic outside of the studied area
 	 */
-	action outside_epidemiological_dynamic(Individual indiv) {
+	action outside_epidemiological_dynamic(AbstractIndividual indiv, float period_duration) {
 		loop v over:proba_outside_contamination_per_hour.keys {
-			if flip(proba_outside_contamination_per_hour[v]) { 
+			if flip(proba_outside_contamination_per_hour[v] / #h * period_duration) { 
 				ask indiv {
 					infectious_contacts_with[myself] <- define_new_case(v); 
 					if infectious_contacts_with[myself] {myself.nb_contaminated <- myself.nb_contaminated + 1;}

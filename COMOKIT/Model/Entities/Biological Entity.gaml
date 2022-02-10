@@ -112,7 +112,7 @@ species BiologicalEntity control:fsm{
 	float basic_viral_release;
 	
 	//Current location of the entity (as we do not represent transportation, the entity can only be inside a building)
-	Building current_place;
+	AbstractPlace current_place;
 	
 	
 	
@@ -312,7 +312,6 @@ species BiologicalEntity control:fsm{
 			is_susceptible <- false;
 		}
 		tick <- tick+1;
-		
 		transition to: symptomatic when: (tick>=latent_period) and (self.is_symptomatic) and (presymptomatic_period>=0);
 		transition to: presymptomatic when: (tick>=latent_period) and (self.is_symptomatic) and (presymptomatic_period<0);
 		transition to: asymptomatic when: (tick>=latent_period) and (self.is_symptomatic=false);
