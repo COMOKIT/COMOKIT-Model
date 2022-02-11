@@ -22,7 +22,7 @@ import "BuildingIndividual.gaml"
 
 import "../Constants.gaml"
 	
-species Room parent: AbstractPlace{
+species Room parent: AbstractPlace {
 	int nb_affected;
 	PedestrianPath closest_path; 
 	geometry init_place;
@@ -147,7 +147,22 @@ species CommonArea parent: Room ;
  
 species Wall frequency: 0{
 	aspect default {
-		draw shape color: #white;
+		draw shape + P_shoulder_length color: #white depth: 2.5#m;
+	}
+}
+
+species BenchWait frequency: 0{
+	bool is_occupied <- false;
+	aspect default{
+		draw rectangle(0.4,0.5) color: #orange depth: 0.6;
+ 	}
+}
+
+species Bed frequency: 0{
+	Room room;
+	bool is_occupied <- false;
+	aspect default{
+		draw rectangle(1.2, 2.0) color: #white depth: 0.6;
 	}
 }
 
@@ -172,6 +187,7 @@ species PedestrianPath skills: [pedestrian_road]{
 species PlaceInRoom frequency: 0{
 	float dists;
 }
+
 species Separator frequency: 0{
 	list<PlaceInRoom> places_concerned; 
 	aspect default {
@@ -407,5 +423,4 @@ grid unit_cell parent: AbstractPlace cell_width: unit_cell_size cell_height: uni
 			 draw shape color:blend(#green, #red, 1 - (coeff_visu_virus_load_cell * viral_load))  ;	
 		}
 	}
-	
 }

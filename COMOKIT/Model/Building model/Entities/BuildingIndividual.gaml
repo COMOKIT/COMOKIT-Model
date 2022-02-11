@@ -14,7 +14,6 @@
 model CoVid19
 
 import "BuildingActivity.gaml"
-
  
 import "../Constants.gaml"
  
@@ -23,16 +22,15 @@ import "Building Spatial Entities.gaml"
 import "../../Entities/Individual.gaml"
 
 
-
-
 species BuildingIndividual parent: AbstractIndividual schedules: shuffle(BuildingIndividual where (each.clinical_status != dead)) skills: [pedestrian] {
  	Room working_place;
 	PlaceInRoom working_desk;
 	map<date, BuildingActivity> agenda_week;
 	map<date, BuildingActivity> current_agenda_week;
-	BuildingActivity current_activity; 
+	BuildingActivity current_activity;
 	point target;
-	Room target_room;
+	point dst_point;
+	Room dst_room;
 	Room current_room;
 	bool has_place <- false;
 	PlaceInRoom target_place;
@@ -49,19 +47,60 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 	float sanitation_time <- 0.0;
 	bool wandering <- false;
 	bool goto_a_desk <- false;
+	float wander_proba <- 1/10#minute;
 	point target_desk;
 	float wandering_time_ag;
 	bool finished_goto <- false;
 	
-	aspect default {
-		if not is_outside  {
-			draw circle(P_shoulder_length) color: state = latent ? #pink : ((state = symptomatic)or(state=asymptomatic)or(state=presymptomatic)? #red : #green) border: #black;
+	init {
+		is_outside <- true;
+		do initialise_epidemio;
+	
+		pedestrian_species <- [BuildingIndividual];
+		obstacle_species <- [BuildingIndividual, Wall];
+		// Params for pedestrian skill
+		obstacle_consideration_distance <-P_obstacle_consideration_distance;
+		pedestrian_consideration_distance <-P_pedestrian_consideration_distance;
+		shoulder_length <- P_shoulder_length;
+		avoid_other <- P_avoid_other;
+		proba_detour <- P_proba_detour;
+		minimal_distance <- P_minimal_distance;
+		A_pedestrians_SFM <- P_A_pedestrian_SFM;
+		A_obstacles_SFM <- P_A_obstacles_SFM;
+		B_pedestrians_SFM <- P_B_pedestrian_SFM;
+		B_obstacles_SFM <- P_B_obstacles_SFM;
+		relaxion_SFM <- P_relaxion_SFM;
+		gama_SFM <- P_gama_SFM;
+		lambda_SFM <- P_lambda_SFM;
+		use_geometry_waypoint <- P_use_geometry_target;
+		tolerance_waypoint <- P_tolerance_target;
+	}
+	
+	// To be defined	
+	map<date, BuildingActivity> get_daily_agenda {
+		return nil;
+	}
+
+	//#############################################################
+	//Reflexes
+	//#############################################################		
+	reflex renew_agenda when: empty(current_agenda_week) {
+		map<date, BuildingActivity> new_daily_agenda <- get_daily_agenda();
+		if new_daily_agenda = nil {
+			return;
+		}
+
+		date cd <- current_date;
+		loop t over: new_daily_agenda.keys {
+			// Apply the correct date
+			date correct_time <- date([cd.year, cd.month, cd.day, t.hour, t.minute, t.second]);
+			if correct_time < current_date {
+				correct_time <- correct_time add_days 1;
+			}
+			current_agenda_week[correct_time] <- new_daily_agenda[t]; 
 		}
 	}
 	
-	//#############################################################
-	//Reflexes
-	//#############################################################
 	//Reflex to trigger transmission to other individuals and environmental contamination
 	reflex infect_others when: not is_outside and is_infectious
 	{
@@ -112,7 +151,6 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		}
 		if BENCHMARK {bench["Individual.infect_others"] <- bench["Individual.infect_others"] + machine_time - start;}
 	}
-	
 
 	//Reflex to trigger infection when outside of the commune
 	reflex become_infected_outside when: is_outside and (state = susceptible){
@@ -120,8 +158,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		ask outside {do outside_epidemiological_dynamic(myself, step);}
 		if BENCHMARK {bench["Individual.become_infected_outside"] <- bench["Individual.become_infected_outside"] + machine_time - start;}
 	}
-	
-	
+
 	//Reflex to update disease cycle
 	reflex update_epidemiology when:(state!=removed) {
 		float start <- BENCHMARK ? machine_time : 0.0;
@@ -145,218 +182,211 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		do update_wear_mask();
 		if BENCHMARK {bench["Individual.update_epidemiology"] <- bench["Individual.update_epidemiology"] + machine_time - start;}
 	}
-	
-	reflex new_agenda when: empty(current_agenda_week) {
-		loop d over: agenda_week.keys {
-			current_agenda_week[d add_days 7] <- agenda_week[d];
-		}
+
+	reflex in_room_behavior when: !is_outside and species(dst_room) != BuildingEntrance and (location overlaps dst_room) {
+		if (wandering) {
+			if (flip(wander_proba) and target = nil){
+				target <- any_location_in(dst_room);
+			}
+		} 
 	}
-	
-	
-	
-	reflex common_area_behavior when: not is_outside and species(target_room) = CommonArea and (location overlaps target_room) {
-		if wandering {
-			if (wandering_time_ag > wandering_time) {
-				if (target_place != nil) {
-					if final_target = nil and ((location distance_to target_place) > 2.0){
-						do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target_place ;
-					}
-					if (final_target = nil) {
-						do goto target: target_place;
-					} else {
-						do walk;
-					}
-					
-					if not(location overlaps target_room.inside_geom) {
-						location <- (target_room.inside_geom closest_points_with location) [0];
-					}
-					if final_target =nil {
-						wandering <- false;
-					}
-				} else {
-					wandering <- false;
-				}
-				if not(location overlaps target_room.inside_geom) {
-					location <- (target_room.inside_geom closest_points_with location) [0];
-				}
-			} else {
-				do wander amplitude: 140.0 bounds: target_room.inside_geom speed: speed / 5.0;
-				wandering_time_ag <- wandering_time_ag + step;	
-			}
-		} else if goto_a_desk {
-			if (final_target = nil) {
-				do goto target: target;
-			} else {
-				do walk;
-			
-			}
-			if not(location overlaps target_room.inside_geom) {
-				location <- (target_room.inside_geom closest_points_with location) [0];
-			}
-			if final_target =nil {
-				goto_a_desk <- false;
-			}
-		} else {
-			if flip(proba_wander) {
-				wandering <- true;
-				wandering_time_ag <- 0.0;
-				heading <- rnd(360.0);
-			} else if flip(proba_change_desk) { 
-				
-				goto_a_desk <- true;
-				PlaceInRoom pir <- one_of (target_room.places);
-				target_desk <- {pir.location.x + rnd(-0.5,0.5),pir.location.y + rnd(-0.5,0.5)};
-				if not(target_desk overlaps target_room.inside_geom) {
-					target_desk <- (target_room.inside_geom closest_points_with target_desk) [0];
-				}
-				if ((location distance_to target_desk) > 2.0) {
-					do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target_desk ;
-				}
-			}
-		}
-	}
-	
+
 	reflex sanitation_behavior when: using_sanitation {
 		sanitation_time <- sanitation_time + step;
 		if (sanitation_time > sanitation_usage_duration) {
 			sanitation_time <- 0.0;
 			using_sanitation <- false;
 			waiting_sanitation <- false;
-			target_room.people_inside >> self;
+			dst_room.people_inside >> self;
 		}
 	}
-	
-	reflex define_activity when: not waiting_sanitation and not empty(current_agenda_week) and 
-		(after(current_agenda_week.keys[0])){
-		if(target_place != nil and (has_place) ) {target_room.available_places << target_place;}
+
+	reflex define_activity when: not waiting_sanitation and 
+								not empty(current_agenda_week) and 
+								(after(current_agenda_week.keys[0])) {
+		if(target_place != nil and (has_place) ) {dst_room.available_places << target_place;}
 		string n <- current_activity = nil ? "" : copy(current_activity.name);
-		Room prev_tr <- copy(target_room);
+		Room prev_tr <- copy(dst_room);
 		do release_path;
+
+		// Pop the next activity out of the agenda and get the new destination
 		current_activity <- current_agenda_week.values[0];
 		current_agenda_week >> first(current_agenda_week);
-		target_room <- current_activity.get_place(self);
-		list<RoomEntrance> possible_entrances <- target_room.entrances where (not((each path_to target_room).shape overlaps prev_tr));
+		pair dst_pair <- current_activity.get_destination(self);
+		dst_room <- dst_pair.key;
+		dst_point <- dst_pair.value;
+
+		// NOTE: remember to create one agent for each of the Activity* species to avoid an error here
+		list<RoomEntrance> possible_entrances <- dst_room.entrances where (not((each path_to dst_room).shape overlaps prev_tr));
 		if (empty (possible_entrances)) {
-			possible_entrances <-  target_room.entrances;
+			possible_entrances <- dst_room.entrances;
 		}
-		target <- (target_room.entrances closest_to self).location;
-		go_oustide_room <- true;
+		target <- dst_point.location;
+//		go_oustide_room <- true;
 		is_outside <- false;
-		goto_entrance <- false;
-		target_place <- nil;
-		finished_goto <- false;
+//		goto_entrance <- false;
+//		target_place <- nil;
+//		finished_goto <- false;
 		if (species(current_activity) = BuildingSanitation) {
 			waiting_sanitation <- true;
 		}
 	}
-	
-	reflex goto_activity when: target != nil and not in_line{
-		bool arrived <- false;
-		point prev_loc <- copy(location);
-		if goto_entrance {
-			if (queueing) and (species(target_room) != BuildingEntrance) and ((self distance_to target) < (2 * distance_queue))  and ((self distance_to target) > (1 * distance_queue))  {
-				point pt <- the_entrance.get_position();
-				if (pt != target) {
-					final_target <- nil;
-					target <- pt;
-				}
+
+	reflex goto_activity when: target != nil and not in_line {
+//		bool arrived <- false;
+//		point prev_loc <- copy(location);
+		if (location distance_to target > 1.0){
+			if(location overlaps dst_room and final_waypoint = nil){
+				do release_path;
+				do goto target: target;
 			}
-			if (final_target = nil) and ((location distance_to target) > 2.0)  {
-					do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target ;
+			else{
+				if (final_waypoint = nil){
+					do compute_virtual_path pedestrian_graph: pedestrian_network target: target;
 				}
-				if (final_target != nil) {
+				if(final_waypoint != nil){
 					do walk;
 				}
-				
-				arrived <- final_target = nil;
-				if (arrived) {
-					is_slow_real <- false;
-					counter <- 0;
-				}
-			
-		} else {
-			if (finished_goto) {
-				do goto target: target;
-			} else {
-				if (final_target = nil) {
-					do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target ;
-				}
-				
-				do walk;
-				finished_goto <- (final_target = nil) and (location != target);
-			}
-			arrived <- location = target;
-			if (arrived) {
-				finished_goto <- false;
 			}
 		}
-		if(arrived) {
-			
-			if (go_oustide_room) {
-				current_room <- nil;
-				the_entrance <- (target_room.entrances closest_to self);
-					
-				if (!queueing) {
-					target <- the_entrance.location;
-				} else {
-					if (species(target_room) = BuildingEntrance) {
-						target <- the_entrance.location;
-					} else {
-						target <- the_entrance.get_position();
-					}
-				}
-				
-				go_oustide_room <- false;
-				goto_entrance <- true;
+		else{
+//			write(self);
+			target <- nil;
+			if(species(dst_room) = BuildingEntrance){
+				is_outside <- true;
 			}
-			else if (goto_entrance) {
-				current_room <- target_room;
-				if (species(current_activity) = BuildingSanitation) {
-					target <- target_room.location;
-					goto_entrance <- false;
-					if (queueing) or (target_room.type = sanitation) {
-						ask RoomEntrance closest_to self {
-							do add_people(myself);
-						}
-						in_line <- true;
-					} else {
-							
-					}
-				} else {
-					target_place <- (target_room = working_place) ? working_desk : target_room.get_target(self, species(target_room) = CommonArea);
-					if target_place != nil {
-						target <- target_place.location;
-						
-						if (queueing and (species(target_room) != BuildingEntrance)) {
-							ask RoomEntrance closest_to self {
-								do add_people(myself);
-							}
-							in_line <- true;
-						}
-					} else {
-						Room tr <- current_activity.get_place(self);
-						if(tr = target_room) {
-							target <- any_location_in(tr);
-						} else if (tr != nil ) {
-							target_room <- tr;
-							target <- (target_room.entrances closest_to self).location;
-						}
-					}
-					goto_entrance <- false;
-				}
-			} else {
-				has_place <- true;
-				target <- nil;
-				if (species(current_activity) = BuildingSanitation) {
-					using_sanitation <- true;
-					target_room.people_inside << self;
-				}
-				if (species(target_room) = BuildingEntrance) {
-					is_outside <- true;
-					do release_path;
-				}
-				
-			}	
 		}
+		if(dst_room != nil and not(location overlaps current_room) and current_room != dst_room){
+			if(current_room!= nil){
+				current_room.people_inside >> self;
+			}
+			current_room <- nil;
+		}
+		if(location overlaps dst_room){
+			current_room <- dst_room;
+			if(dst_room != nil and !(dst_room.people_inside contains self)){
+				dst_room.people_inside << self;
+			}
+			do release_path;
+		}
+		
+		
+// goto with queue behavior
+//		if goto_entrance {
+//			if (queueing) and (species(dst_room) != BuildingEntrance) and ((self distance_to target) < (2 * distance_queue))  and ((self distance_to target) > (1 * distance_queue))  {
+//				point pt <- the_entrance.get_position();
+//				if (pt != target) {
+//					final_waypoint <- nil;
+//					target <- pt;
+//				}
+//			}
+//			if (final_waypoint = nil) and ((location distance_to target) > 2.0)  {
+//				do compute_virtual_path pedestrian_graph:pedestrian_network target: target;
+//			}
+//			if (final_waypoint != nil) {
+//				do walk;
+//			}
+//			arrived <- final_waypoint = nil;
+//			if (arrived) {
+//				is_slow_real <- false;
+//				counter <- 0;
+//			}
+//		} else {
+//			if (finished_goto) {
+//				do goto target: target;
+//			} else {
+//				if (final_waypoint = nil) {
+//					do compute_virtual_path pedestrian_graph:pedestrian_network target: target;
+//				}
+//				do walk;
+//				finished_goto <- (final_waypoint = nil) and (location != target);
+//			}
+//			arrived <- location = target;
+//			if (arrived) {
+//				finished_goto <- false;
+//			}
+//		}
+//		if(arrived) {
+//			if (go_oustide_room) {
+//				current_room <- nil;
+//				the_entrance <- (dst_room.entrances closest_to self);
+//					
+//				if (!queueing) {
+//					target <- the_entrance.location;
+//				} else {
+//					if (species(dst_room) = BuildingEntrance) {
+//						target <- the_entrance.location;
+//					} else {
+//						target <- the_entrance.get_position();
+//					}
+//				}
+//				
+//				go_oustide_room <- false;
+//				goto_entrance <- true;
+//			}
+//			else if (goto_entrance) {
+//				current_room <- dst_room;
+//				if (species(current_activity) = BuildingSanitation) {
+//					target <- dst_room.location;
+//					goto_entrance <- false;
+//					if (queueing) or (dst_room.type = sanitation) {
+//						ask RoomEntrance closest_to self {
+//							do add_people(myself);
+//						}
+//						in_line <- true;
+//					} else {
+//							
+//					}
+//				} else {
+//					if dst_point != nil {
+//						target <- dst_point.location;
+//						if (queueing and (species(dst_room) != BuildingEntrance)) {
+//							ask RoomEntrance closest_to self {
+//								do add_people(myself);
+//							}
+//							in_line <- true;
+//						}
+//					} else {
+//						Room tr <- current_activity.get_destination(self).key;
+//						if(tr = dst_room) {
+//							target <- any_location_in(tr);
+//						} else if (tr != nil ) {
+//							dst_room <- tr;
+//							target <- (dst_room.entrances closest_to self).location;
+//						}
+//					}
+//					goto_entrance <- false;
+//				}
+//			} else {
+//				has_place <- true;
+//				target <- nil;
+//				if (species(current_activity) = BuildingSanitation) {
+//					using_sanitation <- true;
+//					dst_room.people_inside << self;
+//				}
+//				if (species(dst_room) = BuildingEntrance) {
+//					is_outside <- true;
+//					do release_path;
+//				}
+//			}
+//		}
  	}
+ 	
+ 	rgb get_color {
+ 		if state = latent {
+ 			return #pink;
+ 		} else if state in [symptomatic, asymptomatic, presymptomatic] {
+ 			return #red;
+ 		} else {
+ 			return #green;
+ 		}
+ 	}
+ 	
+ 	aspect default {
+		if(!is_outside){
+
+			draw pple_walk size: people_size  at: location + {0, 0, 0.7} rotate: heading - 90 color: color;
+			if(is_infected){draw circle(0.2)  at: location + {0, 0, 0.7} color: get_color();}
+		}
+	}
 }

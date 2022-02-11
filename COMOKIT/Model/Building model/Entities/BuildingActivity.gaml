@@ -20,77 +20,167 @@ import "Building Spatial Entities.gaml"
 
 import "../../Entities/Biological Entity.gaml"
 
-
 global {
 	action create_activities {
 		map<string, list<Room>> rooms_type <- Room group_by each.type;
 		sanitation_rooms <- rooms_type[sanitation];
 		if (use_sanitation and not empty(sanitation_rooms)) {
-			create BuildingSanitation with:[activity_places:: sanitation_rooms];
+			create BuildingSanitation with:[activity_places::sanitation_rooms];
 		}
-		
-		loop ty over: rooms_type.keys  - [workplace_layer, entrance, sanitation]{
-			create BuildingActivity {
-				name <-  ty;
-				activity_places <- rooms_type[ty];
-			}
+
+		loop i over: BuildingActivity.subspecies{
+			create i;
 		}
-		
-		create BuildingWorking;
-		create BuildingGoingHome with:[activity_places:: BuildingEntrance as list];
-		create BuildingEatingOutside with:[activity_places:: BuildingEntrance as list];
-		create BuildingMultiActivity with:[activity_places::CommonArea where (each.type = multi_act)];
 	}
 }
 
-species BuildingActivity {
+// A "singleton" species that provides the destination for different activities
+species BuildingActivity virtual: true {
 	list<Room> activity_places;
 	
-	Room get_place(BuildingIndividual p) {
-		if flip(0.3) {
-			return activity_places with_max_of length(each.available_places);
-		} else {
-			list<Room> rs <- (activity_places where not empty(each.available_places));
-			if empty(rs) {
-				rs <- activity_places;
-			}
-			return rs closest_to p;
+	pair<Room, point> get_destination(BuildingIndividual p) virtual: true;
+}
+
+// Activities of doctors
+species ActivityGoToOffice parent: BuildingActivity {
+	pair<Room, point> get_destination(BuildingIndividual p) {
+		Room r <- p.working_place;
+		point pt <- any_location_in(r);
+		return r::pt;
+	}
+}
+
+species ActivityVisitInpatient parent: BuildingActivity {
+	pair<Room, point> get_destination(BuildingIndividual p) {
+		// Find a ward with at least 1 patient, and a new one if this visitor has just visited another ward 
+		list<Room> wards <- Room where (
+			each.type = WARD and !empty(each.people_inside where (species(each) = Inpatient))
+		);
+		if empty(wards) {
+			error p.name + " is trying to visit an inpatient but there are none in any ward!";
 		}
-	}
-	
-}
-species BuildingMultiActivity parent: BuildingActivity {
-	Room get_place(BuildingIndividual p) {
-		return first(activity_places);
-	}
-}
-species BuildingWorking parent: BuildingActivity {
-	Room get_place(BuildingIndividual p) {
-		return p.working_place;
-	}
-}
+		Room r;
+		r <- one_of(wards); 
 
-species BuildingGoingHome parent: BuildingActivity  {
-	string name <- going_home;
-	Room get_place(BuildingIndividual p) {
-		return BuildingEntrance closest_to p;
-	}
-}
-
-species BuildingEatingOutside parent: BuildingActivity  {
-	string name <- eating_outside;
-	Room get_place(BuildingIndividual p) {
-		return BuildingEntrance closest_to p;
-	}
-}
-
-species BuildingSanitation parent: BuildingActivity{
-	Room get_place(BuildingIndividual p) {
-		if flip(0.3) {
-			return shuffle(activity_places) with_min_of length(first(each.entrances).people_waiting);
-		} else {
-			return activity_places closest_to p;
+		// Select a patient to go near
+		if(one_of(r.people_inside where (species(each) = Inpatient)) = nil){
+			write(r);
 		}
+		BuildingIndividual patient_to_visit <- one_of(r.people_inside where (species(each) = Inpatient));
+		geometry area_around_patient <- circle(rnd(1#m, 2#m), patient_to_visit.location); 
+		point pt <- any_location_in(inter(r, area_around_patient));
+
+		return r::pt;
 	}
-	
+}
+
+species ActivityGoToAdmissionRoom parent: BuildingActivity {
+	pair<Room, point> get_destination(BuildingIndividual p) {
+		Room r <- one_of(Room where (each.type = ADMISSION_ROOM));
+		point pt <- any_location_in(r);
+		return r::pt; 
+	}
+}
+
+species ActivityGoToMeeting parent: BuildingActivity {
+	pair<Room, point> get_destination(BuildingIndividual p) {
+		Room r <- first(Room where (each.type = MEETING_ROOM));
+		point pt <- any_location_in(r);
+		return r::pt; 
+	}
+}
+
+species ActivityLeaveBuilding parent: BuildingActivity {
+	pair<Room, point> get_destination(BuildingIndividual p) {
+		Room r <- BuildingEntrance closest_to p;
+		point pt <- r.location;
+		return r::pt; 
+	}
+}
+
+// Activities of nurses
+
+// Activities of Staffs
+
+species ActivityWander parent: BuildingActivity{
+	pair<Room, point> get_destination(BuildingIndividual p){
+		Room r <- any(Room);
+		point pt <- any_location_in(r);
+		return r::pt;
+	}
+}
+
+// Activities of inpatients
+
+species ActivityRest parent: BuildingActivity{
+	pair<Room, point> get_destination(BuildingIndividual p){
+		Room r <- Inpatient(p).assigned_ward;
+		point pt <- Inpatient(p).mybed.location;
+		return r::pt;
+	}
+}
+
+species ActivityWanderInWard parent: BuildingActivity{
+	pair<Room, point> get_destination(BuildingIndividual p){
+		Room r<- p.current_room;
+		point pt <- any_location_in(r);
+		return r::pt;
+	}
+}
+// Activities of outpatients
+
+// Activities of caregivers
+species ActivityTakeCare parent: BuildingActivity{
+	pair<Room, point> get_destination(BuildingIndividual p){
+		Room r <- Caregivers(p).sicker.assigned_ward;
+		geometry around_sicker <- circle(rnd(1#m, 2#m), Caregivers(p).sicker.mybed.location);
+		point pt <- any_location_in(inter(around_sicker, r));
+		return r::pt;
+	}
+}
+
+species ActivityWaitBench parent: BuildingActivity{
+	pair<Room, point> get_destination(BuildingIndividual p){
+		Room r <- p.current_room;
+		Caregivers(p).bench <- any(BenchWait where (each.is_occupied = false));
+		ask Caregivers(p).bench{
+			is_occupied <- true;
+		}
+		point pt <- Caregivers(p).bench.location;
+		return r::pt;
+	}
+}
+
+//species ActivityWanderAround parent: BuildingActivity{
+//	pair<Room, point> get_destination(BuildingIndividual p){
+//		Room r <- p.current_room;
+//		point pt <- any_location_in(inter(circle(3#m, location), r));
+//		return r::pt;
+//	}
+//}
+
+//species ActivityWanderInWard: like wander in ward of inpatient
+
+// Activities of interns
+
+species ActivityFollow parent: BuildingActivity{
+	pair<Room, point> get_destination(BuildingIndividual p){
+		Room r <- p.current_room;
+		point pt <- p.location;
+		return r::pt;
+	}
+}
+
+
+species BuildingSanitation parent: BuildingActivity {
+	pair<Room, point> get_destination(BuildingIndividual p) {
+		Room r;
+		if flip(0.3) {
+			r <- shuffle(activity_places) with_min_of length(first(each.entrances).people_waiting);
+		} else {
+			r <- activity_places closest_to p;
+		}
+		point pt <- any_location_in(r);
+		return r::pt;
+	}
 }
