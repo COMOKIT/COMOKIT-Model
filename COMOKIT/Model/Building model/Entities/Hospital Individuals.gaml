@@ -11,6 +11,7 @@ model HospitalIndividuals
 import "./BuildingIndividual.gaml"
 
 species Doctor parent: BuildingIndividual {
+	rgb color <- #white;
 	init {
 		location <- any_location_in(one_of(BuildingEntrance).init_place);
 		working_place <- one_of(Room where (each.type = DOCTOR_ROOM));
@@ -89,6 +90,7 @@ species Doctor parent: BuildingIndividual {
 }
 
 species Nurse parent: BuildingIndividual {
+	rgb color <-#blue;
 	init {
 		location <- any_location_in(one_of(BuildingEntrance).init_place);
 		working_place <- any(Room where (each.type = NURSE_ROOM));
@@ -159,6 +161,7 @@ species Nurse parent: BuildingIndividual {
 }
 
 species Staff parent: BuildingIndividual{
+	rgb color <- #lightblue;
 	init {
 		location <- any_location_in(one_of(BuildingEntrance).init_place);
 		working_place <- one_of(Room where (each.type = HALL));
@@ -176,6 +179,7 @@ species Staff parent: BuildingIndividual{
 }
 
 species Inpatient parent: BuildingIndividual {
+	rgb color <- #yellow;
 	Bed mybed;
 	Room assigned_ward;
 	list<Caregivers> carer;
@@ -183,7 +187,6 @@ species Inpatient parent: BuildingIndividual {
 		wandering <- true;
 		is_outside <- false;
 //		assigned_ward <- one_of(Room where (each.type = WARD and each.nb_affected < 5));
-//
 //		assigned_ward.people_inside << self;
 //		current_room <- assigned_ward;
 //		dst_room <- assigned_ward;
@@ -214,14 +217,14 @@ species Inpatient parent: BuildingIndividual {
 }
 
 species Caregivers parent: BuildingIndividual {
+	rgb color <- #orange;
 	Inpatient sicker;
-	BenchWait bench;
 	init {
 		// Some visitor might be infectious
-		if (flip(0.2)) {
-			do define_new_case;
-			latent_period <- 0.0;
-		}
+//		if (flip(0.2)) {
+//			do define_new_case;
+//			latent_period <- 0.0;
+//		}
 	}
 	
 	action initalization{
@@ -230,7 +233,7 @@ species Caregivers parent: BuildingIndividual {
 		ask sicker{
 			carer << myself;
 		}
-		location <- any_location_in(circle(rnd(1#m, 2#m), sicker.mybed.location));
+		location <- any_location_in(inter(circle(rnd(1#m, 2#m), sicker.mybed.location), sicker.assigned_ward));
 	}
 
 	map<date, BuildingActivity> get_daily_agenda {
@@ -242,13 +245,41 @@ species Caregivers parent: BuildingIndividual {
 		date care1 <- date("06:30", TIME_FORMAT_STR) + rnd(15#minute);
 		agenda[care1] <- first(ActivityTakeCare);
 		
+		date wait <- date("07:00", TIME_FORMAT_STR);
+		agenda[wait] <- first(ActivityWait);
+		
+		date care2 <- date("07:30", TIME_FORMAT_STR) + rnd(15#minute);
+		agenda[care2] <- first(ActivityTakeCare);
+		
+		date wander <- date("08:30", TIME_FORMAT_STR) + rnd(15#minute);
+		agenda[wander] <- first(ActivityWanderInWard);
+		
 		return agenda;
 	}
 
 }
 
-species interns parent: BuildingIndividual{
+species Outpatients parent: BuildingIndividual{
+	Doctor doc;
+	init{
+		
+	}
 	
+	map<date, BuildingActivity> get_daily_agenda {
+		map<date, BuildingActivity> agenda;		
+		return agenda;
+	}
+}
+
+species Interns parent: BuildingIndividual{
+	init{
+		
+	}
+	
+	map<date, BuildingActivity> get_daily_agenda {
+		map<date, BuildingActivity> agenda;		
+		return agenda;
+	}
 }
 
 

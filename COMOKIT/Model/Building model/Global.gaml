@@ -202,7 +202,10 @@ global {
 		ask Caregivers{
 			do initalization;
 		}
-		
+		ask any(Caregivers){
+			do define_new_case;
+			latent_period <- 0.0;
+		}
 		
 		ask initial_nb_infected among BuildingIndividual{
 			state <- init_state;

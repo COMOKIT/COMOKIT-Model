@@ -45,7 +45,7 @@ species BuildingActivity virtual: true {
 species ActivityGoToOffice parent: BuildingActivity {
 	pair<Room, point> get_destination(BuildingIndividual p) {
 		Room r <- p.working_place;
-		point pt <- any_location_in(r);
+		point pt <- p.working_desk = nil ? any_location_in(r):p.working_desk.location;
 		return r::pt;
 	}
 }
@@ -139,14 +139,18 @@ species ActivityTakeCare parent: BuildingActivity{
 	}
 }
 
-species ActivityWaitBench parent: BuildingActivity{
+species ActivityWait parent: BuildingActivity{
 	pair<Room, point> get_destination(BuildingIndividual p){
-		Room r <- p.current_room;
-		Caregivers(p).bench <- any(BenchWait where (each.is_occupied = false));
-		ask Caregivers(p).bench{
-			is_occupied <- true;
+		Room r <- first(Room where (each.type = HALL));
+		point pt;
+		if(!empty(BenchWait where (each.is_occupied = false))){
+			p.benchw <- any(BenchWait where (each.is_occupied = false));
+			p.benchw.is_occupied <- true;
+			pt <- p.benchw.location;
 		}
-		point pt <- Caregivers(p).bench.location;
+		else{
+			pt <- any_location_in(r);
+		}		
 		return r::pt;
 	}
 }

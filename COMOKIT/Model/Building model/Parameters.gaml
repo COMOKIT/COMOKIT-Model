@@ -46,7 +46,7 @@ global {
 	int initial_nb_infected<-5;
 	string init_state <- "symptomatic";
 	float infectionDistance <- 2#m;
-	float diminution_infection_rate_separator <- 0.9;
+	float diminution_infection_rate_separator <- 1.0;
 	float unit_cell_size <- 2#m;
 
 	float basic_viral_air_increase_per_day <- 0.1;
@@ -75,10 +75,10 @@ global {
 	bool display_pedestrian_path <- false parameter: "Display pedestrian path" category: "Visualization";
 	bool display_free_space <- false parameter: "Display free space" category: "Visualization";
 	bool display_desk <- false parameter: "Display desks" category: "Visualization";
-	bool display_room_entrance <- true parameter: "Display room entrance" category: "Visualization";
-	bool display_room_status <- false parameter: "Display room status" category: "Visualization";
+	bool display_room_entrance <- false parameter: "Display room entrance" category: "Visualization";
+	bool display_room_status <- true parameter: "Display room status" category: "Visualization";
 	bool display_infection_grid <- false parameter: "Display infection grid" category: "Visualization";
-	bool display_building_entrance <- true parameter: "Display building entrance" category: "Visualization";
+	bool display_building_entrance <- false parameter: "Display building entrance" category: "Visualization";
 
 	bool a_boolean_to_disable_parameters <- false;
 	
@@ -94,11 +94,11 @@ global {
 	//PEDESTRIAN PARAMETERS
 	float P_shoulder_length <- 0.2;
 	float P_proba_detour <- 0.5;
-	bool P_avoid_other <- true;
+	bool P_avoid_other <- false;
 	float P_obstacle_consideration_distance <- 3.0;
 	float P_pedestrian_consideration_distance <- 3.0;
 	float P_minimal_distance <- 0.0;
-	float P_tolerance_target <- 0.1;
+	float P_tolerance_target <- 0.2;
 	bool P_use_geometry_target <- true;
 
 	float P_A_pedestrian_SFM  <- 0.16;
