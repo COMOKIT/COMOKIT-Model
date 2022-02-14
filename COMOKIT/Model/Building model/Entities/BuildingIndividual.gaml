@@ -186,11 +186,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 	}
 
 	reflex in_room_behavior when: !is_outside and species(dst_room) != BuildingEntrance and (location overlaps dst_room) {
-		if (wandering) {
-			if (flip(wander_proba) and target = nil){
-				target <- any_location_in(dst_room);
-			}
-		} 
+		
 	}
 
 	reflex sanitation_behavior when: using_sanitation {
@@ -227,10 +223,13 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		if (empty (possible_entrances)) {
 			possible_entrances <- dst_room.entrances;
 		}
-		if(current_room != dst_room){
-			target <- first(possible_entrances).location;
-		}
-		target <- dst_point.location;
+//		if(current_room != dst_room){
+//			target <- first(possible_entrances).location;
+//		}
+		
+			target <- dst_point.location;
+		
+		
 //		go_oustide_room <- true;
 		is_outside <- false;
 //		goto_entrance <- false;
@@ -394,7 +393,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		if(!is_outside){
 
 			draw pple_walk size: people_size  at: location + {0, 0, 0.7} rotate: heading - 90 color: color;
-			if(is_infected){draw circle(0.4)  at: location + {0, 0, 0.7} color: get_color();}
+			if(is_infected){draw circle(0.7)  at: location + {0, 0, 0.7} color: get_color();}
 		}
 	}
 }

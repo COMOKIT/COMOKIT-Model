@@ -137,7 +137,8 @@ species Room parent: AbstractPlace {
 			loop p over: places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #gray border: #black;}
 		}
 		if(isVentilated ){
-		 	draw image_file("../../../Images/fan.png") size: 3;	
+			draw shape color: blend(#red, #green, min(1,viral_load*coeff_visu_virus_load_room/(shape.area)));
+//		 	draw image_file("../../../Images/fan.png") size: 3;	
 		}
 	}
 	
@@ -147,7 +148,7 @@ species CommonArea parent: Room ;
  
 species Wall frequency: 0{
 	aspect default {
-		draw shape + P_shoulder_length color: #white depth: 2.5#m;
+		draw shape + P_shoulder_length color: #white depth: default_ceiling_height;
 	}
 }
 

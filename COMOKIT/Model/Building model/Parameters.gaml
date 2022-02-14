@@ -43,10 +43,10 @@ global {
 	float sanitation_usage_duration <- 10 #s;
 
 	//EPIDEMIOLOGIC PARAMETERS
-	int initial_nb_infected<-5;
+	int initial_nb_infected<-1;
 	string init_state <- "symptomatic";
 	float infectionDistance <- 2#m;
-	float diminution_infection_rate_separator <- 1.0;
+	float diminution_infection_rate_separator <- 0.9;
 	float unit_cell_size <- 2#m;
 
 	float basic_viral_air_increase_per_day <- 0.1;
@@ -72,11 +72,11 @@ global {
 //	float nb_step_for_one_day <- #day / 1#s update: #day / 1#s;
 
 	//DISPLAY PARAMETERS
-	bool display_pedestrian_path <- false parameter: "Display pedestrian path" category: "Visualization";
+	bool display_pedestrian_path <- true parameter: "Display pedestrian path" category: "Visualization";
 	bool display_free_space <- false parameter: "Display free space" category: "Visualization";
 	bool display_desk <- false parameter: "Display desks" category: "Visualization";
 	bool display_room_entrance <- false parameter: "Display room entrance" category: "Visualization";
-	bool display_room_status <- true parameter: "Display room status" category: "Visualization";
+	bool display_room_status <- false parameter: "Display room status" category: "Visualization";
 	bool display_infection_grid <- false parameter: "Display infection grid" category: "Visualization";
 	bool display_building_entrance <- false parameter: "Display building entrance" category: "Visualization";
 

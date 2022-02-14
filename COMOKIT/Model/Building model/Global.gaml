@@ -199,15 +199,23 @@ global {
 		int nbDesk<-length(Room accumulate each.available_places);
 		do create_recurring_people;
 		
+		ask 1 among Doctor{
+			headdoc <- true;
+		}
+		ask Doctor{
+			do initalization;
+		}
+		ask 2 among (Doctor where (each.headdoc = false)){
+			nightshift <- true;
+		}
+		ask 4 among Nurse{
+			nightshift <- true;
+		}
 		ask Caregivers{
 			do initalization;
 		}
-		ask any(Caregivers){
-			do define_new_case;
-			latent_period <- 0.0;
-		}
 		
-		ask initial_nb_infected among BuildingIndividual{
+		ask initial_nb_infected among Caregivers{
 			state <- init_state;
 		}
 	}

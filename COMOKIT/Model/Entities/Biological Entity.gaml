@@ -220,7 +220,7 @@ species BiologicalEntity control:fsm{
 			tick <- 0.0;
 			do set_status;
 		}
-		tick <- tick+1;
+		tick <- tick + 1;
 		transition to: symptomatic when: (tick>=latent_period) and (self.is_symptomatic) and (presymptomatic_period>=0);
 		transition to: presymptomatic when: (tick>=latent_period) and (self.is_symptomatic) and (presymptomatic_period<0);
 		transition to: asymptomatic when: (tick>=latent_period) and (self.is_symptomatic=false);

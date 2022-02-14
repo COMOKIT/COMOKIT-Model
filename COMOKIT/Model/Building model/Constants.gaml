@@ -44,7 +44,7 @@ global {
 	string SFM <- "SFM";
 	string simple <- "simple";
 	
-	string TIME_FORMAT_STR <- "HH:mm";
+	string TFS <- "HH:mm";
 	
 	// Room types
 	string WARD <- "ward";
@@ -54,4 +54,9 @@ global {
 	string MEETING_ROOM <- "meeting_room";
 	string ADMISSION_ROOM <- "admission_room";
 	string HALL <- "hall";
+	string INJECT <- "injecting_room";
+	string MEDICINE <- "medicine_storage";
+	string MINOPERATION <- "minor_operation_room";
+	string ELEVATOR <- "elevator";
+	string STAIR <- "stairway";
 }
