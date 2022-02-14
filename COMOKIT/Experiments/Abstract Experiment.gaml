@@ -123,11 +123,11 @@ experiment "Abstract Experiment" virtual: true {
 				
 				if (use_activity_precomputation) {
 					int val <- round(255 * (1 - nb_currents / 10.0));
-					draw shape color: nb_currents > 0 ? rgb(val,val,255) : #white;
+					draw square(100.0) color: nb_currents > 0 ? rgb(val,val,255) : #white;
 				}
 				
 				
-				draw shape color: viral_load[original_strain] > 0 ? rgb(255 * viral_load[original_strain], 0, 0) : #lightgrey empty: true width: 2;
+				draw shape color: viral_load[original_strain] > 0 ? rgb(255 * viral_load[original_strain], 0, 0) : #lightgrey wireframe: true width: 2;
 			}
 
 			agents "Individual" value: all_individuals where  (not each.is_outside and each.is_active) {
@@ -140,7 +140,7 @@ experiment "Abstract Experiment" virtual: true {
 		display "default_3D_display" synchronized: false type: opengl background: #black draw_env: false virtual: true {
 			image file: file_exists(dataset_path + "/satellite.png") ? (dataset_path + "/satellite.png") : "../Utilities/white.png" transparency: 0.5 refresh: false;
 			species Building transparency: 0.7 refresh: false {
-				draw shape depth: rnd(50) color: #lightgrey empty: false width: 2;
+				draw shape depth: rnd(50) color: #lightgrey wireframe: false width: 2;
 			}
 
 			agents "Other" value: all_individuals where (not each.is_outside and each.clinical_status = recovered or each.state = susceptible) transparency: 0.5 {
@@ -159,7 +159,7 @@ experiment "Abstract Experiment" virtual: true {
 
 		display "simple_display" parent: default_display synchronized: false type: opengl background: #black virtual: true draw_env: false {
 			species Building {
-				draw shape color: #lightgrey empty: true width: 2;
+				draw shape color: #lightgrey wireframe: true width: 2;
 			}
 
 			agents "Individual" value: all_individuals where not (each.is_outside) {

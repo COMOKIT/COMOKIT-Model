@@ -51,6 +51,8 @@ global {
 }
 
 species AbstractPlace virtual: true {
+
+	int id_int;
 	//Viral load of the building
 	map<virus,float> viral_load <- [original_strain::0.0];
 	bool has_virus <- false;
@@ -61,6 +63,7 @@ species AbstractPlace virtual: true {
 	bool allow_transmission -> {allow_transmission_building};
 
 	//Action to add viral load to the building
+		//Action to add viral load to the building
 	action add_viral_load(float value, virus v <- original_strain){
 		if(allow_transmission_building)
 		{
@@ -68,7 +71,8 @@ species AbstractPlace virtual: true {
 			has_virus <- true;
 		}
 	}
-
+	
+	
 	action decrease_viral_load(float val) {
 		loop v over:viral_load.keys {
 			viral_load[v] <- max(0.0,viral_load[v] - val);
@@ -96,21 +100,34 @@ species Building parent: AbstractPlace {
 	list<Individual> individuals;
 	//Number of households in the building
 	int nb_households;
-	 
+	 list<int> individuals_id;
 	bool need_reinit <- false;
 	list<list<list<list<list<Individual>>>>> entities_inside;
+	list<list<list<list<list<int>>>>> entities_inside_int;
 	list<Individual> indiviudals;
-	int nb_currents  update: use_activity_precomputation and udpate_for_display ?  length(entities_inside[current_week][current_day][current_hour] accumulate each) : 0;
+	int nb_currents  update: use_activity_precomputation and udpate_for_display and precomputation_loaded and not empty(entities_inside_int)?  length(entities_inside_int[current_week][current_day][current_hour] accumulate each) : 0;
 	bool has_virus <- false;
-	
+	bool precomputation_loaded <- false;
+	list<Individual> individuals_concerned;
 	init {
 		if (fcts != nil) {
 			functions <- fcts split_with "$" ;
-			
 		}else {
-			functions << "";
+			if ((shape get "type") != nil){
+				functions << string(shape get "type") ; 
+			} else {
+				functions << "";
+			}
+			
 		}
+	
 	}
+	
+	action compute_individuals_str{
+		individuals_id <- entities_inside_int[current_week][current_day][current_hour] accumulate each;
+		need_reinit <- true;
+	}
+	
 	//Action to return the neighbouring buildings
 	list<Building> get_neighbors {
 		if empty(neighbors) {
@@ -135,17 +152,26 @@ species Building parent: AbstractPlace {
 	//Reflex to update disease cycle
 	reflex transmission_building when: allow_transmission_building and use_activity_precomputation and has_virus {
 		float start <- BENCHMARK ? machine_time : 0.0;
-		ask individuals {
-			loop v over: current_place.viral_load.keys {
-				if(flip(current_place.viral_load[v]*successful_contact_rate_building))
-				{
-					infectious_contacts_with[current_place] <- define_new_case(v);
+		if empty(individuals_id) {do compute_individuals_str;}
+		list<int> inds <- copy(individuals_id where (individuals_precomputation[each] = nil));
+		loop v over: viral_load.keys {
+			float vl <- viral_load[v];
+			loop id_ind over:inds  {
+				if(flip(vl*successful_contact_rate_building)) {
+					if not bot_abstract_individual_precomputation.is_immune(id_ind, v) {
+						AbstractIndividual ind <- world.load_individual(id_ind);
+						ask ind {do define_new_case(v);} 
+					}
 				}	
 			}
 		}
 		if BENCHMARK {bench["Building.transmission_building"] <- bench["Building.transmission_building"] + machine_time - start;}
 	}
 
+	reflex reinit_individuals when: need_reinit  {
+		individuals_id <- [];
+		need_reinit <- false;
+	}
 	aspect default {
 		draw shape color: #gray; //wireframe: true;
 	}
@@ -161,6 +187,7 @@ species outside parent: Building {
 	string type <- "Outside";
 	int nb_contaminated;
 	
+	bool is_active <- true; 	
 	/*
 	 * The action that will be called to mimic epidemic outside of the studied area
 	 */
@@ -175,13 +202,25 @@ species outside parent: Building {
 		}
 	}
 	
+	reflex transmission_building{}
+	
 	//Reflex to trigger infection when outside of the commune
-	reflex transmission_outside when: use_activity_precomputation{
+	reflex transmission_outside when: use_activity_precomputation and is_active and not empty(entities_inside_int){
 		float start <- BENCHMARK ? machine_time : 0.0;
-		/*loop i over: entities_inside[current_week][current_day][current_hour] accumulate each {
-			do outside_epidemiological_dynamic(i);	
-		}*/
+		if empty(individuals_id) {do compute_individuals_str;}
+		list<int> inds <- copy(individuals_id where (individuals_precomputation[each] = nil));
+		loop v over: proba_outside_contamination_per_hour.keys {
+			float proba <- proba_outside_contamination_per_hour[v];
+			loop id_ind over:inds  {
+				if flip(proba) {
+					if not bot_abstract_individual_precomputation.is_immune(id_ind, v) {
+						AbstractIndividual ind <- world.load_individual(id_ind);
+						ask ind {do define_new_case(v);} 
+					}
+				}	
+			}
+		}
 		if BENCHMARK {bench["Building.transmission_outside"] <- bench["Building.transmission_outside"] + machine_time - start;}
 	}
-	
+	reflex remove_if_not_necessary {}
 }

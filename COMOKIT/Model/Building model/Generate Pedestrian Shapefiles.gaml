@@ -8,7 +8,7 @@ model GeneratePedestrianShapefiles
 
 global {
 	string map_plan <- "Danang Hospital/nephrology_department";
-	string output_dir <- "../../generated/" + map_plan + "/";
+	string output_dir <- "../../Datasets/" + map_plan + "/generated/";
 
 	bool display_free_space <- false parameter: true;
 	float P_shoulder_length <- 0.5 parameter: true;
@@ -22,13 +22,13 @@ global {
 	float tol_cliping <- 1.0; //tolerance for the cliping in triangulation (float; distance),
 	float tol_triangulation <- 0.1; //tolerance for the triangulation 
 	float min_dist_obstacles_filtering <- 0.0;// minimal distance to obstacles to keep a path (float; if 0.0, no filtering),
-
+	string closed_walls_path <- "../../Datasets/" + map_plan + "/closed_walls.shp";
+	shape_file closed_walls_file <- file_exists(closed_walls_path) ? shape_file(closed_walls_path) : nil;
+		
 	geometry open_area;
 	geometry shape <- envelope(closed_walls_file);
 
 	init {
-		string closed_walls_path <- "../../Datasets/" + map_plan + "/closed_walls.shp";
-		shape_file closed_walls_file <- file_exists(closed_walls_path) ? shape_file(closed_walls_path) : nil;
 		shape_file walls_file <- shape_file("../../Datasets/" + map_plan + "/walls.shp");
 
 		if closed_walls_file != nil {

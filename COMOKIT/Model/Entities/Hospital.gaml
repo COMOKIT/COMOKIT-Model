@@ -43,4 +43,6 @@ species Hospital parent:Building {
 		draw shape+10 color: #black;
 	}
 
+	
+	reflex remove_if_not_necessary {}
 }

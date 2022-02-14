@@ -51,9 +51,9 @@ global {
 			} 
 		}
 		
-		if (csv_building_type_weights != nil) {
+		if file_exists(csv_building_type_weights_path) {
 			weight_bd_type_per_age_sex_class <- [];
-			matrix data <- matrix(csv_building_type_weights);
+			matrix data <- matrix(csv_file(csv_building_type_weights_path,",",string, false));
 			list<string> types;
 			loop i from: 3 to: data.columns - 1 {
 				types <<string(data[i,0]);
@@ -245,7 +245,11 @@ species Activity parent: AbstractActivity frequency: 0 {
 				return [bds closest_to i::[]];
 			}
 			match gravity {
-				map<Building,list<Individual>> targets <- i.building_targets[self][type] as_map (each::[]);
+				list<Building> bdss <- i.building_targets[self][type] ;
+				if empty(bdss) {
+					bdss <- [bds closest_to i];
+				}
+				map<Building,list<Individual>> targets <-bdss as_map (each::[]);
 				if BENCHMARK { 
 					bench["Activity."+ name+ ".find_target"] <- (bench contains_key ("Activity."+ name+ ".find_target") ? 
 					bench[("Activity."+ name+ ".find_target") ] : 0.0) + machine_time - start;

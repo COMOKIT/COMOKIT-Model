@@ -40,7 +40,7 @@ global {
 	
 	action create_realistic_indiv {
 		do read_mapping();
-		create pseudo_individual from:csv_population with:[age::convert_age(get(age_var))];
+		create pseudo_individual from:csv_file(csv_population_path,separator,qualifier,header) with:[age::convert_age(get(age_var))];
 	}
 	
 	/******************/
@@ -296,7 +296,7 @@ experiment batch_Contact_Tracking parent:"Abstract Experiment" type:batch
 experiment estimate_beta type:batch until:world.stop_sim() repeat:4 keep_seed:true {
 	
 	parameter 'increment contact rate' var: inc init: 0.0 min:0.0 max: 0.01 step:0.001;
-	method exhaustive minimize: Re_fitness;
+	method exhaustive;// minimize: Re_fitness;
 		
 	//the permanent section allows to define a output section that will be kept during all the batch experiment
 	permanent {

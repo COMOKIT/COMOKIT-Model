@@ -11,13 +11,13 @@
 
 @no_experiment
 
-model CoVid19
+model CoVid19 
 
 //import "Entities/Building.gaml"
 //import "Parameters.gaml"
 import "Global.gaml"
 
-/*
+/* 
  * All functions to initialize demographic attribute of the agent. It feature two type of initialization:
  * - use a file with #create_population_from_file to create a synthetic population from given attributes
  * - use the default algorithm provided in the toolkit: see #create_population for more info
@@ -45,11 +45,14 @@ global {
 	) {
 		
 		map<string,list<Individual>> households <- [];
-		
-		if not(csv_population_attribute_mappers=nil) { do read_mapping(); }
-		
-		create individual_species from:csv_population number: (number_of_individual <= 0 ? length(csv_population) :
-			(number_of_individual < length(csv_population) ? number_of_individual : length(csv_population)) 
+		do console_output(sample(csv_population_attribute_mappers_path) +" exist: " + sample(file_exists(csv_population_attribute_mappers_path)));
+		if (file_exists(csv_population_attribute_mappers_path)) { do read_mapping(); }
+		file csv_population <- csv_file(csv_population_path,separator,qualifier,header);
+		int pop_length <- length(csv_population);
+		do console_output("Number of inhabitants: " + pop_length);
+		do console_output("Number of inhabitants: " + pop_length +" " + sample(householdID) + " " + sample(separator) +" " + sample(qualifier) +" " + sample(header));
+		create individual_species from:csv_population number: (number_of_individual <= 0 ?  pop_length:
+			(number_of_individual <pop_length ? number_of_individual : pop_length) 
 		)
 		with:[
 			age::convert_age(get(age_var)),
@@ -64,6 +67,7 @@ global {
 		}
 		
 		list<Individual> hh_empty <- all_individuals where (each.household_id = nil);
+		do console_output("Number of inhabitants without households: " + length(hh_empty));
 		
 		// Do something to build household to mimic built-in generator
 		int hh_n <- sum(homes collect (each.nb_households));
@@ -173,7 +177,7 @@ global {
 	 * Read the synthetic entity variable mapping from parameter file
 	 */
 	action read_mapping {
-		matrix data <- matrix(csv_population_attribute_mappers);
+		matrix data <- matrix(csv_file(csv_population_attribute_mappers_path,",",true));
 		list<list> data_rows <- rows_list(data);
 		//Loading the different rows number for the parameters in the file
 		loop row over:data_rows{
@@ -267,7 +271,8 @@ global {
 		int min_student_age, int max_student_age
 	) {
 		
-		if (csv_parameter_population != nil) {
+		if (file_exists(csv_parameter_population_path)) {
+			csv_file csv_parameter_population <- csv_file(csv_parameter_population_path,",",true);
 			loop i from: 0 to: csv_parameter_population.contents.rows - 1 {
 				string parameter_name <- csv_parameter_population.contents[0,i];
 				float value <- float(csv_parameter_population.contents[1,i]);
@@ -525,7 +530,8 @@ global {
 	action define_agenda(int min_student_age, int max_student_age) {
 		
 		float t <- machine_time;
-		if (csv_parameter_agenda != nil) {
+		if (file_exists(csv_parameter_agenda_path)) {
+			csv_file csv_parameter_agenda <- csv_file(csv_parameter_agenda_path,",",true);
 			loop i from: 0 to: csv_parameter_agenda.contents.rows - 1 {
 				string parameter_name <- csv_parameter_agenda.contents[0,i];
 				if (parameter_name in world.shape.attributes.keys) {
@@ -545,8 +551,8 @@ global {
 				} 
 			}
 		}
-		if (csv_activity_weights != nil) {
-			matrix data <- matrix(csv_activity_weights);
+		if file_exists(csv_activity_weights_path) {
+			matrix data <- matrix(csv_file(csv_activity_weights_path,",",string, false));
 			weight_activity_per_age_sex_class <- [];
 			list<string> act_type;
 			loop i from: 3 to: data.columns - 1 {
@@ -836,49 +842,53 @@ global {
 	}
 	
 	
+	
+	
 	action load_population_and_agenda_from_file {
-		create individual_species from: file(file_population_precomputation_path) returns: individuals;
-		map<string,Building> all_buildings_map <- all_buildings as_map (to_bd_id(each)::each);
-		ask individuals {
+		create individual_species from: file(file_population_precomputation_path) returns: created_ind;
+		//individuals <- copy(created_ind);
+		all_buildings_map <- all_buildings as_map (to_bd_id(each)::each);
+		int  i_bd <- 0;
+		ask all_buildings_map.values {
+			entities_inside  <- [];
+			index_bd <- i_bd;
+			i_bd <- i_bd +1;
+		}
+	//	do init_user_activity_precomputation;
+		ask created_ind {
 			individual_id <- (string(shape get("id")));
-			household_id <- (string(shape get("h_id")));
+			//household_id <- (string(shape get("h_id")));
 			is_unemployed <- bool(string(shape get("is_unempl")));
 			home <- all_buildings_map[string(shape get("home_id"))];
-			if (home = nil) {
-				write sample(name) +" -> " + sample(string(shape get("home_id")));
+			list<string> bds_str <- string(shape get("buildings")) split_with ",";
+			loop bd_str over:  bds_str {
+				Building bd <- all_buildings_map[bd_str];
+				if bd != nil {
+					buildings_concerned << bd;
+				}
 			}
-			school <- all_buildings_map[string(shape get("school_id"))];
+			/*school <- all_buildings_map[string(shape get("school_id"))];
 			working_place <- all_buildings_map[string(shape get("wp_id"))];
 			relatives <- world.from_ids(string(shape get("rel_id")));
 			friends <- world.from_ids(string(shape get("friends_id")));
 			colleagues <- world.from_ids(string(shape get("col_id")));
 			last_activity <-first(staying_home);
-			activity_fellows <- relatives;
+			activity_fellows <- relatives;*/
 			
 			do enter_building(home);
 		}
-		do load_agenda(individuals,all_buildings_map);
+		//do load_agenda(individuals,all_buildings_map);
 		
 	} 
 	
-	action init_user_activity_precomputation {
-		ask all_buildings {
-			entities_inside  <- [];
+	action init_user_activity_precomputation_individual(Individual ind) {
+		ask ind {
+			index_building_agenda <- [];
+			index_group_in_building_agenda <- [];
+			buildings_concerned <- [];
 		}
 		loop times: nb_weeks_ref {
-			ask all_buildings {
-				list<list<list<list<Individual>>>> week_act <- [];
-				loop times: 7 {
-					list<list<list<Individual>>> day_act <- [];
-					loop times: 24 {
-						day_act << [];
-					}
-					week_act<<day_act; 
-				}
-				entities_inside << week_act;
-			}
-			ask all_individuals {
-				to_remove_if_actif <- [];
+			ask ind {
 				list<list<Building>> week_act <- [];
 				list<list<int>> week_act2 <- [];
 				loop times: 7 {
@@ -895,154 +905,266 @@ global {
 				index_building_agenda << week_act;
 				index_group_in_building_agenda << week_act2;
 			}
-			 	
-		}	
+		}
+	}
+	action init_user_activity_precomputation_building(Building bd) {
+		ask bd {
+			entities_inside <- [];
+		}
+		loop times: nb_weeks_ref {
+			ask bd {
+				list<list<list<list<Individual>>>> week_act <- [];
+				loop times: 7 {
+					list<list<list<Individual>>> day_act <- [];
+					loop times: 24 {
+						day_act << [];
+					}
+					week_act<<day_act; 
+				}
+				entities_inside << week_act;
+			}
+			
+		}
+	}
+		
+	action init_user_activity_precomputation_building_str(Building bd) {
+		loop times: nb_weeks_ref {
+			ask bd {
+				list<list<list<list<int>>>> week_act <- [];
+				loop times: 7 {
+					list<list<list<int>>> day_act <- [];
+					loop times: 24 {
+						day_act << [];
+					}
+					week_act<<day_act; 
+				}
+				entities_inside_int << week_act;
+			}
+			
+		}
 	}
 	
 	
-	action load_activity_building(list<Individual> entities, map<string,Building> all_buildings_map, string file_activity_precomputation_path ) {
-		do init_user_activity_precomputation;
-		bool is_folder <- folder_exists(file_activity_precomputation_path);
-		int cpt <- 0;
-		list<string> files <- is_folder ? (folder(file_activity_precomputation_path) collect (file_activity_precomputation_path+"/" + each)): [file_activity_precomputation_path];
-		//float p1;float p2;float p3;float p4;float p5;float p6; float p7;float p8;float p9;
-		int  i_bd <- 0;
-		ask all_buildings {
-			index_bd <- i_bd;
-			i_bd <- i_bd +1;
-		}
-		loop fp over: files {
-		//	float t_t <- machine_time;
-			cpt <- cpt + 1;
-			write "" + cpt +"/" + length(files) +" ->"+ fp;
-			file ff <- file(fp);
-			//p1 <- p1 + machine_time - t_t;
-			// t_t <- machine_time;
-			loop line over: ff {
-				
-				if line != nil and not empty(line) {
-					float t_p <- machine_time;
-					list<string> l1 <- line split_with "|";
-					Building bd <- all_buildings_map[l1[0]];
-					//p3 <- p3 + machine_time - t_p;
-					//t_p <- machine_time;
-					if bd != nil { 
-					
-						loop ll1 over: l1[1] split_with "&" {
-							//float t <- machine_time;
-		
-							list<string> l2 <- ll1 split_with ";";
-							
-							int w <- int(l2[0]);
-							int d <- int(l2[1]);
-							int h <- int(l2[2]);
-							
-							int bd_ind <- bd.index_bd;//all_buildings index_of bd;
-							//p5 <- p5 + machine_time - t;
-							//t <- machine_time;
-				
-							loop l3 over: l2[3] split_with "$" {
-								if l3 != nil and not empty(l3) {
-									list<string> l33 <-  l3 split_with ",";
-									
-									list<Individual> inds <- [];
-									int index <- length(bd.entities_inside[w][d][h]);
-									//float tt <- machine_time;
-									loop l4 over: l33{
-										if l4 != nil and not empty(l4) {
-											Individual ind <- entities[int(l4)]; 
-											ind.index_building_agenda[w][d][h] <- bd ;
-											ind.to_remove_if_actif<<[bd_ind, w,d,h, index] ;
-											ind.index_group_in_building_agenda[w][d][h] <- index ;
-											inds << ind;
-											
-										}
-									}
-									//p6 <- p6 + machine_time - tt;
-									//tt <- machine_time;
-									if not empty(inds) {
-										bd.entities_inside[w][d][h] <<inds;
-									}
-									//p7 <- p7 + machine_time - tt;
-								}
-							}
-							//p8 <- p8 + machine_time - t;
-				
-				
-						}
-						
+	action update_individual_intern(Individual ind,list<string> data_gen,	list<string> data_bd,list<string> data_gp, string file_activity_precomputation_path  ) {
+		float t <- machine_time;
+		do init_user_activity_precomputation_individual(ind);
+		ask ind {
+			loop i from: 11 to: length(data_gen) - 1{
+				string bd_str <- data_gen[i] replace ("]","");
+				Building bd <- all_buildings_map[bd_str];
+				if bd = nil {
+					bd <- world.load_building(bd_str,dataset_path+ precomputation_folder + file_building_precomputation_path,file_activity_precomputation_path+"/" +  file_building_precomputation_path);
+					if bd != nil {
+						all_buildings_map[bd_str] <- bd;
 					}
-					//p4 <- p4 + machine_time - t_p;
+				} else if not bd.precomputation_loaded {
+					ask world{do update_building(bd,file_activity_precomputation_path+"/" +  file_building_precomputation_path );}	
+				}
+				if (bd != nil) {
+					buildings_concerned << bd;
+					bd.individuals_concerned << self;
+				} else {
+					write bd_str + " " + bd;
 				}
 			}
-			//p2 <- p2 + machine_time - t_t;
+			home <- all_buildings_map[data_gen[10]];
 			
-			//write sample(p1) + " " + sample(p2)+ " " + sample(p3)+ " " + sample(p4)+ " " + sample(p5)+ " " + sample(p6)+ " " + sample(p7)+ " " + sample(p8)+ " " + sample(p9);
-			
-		}
-		write "file loaded";
-		
+			if home = nil {
+				write sample(data_gen) +" " + sample(data_gen[6]);
+			}
+			current_place <- home;
+			location <- home.location;
+			int d <- 0;
+			int h <- 0;
+			int w <- 0;
+			loop i from: 0 to: length(data_bd) - 1 {
+				if h = 24 {
+					h <- 0;
+					d <- d + 1;
+					if d = 7 {
+						d <- 0;
+						w <- w + 1;
+					}
+				}
+				index_group_in_building_agenda[w][d][h] <- int(data_gp[i]);
+				index_building_agenda[w][d][h] <- all_buildings_map[data_bd[i]];
+				h <- h +1;
+			}
+		} 
+		p20 <- p20 + machine_time - t;
 	}
 	
-	action load_agenda(list<Individual> individuals,map<string,Building> all_buildings_map) {
-		loop line over: file(file_agenda_precomputation_path) {
+	action update_individual(Individual ind) {
+		float t <- machine_time;
+		string file_activity_precomputation_path <-  not politic_is_active ? (dataset_path+ precomputation_folder + file_activity_without_policy_precomputation_path): (dataset_path+ precomputation_folder + file_activity_with_policy_precomputation_path) ;
+		string file_activity_precomputation_path_pop <- file_activity_precomputation_path +"/" + file_population_precomputation_path;
+		list<string> file_activity <- file(file_activity_precomputation_path_pop +"/" + ind.id_int + ".data").contents;
+		list<string> data_gen <- file_activity[0] split_with ",";
+		list<string> data_bd <-  file_activity[1] split_with ",";
+		list<string> data_gp <- file_activity[2] split_with ",";
+		do update_individual_intern(ind,data_gen,data_bd,data_gp,file_activity_precomputation_path);
+		
+		p19 <- p19 + machine_time - t;
+	 }
+	
+	AbstractIndividual load_individual(int ind_id) {
+		float t <- machine_time;
+		string file_activity_precomputation_path <-  not politic_is_active ? (dataset_path+ precomputation_folder + file_activity_without_policy_precomputation_path): (dataset_path+ precomputation_folder + file_activity_with_policy_precomputation_path) ;
+		string file_activity_precomputation_path_pop <- file_activity_precomputation_path +"/" + file_population_precomputation_path;
+		list<string> file_activity <- file(file_activity_precomputation_path_pop +"/" + ind_id + ".data").contents;
+		list<string> data_gen <- file_activity[0] split_with ",";
+		list<string> data_bd <-  file_activity[1] split_with ",";
+		list<string> data_gp <- file_activity[2] split_with ",";
+		
+		Individual ind ;
+		point loc <- {float(data_gen[1]), float(data_gen[2])}; 
+		create individual_species with:(id_int: int(data_gen[0]), location: loc, age:int(data_gen[3]), sex:int(data_gen[4]), is_unemployed:bool(data_gen[5]), 
+			factor_contact_rate_wearing_mask:float(data_gen[6]),proba_wearing_mask:float(data_gen[7]),vax_willingness:float(data_gen[8]),free_rider:bool(data_gen[9])) 
+		{
+			ind <- self;
+			map history <- agents_history[ind_id];
+			if history != nil {
+				immunity <- history["immunity"];
+				vaccine_history<- history["vaccine_history"];
+				
+			}
+		}
+		do update_individual_intern(ind,data_gen,data_bd,data_gp,file_activity_precomputation_path);
+		
+		file f <- file(dataset_path+ precomputation_folder + file_agenda_precomputation_path +"/" + ind_id + ".data");
+		loop line over:  f{
 			if "%%" in line {
 				list<string> l_pre <- line split_with "%%";
 				list<string> l <- l_pre[0] split_with "!!";
 				if (length(l) > 1) {
-					Individual ind <- individuals[int(l[0])];
 					list<map<int, pair<Activity,list<Individual>>>> week <- [];
-							
-					if (ind != nil) {
-						if (length(l_pre) > 1) and (l_pre[1] != nil){
-							ind.building_targets <- world.from_targets_id(l_pre[1], all_buildings_map);
+					if (length(l_pre) > 1) and (l_pre[1] != nil){
+						ind.building_targets <- world.from_targets_id(l_pre[1]);
+					}
+					loop d over: l[1] split_with "&&" {
+						if d != nil and not empty(d) {
+							map<int, pair<Activity,list<Individual>>> day <- [];
+							loop a over: d split_with "$$" {
+								if a != nil and not empty(a) {
+									list<string> act <- a split_with "@@";
+									Activity activity <- nil;
+									list<Individual> others <- [];
+										
+									if ("," in act[1]) {
+										list<string> aa <- act[1] split_with ",";
+										activity <- Activities[aa[0]];
+										/*loop i from: 1 to: length(aa) - 1 {
+											others << individuals[int(aa[i])];
+										}*/
+									} else {
+										activity <- Activities[act[1]];
+										
+									}
+									if activity != nil {
+										pair<Activity,list<Individual>> to_add <- activity::others;
+										int h <- int(act[0]);
+										day[h] <- to_add;
+											
+									} 
+								}
+							}
+							week << day;
+						} else {
+							week << [];
 						}
-						loop d over: l[1] split_with "&&" {
-							if d != nil and not empty(d) {
-								map<int, pair<Activity,list<Individual>>> day <- [];
-								loop a over: d split_with "$$" {
-									if a != nil and not empty(a) {
-										list<string> act <- a split_with "@@";
-										Activity activity <- nil;
-										list<Individual> others <- [];
-										if ("," in act[1]) {
-											list<string> aa <- act[1] split_with ",";
-											activity <- Activities[aa[0]];
-											loop i from: 1 to: length(aa) - 1 {
-												others << individuals[int(aa[i])];
-											}
-										} else {
-											activity <- Activities[act[1]];
+					}
+					ind.agenda_week <- week;
+					if(length(ind.agenda_week) < 7) {
+						loop times: 7 - length(ind.agenda_week) {
+							ind.agenda_week << [];
+						}
+					}
+				}
+			}			
+		}
+		p18 <- p18 + machine_time - t;
+		return ind;	
+	}
+	
+	// Creating the buildings from a file (should be overloaded to add more attributes to buildings)
+	Building load_building(string bd_str ,string file_bd_precomputation_path, string file_activity_precomputation_path ) {
+		float t <- machine_time;
+		
+		string path_f <-  file_bd_precomputation_path +"/"  +bd_str + ".data";
+		
+		if !file_exists(path_f) {
+			return nil;
+		}
+		list<string> data <- string(first(file(path_f).contents)) split_with ",";
+		
+		Building bd;
+		point loc <- {float(data[1]), float(data[2] replace("']", ""))};
+		
+		create Building with:(id_int: int(data[0] copy_between (2,length(data[0]))), location: loc) {
+			bd <- self;
+			if (length(data) > 3) {
+				loop i from: 3 to: length(data) - 1{
+					string fct <- data[i];
+					functions << fct;
+				}
+			} 
+		}
+		
+		p17 <- p17 + machine_time - t;
+		do update_building(bd,file_activity_precomputation_path );
+		return bd;
+	}
+	
+	// Creating the buildings from a file (should be overloaded to add more attributes to buildings)
+	action update_building(Building bd ,string file_activity_precomputation_path ) {
+		float t <- machine_time;
+		file_activity_precomputation_path <- file_activity_precomputation_path +"/"  +to_bd_id(bd) + ".data";
+		if bd != nil {
+			bd.precomputation_loaded <- true;
+			if file_exists(file_activity_precomputation_path) {
+				do init_user_activity_precomputation_building_str;
+				file ff <- file(file_activity_precomputation_path);
+				loop line over: ff {
+					if line != nil and not empty(line) and ("&" in line) {
+						list<string> l1 <- line split_with "|";
+						loop ll1 over: l1[1] split_with "&" {
+							list<string> l2 <- ll1 split_with ";";
+							int w <- int(l2[0]);
+							int d <- int(l2[1]);
+							int h <- int(l2[2]);
+									
+							int bd_ind <- bd.index_bd;//all_buildings index_of bd;
+							loop l3 over: l2[3] split_with "$" {
+								if l3 != nil and not empty(l3) {
+									list<string> l33 <-  l3 split_with ",";
+									list<int> inds <- [];
+									loop l4 over: l33{
+										if l4 != nil and not empty(l4) {
 											
-										}
-										if activity != nil {
-											pair<Activity,list<Individual>> to_add <- activity::others;
-											int h <- int(act[0]);
-											day[h] <- to_add;
-											
-										} else {
-											write sample(activity);
+											inds << int(l4);
 										}
 									}
+									if not empty(inds) {
+										bd.entities_inside_int[w][d][h] <<inds;
+									}
 								}
-								week << day;
-							} else {
-								week << [];
-							}
-						}
-						ind.agenda_week <- week;
-						if(length(ind.agenda_week) < 7) {
-							loop times: 7 - length(ind.agenda_week) {
-								ind.agenda_week << [];
 							}
 						}
 					}
 				}
-			}	
+			} else {
+				write "BUG ..... " + file_activity_precomputation_path;
+				//do pause;
+			}
+			
 		}
+		
+		p16 <- p16 + machine_time - t;
 	}
+
 	
-	map<Activity, map<string,list<Building>>> from_targets_id(string ids, map<string,Building> all_buildings_map ) {
+	
+	map<Activity, map<string,list<Building>>> from_targets_id(string ids ) {
 		map<Activity, map<string,list<Building>>> targets <- map([]);
 		if ids = nil or empty(ids) {return targets;}
 		list<string> acts <- ids split_with "$$";
@@ -1086,12 +1208,19 @@ global {
 		}
 		return list_ind;
 	}
-	 
+	
+	string to_bds_id (list<Building> bds){
+		string results <- "";
+		loop bd over: bds {
+			results <- results + "," + world.to_bd_id(bd);
+		}
+		return results;
+	}
 	string to_bd_id(Building bd) {
 		if bd = nil {
 			return "";
 		}
-		return string(species(bd)) +"_"+ int(bd);
+		return string(species(bd)) +"_"+ bd.id_int;
 	}
 	float t1;float t2;float t3;float t4;float t5;float t6;float t7;float t8;float t9;
 	map<Activity,float> time_act;
@@ -1099,6 +1228,16 @@ global {
 	action precompute_activities {
 		float t <- machine_time;
 		 do console_output( "precompute_activities start");
+		 int id_i <- 0;
+		 ask Building {
+		 	id_int <- id_i;
+		 	id_i <- id_i +1;
+		 }
+		if empty(all_buildings_map){
+			all_buildings_map <- (list<Building>(Building.population+(Building.subspecies accumulate each.population))) as_map (to_bd_id(each)::each);
+		}
+		 write sample(length(all_buildings_map));
+		
 		map<Building, int> to_index;
 		loop i from: 0 to: length(all_buildings) - 1 {
 			to_index[all_buildings[i]] <- i;
@@ -1109,14 +1248,21 @@ global {
 			activity_fellows <- relatives;
 		}
 		int i <- 0;
-		ask individual_species {
+		ask all_individuals {
 			id_int <- i;
 			i <- i + 1;
+			
+		}
+		loop ind over: all_individuals {
+			do init_user_activity_precomputation_individual(ind);
 		}
 
-		do init_user_activity_precomputation;
+		//do init_user_activity_precomputation;
+		loop bd over: all_buildings_map.values {
+			do init_user_activity_precomputation_building(bd);
+		} 
 		date date_ref <- copy(starting_date);
-		date date_end <- copy(date_ref) add_weeks nb_weeks_ref;
+		date date_end <- copy(date_ref) add_weeks nb_weeks_ref; 
 		
 		t1 <- t1 + machine_time - t;
 		do console_output( "end of first step of precomputation: " + t1);
@@ -1132,6 +1278,7 @@ global {
 				
 				break;
 			}
+			
 			int d <- date_ref.day_of_week - 1;
 			int h <- date_ref.hour;
 			int cpt <- 0;
@@ -1140,12 +1287,12 @@ global {
 			t2 <- t2 + machine_time - ttt;
 			ttt <- machine_time;
 			ask individual_species parallel: parallel_computation{
-				if (cpt mod int(length(individual_species)/100) = 0) {
+				/*if (cpt mod int(length(individual_species)/100) = 0) {
 					ask world{ do console_output( "processing precomputation: " + int(cpt * 100 / length(individual_species))  + "% " +
 						sample(t1) +" " + sample(t2)+" " + sample(t3)+" " + sample(t4)+" " + sample(t5)+" " + sample(t6)+" " + sample(t7)+" " + sample(t8) +" " + sample(t9) +" " + sample(time_act)
 						
 					);}
-				}
+				}*/
 				float tttt <- machine_time;
 				pair<Activity, list<Individual>> act <- agenda_week[d][h];
 				if (act.key != nil) {
@@ -1175,6 +1322,7 @@ global {
 						if not empty(bds_ind) {
 							current_place <- any(bds_ind.keys);
 							activity_fellows <- bds_ind[current_place];
+							buildings_concerned << current_place;
 						}
 							t7 <- t7 + machine_time - tttt;
 				
@@ -1184,12 +1332,12 @@ global {
 									}
 					}
 					if (current_place = nil) {
-					write name + "->" + act + " "+ agenda_week[d];
-				}else {
-					if (current_place.entities_inside = nil) {
-					write name + "->" + current_place;
-				}
-				}
+						write name + "->" + act + " "+ agenda_week[d];
+					}else {
+						if (current_place.entities_inside = nil) {
+							write name + "->" + current_place;
+						}
+					}
 
 				}
 				if BENCHMARK { 
@@ -1212,16 +1360,18 @@ global {
 							list<list<Individual>> ent <- ent_d[h];
 							bool added <- false;
 							int index <- ref_group[ind];
+							
+							buildings_concerned << current_place;
 							if (index != -1) and index < length(ent) {
 								ent[index] << self; 
 								index_building_agenda[w][d][h] <- current_place;
 								index_group_in_building_agenda[w][d][h] <- index;
-								to_remove_if_actif << [to_index[current_place], w, d, h, index];
+								//to_remove_if_actif << [to_index[current_place], w, d, h, index];
 							} else {
 								current_place.entities_inside[w][d][h] << [self];
 								index <- length(current_place.entities_inside[w][d][h]) - 1;
 								index_group_in_building_agenda[w][d][h] <- index;
-								to_remove_if_actif << [to_index[current_place], w, d, h, index];
+							//	to_remove_if_actif << [to_index[current_place], w, d, h, index];
 								index_building_agenda[w][d][h] <- current_place;
 								if (activity_fellows != nil) {
 									loop f over: activity_fellows {
@@ -1235,6 +1385,7 @@ global {
 					}
 					
 				}
+				buildings_concerned <- remove_duplicates(buildings_concerned);
 			}
 			t4 <- t4+ machine_time - ttt;
 			

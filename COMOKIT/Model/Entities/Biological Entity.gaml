@@ -408,7 +408,7 @@ species BiologicalEntity control:fsm{
 		transition to:susceptible when:clinical_status != dead and allow_reinfection {
 			infection_history[viral_agent] <+ current_date::clinical_status;
 			viral_agent <- nil;
-			is_susceptible <- false;
+			is_susceptible <- true;
 			// TODO : all epidemiological variable should be reset 
 		}
 	}

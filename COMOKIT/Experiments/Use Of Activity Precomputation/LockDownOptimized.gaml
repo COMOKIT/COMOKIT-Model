@@ -18,18 +18,16 @@
 
 model CoVid19
 
-import "../../Model/Global.gaml"
+import "../../Model/Global.gaml" 
 import "../Abstract Experiment.gaml"
 
 global {
 	//if true visualise the repartition of people (blue color); for full optimisation, set it to false
-	bool display_map <- true;
+	bool display_map <- false;
 	
 	// Parameter used to define the duration of the lockdown policy
 	int num_days <- 20 among: [0,10,20,30,60];
 
-
-	
 	//Parameter used to define the rate of individuals not following the lockdown - changing this value requires to recompute the building activity file (see Utilities/Generate activity precomputation)
 	float tolerance <- 0.05;
 	
@@ -39,53 +37,33 @@ global {
 			name <- "No containment policy";
 			policy <- create_no_containment_policy();
 		}
-		/*ask Authority {
+		ask Authority {
 			if (num_days > 0) {
 				policy <- with_tolerance(create_lockdown_policy_except([act_home]),tolerance); 
 				policy <- during(policy, num_days); 
 			}
-		}*/
+		}
 	}
 
 }
 
-experiment "all data" parent: "Abstract Experiment" autorun: true{
+
+experiment "Lockdown" parent: "Abstract Experiment" autorun: true{
 	action _init_ {
 		create simulation with:(
-			load_activity_precomputation_from_file: true, //if true, load file (in the generated folder) for the population, agenda, and activity precomputation.
 			use_activity_precomputation:true, //if true, used the precomputation mode
-			nb_weeks_ref:1, // number of different weeks precomputated - agents are going to always use them - increasing this value requires to recompute the building activity file (see Utilities/Generate activity precomputation)
-			udpate_for_display:false, // if true, make some additional computations to be able to display movement of people (color of buildings)
-			file_activity_with_policy_precomputation_path:nil, //precomputed activity file used when the policy is not applied
+			nb_weeks_ref:2, // number of different weeks precomputated - agents are going to always use them - increasing this value requires to recompute the building activity file (see Utilities/Generate activity precomputation)
+			udpate_for_display:display_map, // if true, make some additional computations to be able to display movement of people (color of buildings)
+			file_activity_with_policy_precomputation_path:"activity_lockdown_precomputation", //precomputed activity file used when the policy is not applied
 			file_activity_without_policy_precomputation_path:"activity_without_policy_precomputation", //precomputed activity  file used when the policy is applied
 			num_infected_init: 20 //init number of infected individuals
 		);
 	}
 	
-	/*output {
-		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
+	output {
+		//layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
 		
 		display "Main" refresh: display_map ? true : false parent: default_display {}
 		display "Plot" parent: states_evolution_chart {}	
-	}*/
-}
-experiment "Lockdown" parent: "Abstract Experiment" autorun: true{
-	action _init_ {
-		create simulation with:(
-			load_activity_precomputation_from_file: true, //if true, load file (in the generated folder) for the population, agenda, and activity precomputation.
-			use_activity_precomputation:true, //if true, used the precomputation mode
-			nb_weeks_ref:2, // number of different weeks precomputated - agents are going to always use them - increasing this value requires to recompute the building activity file (see Utilities/Generate activity precomputation)
-			udpate_for_display:display_map, // if true, make some additional computations to be able to display movement of people (color of buildings)
-			file_activity_with_policy_precomputation_path:"activity_lockdown_precomputation.data", //precomputed activity file used when the policy is not applied
-			file_activity_without_policy_precomputation_path:"activity_without_policy_precomputation.data", //precomputed activity  file used when the policy is applied
-			num_infected_init: 20 //init number of infected individuals
-		);
 	}
-	
-	/*output {
-		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
-		
-		display "Main" refresh: display_map ? true : false parent: default_display {}
-		display "Plot" parent: states_evolution_chart {}	
-	}*/
 }

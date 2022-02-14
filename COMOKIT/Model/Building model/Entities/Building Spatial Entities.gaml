@@ -260,15 +260,15 @@ species RoomEntrance {
 				break;
 			}
 			line_g <- line_g at_location last(queue_tmp.points );
-			point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
-			float nb <- max(0.5,(max(1, nb_places) * distance_queue) - queue_tmp.perimeter);
-			queue_tmp <-  line(queue_tmp.points + [pt + vector * nb ]);
-			list<geometry> ws <-Wall overlapping (queue_tmp+ 0.2);
-			ws <- ws +(((RoomEntrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue_tmp + 0.2);
-			if (consider_rooms) {ws <- ws +  Room overlapping (queue_tmp+ 0.2);}
+			point vector_ <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
+			float nb_ <- max(0.5,(max(1, nb_places) * distance_queue) - queue_tmp.perimeter);
+			queue_tmp <-  line(queue_tmp.points + [pt + vector_ * nb_ ]);
+			list<geometry> ws_ <-Wall overlapping (queue_tmp+ 0.2);
+			ws_ <- ws_ +(((RoomEntrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue_tmp + 0.2);
+			if (consider_rooms) {ws_ <- ws_ +  Room overlapping (queue_tmp+ 0.2);}
 			
-			if not empty(ws) {
-				loop w over: ws {
+			if not empty(ws_) {
+				loop w over: ws_ {
 					geometry g <- queue_tmp - w ;
 					if (g != nil) {
 							queue_tmp <- g.geometries with_min_of (each distance_to pt);

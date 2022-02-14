@@ -357,12 +357,35 @@ species DetectionPolicy parent: AbstractPolicy {
 	bool not_tested_only;
 
 	action apply {
-		list<Individual> individual_to_test <- symptomatic_only ? (not_tested_only ? all_individuals where (each.state = symptomatic and
-		each.report_status = not_tested) : all_individuals where (each.state = symptomatic)) : (not_tested_only ? all_individuals where (each.clinical_status != dead and
-		each.report_status = not_tested) : all_individuals where (each.clinical_status != dead));
-		ask nb_individual_tested_per_step among individual_to_test {
-			do test_individual;
+		
+		list<Individual> individual_to_test;
+		if (symptomatic_only) {
+			individual_to_test <-  not_tested_only ? (all_individuals where (each.state = symptomatic and each.report_status = not_tested)) : (all_individuals where (each.state = symptomatic));
+			ask nb_individual_tested_per_step among individual_to_test {
+				do test_individual;
+			}
+		} else {
+			if (use_activity_precomputation) {
+				list<int> inds <- all_individuals_id - individuals_dead;
+				if not_tested_only {
+					inds <- inds - individuals_tested;
+				}
+				loop id over:  nb_individual_tested_per_step among inds {
+					AbstractIndividual individual <- individuals_precomputation[id];
+					if individual != nil {
+						ask individual {do test_individual;}
+					} 
+					individuals_tested<<id;
+				}
+			} else {
+				individual_to_test <-  (not_tested_only ? all_individuals where (each.clinical_status != dead and each.report_status = not_tested) : all_individuals where (each.clinical_status != dead));
+				ask nb_individual_tested_per_step among individual_to_test {
+					do test_individual;
+				}
+			}
 		}
+		
+		
 	}
 	bool is_allowed (Individual i, Activity activity) {
 		return true;
@@ -440,7 +463,7 @@ species DetectionPolicy parent: AbstractPolicy {
  	
  	bool is_allowed (Individual i, Activity activity) { return true; }
  	
- }
+ } 
  
 
 /**
@@ -585,6 +608,7 @@ species HospitalisationPolicy parent: AbstractPolicy{
 				do try_add_individual_to_hospital(an_individual);
 			}
 		}
+		
 	}
 	//Preventing moving anywhere for people hospitalised
 	bool is_allowed (Individual i, Activity activity){

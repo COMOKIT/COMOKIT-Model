@@ -51,6 +51,17 @@ global
 	map<string, int> building_infections;
 	
 }
+species Abstract_individual_precomputation parent: BiologicalEntity schedules:[] {
+	bool is_immune(int id, virus infectious_agent) {
+		float t <- machine_time;
+		map history <-agents_history[id];
+		if (history != nil) {
+			immunity <-history["immunity"];
+			return  activate_immunity(infectious_agent);
+		}
+		return false;
+	}
+}
 
 species AbstractIndividual parent:BiologicalEntity {
 	int id_int;
@@ -119,7 +130,8 @@ species AbstractIndividual parent:BiologicalEntity {
 	int nb_max_fellow <- #max_int;
 	int index_home;
 	
-	list<list<int>> to_remove_if_actif;
+	list<Building> buildings_concerned;
+	//list<list<int>> to_remove_if_actif;
 	list<list<list<int>>> index_group_in_building_agenda;
 	list<list<list<Building>>> index_building_agenda;
 	
@@ -149,7 +161,9 @@ species AbstractIndividual parent:BiologicalEntity {
 		//Set the status of the Individual to latent (i.e. not infectious)
 		state <- "latent";
 		is_susceptible <- false;
-		
+		if (use_activity_precomputation) {
+			individuals_precomputation[id_int] <- self;
+		}
 		if(viral_agent.flip_epidemiological_aspect(self,epidemiological_proportion_asymptomatic)){ 
 			is_symptomatic <- false;
 			latent_period <- viral_agent.get_value_for_epidemiological_aspect(self,epidemiological_incubation_period_asymptomatic);
@@ -164,6 +178,7 @@ species AbstractIndividual parent:BiologicalEntity {
 	//#############################################################
 	//Actions
 	//#############################################################
+	
 	
 	//Action to call when performing a test on a individual
 	action test_individual
@@ -212,50 +227,59 @@ species AbstractIndividual parent:BiologicalEntity {
 	//Action to call to define a new case, obtaining different time to key events
 	bool define_new_case(virus infectious_agent)
 	{
-		if not activate_immunity(infectious_agent) {
-
-            if (use_activity_precomputation) {
-                if not empty(index_building_agenda) {
-                    current_place <- index_building_agenda[current_week][current_day][current_hour];
-                    loop l over: to_remove_if_actif {
-                        all_buildings[l[0]].entities_inside[l[1]][l[2]][l[3]][l[4]] >> self;
-                    }
-                }
-            }
-
-			//Add the new case to the total number of infected (not mandatorily known)
-			total_number_of_infected <- total_number_of_infected +1;
-			
-			//Add the infection to the infections having been caused in the building
-			loop fct over: current_place.functions  {
-				if (current_place != nil and building_infections.keys contains(fct))
-				{
-					building_infections[fct] <- building_infections[fct] +1;
+		if use_activity_precomputation {
+			is_active <- true;
+         
+		} 
+			if use_activity_precomputation or (not activate_immunity(infectious_agent)) {
+				
+				//Add the new case to the total number of infected (not mandatorily known)
+				total_number_of_infected <- total_number_of_infected +1;
+				
+				//Add the infection to the infections having been caused in the building
+				
+				loop fct over: current_place.functions  {
+					if(building_infections.keys contains(fct))
+					{
+						building_infections[fct] <- building_infections[fct] +1;
+					}
 				}
+				
+				//Add the infection to the infections of the same age
+				if(total_incidence_age.keys contains(self.age))
+				{
+					total_incidence_age[self.age] <- total_incidence_age[self.age] +1;
+				}
+				else
+				{
+					add 1 to: total_incidence_age at: self.age;
+				}
+				
+				// Add the activity done while being infected
+				infected_when <- last_activity; 
+				// Infected by
+				viral_agent <- infectious_agent;
+				// Start history of the infetion
+				infection_history[infectious_agent] <- map(current_date::INFECTED); 
+				 
+				do initialise_disease;
+				
+				return true;
 			}
 			
-			//Add the infection to the infections of the same age
-			if(total_incidence_age.keys contains(self.age))
-			{
-				total_incidence_age[self.age] <- total_incidence_age[self.age] +1;
-			}
-			else
-			{
-				add 1 to: total_incidence_age at: self.age;
-			}
+			return false;
 			
-			// Add the activity done while being infected
-			infected_when <- last_activity; 
-			// Infected by
-			viral_agent <- infectious_agent;
-			// Start history of the infetion
-			infection_history[infectious_agent] <- map(current_date::INFECTED); 
-			 
-			do initialise_disease;
-			
-			return true;
+		
+	}
+	// Allows to track who infect who 
+	action infect_someone_from_id(int succesful_contact_id) { 
+		if not bot_abstract_individual_precomputation.is_immune(succesful_contact_id, viral_agent) {
+			AbstractIndividual contact <- world.load_individual(succesful_contact_id);
+			contact.location <- location;
+			contact.current_place <- current_place;
+			do infect_someone(contact);
 		}
-		return false;
+		
 	}
 	
 	// Allows to track who infect who 
@@ -357,8 +381,7 @@ species AbstractIndividual parent:BiologicalEntity {
 	}
 }
 
-species Individual parent: AbstractIndividual 
-		schedules: shuffle(Individual where (each.is_active and (each.clinical_status != dead))) {
+species Individual parent: AbstractIndividual schedules: use_activity_precomputation ? shuffle(Individual) : shuffle(Individual where ((each.clinical_status != dead))){
 	//#############################################################
 	//Agenda and activities attributes
 	//#############################################################
@@ -457,6 +480,7 @@ species Individual parent: AbstractIndividual
 		//Computation of the reduction of the transmission when being asymptomatic/presymptomatic and/or wearing mask
 		if (use_activity_precomputation) {
 			current_place <- is_activity_allowed ? index_building_agenda[current_week][current_day][current_hour] : home;
+			is_at_home <- current_place = home;
 			if udpate_for_display {
 				location <- any_location_in(current_place);
 			}
@@ -489,9 +513,10 @@ species Individual parent: AbstractIndividual
 			float proba <- contact_rate*reduction_factor;
 					
 			if (use_activity_precomputation) {
-				list<list<Individual>> others <- current_place.entities_inside[current_week][current_day][current_hour];
-				if empty(current_place.individuals) {
-					ask current_place {do compute_individuals;}
+				list<list<int>> others <- current_place.entities_inside_int[current_week][current_day][current_hour];
+				
+				if empty(current_place.individuals_id) {
+					ask current_place {do compute_individuals_str;}
 				}
 				
 		
@@ -501,20 +526,22 @@ species Individual parent: AbstractIndividual
 				} else {
 					index <-  index_group_in_building_agenda[current_week][current_day][current_hour];
 				}
-				list<Individual> all_ag <- others accumulate each;
-				
-				loop ag over: is_at_home ? copy(others[index]) : (nb_max_fellow among others[index]) {
-					if  flip(proba){
-						do infect_someone(ag);
+				//list<Individual> all_ag <- others accumulate each;
+				if (index < length(others)) {
+					list<int> inds <- others[index];
+					if not empty(inds) {
+						inds <- copy((is_at_home ? inds : (nb_max_fellow among inds)) where (flip(proba) and (individuals_precomputation[each] = nil)));
+						loop ag over: inds {
+							do infect_someone_from_id(ag);
+						}	
 					}
 				}
-				
 				if (not is_at_home or current_place.nb_households > 1) {
 					float proba_actual <- proba * reduction_coeff_all_buildings_individuals;
-					loop ag over: current_place.individuals {
-						if  flip(proba_actual){
-							do infect_someone(ag);
-						}
+					list<int> inds <- copy(current_place.individuals_id where ( flip (proba_actual)  and (individuals_precomputation[each] = nil)));
+					loop ag over:inds  {
+						do infect_someone_from_id(ag);
+						
 					}
 				}
 				
@@ -523,13 +550,14 @@ species Individual parent: AbstractIndividual
 			} else { 
 				//If the Individual is at home, perform transmission on the household level with a higher factor
 				if (is_at_home) {
-					
-					loop succesful_contact over: relatives where (each.is_at_home and flip(proba) and (each.state = susceptible)) {
+						list<Individual> inds <-copy(relatives where (each.is_at_home and flip(proba) and (each.state = susceptible)));
+					loop succesful_contact over:inds {
 						do infect_someone(succesful_contact);
 					}
 					if (current_place.nb_households > 1) {
 						proba <- proba * reduction_coeff_all_buildings_individuals;
-						loop succesful_contact over:  current_place.individuals where (flip(proba) and (each.state = susceptible))
+						inds <-  copy(current_place.individuals where (flip(proba) and (each.state = susceptible)));
+						loop succesful_contact over: inds 
 				 		{
 				 			do infect_someone(succesful_contact);
 				 		}
@@ -547,7 +575,9 @@ species Individual parent: AbstractIndividual
 					
 					//Perform slightly reduced transmission with people not being involved in the activity but still being present
 					proba <- proba * reduction_coeff_all_buildings_individuals;
-					loop succesful_contact over: current_place.individuals where (flip(proba) and (each.state = susceptible))
+					list<Individual> inds <- copy(current_place.individuals where (flip(proba) and (each.state = susceptible)));
+						
+					loop succesful_contact over: inds
 			 		{
 						do infect_someone(succesful_contact);
 			 		}

@@ -34,68 +34,82 @@ global {
 	 
 	species<Individual> individual_species <- Individual; // by default
 	container<Individual> all_individuals -> {container<Individual>(individual_species.population+(individual_species.subspecies accumulate each.population))};
+	//map<string,string> state_individuals;
+	list agents_history;
+	list<int> all_individuals_id;
+	
 	list<Building> all_buildings;
-	geometry shape <- envelope(shp_buildings);
+	geometry shape <- envelope(file_exists(shp_boundary_path) ?shape_file(shp_boundary_path) : shape_file(shp_buildings_path) );
 	outside the_outside;
 	
 	list<string> possible_homes ;  //building type that will be considered as home	
 	map<string, list<string>> activities; //list of activities, and for each activity type, the list of possible building type
 	
+
+	list<AbstractIndividual> individuals_precomputation;
+	list<int> individuals_tested; 
+	list<int> individuals_dead;
+	map<string, Building> all_buildings_map;
 	
 	int current_week <- starting_date.week_of_year mod nb_weeks_ref update: current_date.week_of_year mod nb_weeks_ref;
 	int current_day <- starting_date.day_of_week - 1 update: current_date.day_of_week - 1;
 	int current_hour <- starting_date.hour update: current_date.hour;
 	
 	bool politic_is_active <- false;
+	Abstract_individual_precomputation bot_abstract_individual_precomputation;
 	float t_ref <- machine_time;
 	float t_ref2 <- machine_time;
 	action global_init {
 		
 		do console_output("global init");
+		create outside;
+		the_outside <- first(outside);
 		do init_building_type_parameters;
+			
+		if not use_activity_precomputation {
+			if (file_exists(shp_boundary_path) != nil) { create Boundary from: shape_file(shp_boundary_path); }
 		
-		if (shp_boundary != nil) { create Boundary from: shp_boundary; }
-		do create_buildings();
+			do create_buildings();
+			list<string> all_building_functions <- remove_duplicates(Building accumulate(each.functions)); 
+			loop aBuilding_Type over: all_building_functions
+			{
+				add 0 at: aBuilding_Type to: building_infections;
+			} 	
+		} else {
+			all_buildings_map[to_bd_id(the_outside)] <- the_outside;
+		}
 		
-		list<string> all_building_functions <- remove_duplicates(Building accumulate(each.functions)); 
-		loop aBuilding_Type over: all_building_functions
-		{
-			add 0 at: aBuilding_Type to: building_infections;
-		} 
 		//THIS SHOULD BE REMOVED ONCE WE FINALLY HAVE HOSPITAL IN SHAPEFILE
 		add 0 at: "Hospital" to: building_infections;
 		add 0 at: "Outside" to: building_infections;
 		do console_output("building and boundary : done");
 		
-		create outside;
-		the_outside <- first(outside);
 		do create_activities;
 		do create_hospital;
-		all_buildings <- list<Building>(Building.population+(Building.subspecies accumulate each.population));
-		do console_output("Activities and special buildings (hospitals and outside) : done");
+		if not use_activity_precomputation {
+			all_buildings <- list<Building>(Building.population+(Building.subspecies accumulate each.population));
+			do console_output("Activities and special buildings (hospitals and outside) : done");
+			do console_output("Start creating and locating population from "+(file_exists(csv_population_path)?"file":"built-in generator"));	
+			float t <- machine_time;
 		
-		map<string,list<Building>> buildings_per_activity <- build_buildings_per_function();
-		list<Building> homes <- remove_duplicates(possible_homes accumulate buildings_per_activity[each]);	
-		homes >> nil;
-		map<Building,float> working_places <- gather_available_workplaces(buildings_per_activity);
-		map<list<int>,list<Building>> schools <- gather_available_schoolplaces(buildings_per_activity);
-		int min_student_age <- min(schools.keys accumulate (each));
-		int max_student_age <- max(schools.keys accumulate (each));
-		do console_output("Finding homes, workplaces and schools : done");
-				
-		do console_output("Start creating and locating population from "+(csv_population!=nil?"file":"built-in generator"));	
-		float t <- machine_time;
-		
-		//optimized COMOKIT - read all the information from files
-		if (load_activity_precomputation_from_file ) {
-			do load_population_and_agenda_from_file();
-			ask all_individuals  { do initialise_epidemiological_behavior(); }
-		} else {
-			if(csv_population != nil) {
+			//do load_population_and_agenda_from_file();
+			//ask individuals  { do initialise_epidemiological_behavior(); }
+			map<string,list<Building>> buildings_per_activity <- build_buildings_per_function();
+			list<Building> homes <- remove_duplicates(possible_homes accumulate buildings_per_activity[each]);	
+			homes >> nil;
+			map<Building,float> working_places <- gather_available_workplaces(buildings_per_activity);
+			map<list<int>,list<Building>> schools <- gather_available_schoolplaces(buildings_per_activity);
+			int min_student_age <- min(schools.keys accumulate (each));
+			int max_student_age <- max(schools.keys accumulate (each));
+			do console_output("Finding homes, workplaces and schools : done");
+			
+			write sample(csv_population_path) +" " + sample(file_exists(csv_population_path));
+			if(file_exists(csv_population_path) ) {
 				do create_population_from_file(homes, min_student_age, max_student_age);
 			} else {
 				do create_population(working_places, schools, homes, min_student_age, max_student_age);
 			}
+			
 			do console_output("-- achieved in "+(machine_time-t)/1000+"s");
 			
 			do console_output("Start assigning school and workplaces");
@@ -119,25 +133,39 @@ global {
             do console_output("-- "+with_precision(all_individuals count (each.is_wearing_mask) * 1.0 / length(all_individuals),2)+"% wearing a mask  | "
                 +with_precision(mean(all_individuals collect (each.vax_willingness)),2)+" average vax hesitancy");
             do console_output("-- achieved in "+(machine_time-t)/1000+"s");
+            
+			total_number_individual <- length(all_individuals);
 
-			do console_output("Population of "+length(all_individuals)+" individuals");
-		}
-		
-		if (use_activity_precomputation) {
-			ask all_individuals {
-				is_active <- false;
+			do console_output("Population of "+total_number_individual+" individuals");		
+		} else {
+			//use to test immunity
+			create Abstract_individual_precomputation {
+				bot_abstract_individual_precomputation <- self;
+			}
+			//optimized COMOKIT - just get the list of possible agents
+			all_individuals_id <- list<string>(folder(dataset_path + precomputation_folder + file_agenda_precomputation_path).contents) collect int(each replace (".data",""));
+			total_number_individual <- length(all_individuals_id);
+			loop times: total_number_individual {
+				individuals_precomputation << nil;
+				agents_history<<nil;
+			}
+			write sample(length(agents_history));
+			ask outside {
+				is_active <- not empty(proba_outside_contamination_per_hour) and (sum(proba_outside_contamination_per_hour.values) > 0.0);
 			}
 		}
-		
-		write sample(all_individuals count each.is_active);
-		
+		do console_output("Population of "+total_number_individual+" individuals");	
 		do init_covid_cases();
 		do console_output("Introduce "+all_individuals count (each.is_infected)+" infected cases");
-		
-		total_number_individual <- length(all_individuals);
-
 	}
 	
+	
+	reflex clean_memory_info when: every(1#week) {
+		ask experiment{
+			do compact_memory;
+		}
+		write "Number of individuals: " + length(all_individuals) +" Number of buildings: " + length(all_buildings_map);
+	}
 	
 	
 	bool firsts <- true;
@@ -146,7 +174,7 @@ global {
 		firsts <- false;
 	}
 	
-	reflex end when: cycle > 24 and (all_individuals count (each.is_susceptible or (each.state = removed))) = length(all_individuals) {
+	reflex end when: cycle > 24 and (use_activity_precomputation ? empty(all_individuals): ((all_individuals count (each.is_susceptible or (each.state = removed))) = length(all_individuals))) {
 		write "nb cycle: " + cycle;
 		write "time tot: " + (machine_time - t_ref);
 		write "time cycle: " + (machine_time - t_ref2) / cycle;
@@ -154,7 +182,7 @@ global {
 		
 	}
 	action init_building_type_parameters {
-		csv_parameters <- csv_file(building_type_per_activity_parameters,",",true);
+		file csv_parameters <- csv_file(building_type_per_activity_parameters,",",true);
 		matrix data <- matrix(csv_parameters);
 		// Modifiers can be weights, age range, or anything else
 		list<string> available_modifiers <- [WEIGHT,RANGE];
@@ -201,11 +229,14 @@ global {
 	
 	// Creating the buildings from a file (should be overloaded to add more attributes to buildings)
 	action create_buildings {
-		if (shp_buildings != nil) { 
-			create Building from: shp_buildings with: [fcts::string(read(type_shp_attribute)), nb_households::max(1,int(read(flat_shp_attribute)))];
+		if (file_exists(shp_buildings_path) != nil) { 
+			create Building from: shape_file(shp_buildings_path) with: [fcts::string(read(type_shp_attribute)), nb_households::max(1,int(read(flat_shp_attribute)))] ;
 		}
 		else {error "The mandatory shapefile of buildings is missing !";}
+		
 	} 
+	
+	
 		
 	// gather all workplaces with the area
 	map<Building,float> gather_available_workplaces(map<string,list<Building>> blds_per_activity) {
@@ -240,7 +271,7 @@ global {
 		if(load_epidemiological_parameter_from_file and file_exists(epidemiological_parameters)) {
 			float t <- machine_time;
 			// Read the file data
-			csv_parameters <- csv_file(epidemiological_parameters,true);
+			file csv_parameters <- csv_file(epidemiological_parameters,true);
 			matrix data <- matrix(csv_parameters);
 			
 			// found header schem
@@ -507,25 +538,29 @@ global {
 	
 	reflex need_to_load when: use_activity_precomputation and (Authority[0].policy.is_active()  != politic_is_active){
 		politic_is_active <- Authority[0].policy.is_active();
-		do update_precomputed_activity;
+		if (file_activity_without_policy_precomputation_path != file_activity_with_policy_precomputation_path) {
+				do update_precomputed_activity;		
+		}
 	}
 
 	action update_precomputed_activity {
-		if (load_activity_precomputation_from_file) {
-			do load_activity_building(all_individuals as list, all_buildings as_map (to_bd_id(each)::each), not politic_is_active ? (dataset_path+ precomputation_folder + file_activity_without_policy_precomputation_path): (dataset_path+ precomputation_folder + file_activity_with_policy_precomputation_path));
-		} else {
-			do precompute_activities;
+		ask all_buildings {
+			entities_inside_int <- [];
+			individuals_precomputation <- [];
+			precomputation_loaded <- false;
 		}
+		write "update precomputation";
+		
+		ask  all_individuals {
+			ask world {do update_individual(myself);}
+		}
+		
 		if udpate_for_display {
 			ask container<Building>(Building.population+(Building.subspecies accumulate each.population)) {
-				nb_currents  <- length(entities_inside[current_week][current_day][current_hour] accumulate each);		
+				nb_currents  <- empty(entities_inside) ? 0  :length(entities_inside[current_week][current_day][current_hour] accumulate each);		
 			}
 		}
-		ask all_individuals where not each.is_susceptible {
-			loop l over: to_remove_if_actif {
-				all_buildings[l[0]].entities_inside[l[1]][l[2]][l[3]][l[4]] >> self;
-			}
-		}
+		
 	}
 		 
 	 /*
@@ -552,7 +587,17 @@ global {
 	  * Initialize sars-cov-2 infected agents at start
 	  */
 	 action init_covid_cases {
-	 	ask num_infected_init among all_individuals { do define_new_case(original_strain); }
+	 	if (use_activity_precomputation) {
+	 		list<int> infected_individuals <- num_infected_init among all_individuals_id;
+	 		loop id_id over: infected_individuals {
+	 			do load_individual(id_id);
+	 		}
+	 		ask all_individuals {
+	 			do define_new_case(original_strain);
+	 		}
+	 	} else {
+	 		ask num_infected_init among all_individuals { do define_new_case(original_strain); }
+	 	}
 	 }
 	
 	// ------------- //
@@ -574,6 +619,8 @@ global {
 	
 	// Global debug mode to print in console all messages called from #console_output()
 	bool DEBUG <- true;
+	bool SAVE_LOG <- true;
+	string log_name <- "log.txt";
 	list<string> levelList const:true <- ["trace","debug","warning","error"]; 
 	// the available level of debug among debug, error and warning (default = debug)
 	string LEVEL init:"debug" among:["trace","debug","warning","error"];
@@ -588,6 +635,7 @@ global {
 					default {write msg;}
 				}	
 			}
+			if SAVE_LOG {save msg to:log_name rewrite: false type:text;}
 		}
 	}
 	
@@ -595,7 +643,11 @@ global {
 	// BENCHMARK //
 	// --------- //
 	
-	bool BENCHMARK <- true;
+	bool BENCHMARK <- false;
+	float p1;float p2;float p3;float p4;float p5;float p6;float p7;float p8;float p9;float p10;
+	float p11;float p12;float p13;float p14;float p15;float p16;float p17;float p18;float p19;float p20;
+	
+	
 	
 	map<string,float> bench <- [
 		"Abstract Batch Experiment.observerPattern"::0.0,
@@ -614,7 +666,7 @@ global {
 		"Individual.add_to_ICU"::0.0
 	];
 	
-	reflex benchmark_info when: every(10#cycle) {
+	reflex benchmark_info when:BENCHMARK and every(10#cycle) {
 		write bench;
 	}
 

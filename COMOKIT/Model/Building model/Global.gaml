@@ -216,9 +216,9 @@ global {
 		loop floor_name over: floor_dirs {
 			shape_file rooms_shape_file <- shape_file("../../Datasets/" + floor_name + "/rooms.shp");
 			shape_file walls_shape_file <- shape_file("../../Datasets/" + floor_name + "/walls.shp");
-			shape_file pedestrian_path_shape_file <- shape_file("../../generated/" + floor_name + "/pedestrian_paths.shp");
-			shape_file free_spaces_shape_file <- shape_file("../../generated/" + floor_name + "/free_spaces.shp");
-			shape_file open_area_shape_file <- shape_file("../../generated/" + floor_name + "/open_area.shp");
+			shape_file pedestrian_path_shape_file <- shape_file("../../Datasets/" + floor_name + "/generated/pedestrian_paths.shp");
+			shape_file free_spaces_shape_file <- shape_file("../../Datasets/" + floor_name + "/generated/free_spaces.shp");
+			shape_file open_area_shape_file <- shape_file("../../Datasets/" + floor_name + "/generated/open_area.shp");
 
 			geometry floor_shape <- envelope(envelope(pedestrian_path_shape_file) + envelope(walls_shape_file) + envelope(rooms_shape_file));
 			float floor_w <- floor_shape.width;

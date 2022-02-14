@@ -1,0 +1,1210 @@
+[Global.gaml] Start experiment ---
+[Global.gaml] finished before init ---
+[Global.gaml] Init epidemiological global parameters ---
+[Global.gaml] finished setting epidemiological parameters ---
+[Global.gaml] Init sars-cov-2 and variants ---
+[Global.gaml] 	----first(original_sars_cov_2).get_epi_id() -: 'SARS-CoV-2|mutation_profile -: [1.0,1.0,1.0,1.0,1.0,1.0]'
+[Global.gaml] 	Sars-CoV-2 original strain created (0.02s)
+[myself -: sarscov2[1]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Alpha|mutation_profile -: [1.1,1.5,1.0,1.4,1.0,1.0]'
+[myself -: sarscov2[2]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Beta|mutation_profile -: [2.0,1.5,1.0,1.0,1.0,1.0]'
+[myself -: sarscov2[3]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Delta|mutation_profile -: [1.5,2.0,1.0,1.5,1.5,1.5]'
+[myself -: sarscov2[4]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Gamma|mutation_profile -: [2.0,1.0,1.0,1.0,1.0,1.0]'
+[Global.gaml] 	Variants created - VOC:['Alpha','Beta','Delta','Gamma'] - VOI:[] (0.02s)
+[Global.gaml] Init vaccines ----
+[Global.gaml] 	Vaccines: ['COMIRNATY','VAXZEVRIA'] created (0.0s)
+[Global.gaml] finished initializing of vaccines and variants ---
+[Global.gaml] global init
+[Global.gaml] building and boundary : done
+[Global.gaml] Activities and special buildings (hospitals and outside) : done
+[Global.gaml] Start creating and locating population from built-in generator
+[Global.gaml] Finding homes, workplaces and schools : done
+[Global.gaml] -- achieved in 0.657s
+[Global.gaml] Start assigning school and workplaces
+[Global.gaml] -- achieved in 0.624s
+[Global.gaml] Start building friendship network
+[Global.gaml] 0.9942691431333287 processed
+[Global.gaml] 1.9885382862666574 processed
+[Global.gaml] 2.982807429399986 processed
+[Global.gaml] 3.977076572533315 processed
+[Global.gaml] 4.971345715666644 processed
+[Global.gaml] 5.965614858799972 processed
+[Global.gaml] 6.959884001933301 processed
+[Global.gaml] 7.95415314506663 processed
+[Global.gaml] 8.948422288199959 processed
+[Global.gaml] 9.942691431333287 processed
+[Global.gaml] 10.936960574466616 processed
+[Global.gaml] 11.931229717599944 processed
+[Global.gaml] 12.925498860733274 processed
+[Global.gaml] 13.919768003866603 processed
+[Global.gaml] 14.91403714699993 processed
+[Global.gaml] 15.90830629013326 processed
+[Global.gaml] 16.902575433266588 processed
+[Global.gaml] 17.896844576399918 processed
+[Global.gaml] 18.891113719533244 processed
+[Global.gaml] 19.885382862666575 processed
+[Global.gaml] 20.879652005799905 processed
+[Global.gaml] 21.87392114893323 processed
+[Global.gaml] 22.86819029206656 processed
+[Global.gaml] 23.862459435199888 processed
+[Global.gaml] 24.856728578333218 processed
+[Global.gaml] 25.85099772146655 processed
+[Global.gaml] 26.845266864599875 processed
+[Global.gaml] 27.839536007733205 processed
+[Global.gaml] 28.83380515086653 processed
+[Global.gaml] 29.82807429399986 processed
+[Global.gaml] 30.822343437133192 processed
+[Global.gaml] 31.81661258026652 processed
+[Global.gaml] 32.810881723399845 processed
+[Global.gaml] 33.805150866533175 processed
+[Global.gaml] 34.799420009666505 processed
+[Global.gaml] 35.793689152799836 processed
+[Global.gaml] 36.787958295933166 processed
+[Global.gaml] 37.78222743906649 processed
+[Global.gaml] 38.77649658219982 processed
+[Global.gaml] 39.77076572533315 processed
+[Global.gaml] 40.76503486846648 processed
+[Global.gaml] 41.75930401159981 processed
+[Global.gaml] 42.75357315473313 processed
+[Global.gaml] 43.74784229786646 processed
+[Global.gaml] 44.74211144099979 processed
+[Global.gaml] 45.73638058413312 processed
+[Global.gaml] 46.73064972726645 processed
+[Global.gaml] 47.724918870399776 processed
+[Global.gaml] 48.719188013533106 processed
+[Global.gaml] 49.713457156666436 processed
+[Global.gaml] 50.707726299799766 processed
+[Global.gaml] 51.7019954429331 processed
+[Global.gaml] 52.69626458606642 processed
+[Global.gaml] 53.69053372919975 processed
+[Global.gaml] 54.68480287233308 processed
+[Global.gaml] 55.67907201546641 processed
+[Global.gaml] 56.67334115859974 processed
+[Global.gaml] 57.66761030173306 processed
+[Global.gaml] 58.66187944486639 processed
+[Global.gaml] 59.65614858799972 processed
+[Global.gaml] 60.650417731133054 processed
+[Global.gaml] 61.644686874266384 processed
+[Global.gaml] 62.63895601739971 processed
+[Global.gaml] 63.63322516053304 processed
+[Global.gaml] 64.62749430366637 processed
+[Global.gaml] 65.62176344679969 processed
+[Global.gaml] 66.61603258993303 processed
+[Global.gaml] 67.61030173306635 processed
+[Global.gaml] 68.60457087619969 processed
+[Global.gaml] 69.59884001933301 processed
+[Global.gaml] 70.59310916246633 processed
+[Global.gaml] 71.58737830559967 processed
+[Global.gaml] 72.581647448733 processed
+[Global.gaml] 73.57591659186633 processed
+[Global.gaml] 74.57018573499965 processed
+[Global.gaml] 75.56445487813298 processed
+[Global.gaml] 76.55872402126631 processed
+[Global.gaml] 77.55299316439964 processed
+[Global.gaml] 78.54726230753298 processed
+[Global.gaml] 79.5415314506663 processed
+[Global.gaml] 80.53580059379962 processed
+[Global.gaml] 81.53006973693296 processed
+[Global.gaml] 82.52433888006628 processed
+[Global.gaml] 83.51860802319962 processed
+[Global.gaml] 84.51287716633294 processed
+[Global.gaml] 85.50714630946626 processed
+[Global.gaml] 86.5014154525996 processed
+[Global.gaml] 87.49568459573293 processed
+[Global.gaml] 88.48995373886626 processed
+[Global.gaml] 89.48422288199959 processed
+[Global.gaml] 90.47849202513291 processed
+[Global.gaml] 91.47276116826625 processed
+[Global.gaml] 92.46703031139957 processed
+[Global.gaml] 93.4612994545329 processed
+[Global.gaml] 94.45556859766623 processed
+[Global.gaml] 95.44983774079955 processed
+[Global.gaml] 96.44410688393289 processed
+[Global.gaml] 97.43837602706621 processed
+[Global.gaml] 98.43264517019955 processed
+[Global.gaml] 99.42691431333287 processed
+[Global.gaml] -- achieved in 4.913s
+[Global.gaml] Start defining agendas
+[synthetic population.gaml] -- input parameters processed in 0.18s
+[synthetic population.gaml]  || 0.009939709956004562 processed in 0.076s
+[synthetic population.gaml]  || 0.019879419912009123 processed in 0.141s
+[synthetic population.gaml]  || 0.02981912986801369 processed in 0.192s
+[synthetic population.gaml]  || 0.03975883982401825 processed in 0.246s
+[synthetic population.gaml]  || 0.04969854978002281 processed in 0.299s
+[synthetic population.gaml]  || 0.05963825973602738 processed in 0.346s
+[synthetic population.gaml]  || 0.06957796969203194 processed in 0.395s
+[synthetic population.gaml]  || 0.0795176796480365 processed in 0.446s
+[synthetic population.gaml]  || 0.08945738960404107 processed in 0.495s
+[synthetic population.gaml]  || 0.09939709956004562 processed in 0.545s
+[synthetic population.gaml]  || 0.10933680951605018 processed in 0.594s
+[synthetic population.gaml]  || 0.11927651947205475 processed in 0.641s
+[synthetic population.gaml]  || 0.12921622942805933 processed in 0.686s
+[synthetic population.gaml]  || 0.13915593938406387 processed in 0.734s
+[synthetic population.gaml]  || 0.14909564934006844 processed in 0.802s
+[synthetic population.gaml]  || 0.159035359296073 processed in 0.848s
+[synthetic population.gaml]  || 0.16897506925207756 processed in 0.888s
+[synthetic population.gaml]  || 0.17891477920808213 processed in 0.929s
+[synthetic population.gaml]  || 0.18885448916408668 processed in 0.969s
+[synthetic population.gaml]  || 0.19879419912009125 processed in 1.007s
+[synthetic population.gaml]  || 0.20873390907609582 processed in 1.046s
+[synthetic population.gaml]  || 0.21867361903210036 processed in 1.084s
+[synthetic population.gaml]  || 0.22861332898810494 processed in 1.12s
+[synthetic population.gaml]  || 0.2385530389441095 processed in 1.166s
+[synthetic population.gaml]  || 0.24849274890011405 processed in 1.236s
+[synthetic population.gaml]  || 0.25843245885611865 processed in 1.286s
+[synthetic population.gaml]  || 0.26837216881212317 processed in 1.33s
+[synthetic population.gaml]  || 0.27831187876812774 processed in 1.367s
+[synthetic population.gaml]  || 0.2882515887241323 processed in 1.4s
+[synthetic population.gaml]  || 0.2981912986801369 processed in 1.446s
+[synthetic population.gaml]  || 0.30813100863614146 processed in 1.49s
+[synthetic population.gaml]  || 0.318070718592146 processed in 1.532s
+[synthetic population.gaml]  || 0.32801042854815055 processed in 1.583s
+[synthetic population.gaml]  || 0.3379501385041551 processed in 1.628s
+[synthetic population.gaml]  || 0.3478898484601597 processed in 1.69s
+[synthetic population.gaml]  || 0.35782955841616426 processed in 1.748s
+[synthetic population.gaml]  || 0.36776926837216883 processed in 1.851s
+[synthetic population.gaml]  || 0.37770897832817335 processed in 1.895s
+[synthetic population.gaml]  || 0.3876486882841779 processed in 1.933s
+[synthetic population.gaml]  || 0.3975883982401825 processed in 1.97s
+[synthetic population.gaml]  || 0.40752810819618707 processed in 2.004s
+[synthetic population.gaml]  || 0.41746781815219164 processed in 2.045s
+[synthetic population.gaml]  || 0.4274075281081962 processed in 2.077s
+[synthetic population.gaml]  || 0.4373472380642007 processed in 2.11s
+[synthetic population.gaml]  || 0.4472869480202053 processed in 2.16s
+[synthetic population.gaml]  || 0.45722665797620987 processed in 2.202s
+[synthetic population.gaml]  || 0.46716636793221444 processed in 2.249s
+[synthetic population.gaml]  || 0.477106077888219 processed in 2.286s
+[synthetic population.gaml]  || 0.4870457878442236 processed in 2.319s
+[synthetic population.gaml]  || 0.4969854978002281 processed in 2.351s
+[synthetic population.gaml]  || 0.5069252077562327 processed in 2.382s
+[synthetic population.gaml]  || 0.5168649177122373 processed in 2.413s
+[synthetic population.gaml]  || 0.5268046276682418 processed in 2.449s
+[synthetic population.gaml]  || 0.5367443376242463 processed in 2.484s
+[synthetic population.gaml]  || 0.5466840475802509 processed in 2.518s
+[synthetic population.gaml]  || 0.5566237575362555 processed in 2.552s
+[synthetic population.gaml]  || 0.56656346749226 processed in 2.58s
+[synthetic population.gaml]  || 0.5765031774482646 processed in 2.61s
+[synthetic population.gaml]  || 0.5864428874042692 processed in 2.641s
+[synthetic population.gaml]  || 0.5963825973602738 processed in 2.67s
+[synthetic population.gaml]  || 0.6063223073162783 processed in 2.704s
+[synthetic population.gaml]  || 0.6162620172722829 processed in 2.731s
+[synthetic population.gaml]  || 0.6262017272282875 processed in 2.76s
+[synthetic population.gaml]  || 0.636141437184292 processed in 2.79s
+[synthetic population.gaml]  || 0.6460811471402965 processed in 2.819s
+[synthetic population.gaml]  || 0.6560208570963011 processed in 2.848s
+[synthetic population.gaml]  || 0.6659605670523057 processed in 2.876s
+[synthetic population.gaml]  || 0.6759002770083102 processed in 2.903s
+[synthetic population.gaml]  || 0.6858399869643148 processed in 2.928s
+[synthetic population.gaml]  || 0.6957796969203194 processed in 2.955s
+[synthetic population.gaml]  || 0.705719406876324 processed in 2.991s
+[synthetic population.gaml]  || 0.7156591168323285 processed in 3.025s
+[synthetic population.gaml]  || 0.7255988267883331 processed in 3.059s
+[synthetic population.gaml]  || 0.7355385367443377 processed in 3.085s
+[synthetic population.gaml]  || 0.7454782467003422 processed in 3.113s
+[synthetic population.gaml]  || 0.7554179566563467 processed in 3.146s
+[synthetic population.gaml]  || 0.7653576666123513 processed in 3.179s
+[synthetic population.gaml]  || 0.7752973765683558 processed in 3.213s
+[synthetic population.gaml]  || 0.7852370865243604 processed in 3.239s
+[synthetic population.gaml]  || 0.795176796480365 processed in 3.269s
+[synthetic population.gaml]  || 0.8051165064363696 processed in 3.311s
+[synthetic population.gaml]  || 0.8150562163923741 processed in 3.346s
+[synthetic population.gaml]  || 0.8249959263483787 processed in 3.374s
+[synthetic population.gaml]  || 0.8349356363043833 processed in 3.4s
+[synthetic population.gaml]  || 0.8448753462603878 processed in 3.43s
+[synthetic population.gaml]  || 0.8548150562163924 processed in 3.457s
+[synthetic population.gaml]  || 0.8647547661723969 processed in 3.483s
+[synthetic population.gaml]  || 0.8746944761284015 processed in 3.51s
+[synthetic population.gaml]  || 0.884634186084406 processed in 3.536s
+[synthetic population.gaml]  || 0.8945738960404106 processed in 3.573s
+[synthetic population.gaml]  || 0.9045136059964152 processed in 3.611s
+[synthetic population.gaml]  || 0.9144533159524197 processed in 3.645s
+[synthetic population.gaml]  || 0.9243930259084243 processed in 3.673s
+[synthetic population.gaml]  || 0.9343327358644289 processed in 3.703s
+[synthetic population.gaml]  || 0.9442724458204335 processed in 3.727s
+[synthetic population.gaml]  || 0.954212155776438 processed in 3.75s
+[synthetic population.gaml]  || 0.9641518657324426 processed in 3.776s
+[synthetic population.gaml]  || 0.9740915756884472 processed in 3.803s
+[synthetic population.gaml]  || 0.9840312856444516 processed in 3.831s
+[synthetic population.gaml]  || 0.9939709956004562 processed in 3.863s
+[synthetic population.gaml] -- active people agenda built in 3.886s
+[synthetic population.gaml] -- retired people agenda built in 0.528s
+[synthetic population.gaml] -- add return home action 0.426s
+[synthetic population.gaml] -- gravity setup 1.626s
+[Global.gaml] -- achieved in 6.661s
+[Global.gaml] Give people an epidemic behavior
+[Global.gaml] -- 0.0% wearing a mask  | 0.6 average vax hesitancy
+[Global.gaml] -- achieved in 0.217s
+[Global.gaml] Population of 14483 individuals
+[Global.gaml] Population of 14483 individuals
+[Global.gaml] Introduce 0 infected cases
+[Global.gaml] finished global init ---
+[Authority.gaml] Create authority: Authority0
+[Global.gaml] finished creating authority ---
+[Global.gaml] finished after init ---
+[Global.gaml] Start experiment ---
+[Global.gaml] finished before init ---
+[Global.gaml] Init epidemiological global parameters ---
+[Global.gaml] finished setting epidemiological parameters ---
+[Global.gaml] Init sars-cov-2 and variants ---
+[Global.gaml] 	----first(original_sars_cov_2).get_epi_id() -: 'SARS-CoV-2|mutation_profile -: [1.0,1.0,1.0,1.0,1.0,1.0]'
+[Global.gaml] 	Sars-CoV-2 original strain created (0.01s)
+[myself -: sarscov2[1]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Alpha|mutation_profile -: [1.1,1.5,1.0,1.4,1.0,1.0]'
+[myself -: sarscov2[2]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Beta|mutation_profile -: [2.0,1.5,1.0,1.0,1.0,1.0]'
+[myself -: sarscov2[3]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Delta|mutation_profile -: [1.5,2.0,1.0,1.5,1.5,1.5]'
+[myself -: sarscov2[4]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Gamma|mutation_profile -: [2.0,1.0,1.0,1.0,1.0,1.0]'
+[Global.gaml] 	Variants created - VOC:['Alpha','Beta','Delta','Gamma'] - VOI:[] (0.02s)
+[Global.gaml] Init vaccines ----
+[Global.gaml] 	Vaccines: ['COMIRNATY','VAXZEVRIA'] created (0.0s)
+[Global.gaml] finished initializing of vaccines and variants ---
+[Global.gaml] global init
+[Global.gaml] building and boundary : done
+[Global.gaml] Activities and special buildings (hospitals and outside) : done
+[Global.gaml] Start creating and locating population from built-in generator
+[Global.gaml] Finding homes, workplaces and schools : done
+[Global.gaml] -- achieved in 0.667s
+[Global.gaml] Start assigning school and workplaces
+[Global.gaml] -- achieved in 0.675s
+[Global.gaml] Start building friendship network
+[Global.gaml] 0.9942691431333287 processed
+[Global.gaml] 1.9885382862666574 processed
+[Global.gaml] 2.982807429399986 processed
+[Global.gaml] 3.977076572533315 processed
+[Global.gaml] 4.971345715666644 processed
+[Global.gaml] 5.965614858799972 processed
+[Global.gaml] 6.959884001933301 processed
+[Global.gaml] 7.95415314506663 processed
+[Global.gaml] 8.948422288199959 processed
+[Global.gaml] 9.942691431333287 processed
+[Global.gaml] 10.936960574466616 processed
+[Global.gaml] 11.931229717599944 processed
+[Global.gaml] 12.925498860733274 processed
+[Global.gaml] 13.919768003866603 processed
+[Global.gaml] 14.91403714699993 processed
+[Global.gaml] 15.90830629013326 processed
+[Global.gaml] 16.902575433266588 processed
+[Global.gaml] 17.896844576399918 processed
+[Global.gaml] 18.891113719533244 processed
+[Global.gaml] 19.885382862666575 processed
+[Global.gaml] 20.879652005799905 processed
+[Global.gaml] 21.87392114893323 processed
+[Global.gaml] 22.86819029206656 processed
+[Global.gaml] 23.862459435199888 processed
+[Global.gaml] 24.856728578333218 processed
+[Global.gaml] 25.85099772146655 processed
+[Global.gaml] 26.845266864599875 processed
+[Global.gaml] 27.839536007733205 processed
+[Global.gaml] 28.83380515086653 processed
+[Global.gaml] 29.82807429399986 processed
+[Global.gaml] 30.822343437133192 processed
+[Global.gaml] 31.81661258026652 processed
+[Global.gaml] 32.810881723399845 processed
+[Global.gaml] 33.805150866533175 processed
+[Global.gaml] 34.799420009666505 processed
+[Global.gaml] 35.793689152799836 processed
+[Global.gaml] 36.787958295933166 processed
+[Global.gaml] 37.78222743906649 processed
+[Global.gaml] 38.77649658219982 processed
+[Global.gaml] 39.77076572533315 processed
+[Global.gaml] 40.76503486846648 processed
+[Global.gaml] 41.75930401159981 processed
+[Global.gaml] 42.75357315473313 processed
+[Global.gaml] 43.74784229786646 processed
+[Global.gaml] 44.74211144099979 processed
+[Global.gaml] 45.73638058413312 processed
+[Global.gaml] 46.73064972726645 processed
+[Global.gaml] 47.724918870399776 processed
+[Global.gaml] 48.719188013533106 processed
+[Global.gaml] 49.713457156666436 processed
+[Global.gaml] 50.707726299799766 processed
+[Global.gaml] 51.7019954429331 processed
+[Global.gaml] 52.69626458606642 processed
+[Global.gaml] 53.69053372919975 processed
+[Global.gaml] 54.68480287233308 processed
+[Global.gaml] 55.67907201546641 processed
+[Global.gaml] 56.67334115859974 processed
+[Global.gaml] 57.66761030173306 processed
+[Global.gaml] 58.66187944486639 processed
+[Global.gaml] 59.65614858799972 processed
+[Global.gaml] 60.650417731133054 processed
+[Global.gaml] 61.644686874266384 processed
+[Global.gaml] 62.63895601739971 processed
+[Global.gaml] 63.63322516053304 processed
+[Global.gaml] 64.62749430366637 processed
+[Global.gaml] 65.62176344679969 processed
+[Global.gaml] 66.61603258993303 processed
+[Global.gaml] 67.61030173306635 processed
+[Global.gaml] 68.60457087619969 processed
+[Global.gaml] 69.59884001933301 processed
+[Global.gaml] 70.59310916246633 processed
+[Global.gaml] 71.58737830559967 processed
+[Global.gaml] 72.581647448733 processed
+[Global.gaml] 73.57591659186633 processed
+[Global.gaml] 74.57018573499965 processed
+[Global.gaml] 75.56445487813298 processed
+[Global.gaml] 76.55872402126631 processed
+[Global.gaml] 77.55299316439964 processed
+[Global.gaml] 78.54726230753298 processed
+[Global.gaml] 79.5415314506663 processed
+[Global.gaml] 80.53580059379962 processed
+[Global.gaml] 81.53006973693296 processed
+[Global.gaml] 82.52433888006628 processed
+[Global.gaml] 83.51860802319962 processed
+[Global.gaml] 84.51287716633294 processed
+[Global.gaml] 85.50714630946626 processed
+[Global.gaml] 86.5014154525996 processed
+[Global.gaml] 87.49568459573293 processed
+[Global.gaml] 88.48995373886626 processed
+[Global.gaml] 89.48422288199959 processed
+[Global.gaml] 90.47849202513291 processed
+[Global.gaml] 91.47276116826625 processed
+[Global.gaml] 92.46703031139957 processed
+[Global.gaml] 93.4612994545329 processed
+[Global.gaml] 94.45556859766623 processed
+[Global.gaml] 95.44983774079955 processed
+[Global.gaml] 96.44410688393289 processed
+[Global.gaml] 97.43837602706621 processed
+[Global.gaml] 98.43264517019955 processed
+[Global.gaml] 99.42691431333287 processed
+[Global.gaml] -- achieved in 5.093s
+[Global.gaml] Start defining agendas
+[synthetic population.gaml] -- input parameters processed in 0.2s
+[synthetic population.gaml]  || 0.009939709956004562 processed in 0.077s
+[synthetic population.gaml]  || 0.019879419912009123 processed in 0.119s
+[synthetic population.gaml]  || 0.02981912986801369 processed in 0.163s
+[synthetic population.gaml]  || 0.03975883982401825 processed in 0.207s
+[synthetic population.gaml]  || 0.04969854978002281 processed in 0.272s
+[synthetic population.gaml]  || 0.05963825973602738 processed in 0.309s
+[synthetic population.gaml]  || 0.06957796969203194 processed in 0.349s
+[synthetic population.gaml]  || 0.0795176796480365 processed in 0.392s
+[synthetic population.gaml]  || 0.08945738960404107 processed in 0.43s
+[synthetic population.gaml]  || 0.09939709956004562 processed in 0.468s
+[synthetic population.gaml]  || 0.10933680951605018 processed in 0.505s
+[synthetic population.gaml]  || 0.11927651947205475 processed in 0.552s
+[synthetic population.gaml]  || 0.12921622942805933 processed in 0.591s
+[synthetic population.gaml]  || 0.13915593938406387 processed in 0.634s
+[synthetic population.gaml]  || 0.14909564934006844 processed in 0.667s
+[synthetic population.gaml]  || 0.159035359296073 processed in 0.702s
+[synthetic population.gaml]  || 0.16897506925207756 processed in 0.742s
+[synthetic population.gaml]  || 0.17891477920808213 processed in 0.778s
+[synthetic population.gaml]  || 0.18885448916408668 processed in 0.821s
+[synthetic population.gaml]  || 0.19879419912009125 processed in 0.854s
+[synthetic population.gaml]  || 0.20873390907609582 processed in 0.893s
+[synthetic population.gaml]  || 0.21867361903210036 processed in 0.931s
+[synthetic population.gaml]  || 0.22861332898810494 processed in 0.962s
+[synthetic population.gaml]  || 0.2385530389441095 processed in 1.004s
+[synthetic population.gaml]  || 0.24849274890011405 processed in 1.052s
+[synthetic population.gaml]  || 0.25843245885611865 processed in 1.103s
+[synthetic population.gaml]  || 0.26837216881212317 processed in 1.152s
+[synthetic population.gaml]  || 0.27831187876812774 processed in 1.194s
+[synthetic population.gaml]  || 0.2882515887241323 processed in 1.24s
+[synthetic population.gaml]  || 0.2981912986801369 processed in 1.285s
+[synthetic population.gaml]  || 0.30813100863614146 processed in 1.329s
+[synthetic population.gaml]  || 0.318070718592146 processed in 1.37s
+[synthetic population.gaml]  || 0.32801042854815055 processed in 1.419s
+[synthetic population.gaml]  || 0.3379501385041551 processed in 1.457s
+[synthetic population.gaml]  || 0.3478898484601597 processed in 1.494s
+[synthetic population.gaml]  || 0.35782955841616426 processed in 1.524s
+[synthetic population.gaml]  || 0.36776926837216883 processed in 1.559s
+[synthetic population.gaml]  || 0.37770897832817335 processed in 1.602s
+[synthetic population.gaml]  || 0.3876486882841779 processed in 1.648s
+[synthetic population.gaml]  || 0.3975883982401825 processed in 1.688s
+[synthetic population.gaml]  || 0.40752810819618707 processed in 1.736s
+[synthetic population.gaml]  || 0.41746781815219164 processed in 1.779s
+[synthetic population.gaml]  || 0.4274075281081962 processed in 1.825s
+[synthetic population.gaml]  || 0.4373472380642007 processed in 1.864s
+[synthetic population.gaml]  || 0.4472869480202053 processed in 1.91s
+[synthetic population.gaml]  || 0.45722665797620987 processed in 1.938s
+[synthetic population.gaml]  || 0.46716636793221444 processed in 1.972s
+[synthetic population.gaml]  || 0.477106077888219 processed in 2.0s
+[synthetic population.gaml]  || 0.4870457878442236 processed in 2.027s
+[synthetic population.gaml]  || 0.4969854978002281 processed in 2.06s
+[synthetic population.gaml]  || 0.5069252077562327 processed in 2.091s
+[synthetic population.gaml]  || 0.5168649177122373 processed in 2.118s
+[synthetic population.gaml]  || 0.5268046276682418 processed in 2.151s
+[synthetic population.gaml]  || 0.5367443376242463 processed in 2.18s
+[synthetic population.gaml]  || 0.5466840475802509 processed in 2.207s
+[synthetic population.gaml]  || 0.5566237575362555 processed in 2.244s
+[synthetic population.gaml]  || 0.56656346749226 processed in 2.273s
+[synthetic population.gaml]  || 0.5765031774482646 processed in 2.302s
+[synthetic population.gaml]  || 0.5864428874042692 processed in 2.336s
+[synthetic population.gaml]  || 0.5963825973602738 processed in 2.362s
+[synthetic population.gaml]  || 0.6063223073162783 processed in 2.389s
+[synthetic population.gaml]  || 0.6162620172722829 processed in 2.425s
+[synthetic population.gaml]  || 0.6262017272282875 processed in 2.453s
+[synthetic population.gaml]  || 0.636141437184292 processed in 2.479s
+[synthetic population.gaml]  || 0.6460811471402965 processed in 2.51s
+[synthetic population.gaml]  || 0.6560208570963011 processed in 2.556s
+[synthetic population.gaml]  || 0.6659605670523057 processed in 2.584s
+[synthetic population.gaml]  || 0.6759002770083102 processed in 2.621s
+[synthetic population.gaml]  || 0.6858399869643148 processed in 2.657s
+[synthetic population.gaml]  || 0.6957796969203194 processed in 2.689s
+[synthetic population.gaml]  || 0.705719406876324 processed in 2.716s
+[synthetic population.gaml]  || 0.7156591168323285 processed in 2.745s
+[synthetic population.gaml]  || 0.7255988267883331 processed in 2.781s
+[synthetic population.gaml]  || 0.7355385367443377 processed in 2.81s
+[synthetic population.gaml]  || 0.7454782467003422 processed in 2.841s
+[synthetic population.gaml]  || 0.7554179566563467 processed in 2.87s
+[synthetic population.gaml]  || 0.7653576666123513 processed in 2.895s
+[synthetic population.gaml]  || 0.7752973765683558 processed in 2.928s
+[synthetic population.gaml]  || 0.7852370865243604 processed in 2.957s
+[synthetic population.gaml]  || 0.795176796480365 processed in 2.986s
+[synthetic population.gaml]  || 0.8051165064363696 processed in 3.018s
+[synthetic population.gaml]  || 0.8150562163923741 processed in 3.043s
+[synthetic population.gaml]  || 0.8249959263483787 processed in 3.07s
+[synthetic population.gaml]  || 0.8349356363043833 processed in 3.102s
+[synthetic population.gaml]  || 0.8448753462603878 processed in 3.134s
+[synthetic population.gaml]  || 0.8548150562163924 processed in 3.161s
+[synthetic population.gaml]  || 0.8647547661723969 processed in 3.194s
+[synthetic population.gaml]  || 0.8746944761284015 processed in 3.219s
+[synthetic population.gaml]  || 0.884634186084406 processed in 3.245s
+[synthetic population.gaml]  || 0.8945738960404106 processed in 3.282s
+[synthetic population.gaml]  || 0.9045136059964152 processed in 3.309s
+[synthetic population.gaml]  || 0.9144533159524197 processed in 3.336s
+[synthetic population.gaml]  || 0.9243930259084243 processed in 3.367s
+[synthetic population.gaml]  || 0.9343327358644289 processed in 3.393s
+[synthetic population.gaml]  || 0.9442724458204335 processed in 3.418s
+[synthetic population.gaml]  || 0.954212155776438 processed in 3.452s
+[synthetic population.gaml]  || 0.9641518657324426 processed in 3.479s
+[synthetic population.gaml]  || 0.9740915756884472 processed in 3.507s
+[synthetic population.gaml]  || 0.9840312856444516 processed in 3.539s
+[synthetic population.gaml]  || 0.9939709956004562 processed in 3.565s
+[synthetic population.gaml] -- active people agenda built in 3.581s
+[synthetic population.gaml] -- retired people agenda built in 0.578s
+[synthetic population.gaml] -- add return home action 0.411s
+[synthetic population.gaml] -- gravity setup 1.659s
+[Global.gaml] -- achieved in 6.446s
+[Global.gaml] Give people an epidemic behavior
+[Global.gaml] -- 0.0% wearing a mask  | 0.6 average vax hesitancy
+[Global.gaml] -- achieved in 0.232s
+[Global.gaml] Population of 14483 individuals
+[Global.gaml] Population of 14483 individuals
+[Global.gaml] Introduce 0 infected cases
+[Global.gaml] finished global init ---
+[Authority.gaml] Create authority: Authority0
+[Global.gaml] finished creating authority ---
+[Global.gaml] finished after init ---
+[Global.gaml] Start experiment ---
+[Global.gaml] finished before init ---
+[Global.gaml] Init epidemiological global parameters ---
+[Global.gaml] finished setting epidemiological parameters ---
+[Global.gaml] Init sars-cov-2 and variants ---
+[Global.gaml] 	----first(original_sars_cov_2).get_epi_id() -: 'SARS-CoV-2|mutation_profile -: [1.0,1.0,1.0,1.0,1.0,1.0]'
+[Global.gaml] 	Sars-CoV-2 original strain created (0.01s)
+[myself -: sarscov2[1]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Alpha|mutation_profile -: [1.1,1.5,1.0,1.4,1.0,1.0]'
+[myself -: sarscov2[2]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Beta|mutation_profile -: [2.0,1.5,1.0,1.0,1.0,1.0]'
+[myself -: sarscov2[3]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Delta|mutation_profile -: [1.5,2.0,1.0,1.5,1.5,1.5]'
+[myself -: sarscov2[4]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Gamma|mutation_profile -: [2.0,1.0,1.0,1.0,1.0,1.0]'
+[Global.gaml] 	Variants created - VOC:['Alpha','Beta','Delta','Gamma'] - VOI:[] (0.02s)
+[Global.gaml] Init vaccines ----
+[Global.gaml] 	Vaccines: ['COMIRNATY','VAXZEVRIA'] created (0.0s)
+[Global.gaml] finished initializing of vaccines and variants ---
+[Global.gaml] global init
+[Global.gaml] building and boundary : done
+[Global.gaml] Activities and special buildings (hospitals and outside) : done
+[Global.gaml] Start creating and locating population from built-in generator
+[Global.gaml] Finding homes, workplaces and schools : done
+[Global.gaml] -- achieved in 0.549s
+[Global.gaml] Start assigning school and workplaces
+[Global.gaml] -- achieved in 0.559s
+[Global.gaml] Start building friendship network
+[Global.gaml] 0.9942691431333287 processed
+[Global.gaml] 1.9885382862666574 processed
+[Global.gaml] 2.982807429399986 processed
+[Global.gaml] 3.977076572533315 processed
+[Global.gaml] 4.971345715666644 processed
+[Global.gaml] 5.965614858799972 processed
+[Global.gaml] 6.959884001933301 processed
+[Global.gaml] 7.95415314506663 processed
+[Global.gaml] 8.948422288199959 processed
+[Global.gaml] 9.942691431333287 processed
+[Global.gaml] 10.936960574466616 processed
+[Global.gaml] 11.931229717599944 processed
+[Global.gaml] 12.925498860733274 processed
+[Global.gaml] 13.919768003866603 processed
+[Global.gaml] 14.91403714699993 processed
+[Global.gaml] 15.90830629013326 processed
+[Global.gaml] 16.902575433266588 processed
+[Global.gaml] 17.896844576399918 processed
+[Global.gaml] 18.891113719533244 processed
+[Global.gaml] 19.885382862666575 processed
+[Global.gaml] 20.879652005799905 processed
+[Global.gaml] 21.87392114893323 processed
+[Global.gaml] 22.86819029206656 processed
+[Global.gaml] 23.862459435199888 processed
+[Global.gaml] 24.856728578333218 processed
+[Global.gaml] 25.85099772146655 processed
+[Global.gaml] 26.845266864599875 processed
+[Global.gaml] 27.839536007733205 processed
+[Global.gaml] 28.83380515086653 processed
+[Global.gaml] 29.82807429399986 processed
+[Global.gaml] 30.822343437133192 processed
+[Global.gaml] 31.81661258026652 processed
+[Global.gaml] 32.810881723399845 processed
+[Global.gaml] 33.805150866533175 processed
+[Global.gaml] 34.799420009666505 processed
+[Global.gaml] 35.793689152799836 processed
+[Global.gaml] 36.787958295933166 processed
+[Global.gaml] 37.78222743906649 processed
+[Global.gaml] 38.77649658219982 processed
+[Global.gaml] 39.77076572533315 processed
+[Global.gaml] 40.76503486846648 processed
+[Global.gaml] 41.75930401159981 processed
+[Global.gaml] 42.75357315473313 processed
+[Global.gaml] 43.74784229786646 processed
+[Global.gaml] 44.74211144099979 processed
+[Global.gaml] 45.73638058413312 processed
+[Global.gaml] 46.73064972726645 processed
+[Global.gaml] 47.724918870399776 processed
+[Global.gaml] 48.719188013533106 processed
+[Global.gaml] 49.713457156666436 processed
+[Global.gaml] 50.707726299799766 processed
+[Global.gaml] 51.7019954429331 processed
+[Global.gaml] 52.69626458606642 processed
+[Global.gaml] 53.69053372919975 processed
+[Global.gaml] 54.68480287233308 processed
+[Global.gaml] 55.67907201546641 processed
+[Global.gaml] 56.67334115859974 processed
+[Global.gaml] 57.66761030173306 processed
+[Global.gaml] 58.66187944486639 processed
+[Global.gaml] 59.65614858799972 processed
+[Global.gaml] 60.650417731133054 processed
+[Global.gaml] 61.644686874266384 processed
+[Global.gaml] 62.63895601739971 processed
+[Global.gaml] 63.63322516053304 processed
+[Global.gaml] 64.62749430366637 processed
+[Global.gaml] 65.62176344679969 processed
+[Global.gaml] 66.61603258993303 processed
+[Global.gaml] 67.61030173306635 processed
+[Global.gaml] 68.60457087619969 processed
+[Global.gaml] 69.59884001933301 processed
+[Global.gaml] 70.59310916246633 processed
+[Global.gaml] 71.58737830559967 processed
+[Global.gaml] 72.581647448733 processed
+[Global.gaml] 73.57591659186633 processed
+[Global.gaml] 74.57018573499965 processed
+[Global.gaml] 75.56445487813298 processed
+[Global.gaml] 76.55872402126631 processed
+[Global.gaml] 77.55299316439964 processed
+[Global.gaml] 78.54726230753298 processed
+[Global.gaml] 79.5415314506663 processed
+[Global.gaml] 80.53580059379962 processed
+[Global.gaml] 81.53006973693296 processed
+[Global.gaml] 82.52433888006628 processed
+[Global.gaml] 83.51860802319962 processed
+[Global.gaml] 84.51287716633294 processed
+[Global.gaml] 85.50714630946626 processed
+[Global.gaml] 86.5014154525996 processed
+[Global.gaml] 87.49568459573293 processed
+[Global.gaml] 88.48995373886626 processed
+[Global.gaml] 89.48422288199959 processed
+[Global.gaml] 90.47849202513291 processed
+[Global.gaml] 91.47276116826625 processed
+[Global.gaml] 92.46703031139957 processed
+[Global.gaml] 93.4612994545329 processed
+[Global.gaml] 94.45556859766623 processed
+[Global.gaml] 95.44983774079955 processed
+[Global.gaml] 96.44410688393289 processed
+[Global.gaml] 97.43837602706621 processed
+[Global.gaml] 98.43264517019955 processed
+[Global.gaml] 99.42691431333287 processed
+[Global.gaml] -- achieved in 5.069s
+[Global.gaml] Start defining agendas
+[synthetic population.gaml] -- input parameters processed in 0.2s
+[synthetic population.gaml]  || 0.009939709956004562 processed in 0.059s
+[synthetic population.gaml]  || 0.019879419912009123 processed in 0.104s
+[synthetic population.gaml]  || 0.02981912986801369 processed in 0.147s
+[synthetic population.gaml]  || 0.03975883982401825 processed in 0.193s
+[synthetic population.gaml]  || 0.04969854978002281 processed in 0.241s
+[synthetic population.gaml]  || 0.05963825973602738 processed in 0.278s
+[synthetic population.gaml]  || 0.06957796969203194 processed in 0.335s
+[synthetic population.gaml]  || 0.0795176796480365 processed in 0.395s
+[synthetic population.gaml]  || 0.08945738960404107 processed in 0.452s
+[synthetic population.gaml]  || 0.09939709956004562 processed in 0.508s
+[synthetic population.gaml]  || 0.10933680951605018 processed in 0.546s
+[synthetic population.gaml]  || 0.11927651947205475 processed in 0.586s
+[synthetic population.gaml]  || 0.12921622942805933 processed in 0.623s
+[synthetic population.gaml]  || 0.13915593938406387 processed in 0.677s
+[synthetic population.gaml]  || 0.14909564934006844 processed in 0.712s
+[synthetic population.gaml]  || 0.159035359296073 processed in 0.753s
+[synthetic population.gaml]  || 0.16897506925207756 processed in 0.786s
+[synthetic population.gaml]  || 0.17891477920808213 processed in 0.828s
+[synthetic population.gaml]  || 0.18885448916408668 processed in 0.88s
+[synthetic population.gaml]  || 0.19879419912009125 processed in 0.931s
+[synthetic population.gaml]  || 0.20873390907609582 processed in 0.965s
+[synthetic population.gaml]  || 0.21867361903210036 processed in 1.0s
+[synthetic population.gaml]  || 0.22861332898810494 processed in 1.039s
+[synthetic population.gaml]  || 0.2385530389441095 processed in 1.071s
+[synthetic population.gaml]  || 0.24849274890011405 processed in 1.111s
+[synthetic population.gaml]  || 0.25843245885611865 processed in 1.143s
+[synthetic population.gaml]  || 0.26837216881212317 processed in 1.183s
+[synthetic population.gaml]  || 0.27831187876812774 processed in 1.22s
+[synthetic population.gaml]  || 0.2882515887241323 processed in 1.25s
+[synthetic population.gaml]  || 0.2981912986801369 processed in 1.286s
+[synthetic population.gaml]  || 0.30813100863614146 processed in 1.316s
+[synthetic population.gaml]  || 0.318070718592146 processed in 1.395s
+[synthetic population.gaml]  || 0.32801042854815055 processed in 1.425s
+[synthetic population.gaml]  || 0.3379501385041551 processed in 1.461s
+[synthetic population.gaml]  || 0.3478898484601597 processed in 1.491s
+[synthetic population.gaml]  || 0.35782955841616426 processed in 1.523s
+[synthetic population.gaml]  || 0.36776926837216883 processed in 1.559s
+[synthetic population.gaml]  || 0.37770897832817335 processed in 1.589s
+[synthetic population.gaml]  || 0.3876486882841779 processed in 1.625s
+[synthetic population.gaml]  || 0.3975883982401825 processed in 1.655s
+[synthetic population.gaml]  || 0.40752810819618707 processed in 1.684s
+[synthetic population.gaml]  || 0.41746781815219164 processed in 1.724s
+[synthetic population.gaml]  || 0.4274075281081962 processed in 1.753s
+[synthetic population.gaml]  || 0.4373472380642007 processed in 1.786s
+[synthetic population.gaml]  || 0.4472869480202053 processed in 1.815s
+[synthetic population.gaml]  || 0.45722665797620987 processed in 1.847s
+[synthetic population.gaml]  || 0.46716636793221444 processed in 1.882s
+[synthetic population.gaml]  || 0.477106077888219 processed in 1.913s
+[synthetic population.gaml]  || 0.4870457878442236 processed in 1.942s
+[synthetic population.gaml]  || 0.4969854978002281 processed in 1.975s
+[synthetic population.gaml]  || 0.5069252077562327 processed in 2.001s
+[synthetic population.gaml]  || 0.5168649177122373 processed in 2.038s
+[synthetic population.gaml]  || 0.5268046276682418 processed in 2.073s
+[synthetic population.gaml]  || 0.5367443376242463 processed in 2.101s
+[synthetic population.gaml]  || 0.5466840475802509 processed in 2.135s
+[synthetic population.gaml]  || 0.5566237575362555 processed in 2.164s
+[synthetic population.gaml]  || 0.56656346749226 processed in 2.193s
+[synthetic population.gaml]  || 0.5765031774482646 processed in 2.235s
+[synthetic population.gaml]  || 0.5864428874042692 processed in 2.283s
+[synthetic population.gaml]  || 0.5963825973602738 processed in 2.327s
+[synthetic population.gaml]  || 0.6063223073162783 processed in 2.366s
+[synthetic population.gaml]  || 0.6162620172722829 processed in 2.41s
+[synthetic population.gaml]  || 0.6262017272282875 processed in 2.438s
+[synthetic population.gaml]  || 0.636141437184292 processed in 2.471s
+[synthetic population.gaml]  || 0.6460811471402965 processed in 2.497s
+[synthetic population.gaml]  || 0.6560208570963011 processed in 2.523s
+[synthetic population.gaml]  || 0.6659605670523057 processed in 2.571s
+[synthetic population.gaml]  || 0.6759002770083102 processed in 2.608s
+[synthetic population.gaml]  || 0.6858399869643148 processed in 2.639s
+[synthetic population.gaml]  || 0.6957796969203194 processed in 2.669s
+[synthetic population.gaml]  || 0.705719406876324 processed in 2.702s
+[synthetic population.gaml]  || 0.7156591168323285 processed in 2.734s
+[synthetic population.gaml]  || 0.7255988267883331 processed in 2.765s
+[synthetic population.gaml]  || 0.7355385367443377 processed in 2.792s
+[synthetic population.gaml]  || 0.7454782467003422 processed in 2.824s
+[synthetic population.gaml]  || 0.7554179566563467 processed in 2.856s
+[synthetic population.gaml]  || 0.7653576666123513 processed in 2.882s
+[synthetic population.gaml]  || 0.7752973765683558 processed in 2.918s
+[synthetic population.gaml]  || 0.7852370865243604 processed in 2.944s
+[synthetic population.gaml]  || 0.795176796480365 processed in 2.972s
+[synthetic population.gaml]  || 0.8051165064363696 processed in 3.002s
+[synthetic population.gaml]  || 0.8150562163923741 processed in 3.027s
+[synthetic population.gaml]  || 0.8249959263483787 processed in 3.055s
+[synthetic population.gaml]  || 0.8349356363043833 processed in 3.089s
+[synthetic population.gaml]  || 0.8448753462603878 processed in 3.116s
+[synthetic population.gaml]  || 0.8548150562163924 processed in 3.147s
+[synthetic population.gaml]  || 0.8647547661723969 processed in 3.175s
+[synthetic population.gaml]  || 0.8746944761284015 processed in 3.2s
+[synthetic population.gaml]  || 0.884634186084406 processed in 3.233s
+[synthetic population.gaml]  || 0.8945738960404106 processed in 3.263s
+[synthetic population.gaml]  || 0.9045136059964152 processed in 3.292s
+[synthetic population.gaml]  || 0.9144533159524197 processed in 3.326s
+[synthetic population.gaml]  || 0.9243930259084243 processed in 3.352s
+[synthetic population.gaml]  || 0.9343327358644289 processed in 3.381s
+[synthetic population.gaml]  || 0.9442724458204335 processed in 3.415s
+[synthetic population.gaml]  || 0.954212155776438 processed in 3.448s
+[synthetic population.gaml]  || 0.9641518657324426 processed in 3.479s
+[synthetic population.gaml]  || 0.9740915756884472 processed in 3.514s
+[synthetic population.gaml]  || 0.9840312856444516 processed in 3.539s
+[synthetic population.gaml]  || 0.9939709956004562 processed in 3.564s
+[synthetic population.gaml] -- active people agenda built in 3.596s
+[synthetic population.gaml] -- retired people agenda built in 0.524s
+[synthetic population.gaml] -- add return home action 0.424s
+[synthetic population.gaml] -- gravity setup 1.925s
+[Global.gaml] -- achieved in 6.686s
+[Global.gaml] Give people an epidemic behavior
+[Global.gaml] -- 0.0% wearing a mask  | 0.6 average vax hesitancy
+[Global.gaml] -- achieved in 0.196s
+[Global.gaml] Population of 14483 individuals
+[Global.gaml] Population of 14483 individuals
+[Global.gaml] Introduce 0 infected cases
+[Global.gaml] finished global init ---
+[Authority.gaml] Create authority: Authority0
+[Global.gaml] finished creating authority ---
+[Global.gaml] finished after init ---
+[Global.gaml] Start experiment ---
+[Global.gaml] finished before init ---
+[Global.gaml] Init epidemiological global parameters ---
+[Global.gaml] finished setting epidemiological parameters ---
+[Global.gaml] Init sars-cov-2 and variants ---
+[Global.gaml] 	----first(original_sars_cov_2).get_epi_id() -: 'SARS-CoV-2|mutation_profile -: [1.0,1.0,1.0,1.0,1.0,1.0]'
+[Global.gaml] 	Sars-CoV-2 original strain created (0.02s)
+[myself -: sarscov2[1]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Alpha|mutation_profile -: [1.1,1.5,1.0,1.4,1.0,1.0]'
+[myself -: sarscov2[2]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Beta|mutation_profile -: [2.0,1.5,1.0,1.0,1.0,1.0]'
+[myself -: sarscov2[3]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Delta|mutation_profile -: [1.5,2.0,1.0,1.5,1.5,1.5]'
+[myself -: sarscov2[4]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Gamma|mutation_profile -: [2.0,1.0,1.0,1.0,1.0,1.0]'
+[Global.gaml] 	Variants created - VOC:['Alpha','Beta','Delta','Gamma'] - VOI:[] (0.03s)
+[Global.gaml] Init vaccines ----
+[Global.gaml] 	Vaccines: ['COMIRNATY','VAXZEVRIA'] created (0.0s)
+[Global.gaml] finished initializing of vaccines and variants ---
+[Global.gaml] global init
+[Global.gaml] building and boundary : done
+[Global.gaml] Activities and special buildings (hospitals and outside) : done
+[Global.gaml] Start creating and locating population from built-in generator
+[Global.gaml] Finding homes, workplaces and schools : done
+[Global.gaml] -- achieved in 0.589s
+[Global.gaml] Start assigning school and workplaces
+[Global.gaml] -- achieved in 0.697s
+[Global.gaml] Start building friendship network
+[Global.gaml] 0.9942691431333287 processed
+[Global.gaml] 1.9885382862666574 processed
+[Global.gaml] 2.982807429399986 processed
+[Global.gaml] 3.977076572533315 processed
+[Global.gaml] 4.971345715666644 processed
+[Global.gaml] 5.965614858799972 processed
+[Global.gaml] 6.959884001933301 processed
+[Global.gaml] 7.95415314506663 processed
+[Global.gaml] 8.948422288199959 processed
+[Global.gaml] 9.942691431333287 processed
+[Global.gaml] 10.936960574466616 processed
+[Global.gaml] 11.931229717599944 processed
+[Global.gaml] 12.925498860733274 processed
+[Global.gaml] 13.919768003866603 processed
+[Global.gaml] 14.91403714699993 processed
+[Global.gaml] 15.90830629013326 processed
+[Global.gaml] 16.902575433266588 processed
+[Global.gaml] 17.896844576399918 processed
+[Global.gaml] 18.891113719533244 processed
+[Global.gaml] 19.885382862666575 processed
+[Global.gaml] 20.879652005799905 processed
+[Global.gaml] 21.87392114893323 processed
+[Global.gaml] 22.86819029206656 processed
+[Global.gaml] 23.862459435199888 processed
+[Global.gaml] 24.856728578333218 processed
+[Global.gaml] 25.85099772146655 processed
+[Global.gaml] 26.845266864599875 processed
+[Global.gaml] 27.839536007733205 processed
+[Global.gaml] 28.83380515086653 processed
+[Global.gaml] 29.82807429399986 processed
+[Global.gaml] 30.822343437133192 processed
+[Global.gaml] 31.81661258026652 processed
+[Global.gaml] 32.810881723399845 processed
+[Global.gaml] 33.805150866533175 processed
+[Global.gaml] 34.799420009666505 processed
+[Global.gaml] 35.793689152799836 processed
+[Global.gaml] 36.787958295933166 processed
+[Global.gaml] 37.78222743906649 processed
+[Global.gaml] 38.77649658219982 processed
+[Global.gaml] 39.77076572533315 processed
+[Global.gaml] 40.76503486846648 processed
+[Global.gaml] 41.75930401159981 processed
+[Global.gaml] 42.75357315473313 processed
+[Global.gaml] 43.74784229786646 processed
+[Global.gaml] 44.74211144099979 processed
+[Global.gaml] 45.73638058413312 processed
+[Global.gaml] 46.73064972726645 processed
+[Global.gaml] 47.724918870399776 processed
+[Global.gaml] 48.719188013533106 processed
+[Global.gaml] 49.713457156666436 processed
+[Global.gaml] 50.707726299799766 processed
+[Global.gaml] 51.7019954429331 processed
+[Global.gaml] 52.69626458606642 processed
+[Global.gaml] 53.69053372919975 processed
+[Global.gaml] 54.68480287233308 processed
+[Global.gaml] 55.67907201546641 processed
+[Global.gaml] 56.67334115859974 processed
+[Global.gaml] 57.66761030173306 processed
+[Global.gaml] 58.66187944486639 processed
+[Global.gaml] 59.65614858799972 processed
+[Global.gaml] 60.650417731133054 processed
+[Global.gaml] 61.644686874266384 processed
+[Global.gaml] 62.63895601739971 processed
+[Global.gaml] 63.63322516053304 processed
+[Global.gaml] 64.62749430366637 processed
+[Global.gaml] 65.62176344679969 processed
+[Global.gaml] 66.61603258993303 processed
+[Global.gaml] 67.61030173306635 processed
+[Global.gaml] 68.60457087619969 processed
+[Global.gaml] 69.59884001933301 processed
+[Global.gaml] 70.59310916246633 processed
+[Global.gaml] 71.58737830559967 processed
+[Global.gaml] 72.581647448733 processed
+[Global.gaml] 73.57591659186633 processed
+[Global.gaml] 74.57018573499965 processed
+[Global.gaml] 75.56445487813298 processed
+[Global.gaml] 76.55872402126631 processed
+[Global.gaml] 77.55299316439964 processed
+[Global.gaml] 78.54726230753298 processed
+[Global.gaml] 79.5415314506663 processed
+[Global.gaml] 80.53580059379962 processed
+[Global.gaml] 81.53006973693296 processed
+[Global.gaml] 82.52433888006628 processed
+[Global.gaml] 83.51860802319962 processed
+[Global.gaml] 84.51287716633294 processed
+[Global.gaml] 85.50714630946626 processed
+[Global.gaml] 86.5014154525996 processed
+[Global.gaml] 87.49568459573293 processed
+[Global.gaml] 88.48995373886626 processed
+[Global.gaml] 89.48422288199959 processed
+[Global.gaml] 90.47849202513291 processed
+[Global.gaml] 91.47276116826625 processed
+[Global.gaml] 92.46703031139957 processed
+[Global.gaml] 93.4612994545329 processed
+[Global.gaml] 94.45556859766623 processed
+[Global.gaml] 95.44983774079955 processed
+[Global.gaml] 96.44410688393289 processed
+[Global.gaml] 97.43837602706621 processed
+[Global.gaml] 98.43264517019955 processed
+[Global.gaml] 99.42691431333287 processed
+[Global.gaml] -- achieved in 5.766s
+[Global.gaml] Start defining agendas
+[synthetic population.gaml] -- input parameters processed in 0.227s
+[synthetic population.gaml]  || 0.009939709956004562 processed in 0.07s
+[synthetic population.gaml]  || 0.019879419912009123 processed in 0.136s
+[synthetic population.gaml]  || 0.02981912986801369 processed in 0.2s
+[synthetic population.gaml]  || 0.03975883982401825 processed in 0.266s
+[synthetic population.gaml]  || 0.04969854978002281 processed in 0.313s
+[synthetic population.gaml]  || 0.05963825973602738 processed in 0.362s
+[synthetic population.gaml]  || 0.06957796969203194 processed in 0.424s
+[synthetic population.gaml]  || 0.0795176796480365 processed in 0.491s
+[synthetic population.gaml]  || 0.08945738960404107 processed in 0.55s
+[synthetic population.gaml]  || 0.09939709956004562 processed in 0.603s
+[synthetic population.gaml]  || 0.10933680951605018 processed in 0.649s
+[synthetic population.gaml]  || 0.11927651947205475 processed in 0.689s
+[synthetic population.gaml]  || 0.12921622942805933 processed in 0.745s
+[synthetic population.gaml]  || 0.13915593938406387 processed in 0.793s
+[synthetic population.gaml]  || 0.14909564934006844 processed in 0.839s
+[synthetic population.gaml]  || 0.159035359296073 processed in 0.894s
+[synthetic population.gaml]  || 0.16897506925207756 processed in 0.935s
+[synthetic population.gaml]  || 0.17891477920808213 processed in 1.015s
+[synthetic population.gaml]  || 0.18885448916408668 processed in 1.068s
+[synthetic population.gaml]  || 0.19879419912009125 processed in 1.105s
+[synthetic population.gaml]  || 0.20873390907609582 processed in 1.157s
+[synthetic population.gaml]  || 0.21867361903210036 processed in 1.198s
+[synthetic population.gaml]  || 0.22861332898810494 processed in 1.24s
+[synthetic population.gaml]  || 0.2385530389441095 processed in 1.28s
+[synthetic population.gaml]  || 0.24849274890011405 processed in 1.322s
+[synthetic population.gaml]  || 0.25843245885611865 processed in 1.367s
+[synthetic population.gaml]  || 0.26837216881212317 processed in 1.408s
+[synthetic population.gaml]  || 0.27831187876812774 processed in 1.455s
+[synthetic population.gaml]  || 0.2882515887241323 processed in 1.489s
+[synthetic population.gaml]  || 0.2981912986801369 processed in 1.526s
+[synthetic population.gaml]  || 0.30813100863614146 processed in 1.568s
+[synthetic population.gaml]  || 0.318070718592146 processed in 1.613s
+[synthetic population.gaml]  || 0.32801042854815055 processed in 1.652s
+[synthetic population.gaml]  || 0.3379501385041551 processed in 1.689s
+[synthetic population.gaml]  || 0.3478898484601597 processed in 1.732s
+[synthetic population.gaml]  || 0.35782955841616426 processed in 1.767s
+[synthetic population.gaml]  || 0.36776926837216883 processed in 1.809s
+[synthetic population.gaml]  || 0.37770897832817335 processed in 1.842s
+[synthetic population.gaml]  || 0.3876486882841779 processed in 1.881s
+[synthetic population.gaml]  || 0.3975883982401825 processed in 1.921s
+[synthetic population.gaml]  || 0.40752810819618707 processed in 1.953s
+[synthetic population.gaml]  || 0.41746781815219164 processed in 1.996s
+[synthetic population.gaml]  || 0.4274075281081962 processed in 2.029s
+[synthetic population.gaml]  || 0.4373472380642007 processed in 2.065s
+[synthetic population.gaml]  || 0.4472869480202053 processed in 2.101s
+[synthetic population.gaml]  || 0.45722665797620987 processed in 2.135s
+[synthetic population.gaml]  || 0.46716636793221444 processed in 2.175s
+[synthetic population.gaml]  || 0.477106077888219 processed in 2.207s
+[synthetic population.gaml]  || 0.4870457878442236 processed in 2.242s
+[synthetic population.gaml]  || 0.4969854978002281 processed in 2.276s
+[synthetic population.gaml]  || 0.5069252077562327 processed in 2.308s
+[synthetic population.gaml]  || 0.5168649177122373 processed in 2.353s
+[synthetic population.gaml]  || 0.5268046276682418 processed in 2.387s
+[synthetic population.gaml]  || 0.5367443376242463 processed in 2.422s
+[synthetic population.gaml]  || 0.5466840475802509 processed in 2.457s
+[synthetic population.gaml]  || 0.5566237575362555 processed in 2.492s
+[synthetic population.gaml]  || 0.56656346749226 processed in 2.529s
+[synthetic population.gaml]  || 0.5765031774482646 processed in 2.566s
+[synthetic population.gaml]  || 0.5864428874042692 processed in 2.601s
+[synthetic population.gaml]  || 0.5963825973602738 processed in 2.634s
+[synthetic population.gaml]  || 0.6063223073162783 processed in 2.671s
+[synthetic population.gaml]  || 0.6162620172722829 processed in 2.712s
+[synthetic population.gaml]  || 0.6262017272282875 processed in 2.745s
+[synthetic population.gaml]  || 0.636141437184292 processed in 2.775s
+[synthetic population.gaml]  || 0.6460811471402965 processed in 2.805s
+[synthetic population.gaml]  || 0.6560208570963011 processed in 2.84s
+[synthetic population.gaml]  || 0.6659605670523057 processed in 2.871s
+[synthetic population.gaml]  || 0.6759002770083102 processed in 2.92s
+[synthetic population.gaml]  || 0.6858399869643148 processed in 2.947s
+[synthetic population.gaml]  || 0.6957796969203194 processed in 2.977s
+[synthetic population.gaml]  || 0.705719406876324 processed in 3.012s
+[synthetic population.gaml]  || 0.7156591168323285 processed in 3.041s
+[synthetic population.gaml]  || 0.7255988267883331 processed in 3.082s
+[synthetic population.gaml]  || 0.7355385367443377 processed in 3.115s
+[synthetic population.gaml]  || 0.7454782467003422 processed in 3.143s
+[synthetic population.gaml]  || 0.7554179566563467 processed in 3.186s
+[synthetic population.gaml]  || 0.7653576666123513 processed in 3.223s
+[synthetic population.gaml]  || 0.7752973765683558 processed in 3.266s
+[synthetic population.gaml]  || 0.7852370865243604 processed in 3.308s
+[synthetic population.gaml]  || 0.795176796480365 processed in 3.344s
+[synthetic population.gaml]  || 0.8051165064363696 processed in 3.372s
+[synthetic population.gaml]  || 0.8150562163923741 processed in 3.425s
+[synthetic population.gaml]  || 0.8249959263483787 processed in 3.485s
+[synthetic population.gaml]  || 0.8349356363043833 processed in 3.531s
+[synthetic population.gaml]  || 0.8448753462603878 processed in 3.57s
+[synthetic population.gaml]  || 0.8548150562163924 processed in 3.603s
+[synthetic population.gaml]  || 0.8647547661723969 processed in 3.636s
+[synthetic population.gaml]  || 0.8746944761284015 processed in 3.691s
+[synthetic population.gaml]  || 0.884634186084406 processed in 3.733s
+[synthetic population.gaml]  || 0.8945738960404106 processed in 3.774s
+[synthetic population.gaml]  || 0.9045136059964152 processed in 3.816s
+[synthetic population.gaml]  || 0.9144533159524197 processed in 3.854s
+[synthetic population.gaml]  || 0.9243930259084243 processed in 3.899s
+[synthetic population.gaml]  || 0.9343327358644289 processed in 3.936s
+[synthetic population.gaml]  || 0.9442724458204335 processed in 3.976s
+[synthetic population.gaml]  || 0.954212155776438 processed in 4.015s
+[synthetic population.gaml]  || 0.9641518657324426 processed in 4.072s
+[synthetic population.gaml]  || 0.9740915756884472 processed in 4.103s
+[synthetic population.gaml]  || 0.9840312856444516 processed in 4.136s
+[synthetic population.gaml]  || 0.9939709956004562 processed in 4.169s
+[synthetic population.gaml] -- active people agenda built in 4.195s
+[synthetic population.gaml] -- retired people agenda built in 0.904s
+[synthetic population.gaml] -- add return home action 0.539s
+[synthetic population.gaml] -- gravity setup 1.874s
+[Global.gaml] -- achieved in 7.755s
+[Global.gaml] Give people an epidemic behavior
+[Global.gaml] -- 0.0% wearing a mask  | 0.6 average vax hesitancy
+[Global.gaml] -- achieved in 0.23s
+[Global.gaml] Population of 14483 individuals
+[Global.gaml] Population of 14483 individuals
+[Global.gaml] Introduce 0 infected cases
+[Global.gaml] finished global init ---
+[Authority.gaml] Create authority: Authority0
+[Global.gaml] finished creating authority ---
+[Global.gaml] finished after init ---
+[Global.gaml] Start experiment ---
+[Global.gaml] finished before init ---
+[Global.gaml] Init epidemiological global parameters ---
+[Global.gaml] finished setting epidemiological parameters ---
+[Global.gaml] Init sars-cov-2 and variants ---
+[Global.gaml] 	----first(original_sars_cov_2).get_epi_id() -: 'SARS-CoV-2|mutation_profile -: [1.0,1.0,1.0,1.0,1.0,1.0]'
+[Global.gaml] 	Sars-CoV-2 original strain created (0.02s)
+[myself -: sarscov2[1]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Alpha|mutation_profile -: [1.1,1.5,1.0,1.4,1.0,1.0]'
+[myself -: sarscov2[2]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Beta|mutation_profile -: [2.0,1.5,1.0,1.0,1.0,1.0]'
+[myself -: sarscov2[3]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Delta|mutation_profile -: [1.5,2.0,1.0,1.5,1.5,1.5]'
+[myself -: sarscov2[4]] myself.get_epi_id() -: 'source:SARS-CoV-2-mutation:Gamma|mutation_profile -: [2.0,1.0,1.0,1.0,1.0,1.0]'
+[Global.gaml] 	Variants created - VOC:['Alpha','Beta','Delta','Gamma'] - VOI:[] (0.04s)
+[Global.gaml] Init vaccines ----
+[Global.gaml] 	Vaccines: ['COMIRNATY','VAXZEVRIA'] created (0.0s)
+[Global.gaml] finished initializing of vaccines and variants ---
+[Global.gaml] global init
+[Global.gaml] building and boundary : done
+[Global.gaml] Activities and special buildings (hospitals and outside) : done
+[Global.gaml] Start creating and locating population from built-in generator
+[Global.gaml] Finding homes, workplaces and schools : done
+[Global.gaml] -- achieved in 0.824s
+[Global.gaml] Start assigning school and workplaces
+[Global.gaml] -- achieved in 0.931s
+[Global.gaml] Start building friendship network
+[Global.gaml] 0.9942691431333287 processed
+[Global.gaml] 1.9885382862666574 processed
+[Global.gaml] 2.982807429399986 processed
+[Global.gaml] 3.977076572533315 processed
+[Global.gaml] 4.971345715666644 processed
+[Global.gaml] 5.965614858799972 processed
+[Global.gaml] 6.959884001933301 processed
+[Global.gaml] 7.95415314506663 processed
+[Global.gaml] 8.948422288199959 processed
+[Global.gaml] 9.942691431333287 processed
+[Global.gaml] 10.936960574466616 processed
+[Global.gaml] 11.931229717599944 processed
+[Global.gaml] 12.925498860733274 processed
+[Global.gaml] 13.919768003866603 processed
+[Global.gaml] 14.91403714699993 processed
+[Global.gaml] 15.90830629013326 processed
+[Global.gaml] 16.902575433266588 processed
+[Global.gaml] 17.896844576399918 processed
+[Global.gaml] 18.891113719533244 processed
+[Global.gaml] 19.885382862666575 processed
+[Global.gaml] 20.879652005799905 processed
+[Global.gaml] 21.87392114893323 processed
+[Global.gaml] 22.86819029206656 processed
+[Global.gaml] 23.862459435199888 processed
+[Global.gaml] 24.856728578333218 processed
+[Global.gaml] 25.85099772146655 processed
+[Global.gaml] 26.845266864599875 processed
+[Global.gaml] 27.839536007733205 processed
+[Global.gaml] 28.83380515086653 processed
+[Global.gaml] 29.82807429399986 processed
+[Global.gaml] 30.822343437133192 processed
+[Global.gaml] 31.81661258026652 processed
+[Global.gaml] 32.810881723399845 processed
+[Global.gaml] 33.805150866533175 processed
+[Global.gaml] 34.799420009666505 processed
+[Global.gaml] 35.793689152799836 processed
+[Global.gaml] 36.787958295933166 processed
+[Global.gaml] 37.78222743906649 processed
+[Global.gaml] 38.77649658219982 processed
+[Global.gaml] 39.77076572533315 processed
+[Global.gaml] 40.76503486846648 processed
+[Global.gaml] 41.75930401159981 processed
+[Global.gaml] 42.75357315473313 processed
+[Global.gaml] 43.74784229786646 processed
+[Global.gaml] 44.74211144099979 processed
+[Global.gaml] 45.73638058413312 processed
+[Global.gaml] 46.73064972726645 processed
+[Global.gaml] 47.724918870399776 processed
+[Global.gaml] 48.719188013533106 processed
+[Global.gaml] 49.713457156666436 processed
+[Global.gaml] 50.707726299799766 processed
+[Global.gaml] 51.7019954429331 processed
+[Global.gaml] 52.69626458606642 processed
+[Global.gaml] 53.69053372919975 processed
+[Global.gaml] 54.68480287233308 processed
+[Global.gaml] 55.67907201546641 processed
+[Global.gaml] 56.67334115859974 processed
+[Global.gaml] 57.66761030173306 processed
+[Global.gaml] 58.66187944486639 processed
+[Global.gaml] 59.65614858799972 processed
+[Global.gaml] 60.650417731133054 processed
+[Global.gaml] 61.644686874266384 processed
+[Global.gaml] 62.63895601739971 processed
+[Global.gaml] 63.63322516053304 processed
+[Global.gaml] 64.62749430366637 processed
+[Global.gaml] 65.62176344679969 processed
+[Global.gaml] 66.61603258993303 processed
+[Global.gaml] 67.61030173306635 processed
+[Global.gaml] 68.60457087619969 processed
+[Global.gaml] 69.59884001933301 processed
+[Global.gaml] 70.59310916246633 processed
+[Global.gaml] 71.58737830559967 processed
+[Global.gaml] 72.581647448733 processed
+[Global.gaml] 73.57591659186633 processed
+[Global.gaml] 74.57018573499965 processed
+[Global.gaml] 75.56445487813298 processed
+[Global.gaml] 76.55872402126631 processed
+[Global.gaml] 77.55299316439964 processed
+[Global.gaml] 78.54726230753298 processed
+[Global.gaml] 79.5415314506663 processed
+[Global.gaml] 80.53580059379962 processed
+[Global.gaml] 81.53006973693296 processed
+[Global.gaml] 82.52433888006628 processed
+[Global.gaml] 83.51860802319962 processed
+[Global.gaml] 84.51287716633294 processed
+[Global.gaml] 85.50714630946626 processed
+[Global.gaml] 86.5014154525996 processed
+[Global.gaml] 87.49568459573293 processed
+[Global.gaml] 88.48995373886626 processed
+[Global.gaml] 89.48422288199959 processed
+[Global.gaml] 90.47849202513291 processed
+[Global.gaml] 91.47276116826625 processed
+[Global.gaml] 92.46703031139957 processed
+[Global.gaml] 93.4612994545329 processed
+[Global.gaml] 94.45556859766623 processed
+[Global.gaml] 95.44983774079955 processed
+[Global.gaml] 96.44410688393289 processed
+[Global.gaml] 97.43837602706621 processed
+[Global.gaml] 98.43264517019955 processed
+[Global.gaml] 99.42691431333287 processed
+[Global.gaml] -- achieved in 7.794s
+[Global.gaml] Start defining agendas
+[synthetic population.gaml] -- input parameters processed in 0.293s
+[synthetic population.gaml]  || 0.009939709956004562 processed in 0.083s
+[synthetic population.gaml]  || 0.019879419912009123 processed in 0.142s
+[synthetic population.gaml]  || 0.02981912986801369 processed in 0.193s
+[synthetic population.gaml]  || 0.03975883982401825 processed in 0.277s
+[synthetic population.gaml]  || 0.04969854978002281 processed in 0.367s
+[synthetic population.gaml]  || 0.05963825973602738 processed in 0.431s
+[synthetic population.gaml]  || 0.06957796969203194 processed in 0.508s
+[synthetic population.gaml]  || 0.0795176796480365 processed in 0.565s
+[synthetic population.gaml]  || 0.08945738960404107 processed in 0.623s
+[synthetic population.gaml]  || 0.09939709956004562 processed in 0.694s
+[synthetic population.gaml]  || 0.10933680951605018 processed in 0.757s
+[synthetic population.gaml]  || 0.11927651947205475 processed in 0.817s
+[synthetic population.gaml]  || 0.12921622942805933 processed in 0.906s
+[synthetic population.gaml]  || 0.13915593938406387 processed in 0.958s
+[synthetic population.gaml]  || 0.14909564934006844 processed in 1.021s
+[synthetic population.gaml]  || 0.159035359296073 processed in 1.071s
+[synthetic population.gaml]  || 0.16897506925207756 processed in 1.127s
+[synthetic population.gaml]  || 0.17891477920808213 processed in 1.185s
+[synthetic population.gaml]  || 0.18885448916408668 processed in 1.247s
+[synthetic population.gaml]  || 0.19879419912009125 processed in 1.301s
+[synthetic population.gaml]  || 0.20873390907609582 processed in 1.367s
+[synthetic population.gaml]  || 0.21867361903210036 processed in 1.416s
+[synthetic population.gaml]  || 0.22861332898810494 processed in 1.467s
+[synthetic population.gaml]  || 0.2385530389441095 processed in 1.531s
+[synthetic population.gaml]  || 0.24849274890011405 processed in 1.615s
+[synthetic population.gaml]  || 0.25843245885611865 processed in 1.662s
+[synthetic population.gaml]  || 0.26837216881212317 processed in 1.72s
+[synthetic population.gaml]  || 0.27831187876812774 processed in 1.78s
+[synthetic population.gaml]  || 0.2882515887241323 processed in 1.838s
+[synthetic population.gaml]  || 0.2981912986801369 processed in 1.887s
+[synthetic population.gaml]  || 0.30813100863614146 processed in 1.947s
+[synthetic population.gaml]  || 0.318070718592146 processed in 1.99s
+[synthetic population.gaml]  || 0.32801042854815055 processed in 2.043s
+[synthetic population.gaml]  || 0.3379501385041551 processed in 2.091s
+[synthetic population.gaml]  || 0.3478898484601597 processed in 2.148s
+[synthetic population.gaml]  || 0.35782955841616426 processed in 2.21s
+[synthetic population.gaml]  || 0.36776926837216883 processed in 2.269s
+[synthetic population.gaml]  || 0.37770897832817335 processed in 2.311s
+[synthetic population.gaml]  || 0.3876486882841779 processed in 2.373s
+[synthetic population.gaml]  || 0.3975883982401825 processed in 2.427s
+[synthetic population.gaml]  || 0.40752810819618707 processed in 2.498s
+[synthetic population.gaml]  || 0.41746781815219164 processed in 2.55s
+[synthetic population.gaml]  || 0.4274075281081962 processed in 2.62s
+[synthetic population.gaml]  || 0.4373472380642007 processed in 2.683s
+[synthetic population.gaml]  || 0.4472869480202053 processed in 2.764s
+[synthetic population.gaml]  || 0.45722665797620987 processed in 2.825s
+[synthetic population.gaml]  || 0.46716636793221444 processed in 2.889s
+[synthetic population.gaml]  || 0.477106077888219 processed in 2.922s
+[synthetic population.gaml]  || 0.4870457878442236 processed in 2.994s
+[synthetic population.gaml]  || 0.4969854978002281 processed in 3.039s
+[synthetic population.gaml]  || 0.5069252077562327 processed in 3.118s
+[synthetic population.gaml]  || 0.5168649177122373 processed in 3.17s
+[synthetic population.gaml]  || 0.5268046276682418 processed in 3.249s
+[synthetic population.gaml]  || 0.5367443376242463 processed in 3.313s
+[synthetic population.gaml]  || 0.5466840475802509 processed in 3.386s
+[synthetic population.gaml]  || 0.5566237575362555 processed in 3.435s
+[synthetic population.gaml]  || 0.56656346749226 processed in 3.5s
+[synthetic population.gaml]  || 0.5765031774482646 processed in 3.566s
+[synthetic population.gaml]  || 0.5864428874042692 processed in 3.621s
+[synthetic population.gaml]  || 0.5963825973602738 processed in 3.683s
+[synthetic population.gaml]  || 0.6063223073162783 processed in 3.75s
+[synthetic population.gaml]  || 0.6162620172722829 processed in 3.806s
+[synthetic population.gaml]  || 0.6262017272282875 processed in 3.868s
+[synthetic population.gaml]  || 0.636141437184292 processed in 3.92s
+[synthetic population.gaml]  || 0.6460811471402965 processed in 3.979s
+[synthetic population.gaml]  || 0.6560208570963011 processed in 4.028s
+[synthetic population.gaml]  || 0.6659605670523057 processed in 4.074s
+[synthetic population.gaml]  || 0.6759002770083102 processed in 4.131s
+[synthetic population.gaml]  || 0.6858399869643148 processed in 4.186s
+[synthetic population.gaml]  || 0.6957796969203194 processed in 4.246s
+[synthetic population.gaml]  || 0.705719406876324 processed in 4.307s
+[synthetic population.gaml]  || 0.7156591168323285 processed in 4.368s
+[synthetic population.gaml]  || 0.7255988267883331 processed in 4.427s
+[synthetic population.gaml]  || 0.7355385367443377 processed in 4.479s
+[synthetic population.gaml]  || 0.7454782467003422 processed in 4.532s
+[synthetic population.gaml]  || 0.7554179566563467 processed in 4.586s
+[synthetic population.gaml]  || 0.7653576666123513 processed in 4.637s
+[synthetic population.gaml]  || 0.7752973765683558 processed in 4.687s
+[synthetic population.gaml]  || 0.7852370865243604 processed in 4.737s
+[synthetic population.gaml]  || 0.795176796480365 processed in 4.782s
+[synthetic population.gaml]  || 0.8051165064363696 processed in 4.828s
+[synthetic population.gaml]  || 0.8150562163923741 processed in 4.874s
+[synthetic population.gaml]  || 0.8249959263483787 processed in 4.919s
+[synthetic population.gaml]  || 0.8349356363043833 processed in 4.967s
+[synthetic population.gaml]  || 0.8448753462603878 processed in 5.018s
+[synthetic population.gaml]  || 0.8548150562163924 processed in 5.07s
+[synthetic population.gaml]  || 0.8647547661723969 processed in 5.107s
+[synthetic population.gaml]  || 0.8746944761284015 processed in 5.172s
+[synthetic population.gaml]  || 0.884634186084406 processed in 5.227s
+[synthetic population.gaml]  || 0.8945738960404106 processed in 5.287s
+[synthetic population.gaml]  || 0.9045136059964152 processed in 5.342s
+[synthetic population.gaml]  || 0.9144533159524197 processed in 5.394s
+[synthetic population.gaml]  || 0.9243930259084243 processed in 5.435s
+[synthetic population.gaml]  || 0.9343327358644289 processed in 5.499s
+[synthetic population.gaml]  || 0.9442724458204335 processed in 5.55s
+[synthetic population.gaml]  || 0.954212155776438 processed in 5.591s
+[synthetic population.gaml]  || 0.9641518657324426 processed in 5.727s
+[synthetic population.gaml]  || 0.9740915756884472 processed in 5.778s
+[synthetic population.gaml]  || 0.9840312856444516 processed in 5.837s
+[synthetic population.gaml]  || 0.9939709956004562 processed in 5.886s
+[synthetic population.gaml] -- active people agenda built in 5.925s
+[synthetic population.gaml] -- retired people agenda built in 0.984s
+[synthetic population.gaml] -- add return home action 0.83s
+[synthetic population.gaml] -- gravity setup 2.7s
+[Global.gaml] -- achieved in 10.762s
+[Global.gaml] Give people an epidemic behavior
+[Global.gaml] -- 0.0% wearing a mask  | 0.6 average vax hesitancy
+[Global.gaml] -- achieved in 0.285s
+[Global.gaml] Population of 14483 individuals
+[Global.gaml] Population of 14483 individuals
+[Global.gaml] Introduce 0 infected cases
+[Global.gaml] finished global init ---
+[Authority.gaml] Create authority: Authority0
+[Global.gaml] finished creating authority ---
+[Global.gaml] finished after init ---
