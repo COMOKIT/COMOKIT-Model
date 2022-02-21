@@ -32,6 +32,7 @@ global {
 	
 	
 	bool parallel_computation <- false;
+	bool macro_model <- false;
 	// precomputation parameters
 	bool use_activity_precomputation <- false; //if true, use precomputation model
 	bool udpate_for_display <- false; // if true, do some additional computation only for display purpose
