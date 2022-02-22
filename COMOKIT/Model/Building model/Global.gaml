@@ -12,24 +12,27 @@
 @no_experiment
 
 model CoVid19
+
+import "Entities/Building Spatial Entities.gaml"
  
 import "Building Synthetic Population.gaml"
 
 import "Parameters.gaml"
  
-import "Entities/Building Spatial Entities.gaml"
-
- 
 global {
 	species<BuildingIndividual> building_individual_species <- BuildingIndividual; // by default
 	container<BuildingIndividual> all_building_individuals -> {container<BuildingIndividual>(building_individual_species.population+(building_individual_species.subspecies accumulate each.population))};
 	
-	shape_file rooms_shape_file <- shape_file(building_dataset_path + "Rooms.shp");
-	shape_file entrances_shape_file <- shape_file(building_dataset_path + "Entrances.shp");
-	shape_file walls_shape_file <- shape_file(building_dataset_path +"Walls.shp");
-	shape_file pedestrian_path_shape_file <- shape_file(building_dataset_path+"pedestrian paths.shp");
-	shape_file free_spaces_shape_file <- shape_file(building_dataset_path+ "free spaces.shp");
-	shape_file open_area_shape_file <- shape_file(building_dataset_path+"open area.shp");
+	shape_file rooms_shape_file <- shape_file("../includes/rooms.shp");
+	shape_file entrances_shape_file <- shape_file("../includes/entrances.shp");
+	shape_file walls_shape_file <- shape_file("../includes/walls.shp");
+	shape_file pedestrian_path_shape_file <- shape_file("../generated/pedestrian_paths.shp");
+	shape_file free_spaces_shape_file <- shape_file("../generated/free_spaces.shp");
+	shape_file open_area_shape_file <- shape_file("../generated/open_area.shp");
+	// beds and benches
+	shape_file beds_shape_file <- shape_file("../includes/beds.shp");
+	shape_file benches_shape_file <- shape_file("../includes/benches.shp");
+
 	
 	geometry shape <- envelope(envelope( pedestrian_path_shape_file) + envelope(walls_shape_file) + envelope(rooms_shape_file));
 	graph pedestrian_network;
@@ -45,11 +48,16 @@ global {
 	
 	container<Room> rooms_list -> {container<Room>(Room.population+(Room.subspecies accumulate each.population))};
 			
-			
-	geometry open_area ;
-	
+	geometry open_area;
 	
 	init {
+		// These will be overridden if they are put in ./Parameters.gaml
+		starting_date <- date([2020,4,6,5,29,0]);
+		final_date <- date([2020,4,20,18,0,0]);
+		step <- 1#s;
+		nb_step_for_one_day <- #day / step;
+		seed <- 25.0;
+
 		create outside;
 		the_outside <- first(outside);
 		do init_epidemiological_parameters;
@@ -57,8 +65,12 @@ global {
 		do create_elements_from_shapefile;
 		create PedestrianPath from: pedestrian_path_shape_file {
 			list<geometry> fs <- free_spaces_shape_file overlapping self;
-			 fs <- fs where (each covers shape); 
-			 free_space <- fs with_min_of (each.location distance_to location);
+			fs <- fs where (each covers shape); 
+			free_space <- fs with_min_of (each.location distance_to location);
+			// Workaround for a NPE in build_intersection_areas
+			if free_space = nil {
+				free_space <- shape + P_shoulder_length;
+			}
 		}
 		pedestrian_network <- as_edge_graph(PedestrianPath);
 		
@@ -100,7 +112,7 @@ global {
 			if (nb > num_people_per_building) and (length(offices_list) > num_people_per_building) {
 				loop times: nb - num_people_per_building {
 					Room r <- one_of(offices_list where (each.num_places > 1));
-					r.num_places <- r.num_places - 1;	
+					r.num_places <- r.num_places - 1;
 				}
 			} else if (nb < num_people_per_building) {
 				loop times: num_people_per_building - nb{
@@ -129,27 +141,26 @@ global {
 		}
 		ask rooms_list{
 			geometry contour <- nil;
-			float dist <-0.5;
+			float dist <- 10.0;
 			int cpt <- 0;
 			loop while: contour = nil {
 				cpt <- cpt + 1;
 				contour <- copy(shape.contour);
 				ask Wall at_distance 2.0 {
 					contour <- contour - (shape +dist);
-			
 				}
 				if cpt < limit_cpt_for_entrance_room_creation {
-					ask (Room  + CommonArea) at_distance 1.0 {
+					ask (Room + CommonArea) at_distance 1.0 {
 						contour <- contour - (shape + dist);
 					}
 				}
 				if cpt = 20 {
 					break;
 				}
-				dist <- dist * 0.5;	
+				dist <- dist * 0.5;
 			} 
 			if contour != nil {
-				list<point> ents <- points_on (contour, 2.0);
+				list<point> ents <- points_on (contour, 1.7);
 				loop pt over:ents {
 					create RoomEntrance with: [location::pt,my_room::self] {
 						myself.entrances << self;
@@ -161,13 +172,11 @@ global {
 				point pte <- (myself.entrances closest_to self).location;
 				dists <- self distance_to pte;
 			}
-					
 		}
 		do create_activities;
 		
 		map<string, list<Room>> rooms_type <- Room group_by each.type;
-		available_offices <- (workplace_layer accumulate rooms_type[each]) where (each != nil and each.is_available());	
-		
+		available_offices <- (workplace_layer accumulate rooms_type[each]) where (each != nil and each.is_available());
 		
 		ask BuildingEntrance {
 			if (not empty(PedestrianPath)) {
@@ -188,21 +197,36 @@ global {
 		}
 	
 		int nbDesk<-length(Room accumulate each.available_places);
-		do create_people(nbDesk);
+		do create_recurring_people;
 		
+		ask 1 among Doctor{
+			headdoc <- true;
+		}
+		ask Doctor{
+			do initalization;
+		}
+		ask 2 among (Doctor where (each.headdoc = false)){
+			nightshift <- true;
+		}
+		ask 4 among Nurse{
+			nightshift <- true;
+		}
+		ask Caregivers{
+			do initalization;
+		}
 		
-		ask initial_nb_infected among BuildingIndividual{
+		ask initial_nb_infected among Caregivers{
 			state <- init_state;
 		}
 	}
-	
-	
+
 	action create_elements_from_shapefile {
 		create Wall from: walls_shape_file;
-		create Room from: rooms_shape_file ;
+		int i <- 0;
+		create Room from: rooms_shape_file;		
 		ask Room {
 			if type = multi_act {
-				create CommonArea  with: [shape::shape, type::type];
+				create CommonArea with: [shape::shape, type::type];
 				do die;
 			}
 		}
@@ -211,9 +235,14 @@ global {
 				shape <- shape + P_shoulder_length;
 			}
 		}
-	}	
-	
-	
+		//create bed and bench
+		create Bed from: beds_shape_file;
+		create BenchWait from: benches_shape_file;
+		ask Bed{
+			room <- first(Room where (each.shape overlaps self.location));
+		}
+	}
+
 	reflex fast_forward when: (BuildingIndividual first_with !(each.is_outside)) = nil {
 		date next_date <- BuildingIndividual min_of (first(each.current_agenda_week.keys));
 		if (next_date != nil) and (next_date >  current_date){
@@ -229,8 +258,8 @@ global {
 			starting_date <- next_date;
 		}
 	}
+
 	reflex end_simulation when: current_date >= final_date {
 		do pause;	
 	}
-				
 }

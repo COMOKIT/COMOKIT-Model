@@ -14,18 +14,17 @@
 model Constants
 
 global {
-	
 	string layer <- "layer";
 	string walls <- "Walls";
-	string windows <- "Windows";	
+	string windows <- "Windows";
 	string entrance <-"Entrance";
 	string offices <- "Offices";
 	string meeting_rooms <- "Meeting rooms";
 	string library<-"Library";
 	string lab<-"Labs";
-	string sanitation<-"Sanitation";	
+	string sanitation<-"Sanitation";
 	string coffee <- "Coffee";
-	string supermarket <-"Supermarket";	
+	string supermarket <-"Supermarket";
 	string furnitures <- "Furniture";
 	string toilets <- "Toilets";
 	string elevators <- "Elevators";
@@ -44,4 +43,20 @@ global {
 	
 	string SFM <- "SFM";
 	string simple <- "simple";
+	
+	string TFS <- "HH:mm";
+	
+	// Room types
+	string WARD <- "ward";
+	string DOCTOR_ROOM <- "doctor_room";
+	string HEAD_DOCTOR_ROOM <- "head_doctor_room";
+	string NURSE_ROOM <- "nurse_room";
+	string MEETING_ROOM <- "meeting_room";
+	string ADMISSION_ROOM <- "admission_room";
+	string HALL <- "hall";
+	string INJECT <- "injecting_room";
+	string MEDICINE <- "medicine_storage";
+	string MINOPERATION <- "minor_operation_room";
+	string ELEVATOR <- "elevator";
+	string STAIR <- "stairway";
 }
