@@ -11,7 +11,8 @@ model Constants
 global {
 	
 	string SUSCEPTIBLE <-"susceptible";
-	string LATENT <- "latent";
+	string LATENT_ASYMPTOMATIC <- "latent_asymptomatic";
+	string LATENT_SYMPTOMATIC <- "latent_symptomatic";
 	string PRESYMPTOMATIC <- "presymptomatic";
 	string SYMPTOMATIC <- "symptomatic";
 	string ASYMPTOMATIC <- "asymptomatic";

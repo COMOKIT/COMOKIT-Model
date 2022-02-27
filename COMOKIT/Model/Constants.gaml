@@ -48,6 +48,8 @@ global {
 	string act_sport <- "sport";
 	string act_other <- "other activity";
 	
+	string act_leisure_sport <- "leisure and sport";
+	
 	//Type of model for building choice during activity
 	string random <- "random";
 	string gravity <- "gravity";

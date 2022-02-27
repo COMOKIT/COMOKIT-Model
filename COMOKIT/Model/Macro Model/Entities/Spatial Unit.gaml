@@ -14,17 +14,16 @@ import "../Global.gaml"
 
 species SpatialUnit {
 	list<compartment> compartments_inhabitants ;
-	map<string, list<group_individuals_simple>> current_groups;
+	map<string, list<list>> current_groups;
 	map<string,float> area_types;
 	rgb color;
 	int nb_individuals;
 	int nb_infected;
 	string id;
+	int id_int;
 	
 	action reset_pop {
-		loop type_gps over: current_groups.values {
-			ask type_gps {do die;}
-		}
+		
 		current_groups <- []; 
 	}
 	
@@ -36,15 +35,15 @@ species SpatialUnit {
 	
 	action infect_others { 
 		loop type over: current_groups.keys {
-			list<group_individuals_simple> groups <- current_groups[type];
-			float infected_factor <- groups sum_of each.infection_val();
+			list<list> groups <- current_groups[type];
+			float infected_factor <- groups sum_of float(each[2]);
 			if (infected_factor > 0) {
-				ask groups {
-					float rate_infection <-infected_factor / myself.area_types[type] * contact_rate;
-					int nb_su <- evol_states[SUSCEPTIBLE];
-					int nb_new_infected <- min(my_compartment.group.evol_states[SUSCEPTIBLE][0], world.rate_to_num(nb_su,rate_infection));
-					my_compartment.group.evol_states[SUSCEPTIBLE][0] <- my_compartment.group.evol_states[SUSCEPTIBLE][0] - nb_new_infected;
-					my_compartment.group.evol_states[LATENT][0] <- my_compartment.group.evol_states[LATENT][0]+ nb_new_infected;
+				loop group over: groups {
+					float rate_infection <-infected_factor / area_types[type] * float(group[3]) * ((type in building_type_infection_factor.keys) ? building_type_infection_factor[type] : 1.0);
+					compartment my_compartment <-compartment(group[0]);
+					int nb_new_infected <- world.rate_to_num(int(group[1]),rate_infection);
+					
+					ask my_compartment {do new_case(nb_new_infected);} 
 					
 				}
 			}
@@ -52,11 +51,8 @@ species SpatialUnit {
 	}
 	
 	action update_color {
-		ask compartments_inhabitants {
-			group.num_infected <- sum(group.evol_states[LATENT]) + sum(group.evol_states[PRESYMPTOMATIC]) + sum(group.evol_states[ASYMPTOMATIC]) + sum(group.evol_states[SYMPTOMATIC]) + sum(group.evol_states[HOSPITALISATION]) + sum(group.evol_states[ICU]);
-			group.num_suceptibles <- (group.evol_states[SUSCEPTIBLE][0]);	
-		}
-		nb_infected <- compartments_inhabitants sum_of (each.group.num_infected);
+		
+		nb_infected <- compartments_inhabitants sum_of (each.group.num_asymptomatic + each.group.num_symptomatic + each.group.num_latent_asymptomatics + each.group.num_latent_symptomatics );
 		float val <- nb_individuals = 0 ? -1 : (nb_infected / nb_individuals);
 		if val = -1 {color <- #white;} else {color <- rgb(255 * val, 255 * (1 - val), 0);}
 	}

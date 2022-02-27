@@ -59,6 +59,8 @@ global {
 	Abstract_individual_precomputation bot_abstract_individual_precomputation;
 	float t_ref <- machine_time;
 	float t_ref2 <- machine_time;
+	
+	
 	action global_init {
 		
 		do console_output("global init");
@@ -164,7 +166,7 @@ global {
 		ask experiment{
 			do compact_memory;
 		}
-		write "Number of individuals: " + length(all_individuals) +" Number of buildings: " + length(all_buildings_map);
+		//write "Number of individuals: " + length(all_individuals) +" Number of buildings: " + length(all_buildings_map);
 	}
 	
 	
@@ -619,7 +621,7 @@ global {
 	
 	// Global debug mode to print in console all messages called from #console_output()
 	bool DEBUG <- true;
-	bool SAVE_LOG <- true;
+	bool SAVE_LOG <- false;
 	string log_name <- "log.txt";
 	list<string> levelList const:true <- ["trace","debug","warning","error"]; 
 	// the available level of debug among debug, error and warning (default = debug)

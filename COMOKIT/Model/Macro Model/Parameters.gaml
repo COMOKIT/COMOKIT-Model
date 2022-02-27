@@ -14,12 +14,27 @@ import "Constants.gaml"
 
 global {
 	
+	
 	string dataset <- "../../Datasets/Alpes-Maritimes";
+	
+	bool use_agenda_data <- false;
+	string csv_boundary_path <- dataset + "/generated/boundary.csv" ;
+	string csv_agenda_path <- dataset + "/generated/agenda.data" ;
+	string agenda_path <- dataset+"/generated/agenda_data/";
+	
+	float step <- 1#h;
+	date starting_date <- date([2022,2,14]);
+	date ending_date <- date([2022,8,14]);
+	
 	
 	float mask_ratio <- 0.5;
 	float factor_contact_rate_wearing_mask <- 0.5;
 
-	float density_ref_contact <- 10000.0;//0.1;
+	float density_ref_contact <- 10.0;
+	map<string,float> building_type_infection_factor <- ["home"::0.1];
 	string variant <- DELTA;
-	int nb_init_infected <- 5;
+	int nb_init_infected <- 20;
+	
+	int num_replication_parameters <- 3;
+	
 }

@@ -9,7 +9,6 @@ model anymodellevel
 
 import "../Entities/Virus.gaml"
 
-import "../Entities/Virus.gaml"
 
 
 import "Parameters.gaml"
@@ -19,114 +18,222 @@ import "Entities/Spatial Unit.gaml"
 import "Entities/Group.gaml"  
 
 
-global {
+global { 
 	
-	float step <- 1#h;
-	date starting_date <- date([2022,2,14]);
-	date ending_date <- date([2022,8,14]);
 	
-	list<string> evol_state_order <- [HOSPITALISATION, SYMPTOMATIC, PRESYMPTOMATIC, ASYMPTOMATIC,LATENT];
+	list<string> evol_state_order <- [HOSPITALISATION, SYMPTOMATIC, PRESYMPTOMATIC, ASYMPTOMATIC,LATENT_SYMPTOMATIC, LATENT_ASYMPTOMATIC];
 	//The viral agent that infect this biological entity
 	virus viral_agent;
 	
+	map<string,SpatialUnit> spatial_unit_per_code;
+	map<string,compartment> compartment_per_code;
 	
-	//['Annexe','staying at home','working','shopping','charging_station','other activity','parking','Agricole','leisure and sport','school','grave_yard','detached','terrace','shelter','eating','social_facility','motocross','greenhouse','First necessity shoping','bicycle_parking','lavoir','post_box','fire_station','bunker','ruins','toilets','fort','fuel','roof','greengrocer','veterinary','cinema','kindergarten','service','public','parking_space','free_flying','health related activity','wayside_shrine','collapsed','funeral_directors','cycling','fountain','recycling','multi','bench','doityourself','semidetached_house','wine','laundry','parking_entrance','car_parts','office','hut','atm','barn','musical_instrument','bell','civic','drinking_water','hangar','monastery','gas','garden_centre','carport','archaeological_site','shed','soccer;basketball','newsagent','community_centre','jewelry','sports','university','farm','supermarket;convenience','cheese','sailing','convenience;gas','computer','farm_auxiliary','architect','dojo','telephone','handball','warehouse','wayside_cross','vacant','waste_basket','storage_tank','reception_desk','cowshed','crematorium']
-	
-	init { 
-		
+	action init_simulation { 
 		do init_epidemiological_parameters;
 		do init_sars_cov_2;
 		viral_agent <- viruses first_with (each.name = variant);
-		create SpatialUnit from: shape_file(shp_boundary_path)  {
-			area_types <- [];// ["home"::shape.area / 10.0,"working_place"::shape.area / 10.0];
-			list<string> types <- string(shape get ("types")) split_with "$";
-			loop t over: types {
-				list<string> k_v <- t split_with "::";
-				if (length(k_v) > 1) {
-					
-					area_types[k_v[0]] <- float(k_v[1]);
-				
-				}
-			}
-			list<string> categories <- string(shape get ("categories")) split_with "$";
-			loop c over: categories {
-				if c != nil and c != "" {
-					list<string> k_v <- c split_with "::";
-					if length(k_v) > 1 {
-						list<string> id_c <- k_v[0] split_with "%";
-						create compartment {
-							create group_individuals with: (
-								num_suceptibles:float(k_v[1]),
-									sex:int(id_c[1]),
-									age:int(id_c[0]),
-									occupation:id_c[2],
-									my_compartment:self
-								) {
-									myself.group <- self;
-								}
-								myself.compartments_inhabitants << self;
-						}		
-					}
-				}
-			}
-		}
+		do create_spatial_unit;
 		
 		list<string> dt <- SpatialUnit accumulate (each.area_types.keys);
-		write remove_duplicates(dt);
 		ask group_individuals {
-			//write sample(num_suceptibles);
-		//	num_suceptibles <- round(1500000 / length(group_individuals));
 			do initialise_disease;
 		}
 		write "area created: " + length(SpatialUnit) +" " + length(compartment);
+		if use_agenda_data {
+			do load_agenda;
+		} else {
+			do load_default_agenda;	
+		}
+		write "agenda loaded";
+		
 		ask SpatialUnit {
-			ask compartments_inhabitants {
-				loop d from: 0 to: 6 {
-					list<map<SpatialUnit,map<string,float>>> act_d <- [];
-					loop h from: 0 to: 23 {
-						map<SpatialUnit,map<string,float>> act_h <- [];
-						int nb_people_home <- round(((h < 8) or (h > 18)) ? 0.9 : 0.2 * group.num_suceptibles);
-						act_h[myself] <- ["staying at home":: nb_people_home];
-						int other_people <- group.num_suceptibles - nb_people_home;
-						act_h[one_of(SpatialUnit)] <- ["working":: other_people];
-						
-						act_d << act_h;
-					}
-					agenda << act_d;
-				}
-			}
-			
-			
-			nb_individuals <- compartments_inhabitants sum_of each.group.num_suceptibles;
+			nb_individuals <- compartments_inhabitants sum_of each.group.num_individuals;
 		}
 		
-		ask one_of(SpatialUnit) {
-			ask one_of(compartments_inhabitants) {
-				group.evol_states[SUSCEPTIBLE] <- group.evol_states[SUSCEPTIBLE] - nb_init_infected;
-				group.evol_states[LATENT] <- group.evol_states[LATENT] + nb_init_infected;
+		loop times: nb_init_infected {
+			ask one_of(SpatialUnit) {
+				ask one_of(compartments_inhabitants) {
+					do new_case(1); 
+				}
 			}
-			
 		}
 		ask SpatialUnit {
 			do update_color;
 		}
 	}
 	
+	action load_default_agenda {
+		list<SpatialUnit> offices_sa <- (SpatialUnit where ("office" in each.area_types.keys));
+		list<SpatialUnit> schools_sa <- (SpatialUnit where ("school" in each.area_types.keys));
+		ask SpatialUnit {
+			ask compartments_inhabitants {
+				loop d from: 0 to: 6 {
+					list<map<SpatialUnit,map<string,map<string,float>>>> act_d <- [];
+					loop h from: 0 to: 23 {
+						map<SpatialUnit,map<string,map<string,float>>> act_h <- [];
+						float people_home_rate <- ((h < 8) or (h > 18)) ? 0.9 : 0.2 ;
+						act_h[myself] <- [act_home:: ["home"::people_home_rate]];
+						float other_people <- 1.0 - people_home_rate;
+						if group.age > 18 {
+							loop sp over: 2 among offices_sa {
+								act_h[sp] <- [act_working::["office" :: (other_people/2)]];
+							}
+						} else {
+							loop sp over: 2 among schools_sa {
+								act_h[sp] <- [act_studying::["school" :: (other_people/2)]];
+							}
+						
+						}
+						act_d << act_h;
+					}
+					agenda << act_d;
+				}
+			}
+		}	
+	}
+	
+	action load_agenda {
+		list<string> activity_list;
+		list<string> bd_type_list;
+		ask SpatialUnit {
+			ask compartments_inhabitants {
+				loop d from: 0 to: 6 {
+					list<map<SpatialUnit,map<string,map<string,float>>>> act_d <- [];
+					loop h from: 0 to: 23 {
+						act_d << [];
+					}
+					agenda << act_d;
+				}
+			}				
+								
+			string path_name <- agenda_path + id + ".data";
+				bool activity_line_done <- false;
+				bool bd_type_line_done <- false;
+				loop line over:  file(path_name){
+					if not activity_line_done {
+						if empty(activity_list) {
+							list<string> act_l <- line split_with "$$";
+							activity_list <- act_l copy_between (1, length(act_l));
+						}
+						activity_line_done <- true;
+					}
+					else if not bd_type_line_done {
+						if empty(bd_type_list) {
+							list<string> bd_l <- line split_with "$$";
+							bd_type_list <- bd_l copy_between (1, length(bd_l));
+						}
+						bd_type_line_done <- true;
+					}
+					else {
+						list<string> ll <- line split_with (",");
+							compartment comp <- compartment_per_code[ll[0]];
+						if (comp != nil) {
+							int d <- int(ll[1]);
+							int h <- int(ll[2]);
+										
+							string agenda_str <- ll[3];
+							
+							ask comp {
+								list<map<SpatialUnit,map<string,map<string,float>>>> act_d <- agenda[d];
+								map<SpatialUnit,map<string, map<string,float>>> act_h <- act_d[h];
+								loop agenda_str_z over: agenda_str split_with "%"  {
+									map<string, map<string,float>> act_z <- [];
+									list<string> tmp3 <- agenda_str_z split_with "@";
+									SpatialUnit sp <- spatial_unit_per_code[tmp3[0]];
+												
+									if sp != nil {
+										loop agenda_str_act over: tmp3[1] split_with "$"  {
+											map<string,float> act_l <- [];
+											list<string> tmp4 <- agenda_str_act split_with "+";
+											if length(tmp4) > 1 {
+												loop agenda_str_ty over: tmp4[1] split_with "="  {
+													list<string> tmp5 <- agenda_str_ty split_with ":";
+													act_l[bd_type_list[int(tmp5[0])]] <- float(tmp5[1]);
+												}
+												act_z[activity_list[int(tmp4[0])]] <- act_l;
+											}
+											act_h[sp] <- act_z;
+										}
+									}
+								}
+							}
+						}
+					}
+			}
+		}
+	}
+	action create_spatial_unit {
+		create SpatialUnit from: shape_file(shp_boundary_path) {
+			spatial_unit_per_code[id] <- self;
+			id_int <- int(id);
+		}
+		matrix mat <- matrix(csv_file(csv_boundary_path,",", true));
+		loop i from: 0 to: mat.rows -1 {
+			SpatialUnit s_unit <- spatial_unit_per_code[string(mat[0,i])];
+		 	ask s_unit {
+			 	area_types <- [];
+				list<string> types <- string(mat[2,i]) split_with "$";
+				loop t over: types {
+					list<string> k_v <- t split_with "::";
+					if (length(k_v) > 1) {
+						
+						area_types[k_v[0]] <- float(k_v[1]);
+					
+					}
+				}
+				list<string> categories <- string(mat[1,i]) split_with "$";
+				loop c over: categories {
+					if c != nil and c != "" {
+						list<string> k_v <- c split_with "::";
+						if length(k_v) > 1 {
+							list<string> id_int_str <- k_v[0] split_with "&&";
+							int id_ <- int(id_int_str[0]);
+							list<string> id_c <- id_int_str[1] split_with "%";
+							create compartment {
+								id <- id_;
+								area_id <- int(myself.id);
+								create group_individuals with: (
+									num_individuals:float(k_v[1]),
+										sex:int(id_c[1]),
+										age:int(id_c[0]),
+										occupation:id_c[2],
+										my_compartment:self
+									) {
+										myself.group <- self;
+										num_susceptibles <- num_individuals;
+									}
+									myself.compartments_inhabitants << self;
+							}		
+						}
+					}
+				}
+			}
+		}
+		compartment_per_code <- compartment as_map (each.id:: each);
+	}
+	
 	reflex main_dynamic {
+		
+		float t <- machine_time;
+		
 		ask SpatialUnit {
 			do reset_pop;
 		}
+		
 		ask SpatialUnit {
 			do define_activity;
 		}
+		
 		ask SpatialUnit {
 			do infect_others;
 		}
-		if every(#day) {
+		
+		if every(#day) and cycle > 1{
 			ask group_individuals {
 				do evolution_state;
 			}
 		}
+		
 		ask SpatialUnit {
 			do update_color;
 		}
@@ -138,9 +245,12 @@ global {
 	}
 	
 	int rate_to_num(int num_tot, float rate) {
+		float t <- machine_time;
+		//rate <- min(max(rate,0.0),1.0);
 		float val_p <- num_tot * rate;
 		int num <- int(val_p);
 		if (val_p > num) {num <- min(num_tot, num + (flip(val_p - num) ? 1 : 0)) ;}	
+		t9 <- t9 + machine_time - t;
 		return num;
 	}
 }

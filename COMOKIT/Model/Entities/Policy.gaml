@@ -39,6 +39,11 @@ species AbstractPolicy virtual: true {
 	int max_allowed (Individual i, Activity activity) {
 		return max_number_individual_group;
 	}
+	
+	/**
+	 * This action - defined for the macro model - returns the rate of individuals coming from source area to carry out a given activity in a given type of building into a target area 
+	 */
+	float allowed(int source_area, int target_area, string activity_str, string building_type) virtual: true;
 }
 
 
@@ -52,6 +57,10 @@ species NoPolicy parent: AbstractPolicy {
 	
 	bool is_allowed (Individual i, Activity activity){
 		return true;
+	}
+	
+	float allowed(int source_area, int target_area, string activity_str, string building_type) {
+		return 1.0;
 	}
 }
 
@@ -74,6 +83,10 @@ species ActivitiesListingPolicy parent: AbstractPolicy {
 		}
 	}
 	
+	float allowed(int source_area, int target_area, string activity_str, string building_type) {
+		return allowed_activities[activity_str] ? 1.0 : 0.0;
+	}
+	
 	
 
 }
@@ -93,7 +106,11 @@ species PositiveAtHome parent: AbstractPolicy {
 		}
 		return true;
 	}
-
+	
+	//@todo : TO IMPLEMENT
+	float allowed(int source_area, int target_area, string activity_str, string building_type) {
+		return 1.0;
+	}
 }
 
 
@@ -112,7 +129,10 @@ species FamilyOfPositiveAtHome parent: AbstractPolicy {
 		}
 		return true;
 	}
-
+	//@TODO  : TO IMPLEMENT
+	float allowed(int source_area, int target_area, string activity_str, string building_type) {
+		return 1.0;
+	}
 }
 
 /**
@@ -138,6 +158,14 @@ species CompoundPolicy parent: AbstractPolicy {
 		}
 		return true;
 	}
+	
+	float allowed(int source_area, int target_area, string activity_str, string building_type) {
+		float rate <- 1.0;
+		loop p over: targets {
+			rate <- rate * p.allowed(source_area, target_area, activity_str, building_type);
+		}
+		return rate;
+	}
 }
 
 /**
@@ -159,6 +187,10 @@ species ForwardingPolicy parent: AbstractPolicy {
 	bool is_allowed (Individual i, Activity activity) {
 		return target.is_allowed(i, activity);
 	}
+	
+	float allowed(int source_area, int target_area, string activity_str, string building_type) {
+		return target.allowed(source_area, target_area, activity_str, building_type);
+	}
 
 }
 
@@ -176,6 +208,10 @@ species PartialPolicy parent: ForwardingPolicy {
 			return true;
 		}
 		return super.is_allowed(i, activity);
+	}
+	
+	float allowed(int source_area, int target_area, string activity_str, string building_type) {
+		return tolerance + ( 1 - tolerance) * super.allowed(source_area, target_area, activity_str, building_type);
 	}
 
 }
@@ -391,6 +427,10 @@ species DetectionPolicy parent: AbstractPolicy {
 		return true;
 	}
 
+//@TODO  : TO IMPLEMENT
+	float allowed(int source_area, int target_area, string activity_str, string building_type) {
+		return 1.0;
+	}
 }
 
 /**
@@ -462,6 +502,11 @@ species DetectionPolicy parent: AbstractPolicy {
  	}
  	
  	bool is_allowed (Individual i, Activity activity) { return true; }
+ 	
+ 	//@TODO  : TO IMPLEMENT
+	float allowed(int source_area, int target_area, string activity_str, string building_type) {
+		return 1.0;
+	}
  	
  } 
  
@@ -613,5 +658,10 @@ species HospitalisationPolicy parent: AbstractPolicy{
 	//Preventing moving anywhere for people hospitalised
 	bool is_allowed (Individual i, Activity activity){
 		return not(i.is_ICU or i.is_hospitalised);
+	}
+	
+	//@TODO  : TO IMPLEMENT
+	float allowed(int source_area, int target_area, string activity_str, string building_type) {
+		return 1.0;
 	}
 }

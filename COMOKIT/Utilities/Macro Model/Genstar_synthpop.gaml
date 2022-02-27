@@ -47,6 +47,11 @@ global {
 	int pop_size <- 20000;
 	float expansion_factor <- 1.3;
 	
+	list<list<int>> age_cat <- [[0,19],[20,44],[45,54],[55,64],[64,74],[75,84],[85,120] ];
+	
+	bool consider_sex_for_group <- false;
+	bool consider_occupation_for_group <- false;
+	
 	// Individual variables
 	list<string> tranches_age <- ["Moins de 4 ans","5 à 9 ans","10 à 14 ans","15 à 19 ans", "20 à 24 ans", "25 à 29 ans", 
 								"30 à 34 ans", "35 à 39 ans", "40 à 44 ans", "45 à 49 ans", "50 à 54 ans", "55 à 59 ans", 
@@ -91,6 +96,114 @@ global {
 	list<int> age_gap_husband <- [-15,3,8,25]; 
 	
 	
+	map<string,string> simplify_type <- [
+		"staying at home"::"home",
+		""::"home",
+		"yes"::"home",
+		"manor"::"home",
+		"hostel"::"hotel",
+		"working"::"office",
+		"estate_agent"::"office",
+		"civic"::"public",
+		"government"::"public",
+		"manufacture"::"industry",
+		"company"::"office" ,
+		"admin"::"public",
+		"store"::"shop",
+		"bookstore"::"shop" , 
+		"coffeeshop"::"caphe" ,
+		"caphe-karaoke"::"caphe" ,
+		"Agricole"::"farm" , 
+		"repairshop"::"shop" , 
+		"eating"::"restaurant",
+		"convenience"::"shop" , 
+		"telephone"::"shop" , 
+		"computer"::"shop" ,
+		"supermarket;convenience":: "supermarket", 
+		"convenience;gas" ::"shop", 
+		"cheese"::"shop" , 
+		"frozen_food"::"shop" , 
+		"alcohol"::"shop" , 
+		"retail"::"shop" , 
+		"furniture"::"shop" , 
+		"jewelry"::"shop" , 
+		"bicycle"::"shop" , 
+		"chocolate"::"shop" , 
+		"shoes"::"shop" , 
+		"store"::"shop" , 
+		"bookstore"::"shop" , 
+		"shopping"::"shop" , 
+		"First necessity shoping"::"shop" , 
+		"greengrocer"::"shop" , 
+		"wine"::"shop" , 
+		"musical_instrument"::"shop",
+		"garden_centre"::"park",
+		"sports"::"sport",		
+		"tennis"::"outside_sport",
+		"multi"::"sport",
+		"basketball"::"sport", 
+		"handball"::"sport" ,
+		"soccer"::"outside_sport",
+		"rugby_league"::"outside_sport",
+		"swimming"::"sport",
+		"cycling"::"outside_sport",
+		"pelota"::"outside_sport",
+		"boules"::"outside_sport",
+		"skateboard"::"outside_sport",
+		"beachvolleyball"::"outside_sport",
+		"athletics"::"outside_sport", 
+		"dojo"::"sport",
+		"car_repair"::"other_activity",
+		"garages"::"other_activity",
+		"church"::"workship",
+		"hairdresser"::"other_activity",
+		"chapel"::"workship",
+		"memorial"::"other_activity",
+		"ruins"::"other_activity",
+		"meeting"::"other_activity",
+		"laundry"::"other_activity",
+		"supplypoint"::"other_activity",
+		"place_of_worship"::"workship" , 
+		"monastery"::"workship" , 
+		"gas"::"other_activity", 
+		"charging_station"::"other_activity", 
+		"other activity"::"other_activity", 
+		"grave_yard"::"other_activity", 
+		"fort"::"other_activity", 
+		"fuel"::"other_activity", 
+		"veterinary"::"health related activity", 
+		"wayside_shrine"::"workship",
+		"copyshop"::"shop",
+		"detached"::"shop",
+		"dentist"::"health related activity",
+		"cathedral"::"workship",
+		"building"::"home",
+		"tennis;soccer"::"outside_sport",
+		"kiosk"::"other_activity", 
+		"archaeological_site"::"other_activity", 
+		"association"::"other_activity", 
+		"mobile_phone"::"shop",
+		"fashion"::"shop",
+		
+		"cosmetics"::"other_activity", 
+		"administrative"::"public",
+		
+		"erotic"::"shop",
+		"pasta"::"restaurant",
+		"pastry"::"shop",
+		"seafood"::"restaurant",
+		"museum"::"leisure",
+		
+		"social_centre"::"other_activity",	
+		"bathroom_furnishing"::"shop",
+		"dry_cleaning"::"shop",
+		"boat_rental"::"shop",
+		"vehicle_inspection"::"garage",
+		"public_bookcase"::"leisure",
+		"tatoo"::"shop",
+		"hardware"::"shop",
+		"sports_hall"::"stadium"
+	];
 	
 	
 	// ----------------------------------
@@ -98,7 +211,9 @@ global {
 	// ----------------------------------
 	file pop_square_file;
 	
-	string pop_output_path <- folder_generated+"boundary.shp"; 
+	string pop_output_path <- folder_generated+"population.csv"; 
+	string spatial_unit_output_path <- folder_generated+"boundary.shp"; 
+	string spatial_unit_data_output_path <- folder_generated+"boundary.csv"; 
 	
 	
 	int age_step <- 10;
@@ -113,6 +228,15 @@ global {
 		
 			create building from: buildings_shape_file {
 				functions <- type split_with "$";
+				list<string> f_s <- [];
+				loop f over: functions {
+					if (f in simplify_type.keys) {
+						f_s << simplify_type[f];
+					} else {
+						f_s << f;
+					}
+					functions <- remove_duplicates(f_s);
+				}
 			}
 			
 			create boundary from: boundary_file;
@@ -129,7 +253,7 @@ global {
 			ask boundary {
 				list<building> bds <- building overlapping self;
 				list<string> type <- remove_duplicates(bds accumulate each.functions);
-				id <- string(int(self));	
+				id <- (int(self));	
 				map<string, float> area_types <- type as_map (each::0.0);
 				loop bd over: bds {
 					loop fct over: bd.functions {
@@ -454,38 +578,37 @@ global {
 		
 		
 		ask dummy_agent {
-			if (Age < 6) {
-				Age_cat <- "3";
-			} else if (Age < 19) {
-				Age_cat <- "15";
-			}else if (Age < 26) {
-				Age_cat <- "22";
-			}else if (Age < 36) {
-				Age_cat <- "30";
-			}else if (Age < 51) {
-				Age_cat <- "45";
-			}else if (Age < 66) {
-				Age_cat <- "55";
-			}else if (Age < 86) {
-				Age_cat <- "75";
-			} else {
-				Age_cat <- "85";
+			loop ac over: age_cat {
+				if Age >= ac[0] and Age <= ac[1] {
+					Age_cat <- string(round(mean(ac)));
+				} 
 			}
+			
 			if Sex = "Homme" {Sex <- "0";} else {Sex<-"1";}
-			if Activity in ["Agriculteurs exploitants","Artisans commerçants chefs d'entreprise","Cadres et professions intellectuelles supérieures",
-								"Professions intermédiaires","Employés","Ouvriers"] {
-				Activity_cat <- "worker";						
+			if consider_occupation_for_group {
+				if Activity in ["Agriculteurs exploitants","Artisans commerçants chefs d'entreprise","Cadres et professions intellectuelles supérieures",
+									"Professions intermédiaires","Employés","Ouvriers"] {
+					Activity_cat <- "worker";						
+				}
+				else  {
+					Activity_cat <- "non worker";						
+				}
 			}
-			else  {
-				Activity_cat <- "non worker";						
-			}
-			id_cat <- Age_cat +"%"+ Sex +"%"+Activity_cat;
+			id_cat <- Age_cat +"%"+ (consider_sex_for_group ? Sex : "_") +"%"+(consider_occupation_for_group ? Activity_cat :"_");
 		}
 		int nb_tot;
-		
-		
+		list<string> list_age_cat <- [];
+		loop ac over: age_cat {
+			list_age_cat << string(round(mean(ac)));
+		} 
+			
+		int cpt_group <- 0;
+		map<list<string>, int> id_to_int <- [];
 		ask boundary {
 			list<dummy_agent> people_in <- (dummy_household overlapping self) accumulate each.family;
+			ask people_in {
+				id_area <- myself.id;
+			}
 			map<string,list<dummy_agent>> group_agents <- people_in group_by each.id_cat;
 			num_cat <- group_agents.keys as_map (each :: length(group_agents[each]));
 			
@@ -495,9 +618,9 @@ global {
 				bool cont <- false;
 				loop cat over: num_cat.keys sort_by (num_cat[each]){
 					if num_cat[cat] < min_numbers {
-						list<string> occupation_values <-["worker", "non worker"];
-						list<string> sex_values <-["0", "1"];
-						list<string> age_values <-["3", "15", "22", "30", "45", "55", "75", "85"];
+						list<string> occupation_values <-consider_occupation_for_group ? ["worker", "non worker"] : ["_"];
+						list<string> sex_values <- consider_sex_for_group ? ["0", "1"] : ["_"];
+						list<string> age_values <- copy(list_age_cat);
 						loop while: true {
 							if  length(occupation_values) = 1 and length(age_values) = 1 and length(sex_values) = 1{
 								break;
@@ -505,7 +628,10 @@ global {
 							string new_value <- world.find_closest(cat,occupation_values,sex_values,age_values );
 							if new_value in  num_cat.keys {
 								num_cat[new_value] <- num_cat[new_value] + num_cat[cat];
+								group_agents[new_value] <- group_agents[new_value] + group_agents[cat];
 								remove key: cat from: num_cat;
+								remove key: cat from: group_agents;
+								
 								cont <- true;
 								break;
 							}
@@ -518,27 +644,42 @@ global {
 				still_continue <- cont;
 				
 			}
+			loop gp_id over: group_agents.keys {
+				
+				ask group_agents[gp_id] {
+					id_group <- cpt_group;
+				}
+				id_to_int[[name, gp_id]] <- cpt_group;
+				cpt_group <- cpt_group + 1;
+			}
 		}
-		int tot_remove <- 0;
 		ask boundary {
 			loop cat over: num_cat.keys {
-				if num_cat[cat] < min_numbers {
-					write sample(cat) +" " + sample(num_cat[cat]);
-					tot_remove <- tot_remove + num_cat[cat];
-				}// else {
-					categories <- categories + cat +"::" + num_cat[cat] +"$";
-					nb_tot <- nb_tot + num_cat[cat] ;
-				//}
-				
+				categories <- categories + id_to_int[[name,cat]] + "&&" + cat +"::" + num_cat[cat] +"$";
+				nb_tot <- nb_tot + num_cat[cat] ;
 			}			
 		}
-		write sample(nb_tot) +" " + sample(tot_remove);
+		write sample(nb_tot) ;
 		
 		
 		
-		save boundary type:shp to: pop_output_path attributes: ["name", "population","categories", "types"];
+		save boundary type:shp to: spatial_unit_output_path attributes: ["name", "id", "population"];
+		save "id,categories,types" to: spatial_unit_data_output_path type:text;
+		ask boundary {
+			save ""+ id +","+categories+","+types to: spatial_unit_data_output_path rewrite: false type:text;
 		
-
+		}
+		
+		save "id,age,sex,occupation,role,household_id, area_id,group_id"  to:pop_output_path type:text rewrite: true;
+			cpt<- 0;
+			ask dummy_agent {
+				cpt <- cpt + 1;
+				if (cpt mod int(length(dummy_agent)/100) = 0) {
+					write "processing csv file save: " + int(cpt * 100 / length(dummy_agent)) + "%";
+				}
+				save [int(self),Age,Sex,Activity,role,int(household), id_area,id_group]  to:pop_output_path type:csv rewrite: false;
+			
+		}
 		write "Population saved";		
 		
 		
@@ -781,6 +922,9 @@ species dummy_agent {
 	string role;
 	string id_cat;
 	
+	int id_area;
+	int id_group;
+	
 }
 
 species dummy_household {
@@ -821,7 +965,7 @@ species boundary {
 	string types;
 	int population;
 	int num_people;
-	string id;
+	int id;
 	map<string,int> num_cat;
 	string categories;
 	aspect default { draw shape color: #blue wireframe: true; }

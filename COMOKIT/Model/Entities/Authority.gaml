@@ -65,6 +65,16 @@ species Authority {
 			}			
 		} 
 	}
+	
+	float allows_rate (int source_area, int target_area, string activity_str, string building_type) { 
+		float start <- BENCHMARK ? machine_time : 0.0;
+		float allowed_rate <- policy.allowed(source_area, target_area, activity_str, building_type);
+		if BENCHMARK {
+			bench["Authority.allows_rate|action"] <- (bench contains_key "Authority.allows_rate|action" ? 
+				bench["Authority.allows_rate|action"] : 0.0) + machine_time - start;
+		}
+		return allowed_rate ;
+	}
 
 	bool allows (Individual i, Activity activity) { 
 		float start <- BENCHMARK ? machine_time : 0.0;
