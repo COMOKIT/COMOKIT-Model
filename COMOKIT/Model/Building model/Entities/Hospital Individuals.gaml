@@ -18,8 +18,11 @@ species Doctor parent: BuildingIndividual {
 		
 	}
 	action initalization{
-		location <- any_location_in(one_of(BuildingEntrance).init_place);
-		working_place <- headdoc? one_of(Room where (each.type = HEAD_DOCTOR_ROOM)):one_of(Room where (each.type = DOCTOR_ROOM));
+		Room r <- one_of(BuildingEntrance where (each.floor = 0));
+		current_floor <- r.floor;
+		location <- r.location + point([0, 0, r.floor*default_ceiling_height]);
+		working_place <- headdoc? one_of(Room where (each.type = HEAD_DOCTOR_ROOM)):
+								one_of(Room where (each.type = DOCTOR_ROOM));
 		
 		if not(working_place.is_available()) {
 			available_offices >> working_place;
@@ -32,23 +35,23 @@ species Doctor parent: BuildingIndividual {
 	
 	map<date, BuildingActivity> get_daily_agenda {
 		map<date, BuildingActivity> agenda;
-//		non nightshift: arrive ~5h30, meeting at 6h, visit inpatient from 6h30 - 7h15, 7h20 start work, 11h30 lunch,
+//		non nightshift: arrive ~6h30, meeting at 7h, visit inpatient from 7h30 - 8h15, 8h20 start work, 11h30 lunch,
 //		13h30 start work, 17h50 go home
 //		nightshift: 18h arrive, 19h work, 5h next day go home
 		if(!nightshift){
-			date arrive <- date("05:30", TFS) + rnd(15#mn);
+			date arrive <- date("06:30", TFS) + rnd(15#mn);
 			agenda[arrive] <- first(ActivityGoToOffice);
 			
-			date meeting <- date("06:00", TFS);
+			date meeting <- date("07:00", TFS);
 			agenda[meeting] <- first(ActivityGoToMeeting);
 			
-			date visit <- date("06:30", TFS);
-			loop while: visit < date('07:10', TFS){
+			date visit <- date("07:30", TFS);
+			loop while: visit < date('08:10', TFS){
 				agenda[visit] <- first(ActivityVisitInpatient);
 				visit <- visit + rnd(3#mn, 5#mn);
 			}
 			
-			date work <- date("07:20", TFS);
+			date work <- date("08:20", TFS);
 			int choice <- rnd_choice([0.4,0.3,0.3]);
 			if(headdoc){
 				agenda[work] <- first(ActivityGoToOffice);
@@ -67,7 +70,7 @@ species Doctor parent: BuildingIndividual {
 				}
 			}
 			
-			work <- date("08:00", TFS);
+			work <- date("09:00", TFS);
 			loop while: work <= date("11:10", TFS){
 				agenda[work] <- first(ActivityWanderAround);
 				work <- work + rnd(10#mn, 15#mn);
@@ -116,8 +119,9 @@ species Doctor parent: BuildingIndividual {
 				agenda[work]<- first(ActivityWanderAround);
 				work <- work + rnd(10#mn, 20#mn);
 			}
-			
-			date end <- date('05:00', TFS);
+			date meeting <- date('07:00', TFS) add_days 1;
+			agenda[meeting] <- first(ActivityGoToMeeting);
+			date end <- date('07:30', TFS) add_days 1;
 			agenda[end] <- first(ActivityLeaveBuilding);
 		}
 		
@@ -130,7 +134,10 @@ species Nurse parent: BuildingIndividual {
 	rgb color <-#blue;
 	bool nightshift <- false;
 	init {
-		location <- any_location_in(one_of(BuildingEntrance).init_place);
+		
+		Room r <- one_of(BuildingEntrance where (each.floor = 0));
+		current_floor <- r.floor;
+		location <- r.location + point([0, 0, r.floor*default_ceiling_height]);
 		working_place <- any(Room where (each.type = NURSE_ROOM));
 		
 		if not(working_place.is_available()) {
@@ -147,19 +154,19 @@ species Nurse parent: BuildingIndividual {
 		map<date, BuildingActivity> agenda;
 //		similar to daily rountine of doctor
 		if(!nightshift){
-			date arrive <- date("05:30", TFS) + rnd(15#mn);
+			date arrive <- date("06:30", TFS) + rnd(15#mn);
 			agenda[arrive] <- first(ActivityGoToOffice);
 			
-			date meeting <- date("06:00", TFS);
+			date meeting <- date("07:00", TFS);
 			agenda[meeting] <- first(ActivityGoToMeeting);
 			
-			date visit <- date("06:30", TFS);
-			loop while: visit <= date("07:10", TFS){
+			date visit <- date("07:30", TFS);
+			loop while: visit <= date("08:10", TFS){
 				agenda[visit] <- first(ActivityVisitInpatient);
 				visit <- visit + rnd(3#mn, 5#mn);
 			}
 			
-			date work <- date("07:20", TFS);
+			date work <- date("08:20", TFS);
 			loop while: work <= date("11:10", TFS){
 				int choice <- rnd_choice([0.3,0.2,0.2, 0.3]);
 				switch choice{
@@ -218,8 +225,9 @@ species Nurse parent: BuildingIndividual {
 				agenda[work]<- first(ActivityWanderAround);
 				work <- work + rnd(10#mn, 20#mn);
 			}
-			
-			date end <- date('05:00', TFS);
+			date meeting <- date('07:00', TFS) add_days 1;
+			agenda[meeting] <- first(ActivityGoToMeeting);
+			date end <- date('07:30', TFS) add_days 1;
 			agenda[end] <- first(ActivityLeaveBuilding);
 		}
 		return agenda;
@@ -230,8 +238,10 @@ species Nurse parent: BuildingIndividual {
 species Staff parent: BuildingIndividual{
 	rgb color <- #lightblue;
 	init {
-		location <- any_location_in(one_of(BuildingEntrance).init_place);
-		working_place <- one_of(Room where (each.type = HALL));
+		Room r <- one_of(BuildingEntrance where (each.floor = 0));
+		current_floor <- r.floor;
+		location <- r.location + point([0, 0, r.floor*default_ceiling_height]);
+		working_place <- any(Room where (each.type = HALL));
 		
 		working_place.nb_affected <- working_place.nb_affected + 1;
 		if not(working_place.is_available()) {
@@ -281,6 +291,7 @@ species Inpatient parent: BuildingIndividual {
 		assigned_ward <- mybed.room;
 		current_room <- assigned_ward;
 		location <- mybed.location;
+		current_floor <- current_room.floor;
 		map<date,BuildingActivity> agenda_day;
 		assigned_ward.people_inside << self;
 	}
@@ -319,11 +330,11 @@ species Inpatient parent: BuildingIndividual {
 	}
 	
 	aspect default{
-		if(location overlaps circle(0.4, mybed.location)){
+		if!is_outside and (location overlaps circle(0.4, mybed.location)) and show_floor[current_floor]{
 			draw pple_lie size: people_size  at: location + {0, 0, 0.85} rotate: 0 color: color;
 			if(is_infected){draw circle(0.2)  at: location + {0, 0, 0.7} color: get_color();}
 		}
-		else{
+		else if !is_outside and show_floor[current_floor]{
 			draw pple_walk size: people_size  at: location + {0, 0, 0.7} rotate: heading - 90 color: color;
 			if(is_infected){draw circle(0.2)  at: location + {0, 0, 0.7} color: get_color();}
 		}
@@ -345,29 +356,31 @@ species Caregivers parent: BuildingIndividual {
 		ask sicker{
 			carer << myself;
 		}
-		location <- any_location_in(inter(circle(rnd(1#m, 2#m), sicker.mybed.location), sicker.assigned_ward));
 		current_room <- sicker.assigned_ward;
+		current_floor <- current_room.floor;
+		location <- any_location_in(inter(circle(rnd(1#m, 2#m), sicker.mybed.location), sicker.assigned_ward))
+				    + point([0, 0, current_floor*default_ceiling_height]);
 		sicker.assigned_ward.people_inside << self;
 	}
 
 	map<date, BuildingActivity> get_daily_agenda {
 		map<date, BuildingActivity> agenda;
 
-		date breakfast <- date("05:30", TFS) + rnd(10#minute);
+		date breakfast <- date("06:30", TFS) + rnd(10#minute);
 		agenda[breakfast] <- first(ActivityLeaveBuilding);
 
-		date care1 <- date("06:00", TFS) + rnd(15#minute);
+		date care1 <- date("07:00", TFS) + rnd(15#minute);
 		agenda[care1] <- first(ActivityTakeCare);
 		
-		date wait <- date("06:30", TFS);
+		date wait <- date("07:30", TFS);
 		agenda[wait] <- first(ActivityWait);
 		
-		date care2 <- date("07:30", TFS) + rnd(15#minute);
+		date care2 <- date("08:15", TFS) + rnd(15#minute);
 		agenda[care2] <- first(ActivityTakeCare);
 		
-		date wander <- date("08:30", TFS);
+		date wander <- date("08:40", TFS);
 		
-		loop while: wander.hour  < 11{
+		loop while: wander.hour < 11{
 			agenda[wander] <- first(ActivityWanderInWardC);
 			wander <- wander + rnd(5#mn, 10#mn);
 		}
@@ -392,23 +405,105 @@ species Caregivers parent: BuildingIndividual {
 
 species Outpatients parent: BuildingIndividual{
 	Doctor doc;
+	date date_come;
 	init{
 		
+	}
+	action initialization{
+		doc <- one_of(Doctor where (each.headdoc = false and each.is_outside = false));
+		date_come <- current_date;
+		Room r <- one_of(BuildingEntrance where (each.floor = 0));
+		current_floor <- r.floor;
+		location <- r.location + point([0, 0, r.floor*default_ceiling_height]);
 	}
 	
 	map<date, BuildingActivity> get_daily_agenda {
 		map<date, BuildingActivity> agenda;		
+
+		// see doctor, go to do health examinations, see doctor again and go out
+		date see_doc <- date_come + rnd(15#mn);
+		agenda[see_doc] <- first(ActivityMeetDoctor);
+		date test_perform <- see_doc +rnd(5#mn, 15#mn);
+		//Temporary assume that they will do a health check at the admission room
+		agenda[test_perform] <- first(ActivityGoToAdmissionRoom);
+		see_doc <- test_perform +rnd(10#mn, 40#mn);
+		agenda[see_doc] <- first(ActivityMeetDoctor);
+		date out <- see_doc +rnd(10#mn, 25#mn);
+		agenda[out] <- first(ActivityLeaveBuilding);
+		
 		return agenda;
 	}
 }
 
 species Interns parent: BuildingIndividual{
+	bool nightshift <- false;
 	init{
 		
 	}
+	action initialization{
+		Room r <- one_of(BuildingEntrance where (each.floor = 0));
+		current_floor <- r.floor;
+		location <- r.location + point([0, 0, r.floor*default_ceiling_height]);
+		working_place <- any(Room where (each.type = DOCTOR_ROOM));
+		
+		if not(working_place.is_available()) {
+			available_offices >> working_place;
+		}
+		
+		working_desk <- working_place.get_target(self, true);
+		if (working_place = nil) {
+			do die;
+		}
+	}
 	
 	map<date, BuildingActivity> get_daily_agenda {
-		map<date, BuildingActivity> agenda;		
+		map<date, BuildingActivity> agenda;
+		if(!nightshift){
+			date arrive <- date("08:00", TFS) + rnd(15#mn);
+			
+			date work <- date("08:20", TFS);			
+			
+			work <- date("08:30", TFS);
+			loop while: work <= date("11:30", TFS){
+				agenda[work] <- first(ActivityWander);
+				work <- work + rnd(20#mn, 25#mn);
+			}
+			
+			date lunch <- date("11:30", TFS);
+			agenda[lunch] <- first(ActivityLeaveBuilding);
+			
+			work <- date("13:30", TFS);
+			
+			
+			work <- date("14:00", TFS);
+			loop while: work <= date("17:30", TFS){
+				agenda[work] <- first(ActivityWander);
+				work <- work + rnd(10#mn, 15#mn);
+			}
+			
+			date end <- date("17:50", TFS);
+			agenda[end] <- first(ActivityLeaveBuilding);
+		}
+		
+		else{
+			date arrive <- date("18:00", TFS) + rnd(15#mn);
+			agenda[arrive] <- first(ActivityGoToOffice);
+			
+			date work <- date("19:00", TFS);
+			agenda[work] <- first(ActivityGoToAdmissionRoom);
+			
+			work <- date("19:30", TFS);
+			loop while: work <= date("23:00", TFS){
+				agenda[work]<- first(ActivityWander);
+				work <- work + rnd(10#mn, 20#mn);
+			}
+			
+			work <- date("23:00", TFS);
+			agenda[work] <- first(ActivityGoToAdmissionRoom);
+
+			date end <- date('07:30', TFS) add_days 1;
+			agenda[end] <- first(ActivityLeaveBuilding);
+		}		
 		return agenda;
 	}
 }

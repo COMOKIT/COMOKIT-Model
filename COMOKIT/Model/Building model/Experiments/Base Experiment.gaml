@@ -26,15 +26,15 @@ experiment AbstractExperiment type:gui autorun:false virtual: true{
 		layout #split;
 	  	display Simulation type:opengl background: #black 
 	  			draw_env:false synchronized: false autosave:false toolbar:false	{
-//		   	species Room refresh: false;
+		   	species Room;
 //		    species BuildingEntrance refresh: false;
 //			species RoomEntrance refresh: false;
 //			species CommonArea;
 //			species RoomEntrance aspect: queuing;
 //			species unit_cell;
-			species Wall refresh: false;
-			species PedestrianPath aspect: free_space_aspect transparency: 0.5;
-			species PedestrianPath;
+			species Wall;
+//			species PedestrianPath aspect: free_space_aspect transparency: 0.5;
+//			species PedestrianPath;
 //			species Separator;
 			species Bed;
 			species BenchWait;
