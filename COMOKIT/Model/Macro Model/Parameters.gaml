@@ -17,7 +17,7 @@ global {
 	
 	string dataset <- "../../Datasets/Alpes-Maritimes";
 	
-	bool use_agenda_data <- false;
+	bool test_mode <- true;
 	string csv_boundary_path <- dataset + "/generated/boundary.csv" ;
 	string csv_agenda_path <- dataset + "/generated/agenda.data" ;
 	string agenda_path <- dataset+"/generated/agenda_data/";
@@ -30,8 +30,8 @@ global {
 	float mask_ratio <- 0.5;
 	float factor_contact_rate_wearing_mask <- 0.5;
 
-	float density_ref_contact <- 10.0;
-	map<string,float> building_type_infection_factor <- ["home"::0.1];
+	float density_ref_contact <- 200.0;
+	map<string,float> building_type_infection_factor <- ["home"::0.5];
 	string variant <- DELTA;
 	int nb_init_infected <- 20;
 	

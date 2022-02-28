@@ -198,12 +198,74 @@ global {
 		"bathroom_furnishing"::"shop",
 		"dry_cleaning"::"shop",
 		"boat_rental"::"shop",
-		"vehicle_inspection"::"garage",
+		"vehicle_inspection"::"other_activity",
 		"public_bookcase"::"leisure",
 		"tatoo"::"shop",
 		"hardware"::"shop",
-		"sports_hall"::"stadium"
+		"sports_hall"::"stadium",
+		"caravan"::"home",
+		"cinema"::"leisure",
+		"social_facility"::"other_activity",	
+		"dormitory"::"home",
+		"climbing"::"sport",
+		"running"::"outside_sport",
+		"community_centre"::"other_activity",
+		"mall"::"shop",
+		"clinic"::"health related activity",
+		"multi;basketball"::"sport",
+		"skateboard;roller_skating;bmx"::"outside_sport",
+		"pelota;basketball"::"sport",
+		"multi;basketball;handball"::"sport",
+		"archery"::"sport",
+		"free_flying"::"leisure",
+		"video_games"::"shop",
+		"basketball;soccer"::"outside_sport",
+		"motorcycle"::"outside_sport",
+		"garage"::"other_activity",
+		"glasshouse"::"leisure",
+		"soccer;rugby"::"outside_sport",
+		"rugby"::"outside_sport",
+		"research"::"office",
+		"driving_school"::"other_activity",
+		"table_tennis"::"sport",
+		"kitchen"::"shop",
+		"trade"::"office",
+		"childcare"::"kindergarden",
+		"financial"::"office",
+		"dive_centre"::"sport",
+		"fabric"::"office",
+		"baby_goods"::"shop",
+		"notary"::"other_activity",
+		"bed"::"shop",
+		"handball;badminton;basketball"::"sport",
+		"multi;fencing;handball;boxing;basketball"::"sport",
+		"tattoo"::"other_activity",
+		"tennis;volleyball"::"sport",
+		"clock"::"shop",
+		"public_bath"::"leisure",
+		"hearing_aids"::"shop",
+		"scuba_diving"::"shop",
+		"college"::"school",
+		"tennis;handball;baskbetball"::"sport",
+		"baseball"::"outside_sport",
+		"variety_store"::"shop",
+		"judo"::"sport",
+		"soccer;basketball"::"outside_sport",
+		"paddle_tennis"::"sport",
+		"flooring;paint"::"shop",
+		"soccer;basketball;handball"::"sport",
+		"handball;football;basketball"::"sport",
+		"electrical"::"shop",
+		"laser_tag"::"leisure",
+		"mosque"::"workship",
+		"handball;basketball;football"::"sport",
+		"e-cigarette"::"shop",
+		"soccer;tennis;basketball"::"sport",
+		"organic"::"shop",
+		"basketball; handball"::"sport"
+		
 	];
+	
 	
 	
 	// ----------------------------------
@@ -250,6 +312,7 @@ global {
 					}	
 				}
 			}
+			map<string,float> bds_area;
 			ask boundary {
 				list<building> bds <- building overlapping self;
 				list<string> type <- remove_duplicates(bds accumulate each.functions);
@@ -263,14 +326,20 @@ global {
 				types <- "";
 				loop t over: type {
 					types <- types + (t +"::" + area_types[t] +"$");
+					bds_area[t] <- ((t in bds_area.keys )? bds_area[t] : 0.0) + area_types[t];
 				}
+				
 				
 			}
 			
 			ask building {do die;}
 		
-			 
-		
+			
+			list<string> types <- bds_area.keys sort_by (-1 * bds_area[each]);
+			loop t over: types {
+				write t + ": " + bds_area[t];
+			}
+			
 			if not TEST_MODE {
 				pop_size <- int(boundary sum_of each.population);
 			}

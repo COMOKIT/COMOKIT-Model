@@ -21,30 +21,34 @@ species SpatialUnit {
 	int nb_infected;
 	string id;
 	int id_int;
-	
+	map<string, float> home_types_rates;
 	action reset_pop {
-		
-		current_groups <- []; 
+		current_groups <- [];
+		loop type over: area_types.keys {
+			current_groups[type] <- [];
+		}
 	}
 	
 	action define_activity {
 		ask compartments_inhabitants{
 			do carry_out_activities;
 		}
-	}
+	} 
 	
 	action infect_others { 
 		loop type over: current_groups.keys {
 			list<list> groups <- current_groups[type];
-			float infected_factor <- groups sum_of float(each[2]);
-			if (infected_factor > 0) {
-				loop group over: groups {
-					float rate_infection <-infected_factor / area_types[type] * float(group[3]) * ((type in building_type_infection_factor.keys) ? building_type_infection_factor[type] : 1.0);
-					compartment my_compartment <-compartment(group[0]);
-					int nb_new_infected <- world.rate_to_num(int(group[1]),rate_infection);
-					
-					ask my_compartment {do new_case(nb_new_infected);} 
-					
+			if not empty(groups) {
+				float infected_factor <- groups sum_of float(each[2]);
+				if (infected_factor > 0) {
+					loop group over: groups {
+						float rate_infection <-infected_factor / area_types[type] * float(group[3]) * ((type in building_type_infection_factor.keys) ? building_type_infection_factor[type] : 1.0);
+						compartment my_compartment <-compartment(group[0]);
+						int nb_new_infected <- world.rate_to_num(int(group[1]),rate_infection);
+						
+						ask my_compartment {do new_case(nb_new_infected);} 
+						
+					}
 				}
 			}
 		}

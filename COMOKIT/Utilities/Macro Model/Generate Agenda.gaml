@@ -7,6 +7,8 @@
 
 model GenerateAgenda
 
+import "../../Model/Macro Model/Functions.gaml"
+
 import "../../Model/Parameters.gaml"
 
 
@@ -167,7 +169,10 @@ global {
 		
 	
 	init {
-		do init_building_type_parameters;
+		
+		activities <- init_building_type_parameters_fct(building_type_per_activity_parameters, possible_workplaces,possible_schools, school_age ,active_age) ;
+	
+		possible_activities_tot <- activities.keys - [act_working, act_studying, act_home];
 		do import_data_file;
 		create zone_EMD from: ZF_EMD2008_shape_file with: [name::string(get("NOM_ZF")), id::string(get("NUM_ZF08")) replace (" ",""), district::int(get("SECTEUR"))] {
 			loop while: first(id) = "0" {
@@ -863,49 +868,7 @@ global {
 	
 	
 	
-	action init_building_type_parameters {
-		file csv_parameters <- csv_file(building_type_per_activity_parameters,",",true);
-		matrix data <- matrix(csv_parameters);
-		// Modifiers can be weights, age range, or anything else
-		list<string> available_modifiers <- [WEIGHT,RANGE];
-		map<string,string> activity_modifiers;
-		//Loading the different rows number for the parameters in the file
-		loop i from: 0 to: data.rows-1{
-			string activity_type <- data[0,i];
-			bool modifier <- available_modifiers contains activity_type;
-			list<string> bd_type;
-			loop j from: 1 to: data.columns - 1 {
-				if (data[j,i] != nil) {	 
-					if modifier {
-						activity_modifiers[data[j,i-1]] <- data[j,i]; 
-					} else {
-						if data[j,i] != nil or data[j,i] != "" {bd_type << data[j,i];}
-					}
-				}
-			}
-			if not(modifier) { activities[activity_type] <- bd_type; }
-		}
-		
-		if activities contains_key act_studying {
-			loop acts over:activities[act_studying] where not(possible_schools contains_key each) {
-				pair age_range <- activity_modifiers contains_key acts ? 
-					pair(split_with(activity_modifiers[acts],SPLIT)) : pair(school_age::active_age); 
-				possible_schools[acts] <- [int(age_range.key),int(age_range.value)];
-			}
-			//remove key: act_studying from:activities;
-		}
-		
-		if activities contains_key act_working {
-			loop actw over:activities[act_working] where not(possible_workplaces contains_key each) { 
-				possible_workplaces[actw] <- activity_modifiers contains_key actw ? 
-					float(activity_modifiers[actw]) : 1.0;
-			}
-			//remove key: act_working from:activities;
-		}
-		activities[act_friend] <- activities[act_home];
-		
-		possible_activities_tot <- activities.keys - [act_working, act_studying, act_home];
-	}
+	
 	
 }
 

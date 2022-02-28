@@ -18,8 +18,16 @@ global {
 	}	
 }
  
-experiment no_contaiment parent: abstract_experiment {
+experiment "No Containment" parent: abstract_experiment autorun: true  {
+	string name_sim <- "No Containment";
+	
 	action _init_ {
-		create simulation with:(macro_model:true, shp_boundary_path: dataset + "/generated/boundary.shp", csv_boundary_path: dataset + "/generated/boundary.csv" );
+		do create_simulation;
+	}
+	output {
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
+		
+		display "Main" parent: map {}
+		display "Plot" parent: states_evolution_chart {}	
 	}
 }

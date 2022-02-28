@@ -7,6 +7,8 @@
 @no_experiment
 model anymodellevel
 
+import "Functions.gaml"
+
 import "../Entities/Virus.gaml"
 
 
@@ -21,7 +23,7 @@ import "Entities/Group.gaml"
 global { 
 	
 	
-	list<string> evol_state_order <- [HOSPITALISATION, SYMPTOMATIC, PRESYMPTOMATIC, ASYMPTOMATIC,LATENT_SYMPTOMATIC, LATENT_ASYMPTOMATIC];
+	list<string> evol_state_order <- [SYMPTOMATIC, PRESYMPTOMATIC, ASYMPTOMATIC,LATENT_SYMPTOMATIC, LATENT_ASYMPTOMATIC];
 	//The viral agent that infect this biological entity
 	virus viral_agent;
 	
@@ -39,13 +41,13 @@ global {
 			do initialise_disease;
 		}
 		write "area created: " + length(SpatialUnit) +" " + length(compartment);
-		if use_agenda_data {
-			do load_agenda;
-		} else {
+		if test_mode {
 			do load_default_agenda;	
+		} else {
+			do load_agenda;
 		}
+		write sample(Activities);
 		write "agenda loaded";
-		
 		ask SpatialUnit {
 			nb_individuals <- compartments_inhabitants sum_of each.group.num_individuals;
 		}
@@ -90,6 +92,8 @@ global {
 				}
 			}
 		}	
+		
+		Activities <- [act_studying::nil, act_working::nil];
 	}
 	
 	action load_agenda {
@@ -161,8 +165,16 @@ global {
 					}
 			}
 		}
+		activity_list >> act_home;
+		write sample(activity_list);
+		Activities <-[];
+		loop act over: activity_list {
+			Activities[act] <- nil;
+		}
 	}
 	action create_spatial_unit {
+		activities <- init_building_type_parameters_fct(building_type_per_activity_parameters, possible_workplaces,possible_schools, school_age ,active_age) ;
+	
 		create SpatialUnit from: shape_file(shp_boundary_path) {
 			spatial_unit_per_code[id] <- self;
 			id_int <- int(id);
@@ -181,6 +193,14 @@ global {
 					
 					}
 				}
+				
+				loop t over: area_types.keys inter activities[act_home] {
+					home_types_rates[t] <- area_types[t] ;
+				}
+				float sum_area <- sum(home_types_rates.values) ;
+				loop t over: home_types_rates.keys{
+					home_types_rates[t] <- home_types_rates[t] / sum_area ;
+				}
 				list<string> categories <- string(mat[1,i]) split_with "$";
 				loop c over: categories {
 					if c != nil and c != "" {
@@ -191,6 +211,7 @@ global {
 							list<string> id_c <- id_int_str[1] split_with "%";
 							create compartment {
 								id <- id_;
+								homeplace <- myself;
 								area_id <- int(myself.id);
 								create group_individuals with: (
 									num_individuals:float(k_v[1]),

@@ -1,7 +1,7 @@
 /******************************************************************
 * This file is part of COMOKIT, the GAMA CoVid19 Modeling Kit
-* Relase 1.0, May 2020. See http://comokit.org for support and updates
-* Author: Huynh Quang Nghi
+* Relase 2.0, March 2021. See http://comokit.org for support and updates
+* Author: Patrick Taillandier
 * 
 * Description: 
 * 	Model with a total lockdown policy applied during a given number of days.
@@ -11,7 +11,7 @@
 * Parameters:
 * 	- numb_days: defines the number of days for the lockdown application.
 * 
-* Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Vinh Phuc)
+* Dataset: Default dataset (DEFAULT_CASE_STUDY_FOLDER_NAME in Parameters.gaml, i.e. Alpes Maritimes)
 * Tags: covid19,epidemiology,lockdown
 ******************************************************************/
 
@@ -21,7 +21,7 @@ import "Abstract Experiments.gaml"
 
 global {
 	// Parameter used to define the duration of the lockdown policy
-	int num_days <- 120;
+	int num_days <- 1;
 
 	/*
 	 * Initialize the lockdown policy over a given duration: no activities are allowed.
@@ -31,14 +31,23 @@ global {
 			if (num_days > 0) {
 				policy <- create_lockdown_policy();
 				policy <- during(policy, num_days); 
+				policy <-  with_tolerance(policy,0.5) ;
 			}
 		}
 	}
 
 }
-
-experiment lockdown parent: abstract_experiment {
+experiment lockdown parent: abstract_experiment autorun: true {
+	string name_sim <- "Lockdown " + num_days + " days";
+	
 	action _init_ {
-		create simulation with:(macro_model:true, shp_boundary_path: dataset + "/generated/boundary.shp", csv_boundary_path: dataset + "/generated/boundary.csv" );
+		do create_simulation;
+	}
+	output {
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
+		
+		display "Main" parent: map {}
+		display "Plot" parent: states_evolution_chart {}	
 	}
 }
+

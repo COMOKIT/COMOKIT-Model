@@ -358,6 +358,14 @@ species TemporaryPolicy parent: ForwardingPolicy {
 		}
 		return super.is_allowed(i, activity);
 	}
+	
+	float allowed(int source_area, int target_area, string activity_str, string building_type) {
+		if (!is_active()) {
+			return 1.0;
+		}
+		return super.allowed(source_area, target_area, activity_str, building_type);
+	}
+	
 
 	
 }

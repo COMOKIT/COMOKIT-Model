@@ -4,8 +4,7 @@
 * Author: Alexis Drogoul
 * 
 * Description: 
-* 	Model comparing 3 measures: no containment, school closed and home containement (workplaces and schools are closed).
-* 	One simulation on the same case study and with the same Random Number Generator seed  is created for each measure scenario.
+* 	Model comparing 3 durations of lockdown
 * 
 * Dataset: chosen by the user (through a choice popup)
 * Tags: covid19,epidemiology,policy comparison
@@ -18,40 +17,56 @@ import "../Abstract Experiments.gaml"
 
 
 experiment "Comparison"  parent: abstract_experiment autorun: true {
+	float simulation_seed <- 1.0;
+	
 	action _init_ {
-		float simulation_seed <- 1.0;
-		string bound_shapefile <- dataset + "/generated/boundary.shp";
-		string  bound_csv <- dataset + "/generated/boundary.csv";
 		
-		/*
-		 * Initialize a simulation with a school closed policy  
-		 */		
-		create simulation  with:(macro_model:true, shp_boundary_path: bound_shapefile, csv_boundary_path:bound_csv,seed:simulation_seed ) {
-			name <- "School closed";
+			
+		create simulation  with:(name: "No containment policy", macro_model:true, shp_boundary_path: bound_shapefile, csv_boundary_path:bound_csv,seed:simulation_seed ) {
 			ask Authority {
-				policy <- create_school_work_allowance_policy(false, true);
-			}
-		}
-
-		/*
-		 * Initialize a simulation with a no containment policy  
-		 */		
-		create simulation with:(macro_model:true, shp_boundary_path: bound_shapefile, csv_boundary_path:bound_csv,seed:simulation_seed ){
-			name <- "No Containment";
-			ask Authority { 
+				name <- "No containment policy";
 				policy <- create_no_containment_policy();
+				
 			}
+		
+		}
+		
+		create simulation with:(name: "Lockdown 7 days", macro_model:true, shp_boundary_path: bound_shapefile, csv_boundary_path:bound_csv,seed:simulation_seed ){
+			name <- "Lockdown 7 days";
+			ask Authority {
+				policy <- create_lockdown_policy();
+				policy <- during(policy, 7); 
+				policy <- with_tolerance(policy,0.05);
+			}
+		
 		}
 
-		/*
-		 * Initialize a simulation with a policy closing schools and workplaces  
-		 */	
-		create simulation with:(macro_model:true, shp_boundary_path: bound_shapefile, csv_boundary_path:bound_csv,seed:simulation_seed ){
-			name <- "Home Containment";
+			
+		create simulation with:(name: "Lockdown 15 days", macro_model:true, shp_boundary_path: bound_shapefile, csv_boundary_path:bound_csv,seed:simulation_seed ){
+			name <- "Lockdown 15 days";
 			ask Authority {
-				policy <- create_school_work_allowance_policy(false, false);
+				policy <- create_lockdown_policy();
+				policy <- during(policy, 15); 
+				policy <- with_tolerance(policy,0.05);
+			}
+		
+		}
+
+		create simulation with:(name: "Lockdown 60 days", macro_model:true, shp_boundary_path: bound_shapefile, csv_boundary_path:bound_csv,seed:simulation_seed ){
+			name <- "Lockdown 60 days";
+			ask Authority {
+				policy <- create_lockdown_policy();
+				policy <- during(policy, 60); 
+				policy <- with_tolerance(policy,0.05);
 			}
 		}
+	}
+	
+	output {
+		
+		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
+		
+		display "Plot" parent: states_evolution_chart {}	
 	}
 }
 	

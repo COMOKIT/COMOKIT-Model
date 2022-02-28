@@ -25,6 +25,8 @@ species group_individuals {
 	int num_asymptomatic;
 	int num_latent_asymptomatics;
 	int num_latent_symptomatics;
+	int num_recovered;
+	int num_dead;
 	
 	
 	int latent_period_asymptomatic;
@@ -130,7 +132,7 @@ species group_individuals {
 		list<string> states <- copy(evol_state_order);
 		if (num_symptomatic = 0) {states>> SYMPTOMATIC;}
 		if (num_asymptomatic = 0) {states>> ASYMPTOMATIC;}
-		if (num_latent_asymptomatics = 0) {states>> LATENT_ASYMPTOMATIC; states >> PRESYMPTOMATIC;}
+		//if (num_latent_asymptomatics = 0) {states>> LATENT_ASYMPTOMATIC; states >> PRESYMPTOMATIC;}
 		if (num_latent_symptomatics = 0) {states>> LATENT_SYMPTOMATIC;}
 		if not empty(states) {
 			loop s over: states {
@@ -164,6 +166,8 @@ species group_individuals {
 						match ASYMPTOMATIC {
 							evol_states[REMOVED][0] <- evol_states[REMOVED][0]  + val;
 							num_asymptomatic <-num_asymptomatic - val;
+							num_recovered <- num_recovered + val ;
+							
 						}
 						match SYMPTOMATIC {
 							int nb_hospitalisation <- world.rate_to_num(val,rate_hospitalisation);
@@ -174,6 +178,8 @@ species group_individuals {
 							evol_states[HOSPITALISATION][0] <- nb_hospitalisation;
 							evol_states[DEAD][0] <- nb_dead;
 							evol_states[REMOVED][0] <-  evol_states[REMOVED][0]  + val;
+							num_recovered <- num_recovered + val - nb_dead;
+							num_dead <- num_dead + nb_dead;
 							num_symptomatic <-num_symptomatic - val;
 						}
 					}
@@ -198,6 +204,7 @@ species compartment {
 		int num_symptomatic <- world.rate_to_num(group.num_symptomatic,coeff_infected );
 		int num_asymptomatic <- world.rate_to_num(group.num_asymptomatic,coeff_infected );
 		int num_susceptibles <- world.rate_to_num(group.num_susceptibles,coeff_susceptible );
+		if (num_symptomatic + num_asymptomatic + num_susceptibles) = 0 {return [];}
 		float factor_mask <- (factor_contact_rate_wearing_mask * ( 2 - mask_ratio));
 		float infection_factor <-  (num_symptomatic + (num_asymptomatic * group.factor_contact_rate_asymptomatic)) * factor_mask;
 		list group_ <- [self,num_susceptibles,infection_factor,group.contact_rate, group.rate_symptomatic];
@@ -212,37 +219,22 @@ species compartment {
 				loop activity_type over: ag_act.keys{
 					map<string,float> bd_act <- ag_act[activity_type];
 					loop bd_type over: bd_act.keys{
-						
 						float coeff <-bd_act[bd_type];
-						/*float allow_rate <- Authority[0].allows_rate (area_id, a.id_int, activity_type, bd_type);
+						float allow_rate <- Authority[0].allows_rate (area_id, a.id_int, activity_type, bd_type);
 						if (allow_rate < 1.0) {
-							list gp <- create_group(coeff*(1.0 - allow_rate),coeff*(1.0 - allow_rate));
-							if gp != nil {
-								if not (bd_type in homeplace.current_groups.keys) {
-									homeplace.current_groups[bd_type] <- [];
+							loop type_h over: homeplace.home_types_rates.keys {
+								list gp <- create_group(homeplace.home_types_rates[type_h] * coeff*(1.0 - allow_rate),coeff*(1.0 - allow_rate));
+								if not empty(gp){
+									homeplace.current_groups[type_h]<< gp; 
 								}
-								homeplace.current_groups[bd_type]<< gp; 
 							}
-						
 						}
 						if allow_rate > 0.0 {
 							list gp <- create_group(coeff*allow_rate,coeff*allow_rate);
-							if gp != nil {
-								if not (bd_type in a.current_groups.keys) {
-									a.current_groups[bd_type] <- [];
-								}
+							if not empty(gp){
 								a.current_groups[bd_type]<< gp; 
 							}
-						}*/
-						
-						list gp <- create_group(coeff,coeff);
-							if gp != nil {
-								if not (bd_type in a.current_groups.keys) {
-									a.current_groups[bd_type] <- [];
-								}
-								a.current_groups[bd_type]<< gp; 
-							}
-		
+						}
 					} 
 				}
 			}  
