@@ -55,7 +55,8 @@ experiment abstract_experiment virtual: true type: gui {
 					
 					draw ("Rate of infected people") at: {world.shape.width*4/5, world.shape.height / 11} color: #white font: font("Helvetica", 30 , #bold); 
 					
-					draw rectangle( world.shape.width / 6,world.shape.height / 50) at: {world.shape.width*4.5/5, 1.17* world.shape.height/10.0} texture: "../../../../EscapeHanoi_IJGIS/includes/degrade.png";
+
+					draw rectangle( world.shape.width / 6,world.shape.height / 50) at: {world.shape.width*4.5/5, 1.17* world.shape.height/10.0} texture: "../../../Utilities/degrade.png";
 					draw ("0.0") at:   {world.shape.width*3.9/5, 1.2 * world.shape.height/10.0} color: #white  font: font("Helvetica", 30 , #bold);
 					draw ("1.0") at: {world.shape.width*5/5, 1.2 * world.shape.height/10.0} color: #white  font: font("Helvetica", 30 , #bold);	
 				}

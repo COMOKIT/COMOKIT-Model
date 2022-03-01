@@ -32,6 +32,7 @@ global {
 	string agenda_path <- folder_generated+"agenda_data/";
 	string population_path <- case_study_path+"generated/population.csv";
 	
+	float proba_min <-0.005;
 
 	int age_step <- 10;
 	int age_max <- 100;
@@ -467,31 +468,8 @@ global {
 		}
 		write "Macro Agenda generated";
 		
-	 	ask boundary parallel: true{
-			loop comp over: agenda.keys {
-				list<list<map<string,map<string,map<string,float>>>>> agenda_comp <- agenda[comp];
-				loop d from: 0 to: 6 {
-					list<map<string,map<string,map<string,float>>>> agenda_day <- agenda_comp[d];
-					loop h from: 0 to: 23 {
-						map<string,map<string,map<string,float>>> agenda_hour <- agenda_day[h];
-						float sum_tot;
-						loop agenda_zone over: agenda_hour.values {
-							loop agenda_type over: agenda_zone.values {
-								sum_tot <- sum_tot + sum(agenda_type);
-							}
-						}
-						loop agenda_zone over: agenda_hour.values {
-							loop agenda_type over: agenda_zone.values {
-								loop type over: agenda_type.keys {
-									agenda_type[type] <- agenda_type[type] / sum_tot;
-								}
-							}
-						}
-					}
-				}
-			}
-	
-		}
+	 	do normalize;
+	 	do filter_small_proba;
 		list<string> bd_types <- remove_duplicates(boundary accumulate each.area_types.keys) ;
 		bd_types <- bd_types inter remove_duplicates(activities.values accumulate each);
 		list<string> act_types <- possible_activities_tot +  [act_working, act_studying, act_home];
@@ -557,6 +535,69 @@ global {
 		}
 		
 		
+	}
+	
+	action filter_small_proba {
+		ask boundary parallel: true{
+			loop comp over: agenda.keys {
+				list<list<map<string,map<string,map<string,float>>>>> agenda_comp <- agenda[comp];
+				loop d from: 0 to: 6 {
+					list<map<string,map<string,map<string,float>>>> agenda_day <- agenda_comp[d];
+					loop h from: 0 to: 23 {
+						map<string,map<string,map<string,float>>> agenda_hour <- agenda_day[h];
+						loop zone over: copy(agenda_hour.keys) {
+							map<string,map<string,float>> agenda_zone <- agenda_hour[zone];
+							loop t over: copy(agenda_zone.keys) {
+								map<string,float> agenda_type <- agenda_zone[t];
+								loop type over: copy(agenda_type.keys) {
+									if agenda_type[type] < proba_min {
+										remove key: type from: agenda_type;
+									}
+								}
+								if (empty(agenda_type)) {
+									remove key: t from: agenda_zone;
+								}
+							}
+							if (empty(agenda_zone)) {
+								remove key: zone from: agenda_hour;
+							}
+						}
+					}
+				}
+			}
+		}
+		do normalize;
+	}
+	
+	action normalize {
+		write "\n Normalize";
+		ask boundary parallel: true{
+			int nb <- 0;
+			loop comp over: agenda.keys {
+				list<list<map<string,map<string,map<string,float>>>>> agenda_comp <- agenda[comp];
+				loop d from: 0 to: 6 {
+					list<map<string,map<string,map<string,float>>>> agenda_day <- agenda_comp[d];
+					loop h from: 0 to: 23 {
+						map<string,map<string,map<string,float>>> agenda_hour <- agenda_day[h];
+						float sum_tot;
+						loop agenda_zone over: agenda_hour.values {
+							loop agenda_type over: agenda_zone.values {
+								sum_tot <- sum_tot + sum(agenda_type);
+							}
+						}
+						loop agenda_zone over: agenda_hour.values {
+							loop agenda_type over: agenda_zone.values {
+								loop type over: agenda_type.keys {
+									agenda_type[type] <- agenda_type[type] / sum_tot;
+									nb <- nb +1;
+								}
+							}
+						}
+					}
+				}
+			}
+			write sample(id) +" " + sample(nb); 
+		}
 	}
 	
 	string to_age_cat(int Age_) {
@@ -803,33 +844,7 @@ global {
 		school_hours_end_min <- min_school_hour_end;
 		school_hours_end_max <- max_school_hour_end ;
 		
-		
-		//write sample(length(people_data));
-		/*ask people_data {
-			loop t over: travels {
-				if not (t.motif in data_area.keys) {
-					data_area[t.motif] <- [];
-				}
-				map<string,map<string,map<string,float>>> data_motif <- data_area[t.motif] ;
-				
-				if not(age in data_motif.keys) {
-					data_motif[age] <- [];
-				}
-				map<string,map<string,float>> od <- data_motif[age];
-				
-				if not(t.zone_id in od.keys) {
-					od[t.zone_id] <- [];
-				}
-				map<string,float> od_dest <- od[t.zone_id];
-				if not(t.destination in od_dest.keys) {
-					od_dest[t.destination] <- 0.0;
-				} 
-				od_dest[t.destination] <- od_dest[t.destination] + t.coep;
-				
-				write sample(od_dest);
-						
-			}
-		}*/ 
+	
 		ask people_data {
 			loop t over: travels {
 				if t.motif != act_home {

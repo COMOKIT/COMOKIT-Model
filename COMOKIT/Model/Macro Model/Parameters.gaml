@@ -17,7 +17,7 @@ global {
 	
 	string dataset <- "../../Datasets/Alpes-Maritimes";
 	
-	bool test_mode <- true;
+	bool test_mode <- false;
 	string csv_boundary_path <- dataset + "/generated/boundary.csv" ;
 	string csv_agenda_path <- dataset + "/generated/agenda.data" ;
 	string agenda_path <- dataset+"/generated/agenda_data/";
