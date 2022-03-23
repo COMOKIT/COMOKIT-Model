@@ -12,13 +12,17 @@ model CoVid19
 import "Base Experiment.gaml"
 
 experiment main type: gui parent: AbstractExperiment{
-	string scenario<-"school day";
 	
-	action _init_ {
-		// TODO: some of these params might be obsolete   
-		create simulation with: [num_people_per_room::20, density_scenario::"num_people_room",distance_people::2.0#m, 
-		agenda_scenario::scenario, separator_proba::0.0,
-		init_all_ages_proportion_wearing_mask::0.0,init_all_ages_factor_contact_rate_wearing_mask:: 0.0, ventilation_proba::0.0
+	action _init_
+	{   
+		create simulation with: [
+			num_people_per_room:: 20, 
+			distance_people::2.0#m, 
+			separator_proba::0.0,
+			init_all_ages_proportion_wearing_mask::0.6,
+			init_all_ages_factor_contact_rate_wearing_mask:: 0.8,
+			ventilation_proba::0.7
+
 		];
 	}
 }

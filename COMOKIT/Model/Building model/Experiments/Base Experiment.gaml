@@ -24,28 +24,31 @@ experiment AbstractExperiment type:gui autorun:false virtual: true{
 		
 	output{
 		layout #split;
-	  	display Simulation type:opengl background: #black 
-	  			draw_env:true synchronized: false autosave:false toolbar:false	{
-		   	species Room refresh: false;
-		    species BuildingEntrance refresh: false;
+	  	display Simulation type:opengl background: #black
+	  			draw_env:false synchronized: false autosave:false toolbar:false	{
+		   	species Room;
+//		    species BuildingEntrance refresh: false;
 //			species RoomEntrance refresh: false;
-			species CommonArea;
+//			species CommonArea;
 //			species RoomEntrance aspect: queuing;
-			species unit_cell;
-			species Wall refresh: false;
-			species PedestrianPath aspect: free_space_aspect transparency: 0.5;
-			species PedestrianPath;
-			species Separator;
+//			species unit_cell;
+			species Wall;
+//			species PedestrianPath aspect: free_space_aspect transparency: 0.5;
+//			species PedestrianPath;
+//			species Separator;
+			species Bed;
+			species BenchWait;
 			species BuildingIndividual;
 //			species outside;
-
 			species Doctor;
 			species Nurse;
+			species Staff;
 			species Inpatient;
-			species Visitor;
+			species Caregivers;
 
 		 	graphics "date" {
-				draw string(current_date, "dd-MM-yyyy HH:mm:ss") at: {0, 0} size: 20;
+				draw string(current_date, "dd-MM-yyyy HH:mm:ss") at: {10, -3} size: 50;
+
 			}
 	  	}
 	  // OUTBREAK

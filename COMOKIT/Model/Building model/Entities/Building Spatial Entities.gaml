@@ -23,6 +23,8 @@ import "BuildingIndividual.gaml"
 import "../Constants.gaml"
 	
 species Room parent: AbstractPlace {
+	int floor;
+
 	int nb_affected;
 	PedestrianPath closest_path; 
 	geometry init_place;
@@ -40,7 +42,7 @@ species Room parent: AbstractPlace {
 	
 	action intialization {
 		inside_geom <- (copy(shape) - P_shoulder_length);
-		ask Wall overlapping self {
+		ask Wall where (each.floor = floor) overlapping self {
 			geometry g <- myself.inside_geom - (self + P_shoulder_length);
 			if g != nil {
 				myself.inside_geom <- g.geometries with_max_of each.area;
@@ -127,21 +129,19 @@ species Room parent: AbstractPlace {
 	
 	
 	aspect default {
-		if (display_room_status) {
-			// TODO: viral_load is now a map
-			draw shape color: blend(#red, #green, min(1,viral_load[original_strain]*coeff_visu_virus_load_room/(shape.area)));
+		if (display_room_status and show_floor[floor]) {
+			draw shape at: location color: blend(#red, #green, min(1,viral_load*coeff_visu_virus_load_room/(shape.area)));
 		}
-		if (type in [ELEVATOR, STAIRWAY]) {
-			draw shape color: rgb(#yellow, 0.5);
+		if (display_room_entrance and show_floor[floor]) {
+			loop e over: entrances {draw circle(0.2)-circle(0.1) at: {e.location.x,e.location.y, e.location.z + 0.001} color: #yellow border: #black;}
 		}
-		if display_room_entrance {
-			loop e over: entrances {draw circle(0.2)-circle(0.1) at: {e.location.x,e.location.y,0.001} color: #yellow border: #black;}
+		if (display_desk and show_floor[floor]) {
+			loop p over: places {draw square(0.2) at: {p.location.x,p.location.y, p.location.z + 0.001} color: #gray border: #black;}
 		}
-		if display_desk {
-			loop p over: places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #gray border: #black;}
-		}
-		if(isVentilated){
-		 	draw image_file("../../../Images/fan.png") size: 3;	
+		if(isVentilated and show_floor[floor]){
+			draw shape color: blend(#red, #green, min(1,viral_load*coeff_visu_virus_load_room/(shape.area)));
+//		 	draw image_file("../../../Images/fan.png") size: 3;	
+
 		}
 	}
 	
@@ -150,25 +150,49 @@ species Room parent: AbstractPlace {
 species CommonArea parent: Room ;
  
 species Wall frequency: 0{
+	int floor;
 	aspect default {
-		draw shape color: #white;
+		if(show_floor[floor]){
+			draw shape + P_shoulder_length at: location color: #white depth: default_ceiling_height;
+		}
+	}
+}
+
+species BenchWait frequency: 0{
+	int floor;
+	bool is_occupied <- false;
+	aspect default{
+		if show_floor[floor]{
+			draw rectangle(0.4,0.5) at: location color: #orange depth: 0.6;
+		}
+ 	}
+}
+
+species Bed frequency: 0{
+	int floor;
+	Room room;
+	bool is_occupied <- false;
+	aspect default{
+		if show_floor[floor]{
+			draw rectangle(1.2, 2.0) at: location color: #white depth: 0.6;
+		}
 	}
 }
 
 species PedestrianPath skills: [pedestrian_road]{
-	
+	int floor;
 	reflex clean_ {
 		agents_on <-  agents_on where (not dead(each) and not BuildingIndividual(each).is_outside);
 	}
 	aspect default {
-		if (display_pedestrian_path) {
-			draw shape color: #red width:2;
+		if (display_pedestrian_path and show_floor[floor]) {
+			draw shape at: location color: #red width:2;
 		}
 	}
 	
 	aspect free_space_aspect {
 		if (display_free_space) {
-			draw free_space color: #pink border: #black;
+			draw free_space at: location color: #pink border: #black;
 		}
 	}
 }
@@ -176,6 +200,7 @@ species PedestrianPath skills: [pedestrian_road]{
 species PlaceInRoom frequency: 0{
 	float dists;
 }
+
 species Separator frequency: 0{
 	list<PlaceInRoom> places_concerned; 
 	aspect default {
@@ -190,8 +215,8 @@ species BuildingEntrance parent: Room {
 	}
 
 	aspect default {
-		if (display_building_entrance) {
-			draw shape color: #yellow;
+		if (display_building_entrance and show_floor[floor]) {
+			draw shape at: location color: #yellow;
 		}
 	}
 }
@@ -397,9 +422,10 @@ species RoomEntrance {
 	}
 	 
 	aspect queuing {
-		if(queueing){
-		    draw queue color: #blue;	
-	  }	 
+//		if(queueing){
+//		    draw queue at: location color: #blue;	
+//	  }	 
+		draw circle(1) at: location color: #yellow;
 	}
 }
 
