@@ -25,7 +25,7 @@ experiment AbstractExperiment type:gui autorun:false virtual: true{
 	output{
 		layout #split;
 	  	display Simulation type:opengl background: #black
-	  			draw_env:false synchronized: false autosave:false toolbar:false	{
+	  			axes:false synchronized: false autosave:false toolbar:false	{
 		   	species Room;
 //		    species BuildingEntrance refresh: false;
 //			species RoomEntrance refresh: false;

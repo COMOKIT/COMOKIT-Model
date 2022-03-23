@@ -110,7 +110,7 @@ species output_building {
  */
 experiment xp {
 	output {
-		display map type: opengl draw_env: false background: #black {
+		display map type: opengl axes: false background: #black {
 			image (file_exists(dataset_path+"satellite.png") ? (dataset_path+"satellite.png"): "white.png")  transparency: 0.2;
 			species building_block;
 			species output_building;

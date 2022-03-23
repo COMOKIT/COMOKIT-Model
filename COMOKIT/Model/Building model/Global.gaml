@@ -243,7 +243,8 @@ global {
 		}
 		
 		ask initial_nb_infected among Caregivers{
-			state <- init_state;
+			//do define_new_case(original_strain);
+			//state <- init_state;
 		}
 	}
 	
@@ -269,9 +270,9 @@ global {
 				shape <- shape + P_shoulder_length;
 
 			}
-			
-			geometry new_open_area <- first(open_area_shape_file.contents);
-			new_open_area <- new_open_area at_location (new_open_area.location - translation);
+		}
+			/*geometry new_open_area <- first(open_area_shape_file[fl].contents);
+			new_open_area <- new_open_area at_location (new_open_area[fl].location - translation);
 			if open_area = nil {
 				open_area <- new_open_area;
 			} else {
@@ -296,8 +297,8 @@ global {
 				i <- 0;
 				j <- j + 1;
 			}
-			floor_cnt <- floor_cnt + 1;
-		}
+			floor_cnt <- floor_cnt + 1;*/
+		
 		//create bed and bench
 		create Bed from: beds_shape_file[fl]{
 			floor <- fl;

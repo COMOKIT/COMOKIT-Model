@@ -59,7 +59,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 	
 	init {
 		is_outside <- true;
-		do initialise_epidemio;
+		//do initialise_disease;
 	
 		pedestrian_species <- [BuildingIndividual];
 		obstacle_species <- [ Wall];
@@ -198,7 +198,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 			waiting_sanitation <- false;
 			dst_room.people_inside >> self;
 		}
-	}
+	
 
 
 	// Setup targets when it's time to move
@@ -248,6 +248,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 			waiting_sanitation <- true;
 		}
 	}
+	
 
 
 	reflex goto_activity when: target != nil and not in_line {
@@ -267,8 +268,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 						do walk;
 					}
 				}
-			}
-			else{
+			} else{
 				to_another_floor<- false;
 				target <- dst_point.location + point([0, 0, dst_room.floor*default_ceiling_height]);
 				location <- location + point([0, 0, dst_room.floor*default_ceiling_height - location.z]);
@@ -282,13 +282,13 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 			}
 		} else if final_waypoint != nil {
 			do walk;
-		} else {
+		} /*else {
 			// Pedestrian skill cannot reach the exact target point, 
 			// so as a last step, we use moving skill to bring the person there
 			do goto target: current_target;
-		}
+		}*/
 
-		else{
+		 else{
 			if (location distance_to target > P_tolerance_target){
 				if(current_room = dst_room and final_waypoint = nil){
 					do goto target: target;

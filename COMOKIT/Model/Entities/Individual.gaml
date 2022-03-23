@@ -238,13 +238,14 @@ species AbstractIndividual parent:BiologicalEntity {
 				
 				//Add the infection to the infections having been caused in the building
 				
-				loop fct over: current_place.functions  {
-					if(building_infections.keys contains(fct))
-					{
-						building_infections[fct] <- building_infections[fct] +1;
+				if current_place != nil {
+					loop fct over: current_place.functions  {
+						if(building_infections.keys contains(fct))
+						{
+							building_infections[fct] <- building_infections[fct] +1;
+						}
 					}
 				}
-				
 				//Add the infection to the infections of the same age
 				if(total_incidence_age.keys contains(self.age))
 				{

@@ -47,17 +47,18 @@ experiment abstract_experiment virtual: true type: gui {
 	}
 	
 	output {
-		display map background: #black type: opengl draw_env: false virtual: true  {
+		display map background: #black type: opengl axes: false virtual: true   {
 			species SpatialUnit;
 			graphics "legend" position: {0,0,0.01}{
 				if show_legend {
 					draw (name) at: {world.shape.width*4/5, world.shape.height / 20} color: #white font: font("Helvetica", 40 , #bold); 
 					
+					draw (""+ current_date.day + " - " + current_date.month + " - " + current_date.year) at: {world.shape.width*4/5, world.shape.height / 15} color: #white font: font("Helvetica", 30 , #bold); 
 					draw ("Rate of infected people") at: {world.shape.width*4/5, world.shape.height / 11} color: #white font: font("Helvetica", 30 , #bold); 
 					
 
 					draw rectangle( world.shape.width / 6,world.shape.height / 50) at: {world.shape.width*4.5/5, 1.17* world.shape.height/10.0} texture: "../../../Utilities/degrade.png";
-					draw ("0.0") at:   {world.shape.width*3.9/5, 1.2 * world.shape.height/10.0} color: #white  font: font("Helvetica", 30 , #bold);
+					draw ("0.0") at:   {world.shape.width*3.9/5, 1.2 * world.shape.height/10.0} color: #white  font: font("Helvetica", 30 , #bold); 
 					draw ("1.0") at: {world.shape.width*5/5, 1.2 * world.shape.height/10.0} color: #white  font: font("Helvetica", 30 , #bold);	
 				}
 			}

@@ -679,7 +679,7 @@ experiment wizard_xp autorun: true {
 		}
 	}
 	output {
-		display map type: opengl draw_env: false background: #black{
+		display map type: opengl axes: false background: #black{
 			image (file_exists(googlemap_path) ? (googlemap_path): "white.png") transparency: 0.2;
 			image (file_exists(dataset_path+"/satellite.png") ? (dataset_path+"/satellite.png"): "white.png")  transparency: 0.2;
 			
@@ -705,7 +705,7 @@ experiment generateGISdata type: gui autorun: true {
 		create simulation;
 	}
 	output {
-		display map type: opengl draw_env: false background: #black{
+		display map type: opengl axes: false background: #black{
 			image (file_exists(googlemap_path) ? (googlemap_path): "white.png") transparency: 0.2;
 			image (file_exists(dataset_path+"/satellite.png") ? (dataset_path+"/satellite.png"): "white.png")  transparency: 0.2;
 			

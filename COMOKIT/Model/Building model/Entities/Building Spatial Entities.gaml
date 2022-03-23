@@ -23,8 +23,6 @@ import "BuildingIndividual.gaml"
 import "../Constants.gaml"
 	
 species Room parent: AbstractPlace {
-	int floor;
-
 	int nb_affected;
 	PedestrianPath closest_path; 
 	geometry init_place;
@@ -130,7 +128,7 @@ species Room parent: AbstractPlace {
 	
 	aspect default {
 		if (display_room_status and show_floor[floor]) {
-			draw shape at: location color: blend(#red, #green, min(1,viral_load*coeff_visu_virus_load_room/(shape.area)));
+			draw shape at: location color: blend(#red, #green, min(1,(empty(viral_load) ? 0.0 :sum(viral_load.values))*coeff_visu_virus_load_room/(shape.area)));
 		}
 		if (display_room_entrance and show_floor[floor]) {
 			loop e over: entrances {draw circle(0.2)-circle(0.1) at: {e.location.x,e.location.y, e.location.z + 0.001} color: #yellow border: #black;}
@@ -139,7 +137,7 @@ species Room parent: AbstractPlace {
 			loop p over: places {draw square(0.2) at: {p.location.x,p.location.y, p.location.z + 0.001} color: #gray border: #black;}
 		}
 		if(isVentilated and show_floor[floor]){
-			draw shape color: blend(#red, #green, min(1,viral_load*coeff_visu_virus_load_room/(shape.area)));
+			draw shape color: blend(#red, #green, min(1,(empty(viral_load) ? 0.0 :sum(viral_load.values))*coeff_visu_virus_load_room/(shape.area)));
 //		 	draw image_file("../../../Images/fan.png") size: 3;	
 
 		}
