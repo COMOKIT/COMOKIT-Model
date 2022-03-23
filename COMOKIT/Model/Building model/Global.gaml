@@ -242,9 +242,13 @@ global {
 			do initalization;
 		}
 		
+		do init_epidemiological_parameters;
+		do init_sars_cov_2;
+		
+		
 		ask initial_nb_infected among Caregivers{
-			//do define_new_case(original_strain);
-			//state <- init_state;
+			do define_new_case(original_strain);
+			state <- init_state;
 		}
 	}
 	
@@ -340,7 +344,7 @@ global {
 		}
 	}
 
-	reflex end_simulation when: current_date >= final_date {
+	reflex end when: current_date >= final_date {
 		do pause;	
 	}
 
