@@ -148,7 +148,7 @@ experiment "Comparison Local" parent: "Abstract Experiment" autorun: true {
 		
 		display "Main" parent: default_display {
 			species SpatialPolicy {
-				draw application_area empty: true color: #red;
+				draw application_area wireframe: true color: #red;
 			}
 		}
 	}

@@ -28,6 +28,7 @@ species Doctor parent: BuildingIndividual {
 			available_offices >> working_place;
 		}	
 		working_desk <- working_place.get_target(self, true);
+
 		if (working_place = nil) {
 			do die;
 		}
@@ -140,11 +141,14 @@ species Nurse parent: BuildingIndividual {
 		location <- r.location + point([0, 0, r.floor*default_ceiling_height]);
 		working_place <- any(Room where (each.type = NURSE_ROOM));
 		
+
 		if not(working_place.is_available()) {
 			available_offices >> working_place;
 		}
 		
+
 		working_desk <- working_place.get_target(self, true);
+
 		if (working_place = nil) {
 			do die;
 		}
@@ -275,6 +279,7 @@ species Staff parent: BuildingIndividual{
 		agenda[end] <- first(ActivityLeaveBuilding);
 		
 		return agenda;
+
 	}
 }
 
@@ -361,6 +366,7 @@ species Caregivers parent: BuildingIndividual {
 		location <- any_location_in(inter(circle(rnd(1#m, 2#m), sicker.mybed.location), sicker.assigned_ward))
 				    + point([0, 0, current_floor*default_ceiling_height]);
 		sicker.assigned_ward.people_inside << self;
+
 	}
 
 	map<date, BuildingActivity> get_daily_agenda {
@@ -397,6 +403,7 @@ species Caregivers parent: BuildingIndividual {
 			agenda[wander] <- first(ActivityWanderInWardC);
 			wander <- wander + rnd(5#mn, 10#mn);
 		}
+
 		
 		return agenda;
 	}

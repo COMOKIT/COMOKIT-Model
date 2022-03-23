@@ -21,6 +21,15 @@ global {
 	action create_authority {
 		create Authority;
 		do define_policy;
+		if (use_activity_precomputation) {
+			ask Authority {
+				ask policy {
+					do apply;
+					politic_is_active <- is_active();
+				}
+			}
+		}
+		
 		ask world { do console_output("Create authority: "+Authority[0].name, caller::"Authority.gaml");}
 	}
 	
@@ -55,6 +64,16 @@ species Authority {
 				do update_stat(act, allowed);
 			}			
 		} 
+	}
+	
+	float allows_rate (int source_area, int target_area, string activity_str, string building_type) { 
+		float start <- BENCHMARK ? machine_time : 0.0;
+		float allowed_rate <- policy.allowed(source_area, target_area, activity_str, building_type);
+		if BENCHMARK {
+			bench["Authority.allows_rate|action"] <- (bench contains_key "Authority.allows_rate|action" ? 
+				bench["Authority.allows_rate|action"] : 0.0) + machine_time - start;
+		}
+		return allowed_rate ;
 	}
 
 	bool allows (Individual i, Activity activity) { 
@@ -175,6 +194,7 @@ species Authority {
 	 */
 	ActivitiesListingPolicy create_lockdown_policy {
 		create ActivitiesListingPolicy returns: result {
+			write "ici: " + sample(Activities);
 			loop s over: Activities.keys {
 				allowed_activities[s] <- false;
 			}
@@ -278,5 +298,32 @@ species Authority {
 		return (first(result));
 	}
 	
+	/*
+	 * To define a vaccine policy with:
+	 * Mandatory
+	 * v - covax : a particular vaccine
+	 * total_nb_doses - int : a total number of vaccine
+	 * vax_capacity_for_one_day - int : maximum number of vaccination for a day
+	 * age_target - point : min (x) and max (y) age of Individual targeted by the vaccine policy
+	 * only_susceptibles - bool : will only vaccinate susceptible individuals
+	 * Optional
+	 * start - date : a strating date of vaccination campaign
+	 * duration - int : number of days until end of the campaign
+	 */
+	AbstractPolicy create_vax_policy(covax v, int total_nb_doses, int vax_capacity_for_one_day, point age_target, bool only_susceptibles, date start <- nil, int last_nb_days <- 2#years / #day) {
+		create VaxPolicy with:[v::v,remaining_doses::total_nb_doses,nb_vax_per_step::vax_capacity_for_one_day/nb_step_for_one_day] returns: vp;
+		AbstractPolicy vax_policy <- first(vp);
+		create AgeTargetPolicy with:[target::vax_policy,age_range::age_target] returns: vp_age;
+		vax_policy <- first(vp_age);
+		if only_susceptibles {
+			create StateTargetPolicy with:[target::vax_policy,states::[susceptible]] returns: vp_susceptible;
+			vax_policy <- first(vp_susceptible);
+		}
+		if start != nil {
+			create TemporaryPolicy with:[target::vax_policy,start_date::start,duration::last_nb_days*#day] returns:vp_temp;
+			vax_policy <- first(vp_temp);
+		}
+		return vax_policy;
+	}
 
 }  

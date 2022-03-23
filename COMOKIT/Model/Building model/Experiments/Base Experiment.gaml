@@ -24,7 +24,7 @@ experiment AbstractExperiment type:gui autorun:false virtual: true{
 		
 	output{
 		layout #split;
-	  	display Simulation type:opengl background: #black 
+	  	display Simulation type:opengl background: #black
 	  			draw_env:false synchronized: false autosave:false toolbar:false	{
 		   	species Room;
 //		    species BuildingEntrance refresh: false;
@@ -48,6 +48,7 @@ experiment AbstractExperiment type:gui autorun:false virtual: true{
 
 		 	graphics "date" {
 				draw string(current_date, "dd-MM-yyyy HH:mm:ss") at: {10, -3} size: 50;
+
 			}
 	  	}
 	  // OUTBREAK

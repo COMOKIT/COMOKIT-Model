@@ -24,6 +24,7 @@ import "../Constants.gaml"
 	
 species Room parent: AbstractPlace {
 	int floor;
+
 	int nb_affected;
 	PedestrianPath closest_path; 
 	geometry init_place;
@@ -37,6 +38,7 @@ species Room parent: AbstractPlace {
 	bool allow_transmission -> {allow_air_transmission};
 	float viral_decrease -> {(isVentilated ? ventilated_viral_air_decrease_per_day : basic_viral_air_decrease_per_day)} ;
 	float ceiling_height <- default_ceiling_height;
+	int floor;
 	
 	action intialization {
 		inside_geom <- (copy(shape) - P_shoulder_length);
@@ -129,7 +131,6 @@ species Room parent: AbstractPlace {
 	aspect default {
 		if (display_room_status and show_floor[floor]) {
 			draw shape at: location color: blend(#red, #green, min(1,viral_load*coeff_visu_virus_load_room/(shape.area)));
-			
 		}
 		if (display_room_entrance and show_floor[floor]) {
 			loop e over: entrances {draw circle(0.2)-circle(0.1) at: {e.location.x,e.location.y, e.location.z + 0.001} color: #yellow border: #black;}
@@ -140,6 +141,7 @@ species Room parent: AbstractPlace {
 		if(isVentilated and show_floor[floor]){
 			draw shape color: blend(#red, #green, min(1,viral_load*coeff_visu_virus_load_room/(shape.area)));
 //		 	draw image_file("../../../Images/fan.png") size: 3;	
+
 		}
 	}
 	
@@ -283,15 +285,15 @@ species RoomEntrance {
 				break;
 			}
 			line_g <- line_g at_location last(queue_tmp.points );
-			point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
-			float nb <- max(0.5,(max(1, nb_places) * distance_queue) - queue_tmp.perimeter);
-			queue_tmp <-  line(queue_tmp.points + [pt + vector * nb ]);
-			list<geometry> ws <-Wall overlapping (queue_tmp+ 0.2);
-			ws <- ws +(((RoomEntrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue_tmp + 0.2);
-			if (consider_rooms) {ws <- ws +  Room overlapping (queue_tmp+ 0.2);}
+			point vector_ <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
+			float nb_ <- max(0.5,(max(1, nb_places) * distance_queue) - queue_tmp.perimeter);
+			queue_tmp <-  line(queue_tmp.points + [pt + vector_ * nb_ ]);
+			list<geometry> ws_ <-Wall overlapping (queue_tmp+ 0.2);
+			ws_ <- ws_ +(((RoomEntrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue_tmp + 0.2);
+			if (consider_rooms) {ws_ <- ws_ +  Room overlapping (queue_tmp+ 0.2);}
 			
-			if not empty(ws) {
-				loop w over: ws {
+			if not empty(ws_) {
+				loop w over: ws_ {
 					geometry g <- queue_tmp - w ;
 					if (g != nil) {
 							queue_tmp <- g.geometries with_min_of (each distance_to pt);
@@ -427,12 +429,14 @@ species RoomEntrance {
 	}
 }
 
-grid unit_cell parent: AbstractPlace cell_width: unit_cell_size cell_height: unit_cell_size neighbors: 8 schedules: unit_cell where (each.viral_load > 0) {
+// TODO: viral_load is now a map
+grid unit_cell parent: AbstractPlace cell_width: unit_cell_size cell_height: unit_cell_size neighbors: 8 schedules: unit_cell where (each.viral_load[original_strain] > 0) {
 	bool allow_transmission -> {allow_local_transmission};
 	float viral_decrease -> {basic_viral_local_decrease_per_day };
 	aspect default{
 		if (display_infection_grid){
-			 draw shape color:blend(#green, #red, 1 - (coeff_visu_virus_load_cell * viral_load))  ;	
+			//TODO: viral_load is now a map
+			draw shape color:blend(#green, #red, 1 - (coeff_visu_virus_load_cell * viral_load[original_strain]))  ;	
 		}
 	}
 }

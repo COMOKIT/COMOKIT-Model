@@ -8,7 +8,7 @@
 * Tags: covid19,epidemiology,proxymix
 ******************************************************************/
 
-model BuildingSyntheticPopulation
+model BuildSyntheticPopulation
 
 import "Entities/BuildingActivity.gaml"
 import "Entities/Building Spatial Entities.gaml" 
@@ -23,5 +23,6 @@ global {
 		create Staff number: 3;
 		create Inpatient number: 38;
 		create Caregivers number: 29;
+
 	}
 }

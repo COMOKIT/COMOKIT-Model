@@ -31,6 +31,7 @@ global {
 		loop i over: BuildingActivity.subspecies{
 			create i;
 		}
+
 	}
 }
 
@@ -40,6 +41,7 @@ species BuildingActivity virtual: true {
 	
 	pair<Room, point> get_destination(BuildingIndividual p) virtual: true;
 }
+
 
 species ActivityLeaveBuilding parent: BuildingActivity {
 	pair<Room, point> get_destination(BuildingIndividual p) {
@@ -53,6 +55,7 @@ species ActivityWanderAround parent: BuildingActivity{
 	pair<Room, point> get_destination(BuildingIndividual p){
 		Room r <- first(Room where (each.shape overlaps p.location));
 		point pt <- any_location_in(r);
+
 		return r::pt;
 	}
 }
@@ -192,6 +195,7 @@ species ActivityWanderInWardC parent: BuildingActivity{
 
 
 // Activities of interns
+
 
 
 

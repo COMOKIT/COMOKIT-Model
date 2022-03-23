@@ -45,6 +45,7 @@ global {
 	string simple <- "simple";
 	
 	string TFS <- "HH:mm";
+
 	
 	// Room types
 	string WARD <- "ward";
@@ -59,4 +60,5 @@ global {
 	string MINOPERATION <- "minor_operation_room";
 	string ELEVATOR <- "elevator";
 	string STAIR <- "stairway";
+
 }

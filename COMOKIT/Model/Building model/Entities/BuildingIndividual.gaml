@@ -26,19 +26,20 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
  	int current_floor <- 0;
  	Room working_place;
 	PlaceInRoom working_desk;
+
 	BenchWait benchw;
 	rgb color <- #violet;
 	map<date, BuildingActivity> agenda_week;
 	map<date, BuildingActivity> current_agenda_week;
 	BuildingActivity current_activity;
 	point target;
+
 	point dst_point;
 	Room dst_room;
 	Room current_room;
+
 	bool has_place <- false;
 	PlaceInRoom target_place;
-	bool goto_entrance <- false;
-	bool go_oustide_room <- false;
 	float speed <- max(2,min(6,gauss(4,1))) #km/#h;
 	bool is_slow <- false update: false;
 	bool is_slow_real <- false;
@@ -62,6 +63,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 	
 		pedestrian_species <- [BuildingIndividual];
 		obstacle_species <- [ Wall];
+
 		// Params for pedestrian skill
 		obstacle_consideration_distance <-P_obstacle_consideration_distance;
 		pedestrian_consideration_distance <-P_pedestrian_consideration_distance;
@@ -169,24 +171,24 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		float start <- BENCHMARK ? machine_time : 0.0;
 		if(allow_air_transmission and (not is_infected)and(self.current_room!=nil))
 		{
-			if(flip(current_room.viral_load*successful_contact_rate_building/ (current_room.shape.area * current_room.ceiling_height)))
+			// TODO: viral_load is now a map, but idk how to properly update these formula
+			if(flip(current_room.viral_load[original_strain]*successful_contact_rate_building/ (current_room.shape.area * current_room.ceiling_height)))
 			{
-				infected_by <- current_place;
-				do define_new_case();
+				infectious_contacts_with[current_place] <- define_new_case(original_strain);
 			}
 		}
 		if(allow_local_transmission and (not is_infected))
 		{
 			unit_cell current_cell <- unit_cell(location);
-			if(flip(current_cell.viral_load*successful_contact_rate_building))
+			if(flip(current_cell.viral_load[original_strain]*successful_contact_rate_building))
 			{
-				infected_by <- current_place;
-				do define_new_case();
+				infectious_contacts_with[current_place] <- define_new_case(original_strain);
 			}
 		}
 		do update_wear_mask();
 		if BENCHMARK {bench["Individual.update_epidemiology"] <- bench["Individual.update_epidemiology"] + machine_time - start;}
 	}
+
 
 	reflex sanitation_behavior when: using_sanitation {
 		sanitation_time <- sanitation_time + step;
@@ -198,10 +200,9 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		}
 	}
 
-	reflex define_activity when: not waiting_sanitation and 
-								not empty(current_agenda_week) and 
-								(after(current_agenda_week.keys[0])) {
-		if(target_place != nil and (has_place) ) {dst_room.available_places << target_place;}
+
+	// Setup targets when it's time to move
+
 		string n <- current_activity = nil ? "" : copy(current_activity.name);
 		Room prev_tr <- copy(dst_room);
 		do release_path;
@@ -210,6 +211,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 			benchw <- nil;
 		}
 		
+
 		// Pop the next activity out of the agenda and get the new destination
 		current_activity <- current_agenda_week.values[0];
 		current_agenda_week >> first(current_agenda_week);
@@ -241,10 +243,12 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 //		goto_entrance <- false;
 //		target_place <- nil;
 //		finished_goto <- false;
+
 		if (species(current_activity) = BuildingSanitation) {
 			waiting_sanitation <- true;
 		}
 	}
+
 
 	reflex goto_activity when: target != nil and not in_line {
 //		bool arrived <- false;
@@ -274,8 +278,16 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 					is_outside <- true;
 				}
 				do release_path;
+
 			}
+		} else if final_waypoint != nil {
+			do walk;
+		} else {
+			// Pedestrian skill cannot reach the exact target point, 
+			// so as a last step, we use moving skill to bring the person there
+			do goto target: current_target;
 		}
+
 		else{
 			if (location distance_to target > P_tolerance_target){
 				if(current_room = dst_room and final_waypoint = nil){
@@ -312,6 +324,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 				dst_room.people_inside << self;
 			}
 			do release_path;
+
 		}
 		
 		
@@ -426,12 +439,14 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
  			return #green;
  		}
  	}
+
  	
  	aspect default {
 		if(!is_outside and show_floor[current_floor]){
 
 			draw pple_walk size: people_size  at: location + {0, 0, 0.7} rotate: heading - 90 color: color;
 			if(is_infected){draw circle(0.7)  at: location + {0, 0, 0.7} color: get_color();}
+
 		}
 	}
 }

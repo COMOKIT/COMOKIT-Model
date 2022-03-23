@@ -22,6 +22,7 @@ experiment main type: gui parent: AbstractExperiment{
 			init_all_ages_proportion_wearing_mask::0.6,
 			init_all_ages_factor_contact_rate_wearing_mask:: 0.8,
 			ventilation_proba::0.7
+
 		];
 	}
 }

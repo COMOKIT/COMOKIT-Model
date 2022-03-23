@@ -54,7 +54,7 @@ experiment "Radius Quarantine" parent: "Abstract Experiment" autorun: true {
 		
 		display "Main" parent: default_display {
 			species SpatialPolicy transparency: 0.7{
-				draw application_area empty: false color: #red;
+				draw application_area wireframe: false color: #red;
 			}
 		}
 		display "Chart" parent: states_evolution_chart {}

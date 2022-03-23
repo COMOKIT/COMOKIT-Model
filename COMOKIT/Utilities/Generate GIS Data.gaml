@@ -144,7 +144,7 @@ global {
 				do load_google_image;
 			} else {
 				//otherwise propose to download the image from google (WARNING: direct access to google map image without using the google api (and key) is recommended).
-				map input_values <- user_input("Do you want to download google maps to fill in the data? (warning: risk of being blocked by google!)",[enter("Download data",false), enter("Delay (in s) between two requests",5.0)]);
+				map input_values <- user_input_dialog("Do you want to download google maps to fill in the data? (warning: risk of being blocked by google!)",[enter("Download data",false), enter("Delay (in s) between two requests",5.0)]);
 				experiment.minimum_cycle_duration <- max(0.5, float(input_values["Delay (in s) between two requests"]));
 	
 				//if the user choose to download the data anyway, build and store the url to the needed tiles.
@@ -356,10 +356,10 @@ global {
 			rgb col <- google_map_type[type];
 			
 			//select the pixel of the given color
-			list<cell_google> cells <- cell_google where ((abs(each.color.red - col.red)+abs(each.color.green - col.green) + abs(each.color.blue - col.blue)) <= tolerance_color_type);
+			list<cell_google> cells_g <- cell_google where ((abs(each.color.red - col.red)+abs(each.color.green - col.green) + abs(each.color.blue - col.blue)) <= tolerance_color_type);
 			
 			//and build geometries from them
-			list<geometry> gs <- union(cells collect (each.shape + tolerance_dist)).geometries;
+			list<geometry> gs <- union(cells_g collect (each.shape + tolerance_dist)).geometries;
 			if (buffer_coeff > 0) {
 				float buffer_dist <- first(cell_google).shape.width * buffer_coeff;
 				gs <- gs collect (each + buffer_dist);
@@ -525,7 +525,7 @@ global {
 						
 						//for each type of marker, create the marker agents from the google image and use to it to give a type to the closest building (of the bottom of the marker)
 						loop type over: google_map_type.keys {
-							list<geometry> cells;
+							list<geometry> cells_g;
 							rgb col <- google_map_type[type];
 							
 							//select the pixel of the given color 
@@ -533,20 +533,20 @@ global {
 								geometry r <- rectangles[i];
 								rgb col_r <- colors[i];
 								if ((abs(col_r.red - col.red)+abs(col_r.green - col.green) + abs(col_r.blue - col.blue)) < tolerance_color_bd) {
-									cells << r;
+									cells_g<< r;
 								}
 							}
 							
-							if not empty(cells) {
+							if not empty(cells_g) {
 								//and build geometries from them
-								list<geometry> gs <- union(cells collect (each + tolerance_dist)).geometries;
+								list<geometry> gs_ <- union(cells_g collect (each + tolerance_dist)).geometries;
 								if (buffer_coeff > 0) {
-									float buffer_dist <- first(cells).width * buffer_coeff;
-									gs <- gs collect (each + buffer_dist);
+									float buffer_dist <- first(cells_g).width * buffer_coeff;
+									gs_ <- gs_ collect (each + buffer_dist);
 								}
 								
 								//create the marker agents
-								create marker from: gs with: [type::type];
+								create marker from: gs_ with: [type::type];
 								
 								float min_area <- marker mean_of each.shape.area;
 								
@@ -642,7 +642,7 @@ species Building {
 
 species Boundary {
 	aspect default {
-		draw shape color: #violet empty: true;
+		draw shape color: #violet wireframe: true;
 	}
 }
 
@@ -685,7 +685,7 @@ experiment wizard_xp autorun: true {
 			
 			graphics "tile" {
 				if bounds_tile != nil {
-					draw bounds_tile color: #red empty: true;
+					draw bounds_tile color: #red wireframe: true;
 				}
 			}
 			species Boundary;
@@ -711,7 +711,7 @@ experiment generateGISdata type: gui autorun: true {
 			
 			graphics "tile" {
 				if bounds_tile != nil {
-					draw bounds_tile color: #red empty: true;
+					draw bounds_tile color: #red wireframe: true;
 				}
 			}
 			species Boundary;

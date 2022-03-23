@@ -23,6 +23,7 @@ global {
 	species<BuildingIndividual> building_individual_species <- BuildingIndividual; // by default
 	container<BuildingIndividual> all_building_individuals -> {container<BuildingIndividual>(building_individual_species.population+(building_individual_species.subspecies accumulate each.population))};
 	
+
 	list<shape_file> rooms_shape_file;
 	list<shape_file> entrances_shape_file;
 	list<shape_file> walls_shape_file;
@@ -43,6 +44,7 @@ global {
 
 	
 	geometry shape <- envelope(envelope(pedestrian_path_shapefile) + envelope(walls_shapefile) + envelope(rooms_shapefile));
+
 	graph pedestrian_network;
 	list<Room> available_offices;
 	
@@ -58,7 +60,7 @@ global {
 			
 	list<geometry> open_area;
 	bool morefloorfile <- false;
-	
+
 	init {
 		// These will be overridden if they are put in ./Parameters.gaml
 		starting_date <- date([2020,4,6,5,29,0]);
@@ -163,6 +165,7 @@ global {
 		}
 		ask rooms_list{
 			geometry contour <- nil;
+
 			float dist <- 10.0;
 			int cpt <- 0;
 			loop while: contour = nil {
@@ -182,6 +185,7 @@ global {
 				dist <- dist * 0.5;
 			} 
 			if contour != nil {
+
 				list<point> ents <- points_on (contour, 1.7);
 				loop pt over:ents {
 					create RoomEntrance with: [location::pt,my_room::self] {
@@ -263,7 +267,36 @@ global {
 			location <- location + point([0, 0, floor*default_ceiling_height]);
 			if shape.area = 0.0 {
 				shape <- shape + P_shoulder_length;
+
 			}
+			
+			geometry new_open_area <- first(open_area_shape_file.contents);
+			new_open_area <- new_open_area at_location (new_open_area.location - translation);
+			if open_area = nil {
+				open_area <- new_open_area;
+			} else {
+				open_area <- open_area + new_open_area;
+			}
+
+			create PedestrianPath from: pedestrian_path_shape_file {
+				list<geometry> fs <- free_spaces_shape_file overlapping self;
+				fs <- fs where (each covers shape); 
+				free_space <- fs with_min_of (each.location distance_to location);
+				// Workaround for a NPE in build_intersection_areas
+				if free_space = nil {
+					free_space <- shape + P_shoulder_length;
+				}
+				
+				location <- location - translation;
+				free_space <- free_space at_location (free_space.location - translation);
+			}
+
+			i <- i + 1;
+			if i >= num_layout_columns {
+				i <- 0;
+				j <- j + 1;
+			}
+			floor_cnt <- floor_cnt + 1;
 		}
 		//create bed and bench
 		create Bed from: beds_shape_file[fl]{
@@ -298,7 +331,7 @@ global {
 				ask outside {do outside_epidemiological_dynamic(myself, duration_period);}
 				tick <- tick + round(duration_period / step);
 			}
-			ask rooms_list  {
+			ask rooms_list {
 				do decrease_viral_load(viral_decrease/nb_step_for_one_day * duration_period / step);
 			}
 		
@@ -309,4 +342,5 @@ global {
 	reflex end_simulation when: current_date >= final_date {
 		do pause;	
 	}
+
 }

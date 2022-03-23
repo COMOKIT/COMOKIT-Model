@@ -16,6 +16,7 @@ model CoVid19
 import "Constants.gaml"
 
 global {
+		
 	
 	// Parameter folder path
 	string parameters_folder_path <- experiment.project_path+"Parameters";
@@ -24,13 +25,44 @@ global {
 	string datasets_folder_path; // The path from root project to the data set folder (can contains several case studies)
 	// Default dataset management
 	list<string> EXCLUDED_CASE_STUDY_FOLDERS_NAME <- ["Test Generate GIS Data"] const:true;
-	string DEFAULT_CASE_STUDY_FOLDER_NAME <- "Vinh Phuc" const: true;
+	string DEFAULT_CASE_STUDY_FOLDER_NAME <-"Ben Tre" const: true;
 	string DEFAULT_DATASETS_FOLDER_NAME <- "Datasets"  const: true;
 	// The actual dataset path
 	string dataset_path <- build_dataset_path();
 	
+	
+	bool parallel_computation <- false;
+	bool macro_model <- false;
+	// precomputation parameters
+	bool use_activity_precomputation <- false; //if true, use precomputation model
+	bool udpate_for_display <- false; // if true, do some additional computation only for display purpose
+	//bool load_activity_precomputation_from_file <- false; //if true, use file to generate the population and their agenda and activities
+	int nb_weeks_ref <- 2 min: 1; // number of weeks precomputed used (should not be higher than the number precomputed in the file)
+	
+	string file_activity_with_policy_precomputation_path <- "activity_with_policy_precomputation"; //file to use for precomputed activity when the policy is active
+	string file_activity_without_policy_precomputation_path <- "activity_without_policy_precomputation"; //file to use for precomputed activity when the policy is not active
+	
+	string precomputation_folder <- "generated/"; //folder where are located all the precomputed files
+	string file_population_precomputation_path <- "population_precomputation";
+	string file_agenda_precomputation_path <-"agenda_precomputation";
+	string file_building_precomputation_path <-"building_precomputation";
+	
+	
 	//GIS data
-	file shp_boundary <- file_exists(dataset_path+"boundary.shp") ? shape_file(dataset_path+"boundary.shp"):nil;
+	string shp_boundary_path <- (dataset_path+"boundary.shp");
+	string shp_buildings_path <- (dataset_path+"buildings.shp");
+
+	//Population data 
+	string csv_population_path <-(dataset_path+"population.csv") ;
+	string csv_population_attribute_mappers_path <- (dataset_path+"Population Records.csv");
+	string csv_parameter_population_path <- (dataset_path+"Population parameter.csv");
+	string csv_parameter_agenda_path <- (dataset_path+"Agenda parameter.csv") ;
+	string csv_activity_weights_path <- (dataset_path+"Activity weights.csv") ;
+	string csv_building_type_weights_path <- (dataset_path+"Building type weights.csv") ;
+	
+	
+	//GIS data
+	/*file shp_boundary <- file_exists(dataset_path+"boundary.shp") ? shape_file(dataset_path+"boundary.shp"):nil;
 	file shp_buildings <- file_exists(dataset_path+"buildings.shp") ? shape_file(dataset_path+"buildings.shp"):nil;
 
 	//Population data 
@@ -39,7 +71,7 @@ global {
 	csv_file csv_parameter_population <- file_exists(dataset_path+"Population parameter.csv") ? csv_file(dataset_path+"Population parameter.csv",",",true):nil;
 	csv_file csv_parameter_agenda <- file_exists(dataset_path+"Agenda parameter.csv") ? csv_file(dataset_path+"Agenda parameter.csv",",",true):nil;
 	csv_file csv_activity_weights <- file_exists(dataset_path+"Activity weights.csv") ? csv_file(dataset_path+"Activity weights.csv",",",string, false):nil;
-	csv_file csv_building_type_weights <- file_exists(dataset_path+"Building type weights.csv") ? csv_file(dataset_path+"Building type weights.csv",",",string, false):nil;
+	csv_file csv_building_type_weights <- file_exists(dataset_path+"Building type weights.csv") ? csv_file(dataset_path+"Building type weights.csv",",",string, false):nil;*/
 	
 	
 	//simulation step
@@ -49,71 +81,146 @@ global {
 	int num_infected_init <- 2; //number of infected individuals at the initialization of the simulation
 	int num_recovered_init <- 0; //The number of people that have already been infected in the past
 
-	//Epidemiological parameters
+	//Model initial parameters
 	float nb_step_for_one_day <- #day/step; //Used to define the different period used in the model
 	
 	bool load_epidemiological_parameter_from_file <- true; //Allowing parameters being loaded from a csv file 
-	string epidemiological_parameters <- (last(parameters_folder_path)="/"?parameters_folder_path:parameters_folder_path+"/")
-		+"Epidemiological Parameters.csv"; //File for the parameters
-	file csv_parameters <- file_exists(epidemiological_parameters)?csv_file(epidemiological_parameters):nil;
 	
-	//Dynamics
+	string epidemiological_parameters <- (last(parameters_folder_path)="/"?parameters_folder_path:parameters_folder_path+"/")+"Epidemiological_parameters.csv"; //File for the parameters
+	string sars_cov_2_parameters <- (last(parameters_folder_path)="/"?parameters_folder_path:parameters_folder_path+"/")+SARS_CoV_2+".csv"; //File for the parameters
+	//csv_file csv_parameters <- file_exists(sars_cov_2_parameters)?csv_file(sars_cov_2_parameters):nil;
+	
+	string variants_folder <- (last(parameters_folder_path)="/"?parameters_folder_path:parameters_folder_path+"/")+"Variants";
+	
+	// --------------------
+	// ----------------------------------
+	// EPIDEMIOLOGICAL PARAMETERS
+	// ----------------------------------
+	// --------------------
+	
+	// -------
+	// Globals
+	// -------
+	// Basic transmission mechanisms
 	bool allow_transmission_human <- true; //Allowing human to human transmission
 	bool allow_transmission_building <- true; //Allowing environment contamination and infection
 	bool allow_viral_individual_factor <- false; //Allowing individual effects on the beta and viral release
 	
-	
 	//Environmental contamination
 	float successful_contact_rate_building <- 2.5 * 1/(14.69973*nb_step_for_one_day);//Contact rate for environment to human transmission derivated from the R0 and the mean infectious period
-	float reduction_coeff_all_buildings_inhabitants <- 0.01; //reduction of the contact rate for individuals belonging to different households leaving in the same building
-	float reduction_coeff_all_buildings_individuals <- 0.05; //reduction of the contact rate for individuals belonging to different households leaving in the same building
+	float reduction_coeff_all_buildings_individuals <- 0.05; //reduction of the contact rate for unknown individuals in the same place
 	float basic_viral_release <- 3.0; //Viral load released in the environment by infectious individual
 	float basic_viral_decrease <- 0.33; //Value to decrement the viral load in the environment
 	
+	// Re-infections
+	bool allow_reinfection <- true; // Allowing Individual to be infected by the sars-cov-2 virus multiple times
 	
-	//These parameters are used when no CSV is loaded to build the matrix of parameters per age
-	float init_all_ages_successful_contact_rate_human <- 2.5 * 1/(14.69973);//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
-	float init_all_ages_factor_contact_rate_asymptomatic <- 0.55; //Factor of the reduction for successful contact rate for  human to human transmission for asymptomatic individual
-	float init_all_ages_proportion_asymptomatic <- 0.3; //Proportion of asymptomatic infections
-	float init_all_ages_proportion_dead_symptomatic <- 0.01; //Proportion of symptomatic infections dying
-	float init_all_ages_probability_true_positive <- 0.89; //Probability of successfully identifying an infected
-	float init_all_ages_probability_true_negative <- 0.92; //Probability of successfully identifying a non infected
+	// Behavioral parameters
 	float init_all_ages_proportion_wearing_mask <- 0.0; //Proportion of people wearing a mask
+	float init_all_ages_proportion_antivax <- 0.4;//Proportion of people not willing to take the vaccin
+	float init_all_ages_proportion_freerider <- 0.0;
 	float init_all_ages_factor_contact_rate_wearing_mask <- 0.5; //Factor of reduction for successful contact rate of an infectious individual wearing mask
-	string init_all_ages_distribution_type_incubation_period_symptomatic <- "Lognormal"; //Type of distribution of the incubation period; Among normal, lognormal, weibull, gamma
-	float init_all_ages_parameter_1_incubation_period_symptomatic <- 1.57; //First parameter of the incubation period distribution for symptomatic
-	float init_all_ages_parameter_2_incubation_period_symptomatic <- 0.65; //Second parameter of the incubation period distribution for symptomatic
-	string init_all_ages_distribution_type_incubation_period_asymptomatic <- "Lognormal"; //Type of distribution of the incubation period; Among normal, lognormal, weibull, gamma
-	float init_all_ages_parameter_1_incubation_period_asymptomatic <- 1.57; //First parameter of the incubation period distribution for asymptomatic
-	float init_all_ages_parameter_2_incubation_period_asymptomatic <- 0.65; //Second parameter of the incubation period distribution for asymptomatic
-	string init_all_ages_distribution_type_serial_interval <- "Normal"; //Type of distribution of the serial interval
-	float init_all_ages_parameter_1_serial_interval <- 3.96;//First parameter of the serial interval distribution
-	float init_all_ages_parameter_2_serial_interval <- 3.75;//Second parameter of the serial interval distribution
-	string init_all_ages_distribution_type_infectious_period_symptomatic <- "Lognormal";//Type of distribution of the time from onset to recovery
-	float init_all_ages_parameter_1_infectious_period_symptomatic <- 3.034953;//First parameter of the time from onset to recovery distribution
-	float init_all_ages_parameter_2_infectious_period_symptomatic <- 0.34;//Second parameter of the time from onset to recovery distribution
-	string init_all_ages_distribution_type_infectious_period_asymptomatic <- "Lognormal";//Type of distribution of the time from onset to recovery
-	float init_all_ages_parameter_1_infectious_period_asymptomatic <- 3.034953;//First parameter of the time from onset to recovery distribution
-	float init_all_ages_parameter_2_infectious_period_asymptomatic <- 0.34;//Second parameter of the time from onset to recovery distribution
-	float init_all_ages_proportion_hospitalisation <- 0.2; //Proportion of symptomatic cases hospitalized
-	string init_all_ages_distribution_type_onset_to_hospitalisation <- "Lognormal";//Type of distribution of the time from onset to hospitalization
-	float init_all_ages_parameter_1_onset_to_hospitalisation  <- 3.034953;//First parameter of the time from onset to hospitalization distribution
-	float init_all_ages_parameter_2_onset_to_hospitalisation  <- 0.34;//Second parameter of the time from onset to hospitalization distribution
-	float init_all_ages_proportion_icu <- 0.1; //Proportion of hospitalized cases going through ICU
-	string init_all_ages_distribution_type_hospitalisation_to_ICU <- "Lognormal";//Type of distribution of the time from hospitalization to ICU
-	float init_all_ages_parameter_1_hospitalisation_to_ICU  <- 3.034953;//First parameter of the time from hospitalization to ICU
-	float init_all_ages_parameter_2_hospitalisation_to_ICU  <- 0.34;//Second parameter of the time from hospitalization to ICU
-	string init_all_ages_distribution_type_stay_ICU <- "Lognormal";//Type of distribution of the time to stay in ICU
-	float init_all_ages_parameter_1_stay_ICU <- 3.034953;//First parameter of the time to stay in ICU
-	float init_all_ages_parameter_2_stay_ICU <- 0.34;//Second parameter of the time to stay in ICU
-	string init_all_ages_distribution_viral_individual_factor <- "Lognormal"; //Type of distribution of the individual factor for beta and viral release
-	float init_all_ages_parameter_1_viral_individual_factor <- -0.125; //First parameter of distribution of the individual factor for beta and viral release
-	float init_all_ages_parameter_2_viral_individual_factor <- 0.5; //Second parameter of distribution of the individual factor for beta and viral release
+	
+	
+	// HOSP - ICU CAPACITY
 	int ICU_capacity<-17; //Capacity of ICU for one hospital (from file)
 	int hospitalisation_capacity <- 200; //Capacity of hospitalisation admission for one hospital (assumed)
-	list<string> force_parameters;
 	
-	//Synthetic population parameters
+	list<string> forced_sars_cov_2_parameters;
+	list<string> forced_epidemiological_parameters;
+	
+	
+	//These parameters are used when no CSV is loaded to build the matrix of parameters per age
+	// -----------------
+	// SARS-CoV-2 INIT
+	// -----------------
+	// infectiousness
+	float init_all_ages_successful_contact_rate_human <- 2.5 * 1/(14.69973);//Contact rate for human to human transmission derivated from the R0 and the mean infectious period
+	float init_all_ages_factor_contact_rate_asymptomatic <- 0.55; //Factor of the reduction for successful contact rate for  human to human transmission for asymptomatic individual
+	
+	// viral load
+	string init_all_ages_distribution_viral_individual_factor <- epidemiological_lognormal; //Type of distribution of the individual factor for beta and viral release
+	float init_all_ages_parameter_1_viral_individual_factor <- -0.125; //First parameter of distribution of the individual factor for beta and viral release
+	float init_all_ages_parameter_2_viral_individual_factor <- 0.5; //Second parameter of distribution of the individual factor for beta and viral release
+	
+	// test prone
+	// https://www.medrxiv.org/content/10.1101/2020.04.26.20080911v1.full
+	float init_all_ages_probability_true_positive <- 0.96; //Probability of successfully identifying an infected
+	// https://www.eurosurveillance.org/content/10.2807/1560-7917.ES.2020.25.50.2000568
+	// Higly dependant over time after symptom onsets but: "a false-negative test probability of 16.7%"
+	float init_all_ages_probability_true_negative <- 0.833; //Probability of successfully identifying a non infected
+	
+	// asympto
+	float init_all_ages_proportion_asymptomatic <- 0.3; //Proportion of asymptomatic infections
+	map<int,float> distribution_proportion_asymptomatic <- [0::0.701, 20::0.626, 30::0.596, 40::0.573, 50::0.599, 60::0.616, 70::0.687];
+	
+	// hospitalisation
+	float init_all_ages_proportion_hospitalisation <- 0.2; //Proportion of symptomatic cases hospitalized
+	map<int,float> distribution_proportion_hospitalisation <- [0::0.0066,9::0.0013,19::0.0026,29::0.0112,39::0.0289,49::0.0702,59::0.1841,69::0.3756,79::0.6157];
+	
+	// icu
+	float init_all_ages_proportion_icu <- 0.1; //Proportion of hospitalized cases going through ICU
+	
+	// dead proba
+	float init_all_ages_proportion_dead_symptomatic <- 0.01; //Proportion of symptomatic infections dying
+	
+	//Periods
+	string init_all_ages_distribution_type_incubation_period_symptomatic <- epidemiological_lognormal; //Type of distribution of the incubation period; Among normal, lognormal, weibull, gamma
+	float init_all_ages_parameter_1_incubation_period_symptomatic <- 1.57; //First parameter of the incubation period distribution for symptomatic
+	float init_all_ages_parameter_2_incubation_period_symptomatic <- 0.65; //Second parameter of the incubation period distribution for symptomatic
+	string init_all_ages_distribution_type_incubation_period_asymptomatic <- epidemiological_lognormal; //Type of distribution of the incubation period; Among normal, lognormal, weibull, gamma
+	float init_all_ages_parameter_1_incubation_period_asymptomatic <- 1.57; //First parameter of the incubation period distribution for asymptomatic
+	float init_all_ages_parameter_2_incubation_period_asymptomatic <- 0.65; //Second parameter of the incubation period distribution for asymptomatic
+	string init_all_ages_distribution_type_serial_interval <- epidemiological_normal; //Type of distribution of the serial interval
+	float init_all_ages_parameter_1_serial_interval <- 3.96;//First parameter of the serial interval distribution
+	float init_all_ages_parameter_2_serial_interval <- 3.75;//Second parameter of the serial interval distribution
+	string init_all_ages_distribution_type_infectious_period_symptomatic <- epidemiological_lognormal;//Type of distribution of the time from onset to recovery
+	float init_all_ages_parameter_1_infectious_period_symptomatic <- 3.034953;//First parameter of the time from onset to recovery distribution
+	float init_all_ages_parameter_2_infectious_period_symptomatic <- 0.34;//Second parameter of the time from onset to recovery distribution
+	string init_all_ages_distribution_type_infectious_period_asymptomatic <- epidemiological_lognormal;//Type of distribution of the time from onset to recovery
+	float init_all_ages_parameter_1_infectious_period_asymptomatic <- 3.034953;//First parameter of the time from onset to recovery distribution
+	float init_all_ages_parameter_2_infectious_period_asymptomatic <- 0.34;//Second parameter of the time from onset to recovery distribution
+	string init_all_ages_distribution_type_onset_to_hospitalisation <- epidemiological_lognormal;//Type of distribution of the time from onset to hospitalization
+	float init_all_ages_parameter_1_onset_to_hospitalisation  <- 3.034953;//First parameter of the time from onset to hospitalization distribution
+	float init_all_ages_parameter_2_onset_to_hospitalisation  <- 0.34;//Second parameter of the time from onset to hospitalization distribution
+	string init_all_ages_distribution_type_hospitalisation_to_ICU <- epidemiological_lognormal;//Type of distribution of the time from hospitalization to ICU
+	float init_all_ages_parameter_1_hospitalisation_to_ICU  <- 3.034953;//First parameter of the time from hospitalization to ICU
+	float init_all_ages_parameter_2_hospitalisation_to_ICU  <- 0.34;//Second parameter of the time from hospitalization to ICU
+	string init_all_ages_distribution_type_stay_ICU <- epidemiological_normal;//Type of distribution of the time to stay in ICU
+	float init_all_ages_parameter_1_stay_ICU <- 8.0;//First parameter of the time to stay in ICU
+	float init_all_ages_parameter_2_stay_ICU <- 5.9;//Second parameter of the time to stay in ICU
+	
+	// Immune escapement
+	float init_immune_escapement <- 1.0; // The extends to which the virus escape from previous exposition and/or vaccines (TODO : is there a distinction ?)
+	float init_selfstrain_reinfection_probability <- 0.0; // The basic probability to be re-infected by the very same strain/variant - differ from immunity evasion of variants
+	
+	// --------------
+	// VACCINE INIT
+	// --------------
+	
+	string pfizer_biontech <- "COMIRNATY";
+	list pfizer_doses_schedule <- [pair<float,float>(3#week,6#week)];
+	list<float> pfizer_doses_immunity <- [0.6,0.95];
+	list<float> pfizer_doses_sympto;
+	list<float> pfizer_doses_sever;
+	
+	string astra_zeneca <- "VAXZEVRIA";
+	list astra_doses_schedule <- [pair<float,float>(4#week,12#week)];
+	list<float> astra_doses_immunity <- [0.5,0.75];
+	list<float> astra_doses_sympto;
+	list<float> astra_doses_sever;
+		
+	// PROTECTIVE DIMENSION OF COVID19 VACCINES
+	
+	
+	// --------------------
+	// ----------------------------------------
+	// SYNTHETIC POPULATION AND AGENDA
+	// ----------------------------------------
+	// --------------------
+	
+	// ---------
+	// Synthetic population parameters
 	
 	// ------ From file
 	string OTHER <- "OTHER" const:true;
@@ -156,7 +263,12 @@ global {
 	float proba_work_at_home <- 0.05; //probability to work at home;
 	float proba_unemployed_M <- 0.03; // probability for a M individual to be unemployed.
 	float proba_unemployed_F <-0.03; // probability for a F individual to be unemployed.
+	// --------------
+	list<int> comorbidities_range <- [0];
 	
+	// -----------
+	// Localisation and synthetic agenda
+	// -----------
 	
 	 //building type that will be considered as home - for each type, the coefficient to apply to this type for this choice of working place
 	 //weight of a working place = area * this coefficient
@@ -171,10 +283,9 @@ global {
 		+"Building type per activity type.csv"; //File for the parameters
 	
 	string choice_of_target_mode <- gravity among: ["random", "gravity","closest"]; // model used for the choice of building for an activity 
+	int limitation_of_candidates <- -1; //  number of buildings considered (-1 = all buildings)
 	int nb_candidates <- 4; // number of building considered for the choice of building for a particular activity
 	float gravity_power <- 0.5;  // power used for the gravity model: weight_of_building <- area of the building / (distance to it)^gravity_power
-	
-	
 	
 	//Agenda paramaters
 	list<int> non_working_days <- [7]; //list of non working days (1 = monday; 7 = sunday)
@@ -205,12 +316,11 @@ global {
 	float proba_lunch_at_home <- 0.5; // if lunch outside the working place, proba of having lunch at home
 	
 	float proba_work_outside <- 0.0; //proba for an individual to work outside the study area
-	float proba_go_outside <- 0.0; //proba for an individual to do an activity outside the study area
-	float proba_outside_contamination_per_hour <- 0.0; //proba per hour of being infected for Individual outside the study area 
-	
+	float proba_go_outside <- 0.0; //proba for an individual to do an activity outside the study area 
+	int min_age_obligatory_school <- 3; //age from which children have to go to school
+	float proba_kindergarden <- 0.1; //proba for an children to go to kindergarden
 	//Activity parameters
 	float building_neighbors_dist <- 500 #m; //used by "visit to neighbors" activity (max distance of neighborhood).
-	
 	
 	//for each category of age, and for each sex, the weight of the different activities
 	map<list<int>,map<int,map<string,float>>> weight_activity_per_age_sex_class <- [

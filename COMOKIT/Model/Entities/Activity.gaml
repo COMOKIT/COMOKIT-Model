@@ -19,16 +19,24 @@ global {
 	// A map of all possible activities
 	map<string, Activity> Activities;
 	
+	list<string> activities_to_remove;
 	action create_activities {
 		
 		// Create one Activity agent for each species inheriting from Activity
 		loop s over: Activity.subspecies { 
 			create s returns: new_activity;
-			Activities[first(new_activity).name] <- Activity(first(new_activity)) ;
+			Activity act <- Activity(first(new_activity));
+			if act != nil and (empty(activities_to_remove) or not (act.name in activities_to_remove)) {
+				Activities[act.name] <- act ;
+			} else {
+				ask act {do die;}
+			}
+			
+			
 		}
 		
 		// Local variable sorting all the Building agents given their type
-		map<string,list<Building>> buildings_per_activity <- Building group_by (each.type);
+		map<string,list<Building>> buildings_per_activity <- build_buildings_per_function(); 
 		
 		// Create in addition one Activity species for each meta-type of Activity as defined in the activities map
 		loop tb over: activities.keys { 
@@ -40,12 +48,12 @@ global {
 					} 
 				}
 				
-			}
+			} 
 		}
 		
-		if (csv_building_type_weights != nil) {
+		if file_exists(csv_building_type_weights_path) {
 			weight_bd_type_per_age_sex_class <- [];
-			matrix data <- matrix(csv_building_type_weights);
+			matrix data <- matrix(csv_file(csv_building_type_weights_path,",",string, false));
 			list<string> types;
 			loop i from: 3 to: data.columns - 1 {
 				types <<string(data[i,0]);
@@ -143,10 +151,10 @@ global {
 					
 					// Length of the activity
 					int l <- rnd(length.key,length.value);
-					int current_hour <- h+l;
+					int current_hour_ <- h+l;
 					if h+l>23 {
 						l <- l - (h + l - 23);
-						current_hour <- 23;
+						current_hour_ <- 23;
 					}
 					
 					// Skipped activities
@@ -160,33 +168,33 @@ global {
 					
 					// If there is no skipped activity, then return to previous activity
 					if empty(removed_activities) {
-						agenda_week[d][current_hour] <- current_act;
+						agenda_week[d][current_hour_] <- current_act;
 					} else if length(removed_activities) = 1 { 
 						// If one activity have been skipped, just move to it and carry on with normal agenda
-						agenda_week[d][current_hour] <- first(removed_activities.values);
+						agenda_week[d][current_hour_] <- first(removed_activities.values);
 					} else { // There is more than one activity skipped
 						// That contains last return home activity
 						if removed_activities contains_key end_day {
-							agenda_week[d][current_hour] <- staying_home[0]::[];
+							agenda_week[d][current_hour_] <- staying_home[0]::[];
 						} else {
 							// Fill available time with removed activities
-							int available_time <- agenda_week[d].keys[(agenda_week[d].keys index_of h + 1)]-current_hour;
+							int available_time <- agenda_week[d].keys[(agenda_week[d].keys index_of h + 1)]-current_hour_;
 							if available_time > 0 {
 								int total_time_removed <- last(removed_activities.keys) - first(removed_activities.keys);
 								map<Activity,pair<int,list<Individual>>> r_act <- removed_activities.keys 
 									as_map (removed_activities[each].key::(each::removed_activities[each].value));
 								if total_time_removed <= available_time {
 									loop a over:r_act.keys {
-										agenda_week[d][current_hour] <- a::r_act[a].value;
+										agenda_week[d][current_hour_] <- a::r_act[a].value;
 										if last(r_act.keys) != a {
-											current_hour <- current_hour + r_act[a].key - r_act[r_act.keys[r_act.keys index_of a + 1]].key;
+											current_hour_ <- current_hour_ + r_act[a].key - r_act[r_act.keys[r_act.keys index_of a + 1]].key;
 										} 
 									}
 								} else {
 									loop while:available_time > 0 {
 										Activity a <- any(r_act.keys where (r_act[each].key <= available_time));
 										if a = nil { a <- any(r_act.keys); }
-										agenda_week[d][current_hour] <- a::r_act[a].value;
+										agenda_week[d][current_hour_] <- a::r_act[a].value;
 										available_time <- available_time + r_act[a].key - r_act[r_act.keys[r_act.keys index_of a + 1]].key;
 										r_act[] >- a; 
 									}
@@ -203,7 +211,7 @@ global {
 
 species AbstractActivity virtual: true;
 
-species Activity parent: AbstractActivity {
+species Activity parent: AbstractActivity frequency: 0 {
 	list<string> types_of_building <- [];
 	map<string,list<Building>> buildings;
 	
@@ -212,10 +220,18 @@ species Activity parent: AbstractActivity {
 		if not empty(i.activity_fellows ) {
 			Individual fellow <- i.activity_fellows first_with (each.last_activity = self);
 			if (fellow!= nil) {
+				if BENCHMARK { 
+					bench["Activity."+ name+ ".find_target"] <- (bench contains_key ("Activity."+ name+ ".find_target") ? 
+					bench[("Activity."+ name+ ".find_target") ] : 0.0) + machine_time - start;
+				}
 				return [fellow.current_place::[]];
 			} 
 		}
 		if flip(proba_go_outside) {
+			if BENCHMARK { 
+					bench["Activity."+ name+ ".find_target"] <- (bench contains_key ("Activity."+ name+ ".find_target") ? 
+					bench[("Activity."+ name+ ".find_target") ] : 0.0) + machine_time - start;
+				}
 			return [the_outside::[]];
 		}
 		
@@ -223,16 +239,22 @@ species Activity parent: AbstractActivity {
 		list<Building> bds <- buildings[type];
 		
 		if (empty(bds)) { return [the_outside::[]]; }	
-		if BENCHMARK { 
-			bench["Activity.find_target"] <- (bench contains_key "Activity.find_target" ? 
-				bench["Activity.find_target"] : 0.0) + machine_time - start;
-		}
+	
 		switch choice_of_target_mode {
 			match closest {
 				return [bds closest_to i::[]];
 			}
 			match gravity {
-				return i.building_targets[self][type] as_map (each::[]);
+				list<Building> bdss <- i.building_targets[self][type] ;
+				if empty(bdss) {
+					bdss <- [bds closest_to i];
+				}
+				map<Building,list<Individual>> targets <-bdss as_map (each::[]);
+				if BENCHMARK { 
+					bench["Activity."+ name+ ".find_target"] <- (bench contains_key ("Activity."+ name+ ".find_target") ? 
+					bench[("Activity."+ name+ ".find_target") ] : 0.0) + machine_time - start;
+				}
+				return targets;
 			}
 			match random {
 				return (nb_candidates among bds) as_map(each::[]);

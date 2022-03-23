@@ -24,6 +24,7 @@ global {
 	float tol_triangulation <- 0.1; //tolerance for the triangulation 
 	float min_dist_obstacles_filtering <- 0.0;// minimal distance to obstacles to keep a path (float; if 0.0, no filtering),
 
+
 	geometry open_area;
 	geometry shape <- envelope(closed_walls_file);
 
@@ -43,6 +44,7 @@ global {
 			}
 		}
 		
+
 		// Create walls with doors this time, in order to compute pedestrian paths
 		ask Wall {
 			do die;
@@ -64,6 +66,7 @@ global {
 		save open_area type: shp to: output_dir + "open_area.shp";
 		save pedestrian_path collect each.free_space type: shp to: output_dir + "free_spaces.shp";
 	} 
+
 }
 
 species Wall {
@@ -104,6 +107,7 @@ experiment Generate type: gui {
 			graphics "shape"{
 				draw shape color: #grey;
 			}
+
 		}
 	}
 }

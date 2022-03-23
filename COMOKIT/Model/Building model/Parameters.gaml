@@ -18,6 +18,7 @@ global {
 	string building_dataset_path <- "";
 	string agenda_scenario <- "simple" among: ["simple", "school day"];
 	float arrival_time_interval <- 15 #mn;
+
 	date starting_date <- date([2020,4,6,5,30]);
 	date final_date <- date([2020,4,20,18,0]);
 	string density_scenario <- "distance" among: ["distance", "num_people_building", "num_people_room"]; //location of the desk
@@ -80,6 +81,7 @@ global {
 	bool display_infection_grid <- false parameter: "Display infection grid" category: "Visualization";
 	bool display_building_entrance <- false parameter: "Display building entrance" category: "Visualization";
 
+
 	bool a_boolean_to_disable_parameters <- false;
 	
 	obj_file pple_walk<- obj_file("../includes/people.obj", 90::{-1, 0, 0});
@@ -99,6 +101,7 @@ global {
 	float P_pedestrian_consideration_distance <- 3.0;
 	float P_minimal_distance <- 0.0;
 	float P_tolerance_target <- 0.2;
+
 	bool P_use_geometry_target <- true;
 
 	float P_A_pedestrian_SFM  <- 0.16;
