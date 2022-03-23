@@ -72,11 +72,11 @@ global {
 //	float nb_step_for_one_day <- #day / 1#s update: #day / 1#s;
 
 	//DISPLAY PARAMETERS
-	bool display_pedestrian_path <- true parameter: "Display pedestrian path" category: "Visualization";
+	bool display_pedestrian_path <- false parameter: "Display pedestrian path" category: "Visualization";
 	bool display_free_space <- false parameter: "Display free space" category: "Visualization";
 	bool display_desk <- false parameter: "Display desks" category: "Visualization";
 	bool display_room_entrance <- false parameter: "Display room entrance" category: "Visualization";
-	bool display_room_status <- false parameter: "Display room status" category: "Visualization";
+	bool display_room_status <- true parameter: "Display room status" category: "Visualization";
 	bool display_infection_grid <- false parameter: "Display infection grid" category: "Visualization";
 	bool display_building_entrance <- false parameter: "Display building entrance" category: "Visualization";
 
@@ -108,4 +108,9 @@ global {
 	float P_relaxion_SFM <- 0.5;
 	float P_gama_SFM <- 0.35;
 	float P_lambda_SFM <- 0.1;
+	
+	//FLOOR RELEVANT PARAMETER
+	int nb_floor <- 2;
+	list<bool> show_floor <- [true, false, true, true, true, true, true, true]
+							parameter: "which floor show" category: "Visualization";
 }

@@ -43,7 +43,7 @@ species BuildingActivity virtual: true {
 
 species ActivityLeaveBuilding parent: BuildingActivity {
 	pair<Room, point> get_destination(BuildingIndividual p) {
-		Room r <- BuildingEntrance closest_to p;
+		Room r <- (BuildingEntrance where (each.floor = p.current_floor)) closest_to p;
 		point pt <- r.location;
 		return r::pt; 
 	}
@@ -94,7 +94,7 @@ species ActivityGoToMeeting parent: BuildingActivity {
 
 species ActivityGoToInjecting parent: BuildingActivity{
 	pair<Room, point> get_destination(BuildingIndividual p) {
-		Room r <- first(Room where (each.type = INJECT));
+		Room r <- any(Room where (each.type = INJECT));
 		point pt <- any_location_in(r);
 		return r::pt; 
 	}
@@ -102,7 +102,7 @@ species ActivityGoToInjecting parent: BuildingActivity{
 
 species ActivityGoToMinorOperation parent: BuildingActivity{
 	pair<Room, point> get_destination(BuildingIndividual p) {
-		Room r <- first(Room where (each.type = MINOPERATION));
+		Room r <- any(Room where (each.type = MINOPERATION));
 		point pt <- any_location_in(r);
 		return r::pt; 
 	}
@@ -112,7 +112,7 @@ species ActivityGoToMinorOperation parent: BuildingActivity{
 
 species ActivityGetMedicine parent: BuildingActivity{
 	pair<Room, point> get_destination(BuildingIndividual p){
-		Room r <- first(Room where (each.type = MEDICINE));
+		Room r <- (Room where (each.type = MEDICINE)) closest_to p;
 		point pt <- any_location_in(r);
 		return r::pt;
 	}
@@ -147,7 +147,14 @@ species ActivityWanderInWardI parent: BuildingActivity{
 }
 
 // Activities of outpatients
-
+species ActivityMeetDoctor parent: BuildingActivity{
+	pair<Room, point> get_destination(BuildingIndividual p){
+		Room r <- Outpatients(p).doc.current_room;
+		geometry area_around_doc <- circle(rnd(1#m, 2#m), Outpatients(p).doc.location);
+		point pt <- any_location_in(inter(r, area_around_doc));
+		return r::pt;
+	}
+}
 // Activities of caregivers
 species ActivityTakeCare parent: BuildingActivity{
 	pair<Room, point> get_destination(BuildingIndividual p){
@@ -160,9 +167,9 @@ species ActivityTakeCare parent: BuildingActivity{
 
 species ActivityWait parent: BuildingActivity{
 	pair<Room, point> get_destination(BuildingIndividual p){
-		Room r <- first(Room where (each.type = HALL));
+		Room r <- first(Room where (each.type = HALL and each.floor = p.current_floor));
 		point pt;
-		if(!empty(BenchWait where (each.is_occupied = false))){
+		if(!empty(BenchWait where (each.is_occupied = false and each.floor = p.current_floor))){
 			p.benchw <- any(BenchWait where (each.is_occupied = false));
 			p.benchw.is_occupied <- true;
 			pt <- p.benchw.location;
@@ -186,13 +193,7 @@ species ActivityWanderInWardC parent: BuildingActivity{
 
 // Activities of interns
 
-species ActivityFollow parent: BuildingActivity{
-	pair<Room, point> get_destination(BuildingIndividual p){
-		Room r <- p.current_room;
-		point pt <- p.location;
-		return r::pt;
-	}
-}
+
 
 
 species BuildingSanitation parent: BuildingActivity {

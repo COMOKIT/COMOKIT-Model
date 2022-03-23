@@ -23,6 +23,7 @@ import "../../Entities/Individual.gaml"
 
 
 species BuildingIndividual parent: AbstractIndividual schedules: shuffle(BuildingIndividual where (each.clinical_status != dead)) skills: [pedestrian] {
+ 	int current_floor <- 0;
  	Room working_place;
 	PlaceInRoom working_desk;
 	BenchWait benchw;
@@ -53,6 +54,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 	point target_desk;
 	float wandering_time_ag;
 	bool finished_goto <- false;
+	bool to_another_floor <- false;
 	
 	init {
 		is_outside <- true;
@@ -139,7 +141,8 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		if allow_direct_transmission {
 			float proba <- contact_rate*reduction_factor;
 			//If the Individual is at home, perform transmission on the household level with a higher factor
-			loop succesful_contact over: (BuildingIndividual at_distance infectionDistance) where (each.state = susceptible) {
+			loop succesful_contact over: (BuildingIndividual at_distance infectionDistance) where 
+											((each.state = susceptible) and (each.current_floor = self.current_floor)) {
 				geometry line <- line([self,succesful_contact]);
 				if empty(Wall overlapping line) {
 					if not empty(Separator overlapping line) {
@@ -185,10 +188,6 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		if BENCHMARK {bench["Individual.update_epidemiology"] <- bench["Individual.update_epidemiology"] + machine_time - start;}
 	}
 
-	reflex in_room_behavior when: !is_outside and species(dst_room) != BuildingEntrance and (location overlaps dst_room) {
-		
-	}
-
 	reflex sanitation_behavior when: using_sanitation {
 		sanitation_time <- sanitation_time + step;
 		if (sanitation_time > sanitation_usage_duration) {
@@ -227,7 +226,14 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 //			target <- first(possible_entrances).location;
 //		}
 		
-			target <- dst_point.location;
+		if(current_floor != dst_room.floor){
+			to_another_floor <- true;
+			target <- ((BuildingEntrance where (each.floor = current_floor)) closest_to self).location
+													+ point([0, 0, current_floor*default_ceiling_height]);
+		}
+		else{	
+			target <- dst_point.location + point([0, 0, dst_room.floor*default_ceiling_height - dst_point.location.z]);
+		}
 		
 		
 //		go_oustide_room <- true;
@@ -243,39 +249,71 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 	reflex goto_activity when: target != nil and not in_line {
 //		bool arrived <- false;
 //		point prev_loc <- copy(location);
-		if (location distance_to target > P_tolerance_target){
-			if(current_room = dst_room and final_waypoint = nil){
-				do goto target: target;
+//		check floor, if current_floor = target floor, go straight to target, if not, go through the entrance
+		if(to_another_floor){
+			if (location distance_to target > P_tolerance_target){
+				if(current_room = dst_room and final_waypoint = nil){
+					do goto target: target;
+				}
+				else{
+					if (current_room != dst_room and final_waypoint = nil){
+						do compute_virtual_path pedestrian_graph: pedestrian_network target: target;
+					}
+					if(final_waypoint != nil){
+						do walk;
+					}
+				}
 			}
 			else{
-				if (current_room != dst_room and final_waypoint = nil){
-					do compute_virtual_path pedestrian_graph: pedestrian_network target: target;
+				to_another_floor<- false;
+				target <- dst_point.location + point([0, 0, dst_room.floor*default_ceiling_height]);
+				location <- location + point([0, 0, dst_room.floor*default_ceiling_height - location.z]);
+				is_outside <- false;
+				current_floor <- dst_room.floor;
+				if(species(dst_room) = BuildingEntrance){
+					is_outside <- true;
 				}
-				if(final_waypoint != nil){
-					do walk;
-				}
+				do release_path;
 			}
 		}
 		else{
-//			write(self);
-			target <- nil;
-			if(species(dst_room) = BuildingEntrance){
-				is_outside <- true;
+			if (location distance_to target > P_tolerance_target){
+				if(current_room = dst_room and final_waypoint = nil){
+					do goto target: target;
+				}
+				else{
+					if (current_room != dst_room and final_waypoint = nil){
+						do compute_virtual_path pedestrian_graph: pedestrian_network target: target;
+					}
+					if(final_waypoint != nil){
+						do walk;
+					}
+				}
+			}
+			else{
+				target <- nil;
+				if(species(dst_room) = BuildingEntrance){
+					is_outside <- true;
+				}
+				do release_path;
 			}
 		}
+		
 		if(dst_room != nil and not(location overlaps current_room) and current_room != dst_room){
 			if(current_room!= nil){
 				current_room.people_inside >> self;
 			}
-			current_room <- empty(Room where (each overlaps location))? nil:first(Room where (each overlaps location));
+			current_room <- empty(Room where (each overlaps location and each.floor = current_floor))
+							?nil:first(Room where (each overlaps location and each.floor = current_floor));
 		}
-		if(location overlaps dst_room){
+		if(location overlaps dst_room and current_floor = dst_room.floor){
 			current_room <- dst_room;
 			if(!(dst_room.people_inside contains self)){
 				dst_room.people_inside << self;
 			}
 			do release_path;
 		}
+		
 		
 		
 // goto with queue behavior
@@ -390,7 +428,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
  	}
  	
  	aspect default {
-		if(!is_outside){
+		if(!is_outside and show_floor[current_floor]){
 
 			draw pple_walk size: people_size  at: location + {0, 0, 0.7} rotate: heading - 90 color: color;
 			if(is_infected){draw circle(0.7)  at: location + {0, 0, 0.7} color: get_color();}

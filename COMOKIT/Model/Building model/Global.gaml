@@ -23,18 +23,26 @@ global {
 	species<BuildingIndividual> building_individual_species <- BuildingIndividual; // by default
 	container<BuildingIndividual> all_building_individuals -> {container<BuildingIndividual>(building_individual_species.population+(building_individual_species.subspecies accumulate each.population))};
 	
-	shape_file rooms_shape_file <- shape_file("../includes/rooms.shp");
-	shape_file entrances_shape_file <- shape_file("../includes/entrances.shp");
-	shape_file walls_shape_file <- shape_file("../includes/walls.shp");
-	shape_file pedestrian_path_shape_file <- shape_file("../generated/pedestrian_paths.shp");
-	shape_file free_spaces_shape_file <- shape_file("../generated/free_spaces.shp");
-	shape_file open_area_shape_file <- shape_file("../generated/open_area.shp");
-	// beds and benches
-	shape_file beds_shape_file <- shape_file("../includes/beds.shp");
-	shape_file benches_shape_file <- shape_file("../includes/benches.shp");
+	list<shape_file> rooms_shape_file;
+	list<shape_file> entrances_shape_file;
+	list<shape_file> walls_shape_file;
+	list<shape_file> pedestrian_path_shape_file;
+	list<shape_file> free_spaces_shape_file;
+	list<shape_file> open_area_shape_file;
+	list<shape_file> beds_shape_file;
+	list<shape_file> benches_shape_file;
+	shape_file rooms_shapefile <- shape_file("../includes/rooms.shp");
+//	shape_file entrances_shape_file <- shape_file("../includes/entrances.shp");
+	shape_file walls_shapefile <- shape_file("../includes/walls.shp");
+	shape_file pedestrian_path_shapefile <- shape_file("../generated/pedestrian_paths.shp");
+//	shape_file free_spaces_shape_file <- shape_file("../generated/free_spaces.shp");
+//	shape_file open_area_shape_file <- shape_file("../generated/open_area.shp");
+//	// beds and benches
+//	shape_file beds_shape_file <- shape_file("../includes/beds.shp");
+//	shape_file benches_shape_file <- shape_file("../includes/benches.shp");
 
 	
-	geometry shape <- envelope(envelope( pedestrian_path_shape_file) + envelope(walls_shape_file) + envelope(rooms_shape_file));
+	geometry shape <- envelope(envelope(pedestrian_path_shapefile) + envelope(walls_shapefile) + envelope(rooms_shapefile));
 	graph pedestrian_network;
 	list<Room> available_offices;
 	
@@ -48,7 +56,8 @@ global {
 	
 	container<Room> rooms_list -> {container<Room>(Room.population+(Room.subspecies accumulate each.population))};
 			
-	geometry open_area;
+	list<geometry> open_area;
+	bool morefloorfile <- false;
 	
 	init {
 		// These will be overridden if they are put in ./Parameters.gaml
@@ -57,21 +66,34 @@ global {
 		step <- 1#s;
 		nb_step_for_one_day <- #day / step;
 		seed <- 25.0;
-
+		
+		if(!morefloorfile){
+			loop i from: 0 to: nb_floor - 1{
+				rooms_shape_file << shape_file("../includes/rooms.shp");
+				entrances_shape_file << shape_file("../includes/entrances.shp");
+				walls_shape_file << shape_file("../includes/walls.shp");
+				pedestrian_path_shape_file << shape_file("../generated/pedestrian_paths.shp");
+				free_spaces_shape_file << shape_file("../generated/free_spaces.shp");
+				open_area_shape_file << shape_file("../generated/open_area.shp");
+				beds_shape_file << shape_file("../includes/beds.shp");
+				benches_shape_file << shape_file("../includes/benches.shp");
+			}
+		}
+		else{
+			//add each shape_file to the list
+		}
+		
 		create outside;
 		the_outside <- first(outside);
 		do init_epidemiological_parameters;
-		open_area <- first(open_area_shape_file.contents);
-		do create_elements_from_shapefile;
-		create PedestrianPath from: pedestrian_path_shape_file {
-			list<geometry> fs <- free_spaces_shape_file overlapping self;
-			fs <- fs where (each covers shape); 
-			free_space <- fs with_min_of (each.location distance_to location);
-			// Workaround for a NPE in build_intersection_areas
-			if free_space = nil {
-				free_space <- shape + P_shoulder_length;
-			}
+		loop i from: 0 to: nb_floor - 1{
+			open_area << first(open_area_shape_file[i].contents);
 		}
+		
+		loop i from: 0 to: nb_floor - 1{
+			do create_elements_from_shapefile(i);
+		}
+		
 		pedestrian_network <- as_edge_graph(PedestrianPath);
 		
 		ask PedestrianPath {
@@ -80,7 +102,7 @@ global {
 		
 		ask Room sort_by (-1 * each.shape.area){
 			ask(Room overlapping self) {
-				if (type = myself.type and shape.area>0) {
+				if (type = myself.type and shape.area>0 and floor = myself.floor) {
 					if ((self inter myself).area / shape.area) > 0.8 {
 						do die;	
 					} else {
@@ -93,7 +115,7 @@ global {
 	
 		ask rooms_list{
 			isVentilated <- flip(ventilation_proba);
-			list<Wall> ws <- Wall overlapping self;
+			list<Wall> ws <- Wall where (each.floor = floor) overlapping self;
 			loop w over: ws {
 				if (w covers self) {
 					w.shape <- w.shape - (self + 0.5);
@@ -127,12 +149,12 @@ global {
 		}
 		
 		ask Wall {
-			if not empty((rooms_list) inside self ) {
+			if not empty((rooms_list where (each.floor = floor)) inside self ) {
 				shape <- shape.contour;
 			}
 		}
 		ask Room {
-			list<Wall> ws <- Wall overlapping self;
+			list<Wall> ws <- Wall overlapping self where (each.floor = floor);
 			loop w over: ws {
 				if w covers self {
 					do die;
@@ -146,7 +168,7 @@ global {
 			loop while: contour = nil {
 				cpt <- cpt + 1;
 				contour <- copy(shape.contour);
-				ask Wall at_distance 2.0 {
+				ask Wall where (each.floor = floor) at_distance 2.0 {
 					contour <- contour - (shape +dist);
 				}
 				if cpt < limit_cpt_for_entrance_room_creation {
@@ -163,6 +185,7 @@ global {
 				list<point> ents <- points_on (contour, 1.7);
 				loop pt over:ents {
 					create RoomEntrance with: [location::pt,my_room::self] {
+						location <- location + point([0, 0, myself.floor*default_ceiling_height - location.z]);
 						myself.entrances << self;
 					}
 				
@@ -219,27 +242,51 @@ global {
 			state <- init_state;
 		}
 	}
-
-	action create_elements_from_shapefile {
-		create Wall from: walls_shape_file;
-		int i <- 0;
-		create Room from: rooms_shape_file;		
+	
+	action create_elements_from_shapefile (int fl){
+		create Wall from: walls_shape_file[fl]{
+			floor <- fl;
+			location <- location + point([0, 0, floor*default_ceiling_height]);
+		}
+		create Room from: rooms_shape_file[fl]{
+			floor <- fl;
+			location <- location + point([0, 0, floor*default_ceiling_height]);
+		}		
 		ask Room {
 			if type = multi_act {
 				create CommonArea with: [shape::shape, type::type];
 				do die;
 			}
 		}
-		create BuildingEntrance from: entrances_shape_file with: (type:entrance) {
+		create BuildingEntrance from: entrances_shape_file[fl] with: (type:entrance) {
+			floor <- fl;
+			location <- location + point([0, 0, floor*default_ceiling_height]);
 			if shape.area = 0.0 {
 				shape <- shape + P_shoulder_length;
 			}
 		}
 		//create bed and bench
-		create Bed from: beds_shape_file;
-		create BenchWait from: benches_shape_file;
+		create Bed from: beds_shape_file[fl]{
+			floor <- fl;
+			location <- location + point([0, 0, floor*default_ceiling_height]);
+		}
+		create BenchWait from: benches_shape_file[fl]{
+			floor <- fl;
+			location <- location + point([0, 0, floor*default_ceiling_height]);
+		}
 		ask Bed{
-			room <- first(Room where (each.shape overlaps self.location));
+			room <- first(Room where (each.shape overlaps self.location and each.floor = self.floor));
+		}
+		create PedestrianPath from: pedestrian_path_shape_file[fl] {
+			floor <- fl;
+			location <- location + point([0, 0, floor*default_ceiling_height]);
+			list<geometry> fs <- free_spaces_shape_file[fl] overlapping self;
+			fs <- fs where (each covers shape); 
+			free_space <- fs with_min_of (each.location distance_to location);
+			// Workaround for a NPE in build_intersection_areas
+			if free_space = nil {
+				free_space <- shape + P_shoulder_length;
+			}
 		}
 	}
 

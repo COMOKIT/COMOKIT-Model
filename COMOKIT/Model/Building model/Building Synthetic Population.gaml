@@ -18,10 +18,10 @@ import "Entities/Hospital Individuals.gaml"
 
 global {
 	action create_recurring_people {
-		create Doctor number: 9;
+		create Doctor number: 10;
 		create Nurse number: 16;
 		create Staff number: 3;
 		create Inpatient number: 38;
-		create Caregivers number: 52;
+		create Caregivers number: 29;
 	}
 }
