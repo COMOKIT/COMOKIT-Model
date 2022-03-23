@@ -198,19 +198,15 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 			waiting_sanitation <- false;
 			dst_room.people_inside >> self;
 		}
-	
+	}
 
-
-	// Setup targets when it's time to move
-
+	reflex define_activity when: not waiting_sanitation and 
+								not empty(current_agenda_week) and 
+								(after(current_agenda_week.keys[0])) {
+		if(target_place != nil and (has_place) ) {dst_room.available_places << target_place;}
 		string n <- current_activity = nil ? "" : copy(current_activity.name);
 		Room prev_tr <- copy(dst_room);
 		do release_path;
-		if(species(current_activity) = ActivityWait){
-			benchw.is_occupied <- false;
-			benchw <- nil;
-		}
-		
 
 		// Pop the next activity out of the agenda and get the new destination
 		current_activity <- current_agenda_week.values[0];
@@ -224,32 +220,18 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		if (empty (possible_entrances)) {
 			possible_entrances <- dst_room.entrances;
 		}
-//		if(current_room != dst_room){
-//			target <- first(possible_entrances).location;
-//		}
-		
-		if(current_floor != dst_room.floor){
-			to_another_floor <- true;
-			target <- ((BuildingEntrance where (each.floor = current_floor)) closest_to self).location
-													+ point([0, 0, current_floor*default_ceiling_height]);
-		}
-		else{	
-			target <- dst_point.location + point([0, 0, dst_room.floor*default_ceiling_height - dst_point.location.z]);
-		}
-		
-		
+		target <- dst_point.location;
 //		go_oustide_room <- true;
 		is_outside <- false;
 //		goto_entrance <- false;
 //		target_place <- nil;
 //		finished_goto <- false;
-
 		if (species(current_activity) = BuildingSanitation) {
 			waiting_sanitation <- true;
 		}
 	}
-	
 
+		
 
 	reflex goto_activity when: target != nil and not in_line {
 //		bool arrived <- false;
