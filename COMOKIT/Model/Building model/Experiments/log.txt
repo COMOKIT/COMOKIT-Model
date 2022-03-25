@@ -1,1 +1,0 @@
-[Global.gaml] Init epidemiological global parameters ---
