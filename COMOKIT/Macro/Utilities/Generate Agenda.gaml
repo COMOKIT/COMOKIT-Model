@@ -1,17 +1,18 @@
 /**
-* Name: GenerateAgenda
-* Based on the internal skeleton template. 
+* Name: NewModel
+* Based on the internal empty template. 
 * Author: admin_ptaillandie
 * Tags: 
 */
 
+
 model GenerateAgenda
 
+import "../Models/Functions.gaml"
+
+import "../Models/Parameters.gaml"
+
 import "../../Core/Models/Parameters.gaml"
-
-import "../Model/Parameters.gaml"
-
-import "../Model/Functions.gaml"
 
 
 
@@ -1412,3 +1413,4 @@ experiment GenerateAgenda type: gui {
 		}
 	}
 }
+

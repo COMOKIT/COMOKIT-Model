@@ -13,9 +13,11 @@ model Parameters
 import "Constants.gaml"
 
 global {
+	
+	string dataset_path <- "../Datasets/Danang Hospital/";
+	
 	//SCENARIO
 	list<string> workplace_layer <- [classe];
-	string building_dataset_path <- "";
 	string agenda_scenario <- "simple" among: ["simple", "school day"];
 	float arrival_time_interval <- 15 #mn;
 

@@ -13,12 +13,12 @@
 
 model CoVid19
 
-import "Constants.gaml"
+import "Constants.gaml" 
 
 global {
 		// The case study name and dataset path variable to be used in models
 	string case_study_folder_name; // The case study folder
-	string datasets_folder_path; // The path from root project to the data set folder (can contains several case studies)
+	string dataset_path; // The path from root project to the data set folder (can contains several case studies)
 	// Default dataset management
 	
 	list<string> EXCLUDED_CASE_STUDY_FOLDERS_NAME <- ["Test Generate GIS Data"] const:true;
@@ -335,13 +335,13 @@ global {
 	string build_dataset_path(string relative_path <- experiment.project_path) {
 		string the_path <- relative_path;
 		string default <- the_path+"/"+DEFAULT_DATASETS_FOLDER_NAME+"/"+DEFAULT_CASE_STUDY_FOLDER_NAME+"/";
-		if(datasets_folder_path=nil and case_study_folder_name=nil) {return default;}
-		if(datasets_folder_path=nil){
+		if(dataset_path=nil and case_study_folder_name=nil) {return default;}
+		if(dataset_path=nil){
 			the_path <- the_path+DEFAULT_DATASETS_FOLDER_NAME+"/";
 			the_path <- the_path + (folder_exists(the_path+case_study_folder_name) ? case_study_folder_name : DEFAULT_CASE_STUDY_FOLDER_NAME) + "/";
 		} else {
-			the_path <- (folder_exists(datasets_folder_path) ? datasets_folder_path : 
-				(folder_exists(the_path+datasets_folder_path) ? the_path+datasets_folder_path : the_path+"/"+DEFAULT_DATASETS_FOLDER_NAME)
+			the_path <- (folder_exists(dataset_path) ? dataset_path : 
+				(folder_exists(the_path+dataset_path) ? the_path+dataset_path : the_path+"/"+DEFAULT_DATASETS_FOLDER_NAME)
 			) + "/";
 			list<string> case_studies <- folder(the_path).contents; 
 			if (case_studies contains case_study_folder_name) { the_path <- the_path+(last(case_study_folder_name)="/"?case_study_folder_name:case_study_folder_name+"/"); }

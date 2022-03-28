@@ -21,6 +21,7 @@ global {
 		create Staff number: 3;
 		create Inpatient number: 38;
 		create Caregivers number: 29;
+		all_individuals <- agents of_generic_species BuildingIndividual;
 
 	}
 }

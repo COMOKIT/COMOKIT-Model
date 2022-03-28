@@ -1,0 +1,35 @@
+/***
+* Name: $TITLE$
+* $DESC$
+* Based on a template model, part of COMOKIT. Its goal is to create simple experiments on a specific policy. 
+* Release 1.0, May 2020. see http://comokit.org for support and updates
+* Author: $AUTHOR$
+* Tags: covid19,epidemiology
+***/
+
+model $TITLE$ 
+
+import "All COMOKIT Micro.gaml"
+
+global {
+	
+	// Parameter file folder
+	// by default parameter files are placed in Parameters/ folder of COMOKIT
+	// if you decide to redefine the path to that folder identify the place COMOKIT can find your parameter files
+	string parameters_folder_path <- "../../COMOKIT/Core/Parameters/";
+	
+	string dataset_path <- "../Datasets/Case Study/"; // Relative path to the folder containing the boundary.shp, buildings.shp, satellite.png, etc. datafiles. 
+
+}
+
+experiment $TITLE$ parent: "Abstract Experiment" {
+	
+	output {
+		
+		// Graphical display showing the geographical representation of the model 
+		display "Main" parent: map {}
+		
+		// Setup a chart to follow the number of infectious cases 
+		display "Plot" parent: states_evolution_chart {}		
+	}
+}

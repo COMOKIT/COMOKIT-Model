@@ -9,9 +9,9 @@
 ******************************************************************/
 model CoVid19
 
-import "Base Experiment.gaml"
+import "Abstract Experiment.gaml"
 
-experiment main type: gui parent: AbstractExperiment{
+experiment main type: gui parent: "Abstract Experiment"{
 	
 	action _init_
 	{   

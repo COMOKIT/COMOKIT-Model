@@ -35,12 +35,12 @@ global {
 	list<shape_file> open_area_shape_file;
 	list<shape_file> beds_shape_file;
 	list<shape_file> benches_shape_file;
-	shape_file pedestrian_paths0_shape_file <- shape_file("../Datasets/Danang Hospital/pedestrian_paths.shp");
+	shape_file pedestrian_paths0_shape_file <- shape_file(dataset_path + "pedestrian_paths.shp");
 
-	shape_file rooms_shapefile <- shape_file("../Datasets/Danang Hospital/rooms.shp");
+	shape_file rooms_shapefile <- shape_file(dataset_path + "rooms.shp");
 //	shape_file entrances_shape_file <- shape_file("../includes/entrances.shp");
-	shape_file walls_shapefile <- shape_file("../Datasets/Danang Hospital/walls.shp");
-	shape_file pedestrian_path_shapefile <- shape_file("../Datasets/Danang Hospital/pedestrian_paths.shp");
+	shape_file walls_shapefile <- shape_file(dataset_path + "walls.shp");
+	shape_file pedestrian_path_shapefile <- shape_file(dataset_path + "pedestrian_paths.shp");
 //	shape_file free_spaces_shape_file <- shape_file("../generated/free_spaces.shp");
 //	shape_file open_area_shape_file <- shape_file("../generated/open_area.shp");
 //	// beds and benches
@@ -76,14 +76,14 @@ global {
 		
 		if(!morefloorfile){
 			loop i from: 0 to: nb_floor - 1{
-				rooms_shape_file << shape_file("../Datasets/Danang Hospital/rooms.shp");
-				entrances_shape_file << shape_file("../Datasets/Danang Hospital/entrances.shp");
-				walls_shape_file << shape_file("../Datasets/Danang Hospital/walls.shp");
-				pedestrian_path_shape_file << shape_file("../Datasets/Danang Hospital/pedestrian_paths.shp");
-				free_spaces_shape_file << shape_file("../Datasets/Danang Hospital/free_spaces.shp");
-				open_area_shape_file << shape_file("../Datasets/Danang Hospital/open_area.shp");
-				beds_shape_file << shape_file("../Datasets/Danang Hospital/beds.shp");
-				benches_shape_file << shape_file("../Datasets/Danang Hospital/benches.shp");
+				rooms_shape_file << shape_file(dataset_path + "rooms.shp");
+				entrances_shape_file << shape_file(dataset_path + "entrances.shp");
+				walls_shape_file << shape_file(dataset_path + "walls.shp");
+				pedestrian_path_shape_file << shape_file(dataset_path + "pedestrian_paths.shp");
+				free_spaces_shape_file << shape_file(dataset_path + "free_spaces.shp");
+				open_area_shape_file << shape_file(dataset_path + "open_area.shp");
+				beds_shape_file << shape_file(dataset_path + "beds.shp");
+				benches_shape_file << shape_file(dataset_path + "benches.shp");
 			}
 		}
 		else{
