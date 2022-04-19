@@ -10,7 +10,7 @@ model HospitalIndividuals
 
 import "./BuildingIndividual.gaml"
 
-species Doctor parent: BuildingIndividual {
+/*species Doctor parent: BuildingIndividual {
 	rgb color <- #white;
 	bool headdoc <- false;
 	bool nightshift <- false;
@@ -514,5 +514,5 @@ species Interns parent: BuildingIndividual{
 		return agenda;
 	}
 }
-
+*/
 

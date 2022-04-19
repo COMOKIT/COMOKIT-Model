@@ -16,36 +16,13 @@ global {
 	
 	string dataset_path <- "../Datasets/Danang Hospital/";
 	
-	//SCENARIO
-	list<string> workplace_layer <- [classe];
-	string agenda_scenario <- "simple" among: ["simple", "school day"];
-	float arrival_time_interval <- 15 #mn;
-
-	date starting_date <- date([2020,4,6,5,30]);
-	date final_date <- date([2020,4,20,18,0]);
-	string density_scenario <- "distance" among: ["distance", "num_people_building", "num_people_room"]; //location of the desk
-	int num_people_per_building <- 100;  //if density_scenario = num_people_building
-	int num_people_per_room <- 1; //if density_scenario = num_people_room
-	float distance_people <- 1.0; //if density_scenario = distance
-
-	//COMMON AREA BEHAVIOR
-	float proba_wander <- 0.003;
-	float wandering_time <- 1 #mn;
-	float proba_change_desk <- 0.003;
-
-	//QUEING PARAMETERS
-	bool queueing <- false;
-	float distance_queue <- 1#m;
-	float waiting_time_entrance <- 10#s;
-
-	//SANITATION PARAMETERS
-	bool use_sanitation <- false;
-	float proba_using_before_work <- 0.7;
-	float proba_using_after_work <- 0.3;
-	int nb_people_per_sanitation <- 2;
-	float sanitation_usage_duration <- 10 #s;
-
+	date starting_date <- date([2020,4,6]);
+	date final_date <- date([2020,4,20]);
+	float step_duration <- 1#mn;
+		
 	//EPIDEMIOLOGIC PARAMETERS
+	string variant <- DELTA; 
+	
 	int initial_nb_infected<-1;
 	string init_state <- "symptomatic";
 	float infectionDistance <- 2#m;
@@ -69,7 +46,6 @@ global {
 	float ventilation_proba <- 0.0;
 
 	//SIMULATION PARAMETERS
-//	float step <- 1#s update: 1#s;
 	bool parallel <- false; // use parallel computation
 	int limit_cpt_for_entrance_room_creation <- 10; //dark parameter - no need to change this value
 //	float nb_step_for_one_day <- #day / 1#s update: #day / 1#s;
@@ -87,10 +63,14 @@ global {
 	bool a_boolean_to_disable_parameters <- false;
 	
 	
+	float density_max_admi <- 3.0;// 5.4;
+	float min_density_threshold <- #max_float;
+	float lambda <- 1.913 ;
+	float lane_width <- 3.0;
 	obj_file pple_walk<- obj_file("../Utilities/people.obj", 90::{-1, 0, 0});
 	obj_file pple_lie <- obj_file("../Utilities/people.obj", 0::{-1, 0, 0});
 	float people_size <- 1.7;
-	
+	float udpate_path_weights_every	<- 5#mn;
 	// Utils variable for the look and feel of simulation GUI
 	font default <- font("Helvetica", 18, #bold) const: true;
 	float coeff_visu_virus_load_cell <- 100.0;

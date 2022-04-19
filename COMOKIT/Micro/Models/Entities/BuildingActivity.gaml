@@ -21,16 +21,9 @@ import "Building Spatial Entities.gaml"
 
 global {
 	action create_activities {
-		map<string, list<Room>> rooms_type <- Room group_by each.type;
-		sanitation_rooms <- rooms_type[sanitation];
-		if (use_sanitation and not empty(sanitation_rooms)) {
-			create BuildingSanitation with:[activity_places::sanitation_rooms];
-		}
-
 		loop i over: BuildingActivity.subspecies{
 			create i;
 		}
-
 	}
 }
 
@@ -38,18 +31,38 @@ global {
 species BuildingActivity virtual: true {
 	list<Room> activity_places;
 	
-	pair<Room, point> get_destination(BuildingIndividual p) virtual: true;
+	map get_destination(BuildingIndividual p) virtual: true;
+	
 }
 
 
-species ActivityLeaveBuilding parent: BuildingActivity {
-	pair<Room, point> get_destination(BuildingIndividual p) {
-		Room r <- (BuildingEntrance where (each.floor = p.current_floor)) closest_to p;
-		point pt <- r.location;
-		return r::pt; 
+species ActivityLeaveArea parent: BuildingActivity {
+	map get_destination(BuildingIndividual p) {
+		map results;
+		AreaEntry ea <- AreaEntry closest_to p;
+		if (ea = nil) {
+			ea <- AreaEntry with_min_of (each distance_to self);
+		}
+		results[key_room] <- ea;
+		return results; 
 	}
 }
 
+species ActivityGotoRoom parent: BuildingActivity {
+	
+	map get_destination(BuildingIndividual p) {
+		map results;
+		Room a_room <- choose_room(p);
+		results[key_room] <- a_room;
+		return results; 
+	}
+	
+	Room choose_room(BuildingIndividual p) {
+		return one_of(Room);
+	}
+}
+
+/*
 species ActivityWanderAround parent: BuildingActivity{
 	pair<Room, point> get_destination(BuildingIndividual p){
 		Room r <- first(Room where (each.shape overlaps p.location));
@@ -190,24 +203,4 @@ species ActivityWanderInWardC parent: BuildingActivity{
 		return r::pt;
 	}
 }
-
-
-
-// Activities of interns
-
-
-
-
-
-species BuildingSanitation parent: BuildingActivity {
-	pair<Room, point> get_destination(BuildingIndividual p) {
-		Room r;
-		if flip(0.3) {
-			r <- shuffle(activity_places) with_min_of length(first(each.entrances).people_waiting);
-		} else {
-			r <- activity_places closest_to p;
-		}
-		point pt <- any_location_in(r);
-		return r::pt;
-	}
-}
+*/

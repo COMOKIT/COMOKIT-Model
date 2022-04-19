@@ -13,47 +13,29 @@
 
 model CoVid19
 
-import "../Entities/BuildingIndividual.gaml"
 import "../Entities/Hospital Individuals.gaml"
-import "../Entities/Building Spatial Entities.gaml"
- 
-import "../Parameters.gaml"
 
 
 experiment "Abstract Experiment" type:gui autorun:false virtual: true{
 		
 	output{
-		layout #split;
+		layout #split; 
 	  	
 	  	
-		display map background: #black type: opengl axes: false virtual: true  {
-			species Room;
-//		    species BuildingEntrance refresh: false;
-//			species RoomEntrance refresh: false;
-//			species CommonArea;
-//			species RoomEntrance aspect: queuing;
-//			species unit_cell;
-			species Wall;
-//			species PedestrianPath aspect: free_space_aspect transparency: 0.5;
-//			species PedestrianPath;
-//			species Separator;
-			species Bed;
-			species BenchWait;
+		display map type: opengl axes: false{
+			species Building ;
+			//species Room;
+			//species Elevator;
+			//species Wall;
+			//species BuildingEntry;
+			//species AreaEntry;
+			
+			//species OpenArea refresh: false;
+			//species PedestrianPath refresh: false;
 			species BuildingIndividual;
-//			species outside;
-			species Doctor;
-			species Nurse;
-			species Staff;
-			species Inpatient;
-			species Caregivers;
-
-		 	graphics "date" {
-				draw string(current_date, "dd-MM-yyyy HH:mm:ss") at: {10, -3} size: 50;
-
-			}
 		}
 		
-		display "states_evolution_chart"  refresh: every(#day)  virtual: true {
+		display "states_evolution_chart"  refresh: every(1#h)   {
 			chart "Population epidemiological states evolution - " + name background: #black axes:  #white color:  #white title_font: default legend_font: font("Helvetica", 14, #bold) {
 				data "Susceptible" value: length(all_individuals where (each.state = susceptible)) color: #green marker: false style: line;
 				data "Latent" value: length(all_individuals where (each.is_latent())) color: #orange marker: false style: line;
@@ -66,32 +48,23 @@ experiment "Abstract Experiment" type:gui autorun:false virtual: true{
 	 
 	  // OUTBREAK
 		
-//		display "states_evolution_chart" refresh: every(15#mn) {
-//			chart "Population epidemiological states evolution" background: #white axes: #black color: #black title_font: default legend_font: font("Helvetica", 14, #bold) {
-//				data "Susceptible" value: length(all_building_individuals where (each.state = susceptible)) color: #green marker: false style: line;
-//				data "Latent" value: length(all_building_individuals where (each.is_latent())) color: #orange marker: false style: line;
-//				data "Infectious" value: length(all_building_individuals where (each.is_infectious)) color: #red marker: false style: line;
-//				data "Recovered" value: length(all_building_individuals where (each.clinical_status = recovered)) color: #blue marker: false style: line;
-//				data "Dead" value: length(all_building_individuals where (each.clinical_status = dead)) color: #black marker: false style: line;
-//			}
-//
-//		} 
-//
-//		display "cumulative_incidence" refresh: every(15#mn) {
-//			chart "Cumulative incidence" background: #white axes: #black {
-//				data "cumulative incidence" value: total_number_of_infected color: #red marker: false style: line;
-//			}
-//		}
-//		
-//		display "secondary_infection_distribution" refresh: every(15#mn) {
-//			chart "Distribution of the number of people infected per individual" type: histogram {
-//				loop i over:[pair(0,0),pair(1,1),pair(2,4),pair(5,9),pair(10,24),
-//					pair(24,49),pair(50,99),pair(100,499),pair(500,10000)
-//				] {
-//					data i.key=i.value?string(i.key):string(i) 
-//						value: all_building_individuals count (each.number_of_infected_individuals>=int(i.key) and each.number_of_infected_individuals<=int(i.value));
-//				}
-//			}
-//		}
+	
+
+		display "cumulative_incidence" refresh: every(1#h) {
+			chart "Cumulative incidence" background: #white axes: #black {
+				data "cumulative incidence" value: total_number_of_infected color: #red marker: false style: line;
+			}
+		}
+		
+		/*display "secondary_infection_distribution" refresh: every(15#mn) {
+			chart "Distribution of the number of people infected per individual" type: histogram {
+				loop i over:[pair(0,0),pair(1,1),pair(2,4),pair(5,9),pair(10,24),
+					pair(24,49),pair(50,99),pair(100,499),pair(500,10000)
+				] {
+					data i.key=i.value?string(i.key):string(i) 
+						value: all_building_individuals count (each.number_of_infected_individuals>=int(i.key) and each.number_of_infected_individuals<=int(i.value));
+				}
+			}
+		}*/
 	}	
 }

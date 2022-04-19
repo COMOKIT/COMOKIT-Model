@@ -16,7 +16,7 @@ model CoVid19
 
 import "Abstract Individual.gaml"  
 
-global {
+global { 
 	
 	map<string,list<AbstractPlace>> build_buildings_per_function {
 		list<string> all_places_functions <- remove_duplicates((agents of_generic_species AbstractPlace) accumulate(each.functions)); 

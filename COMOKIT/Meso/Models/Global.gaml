@@ -21,7 +21,7 @@ import "Parameters.gaml"
 import "Entities/Activity.gaml"
 
 import "Entities/Building.gaml"
-import "Entities/Individual.gaml"
+import "Entities/Individual.gaml" 
 import "Entities/Hospital.gaml"
 import "Entities/Activity.gaml"
 import "Entities/Boundary.gaml"
@@ -34,7 +34,7 @@ global {
 	 * Individuals access
 	 */
 	 //geometry shape <-envelope(shape_file(shp_boundary_path)); 
-	species<Individual> individual_species <- Individual; // by default
+	species<Individual> individual_species;// <- Individual; // by default
 	//map<string,string> state_individuals;
 	list agents_history; 
 	list<int> all_individuals_id;
@@ -57,10 +57,13 @@ global {
 	float t_ref <- machine_time;
 	float t_ref2 <- machine_time;
 	
+	action define_individual_species {
+		individual_species <- Individual;
+	}
 	
 	action global_init {
-		
 		do console_output("global init");
+		do define_individual_species;
 		create Outside;
 		the_outside <- first(Outside);
 		do init_building_type_parameters;

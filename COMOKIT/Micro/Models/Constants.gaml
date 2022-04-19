@@ -14,6 +14,8 @@
 model Constants
 
 global {
+	string key_room <- "room";
+		
 	string layer <- "layer";
 	string walls <- "Walls";
 	string windows <- "Windows";
@@ -60,5 +62,11 @@ global {
 	string MINOPERATION <- "minor_operation_room";
 	string ELEVATOR <- "elevator";
 	string STAIR <- "stairway";
+
+	string ALPHA <- "Alpha";
+	string BETA <- "Beta";
+	string DELTA <- "Delta";
+	string GAMMA <- "Gamma";
+	string ORGINAL <- "SARS-CoV-2";
 
 }

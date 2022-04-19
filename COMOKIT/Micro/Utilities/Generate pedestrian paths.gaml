@@ -34,54 +34,70 @@ global {
 	float min_dist_obstacles_filtering <- 0.0;// minimal distance to obstacles to keep a path (float; if 0.0, no filtering), 
 	
 	
-	geometry open_area ;
+	action process_data {
+		create Wall from:file(obstacles_path);
+		do generate_path(shape,Wall as list,-1,0);
+		save OpenArea type: shp to: dataset_path+"/open area.shp" attributes: ["building", "floor"];
+		save PedestrianPath type: shp to: dataset_path+"/pedestrian paths.shp" attributes: ["building", "floor", "area"];
+	}
 	
 	init {
-		open_area <- copy(shape);
-		create wall from:file(obstacles_path) {
-			open_area <- open_area -(shape buffer (P_shoulder_length/2.0));
+		do process_data;
+	}
+	
+	list<list<agent>> generate_path(geometry consider_geom, list<geometry> obstacles, int id_bd, int id_floor) {
+		geometry open <- copy(consider_geom);
+		loop g over: obstacles {
+			open <- open -(g buffer (P_shoulder_length/2.0));
 		}
-		list<geometry> generated_lines <- generate_pedestrian_network([],[open_area],add_points_open_area,random_densification,min_dist_open_area,density_open_area,clean_network,tol_cliping,tol_triangulation,min_dist_obstacles_filtering,simplification_dist);
-		
-		create pedestrian_path from: generated_lines  {
-			do initialize bounds:[open_area] distance: min(10.0,(wall closest_to self) distance_to self) masked_by: [wall] distance_extremity: 1.0;
+		create OpenArea from: open.geometries with: (building:id_bd, floor:id_floor) returns: oa;
+		list<geometry> generated_lines <- generate_pedestrian_network([],open.geometries,add_points_open_area,random_densification,min_dist_open_area,density_open_area,clean_network,tol_cliping,tol_triangulation,min_dist_obstacles_filtering,simplification_dist);
+		write sample(length(generated_lines));
+		create PedestrianPath from: generated_lines with: (building:id_bd, floor:id_floor)  returns: pp{
+			area <- min(10.0,(Wall closest_to self) distance_to self) * shape.perimeter;
+			
 		}
-		save open_area type: shp to: dataset_path+"/open area.shp";
+		return [oa,pp];
 		
-		save pedestrian_path type: shp to: dataset_path+"/pedestrian paths.shp";
-		save pedestrian_path collect each.free_space type: shp to:dataset_path+ "/free spaces.shp";
 	}
 }
 
-species pedestrian_path skills: [pedestrian_road]{
+
+species OpenArea{
 	rgb color <- rnd_color(255);
+	int floor;
+	int building;
 	aspect default {
 		draw shape  color: color;
 	}
-	aspect free_area_aspect {
-		if(display_free_space and free_space != nil) {
-			draw free_space color: #cyan border: #black;
-		}
+}
+
+
+species PedestrianPath{
+	rgb color <- rnd_color(255);
+	int floor;
+	int building;
+	float area;
+	aspect default {
+		draw shape  color: color;
 	}
 }
 
 
-species wall {
+species Wall {
+	int floor;
 	aspect default {
 		draw shape + (P_shoulder_length/2.0) color: #gray border: #black;
 	}
 }
 
 
-experiment normal_sim type: gui {
+experiment generating_path type: gui {
 		output {
 		display map type: opengl{
-			species wall refresh: false;
-			graphics "open_area" {
-				draw open_area color: #lightpink;
-			}
-			species pedestrian_path aspect:free_area_aspect transparency: 0.5 ;
-			species pedestrian_path refresh: false;
+			species Wall refresh: false;
+			species OpenArea refresh: false;
+			species PedestrianPath refresh: false;
 		}
 	}
 }

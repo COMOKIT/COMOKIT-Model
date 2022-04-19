@@ -14,9 +14,6 @@ import "BuildingActivity.gaml"
 
 import "BuildingIndividual.gaml"
 
-//import "../../Entities/Policy.gaml"
-
-/* Insert your model definition here */
 
 global{
 	action define_policies{
