@@ -50,7 +50,6 @@ global {
 
 	
 	// Room types
-	string WARD <- "ward";
 	string DOCTOR_ROOM <- "doctor_room";
 	string HEAD_DOCTOR_ROOM <- "head_doctor_room";
 	string NURSE_ROOM <- "nurse_room";
@@ -60,8 +59,6 @@ global {
 	string INJECT <- "injecting_room";
 	string MEDICINE <- "medicine_storage";
 	string MINOPERATION <- "minor_operation_room";
-	string ELEVATOR <- "elevator";
-	string STAIR <- "stairway";
 
 	string ALPHA <- "Alpha";
 	string BETA <- "Beta";

@@ -28,7 +28,8 @@ species Room parent: AbstractPlace {
 	string type;
 	int building;
 	int floor;
-	rgb color <- #gray;
+	int id;
+	rgb color <- #lightgray;
 	
 	Building my_building;
 	list<RoomEntry> entrances;
@@ -37,7 +38,14 @@ species Room parent: AbstractPlace {
 	float ceiling_height <- 3#m;
 	
 	aspect default {
-		draw shape color: color;
+		if (building = building_map) and (floor = floor_map) {
+			draw shape color: color;
+		}
+	
+	}
+	
+	aspect viral {
+		draw shape color: rgb(255 * sum(viral_load.values),255 * (1 - sum(viral_load.values)), 0 );
 	}
 	
 }
@@ -50,8 +58,32 @@ species Building {
 	list<BuildingEntry> entrances;
 	map<int,list<Room>> rooms;
 	map<int,list<Elevator>> elevators;
+	map<int,list<BuildingIndividual>> people;
+ 
+	user_command action: select_command;
+ 	
+ 	action select_command {
+ 		selected_bd <- self;
+ 		building_map <- int(self);
+ 		map  result <- user_input_dialog("Selection of a floor",[choose("Floor to inspect",int,0, rooms.keys)]);
+ 		floor_map <- int(result["Floor to inspect"]);
+			
+ 	}
+	aspect draw_infected {
+		loop i over: people.keys {
+			list<BuildingIndividual> inds <- people[i];
+			float rate <- empty(inds) ? 0.0 : ((inds count each.is_infected) / length(inds)); 
+			rgb col <- rgb(rate *255,255 * (1 - rate),0);
+			draw shape color: col at: location + {0,0,i * floor_high} depth: floor_high;
+		}
+		
+	}
+	 
 	aspect default {
-		draw shape color: #pink;
+		if int(self) = building_map {
+			draw shape color: #pink;
+		}
+		
 	}
 }	
 
@@ -103,9 +135,13 @@ species PedestrianPath{
 
 species Wall {
 	int floor;
+	int building;
 	
 	aspect default {
-		draw shape  color: #lightgray border: #black;
+		
+		if (building = building_map) and (floor = floor_map) {
+			draw shape  color: #lightgray border: #black;
+		}
 	}
 }
 
@@ -128,11 +164,15 @@ species BuildingEntry {
 		draw shape color: #magenta ;
 	}
 }
-
+ 
 
 species Elevator parent: Room {
 	aspect default {
-		draw shape color: #red ;
+		if (building = building_map) and (floor = floor_map) {
+		
+			draw shape color: #gold ;
+			
+		}
 	}
 }
 
@@ -144,9 +184,7 @@ species unit_cell parent: AbstractPlace  schedules: unit_cell where (each.viral_
 	int building;
 	int floor;
 	aspect default{
-		if (display_infection_grid){
-			//TODO: viral_load is now a map
-			draw shape color:blend(#green, #red, 1 - (coeff_visu_virus_load_cell * viral_load[original_strain]))  ;	
-		}
+		draw shape color:blend(#green, #red, 1 - (coeff_visu_virus_load_cell * viral_load[original_strain]))  ;	
+		
 	}
 }

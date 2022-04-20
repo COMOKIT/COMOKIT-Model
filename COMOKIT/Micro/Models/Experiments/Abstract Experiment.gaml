@@ -15,23 +15,29 @@ model CoVid19
 
 import "../Entities/Hospital Individuals.gaml"
 
-
+global {
+	float distance_camera <- 200.0 parameter: "Distance of the camera" category: "Visualization" min: 10.0 max: 1000.0;
+}
 experiment "Abstract Experiment" type:gui autorun:false virtual: true{
-		
+	
+	
 	output{
 		layout #split; 
 	  	
 	  	
-		display map type: opengl axes: false{
-			species Building ;
-			//species Room;
-			//species Elevator;
-			//species Wall;
-			//species BuildingEntry;
-			//species AreaEntry;
+		display map_global type: opengl  background: #black{
+			species Building aspect: draw_infected;
+			event mouse_down action: select_building;
+		
 			
-			//species OpenArea refresh: false;
-			//species PedestrianPath refresh: false;
+		}
+		
+		display map_1_floor type: opengl background: #black {
+			camera #default dynamic: true target: selected_bd = nil ? world : selected_bd distance: distance_camera;
+			species Building ;
+			species Room ;
+			species Elevator ;
+			species Wall;
 			species BuildingIndividual;
 		}
 		

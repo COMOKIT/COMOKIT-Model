@@ -50,14 +50,6 @@ global {
 	int limit_cpt_for_entrance_room_creation <- 10; //dark parameter - no need to change this value
 //	float nb_step_for_one_day <- #day / 1#s update: #day / 1#s;
 
-	//DISPLAY PARAMETERS
-	bool display_pedestrian_path <- false parameter: "Display pedestrian path" category: "Visualization";
-	bool display_free_space <- false parameter: "Display free space" category: "Visualization";
-	bool display_desk <- false parameter: "Display desks" category: "Visualization";
-	bool display_room_entrance <- false parameter: "Display room entrance" category: "Visualization";
-	bool display_room_status <- true parameter: "Display room status" category: "Visualization";
-	bool display_infection_grid <- false parameter: "Display infection grid" category: "Visualization";
-	bool display_building_entrance <- false parameter: "Display building entrance" category: "Visualization";
 
 
 	bool a_boolean_to_disable_parameters <- false;
@@ -69,7 +61,7 @@ global {
 	float lane_width <- 3.0;
 	obj_file pple_walk<- obj_file("../Utilities/people.obj", 90::{-1, 0, 0});
 	obj_file pple_lie <- obj_file("../Utilities/people.obj", 0::{-1, 0, 0});
-	float people_size <- 1.7;
+	float people_size <- 5.0;
 	float udpate_path_weights_every	<- 5#mn;
 	// Utils variable for the look and feel of simulation GUI
 	font default <- font("Helvetica", 18, #bold) const: true;

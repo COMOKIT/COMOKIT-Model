@@ -79,6 +79,11 @@ global {
 	
 	map<list<int>,list<unit_cell>> unit_cells; 
 	virus viral_agent;
+	
+	int floor_map <- -1 ;
+	int building_map <- -1 ;
+	Building selected_bd;
+	
 	init {
 		step <- step_duration;
 	 	nb_step_for_one_day <- #day / step;
@@ -111,6 +116,7 @@ global {
 				list<geometry> gg <- shape to_squares(unit_cell_size, true); 
 				create unit_cell from: gg with: (building:int(self), floor:i) returns: cells;
 				unit_cells[int(self),i] <- cells; 
+				people[i] <- [];
 			}
 		}
 		ask Room {
@@ -162,7 +168,17 @@ global {
 		all_individuals <- agents of_generic_species BuildingIndividual;
 	}
 
+	
 	action create_individuals;
+	
+	action select_building {
+		list<Building> bds <- Building overlapping #user_location;
+		if not empty(bds) {
+			ask bds {
+				do select_command;
+			}
+		}
+	}
 	
 	reflex update_moving_weight when: every(udpate_path_weights_every) {
 		ask PedestrianPath where each.update_coeff {

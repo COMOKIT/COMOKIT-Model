@@ -16,6 +16,8 @@ global {
 	string buildings_path <- dataset_path + "Buildings.shp";
 	string rooms_path <- dataset_path + "Rooms.shp" ;
 	string walls_path <- dataset_path + "Walls.shp" ;
+	string beds_path <-  dataset_path + "Beds.shp" ;
+	
 	string elevators_path <- dataset_path + "Elevators.shp" ;
 	
 	string building_entry_path <- dataset_path + "Building_entries.shp" ;
@@ -35,7 +37,7 @@ global {
 	float wall_width <- 0.2;
 	float room_scale <- 0.9;
 	float floor_high <- 5.0 #m;
-	
+	float area_per_bed <- 6 #m;
 	
 	
 	
@@ -43,7 +45,14 @@ global {
 		//list<float> angles <- [];
 		create Building from: buildings_shapefile  {
 			id <- int(self);
+			string rt <- string(get("room_type"));
+			list<string> rts <- rt split_with ",";
+			loop t over: rts {
+				list<string> ts <- t split_with ":";
+				types_room[ts[0]] <- float(ts[1]);
+			}
 		}
+		
 		
 		do create_building_entries;
 		
@@ -58,9 +67,23 @@ global {
 				}
 			}
 		}
+		int cpt <- 0;
 		ask Room {
+			id <- cpt; cpt <- cpt + 1;
 			do create_walls;
+			if (type = "room") {
+				float size <- shape.area / area_per_bed;
+				list<geometry> squares <- shape to_squares size;
+				loop sq over: squares {
+					create Bed with: (location:sq.location, room_id:id, building:building, floor:floor);
+				}
+			}
 		}
+		
+		ask Bed {
+			location <- location + {0,0, floor * floor_high};
+		}
+		
 		
 		ask Room {
 			location <- location + {0,0, floor * floor_high};
@@ -85,10 +108,11 @@ global {
 			}
 		}
 		save BuildingEntry type:shp to: building_entry_path attributes: ["building"];
-		save Room type:shp to: rooms_path attributes: ["floor", "building"];
+		save Room type:shp to: rooms_path attributes: ["id", "floor", "building", "type"];
 		save RoomEntry type:shp to: room_entry_path attributes: ["floor", "room_id"];
 		save Elevator type:shp to: elevators_path attributes: ["floor", "building"];
-		save Wall type:shp to: walls_path attributes: ["floor"];
+		save Wall type:shp to: walls_path attributes: ["floor", "building"];
+		save Bed type:shp to: beds_path attributes: ["room_id", "floor", "building"];
 		
 		loop bd over: Building {
 			list<list<agent>> created_agents;
@@ -161,6 +185,16 @@ global {
 	
 	
 }
+
+species Bed {
+	int room_id;
+	int floor;
+	int building;
+	
+	aspect default {
+		draw rectangle(2,2) color: #cyan ;
+	}
+}
 species RoomEntry {
 	int room_id;
 	int floor;
@@ -177,6 +211,7 @@ species BuildingEntry {
 }
 
 species Room {
+	int id;
 	string type;
 	Building bd;
 	int building;
@@ -209,11 +244,11 @@ species Room {
 		}
 		lines >> l_ref;
 		geometry door_g <-  (l_ref inter (circle(door_size/2.0) at_location l_ref.location)) + wall_width ;
-		create RoomEntry with: (room_id:int(self), shape:door_g, floor:floor );
+		create RoomEntry with: (room_id:id, shape:door_g, floor:floor );
 		l_ref <- l_ref - (circle(door_size/2.0) at_location l_ref.location);
 		lines <- lines + l_ref.geometries;
 		loop l over: lines {
-			create Wall with: (shape: l + wall_width, floor:floor);
+			create Wall with: (shape: l + wall_width, floor:floor, building: building);
 		}
 	}
 }
@@ -233,7 +268,7 @@ species Building {
 	int nb_floors <- 3;
 	int nb_unders <- 0;
 	float room_size <- 10.0;
-	
+	map<string,float> types_room;
 	
 	
 	map<int,list<Room>> rooms;
@@ -288,6 +323,7 @@ species Building {
 				create Room with: (shape:g scaled_by room_scale, bd:self, floor:i) {
 					myself.rooms[i] << self;
 					building <- int(bd);
+					type <- empty(myself.types_room) ? "" : myself.types_room.keys[rnd_choice(myself.types_room.values)];
 				}
 			}
 		}
@@ -295,7 +331,7 @@ species Building {
 		
 	}
 	aspect default {
-		draw shape color: #pink depth: nb_floors * floor_high;
+		draw shape color: #pink ;
 	}
 }
 
@@ -306,13 +342,14 @@ experiment generating_rooms_path type: gui {
 	}
 	output {
 		display map type: opengl axes: false{
-			species Building transparency: 0.5;
+			species Building ;
 			species Room;
 			species Elevator;
 			species Wall;
 			species BuildingEntry;
+			species Bed;
 			
-			species OpenArea refresh: false;
+			//species OpenArea refresh: false;
 			species PedestrianPath refresh: false;
 			
 		}

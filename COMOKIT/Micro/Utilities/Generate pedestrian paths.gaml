@@ -86,6 +86,7 @@ species PedestrianPath{
 
 species Wall {
 	int floor;
+	int building;
 	aspect default {
 		draw shape + (P_shoulder_length/2.0) color: #gray border: #black;
 	}

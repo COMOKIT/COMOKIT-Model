@@ -33,6 +33,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 	point target;
 	Room current_room;
 	unit_cell current_cell;
+	bool has_to_renew_agenda <- true;
 	
 	Room dst_room;
 
@@ -43,28 +44,16 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		//do initialise_disease;
 	}
 	
-	// To be defined	
-	map<date, BuildingActivity> get_daily_agenda {
-		return agenda_week;
-	}
+
+	
 
 	//#############################################################
 	//Reflexes
 	//#############################################################		
-	reflex renew_agenda when: empty(current_agenda_week) {
-		map<date, BuildingActivity> new_daily_agenda <- get_daily_agenda();
-		if new_daily_agenda = nil {
-			return;
-		}
-
-		date cd <- current_date;
-		loop t over: new_daily_agenda.keys {
+	reflex renew_agenda when:has_to_renew_agenda and empty(current_agenda_week) {
+		loop t over: agenda_week.keys {
 			// Apply the correct date
-			date correct_time <- date([cd.year, cd.month, cd.day, t.hour, t.minute, t.second]);
-			if correct_time < current_date {
-				correct_time <- correct_time add_days 1;
-			}
-			current_agenda_week[correct_time] <- new_daily_agenda[t]; 
+			current_agenda_week[t + time] <- current_agenda_week[t] ; 
 		}
 	}
 	
@@ -184,17 +173,25 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 					current_room <- dst_room;
 				}
 			} else {
+				current_building.people[current_floor] >> self;
+					
 				current_floor <- dst_room.floor;
+				current_building.people[current_floor] << self;
+				
 				location <- {location.x,location.y,floor_high * current_floor};
 			}
 		} else {
 			if(current_building = nil) {
 				current_building <- dst_room.my_building;
+				current_building.people[0] << self;
 			} else {
 				if (current_floor = 0) {
+					current_building.people[0] >> self;
 					current_building <- nil;
 				} else {
+					current_building.people[current_floor] >> self;
 					current_floor <- 0;
+					current_building.people[current_floor] << self;
 					location <- {location.x,location.y,floor_high * current_floor};
 				}
 			}
@@ -284,7 +281,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 
  	
  	aspect default {
-		if(!is_outside ){
+		if (current_building != nil) and (int(current_building) = building_map) and (current_floor = floor_map) {
 			draw pple_walk size: {0.5,people_size}  at: location + {0, 0, people_size/2.0} rotate: heading - 90 color: color;
 			if(is_infected){draw circle(0.7)  at: location + {0, 0, 0.7} color: get_color();}
 
