@@ -35,7 +35,7 @@ species Room parent: AbstractPlace {
 	list<RoomEntry> entrances;
 	
 	
-	float ceiling_height <- 3#m;
+	float ceiling_height <- floor_high;
 	
 	aspect default {
 		if (building = building_map) and (floor = floor_map) {
@@ -140,7 +140,7 @@ species Wall {
 	aspect default {
 		
 		if (building = building_map) and (floor = floor_map) {
-			draw shape  color: #lightgray border: #black;
+			draw shape depth: 2.0 color: #lightgray border: #black;
 		}
 	}
 }

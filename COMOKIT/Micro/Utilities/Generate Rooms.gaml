@@ -67,17 +67,8 @@ global {
 				}
 			}
 		}
-		int cpt <- 0;
 		ask Room {
-			id <- cpt; cpt <- cpt + 1;
 			do create_walls;
-			if (type = "room") {
-				float size <- shape.area / area_per_bed;
-				list<geometry> squares <- shape to_squares size;
-				loop sq over: squares {
-					create Bed with: (location:sq.location, room_id:id, building:building, floor:floor);
-				}
-			}
 		}
 		
 		ask Bed {
@@ -103,9 +94,16 @@ global {
 						building <- int(bd);
 					}
 					rs >> sr;
-					ask sr {do die;}
+					ask sr {
+						ask beds {do die;}
+						do die;
+					}
 				}
 			}
+		}
+		int cpt <- 0;
+		ask Room {
+			id <- cpt; cpt <- cpt + 1;
 		}
 		save BuildingEntry type:shp to: building_entry_path attributes: ["building"];
 		save Room type:shp to: rooms_path attributes: ["id", "floor", "building", "type"];
@@ -192,7 +190,7 @@ species Bed {
 	int building;
 	
 	aspect default {
-		draw rectangle(2,2) color: #cyan ;
+		draw shape color: #cyan ;
 	}
 }
 species RoomEntry {
@@ -216,6 +214,7 @@ species Room {
 	Building bd;
 	int building;
 	int floor;
+	list<Bed> beds;
 	
 	
 	aspect default {
@@ -324,6 +323,21 @@ species Building {
 					myself.rooms[i] << self;
 					building <- int(bd);
 					type <- empty(myself.types_room) ? "" : myself.types_room.keys[rnd_choice(myself.types_room.values)];
+					if (type = "room") {
+						float size <- shape.area / area_per_bed;
+						list<geometry> squares <- shape to_squares (size, true);
+						loop sq over: squares {
+							create Bed with: (shape:(rectangle(2.2,1.5) at_location sq.location) rotated_by angle_ref, room_id:id, building:building, floor:floor) {
+								if !(myself covers self) {
+									do die;
+								} else {
+									myself.beds << self;
+									
+								}
+									
+							}
+						}
+					}
 				}
 			}
 		}

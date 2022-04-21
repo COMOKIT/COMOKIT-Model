@@ -23,15 +23,18 @@ global {
 	action create_activities {
 		loop i over: BuildingActivity.subspecies{
 			create i;
+			loop k over: species(i).subspecies {
+				create k;
+			}
 		}
 	}
+	
 }
 
 // A "singleton" species that provides the destination for different activities
 species BuildingActivity virtual: true {
 	list<Room> activity_places;
 	float wandering_in_room <- -1.0;
-	float wandering_between_room <- -1.0;
 	map get_destination(BuildingIndividual p) virtual: true;
 	
 }

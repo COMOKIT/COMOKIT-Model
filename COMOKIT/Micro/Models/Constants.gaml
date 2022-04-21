@@ -59,6 +59,7 @@ global {
 	string INJECT <- "injecting_room";
 	string MEDICINE <- "medicine_storage";
 	string MINOPERATION <- "minor_operation_room";
+	string ROOM <- "room";
 
 	string ALPHA <- "Alpha";
 	string BETA <- "Beta";

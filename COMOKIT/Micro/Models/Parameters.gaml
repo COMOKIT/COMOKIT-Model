@@ -61,7 +61,7 @@ global {
 	float lane_width <- 3.0;
 	obj_file pple_walk<- obj_file("../Utilities/people.obj", 90::{-1, 0, 0});
 	obj_file pple_lie <- obj_file("../Utilities/people.obj", 0::{-1, 0, 0});
-	float people_size <- 5.0;
+	float people_size <- 1.7;
 	float udpate_path_weights_every	<- 5#mn;
 	// Utils variable for the look and feel of simulation GUI
 	font default <- font("Helvetica", 18, #bold) const: true;
@@ -87,8 +87,5 @@ global {
 	float P_gama_SFM <- 0.35;
 	float P_lambda_SFM <- 0.1;
 	
-	//FLOOR RELEVANT PARAMETER
-	int nb_floor <- 2;
-	list<bool> show_floor <- [true, false, true, true, true, true, true, true]
-							parameter: "which floor show" category: "Visualization";
+
 }

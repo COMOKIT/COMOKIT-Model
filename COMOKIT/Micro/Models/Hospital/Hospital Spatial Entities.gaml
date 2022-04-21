@@ -12,10 +12,16 @@ import "Hospital Experiments.gaml"
 
 global {
 	action external_initilization {
+		ask Room {
+			if type in room_type_color.keys {
+				color <- room_type_color[type];
+			}
+		}
 		string beds_path <- dataset_path + "Beds.shp" ;
 	
 		create Bed from: file(beds_path) {
 			my_room <- Room first_with (each.id = room_id);
+			location <- location + {0,0, floor * floor_high};
 		}
 	}
 	
@@ -29,7 +35,9 @@ species Bed {
 	
 	rgb color <- #brown;
 	aspect default {
-		draw rectangle(people_size, 2) depth: 1 color: color;
+		if (building = building_map) and (floor = floor_map) {
+			draw shape depth: 0.5 color: color;
+		}
 	}
 } 
 

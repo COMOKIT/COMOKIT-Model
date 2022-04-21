@@ -13,7 +13,7 @@ import "HospitalActivity.gaml"
 
 import "HospitalIndividual.gaml"
 
-import "Hospital Spatial Entities.gaml"
+import "Hospital Spatial Entities.gaml" 
 
 
 import "../Experiments/Abstract Experiment.gaml"
@@ -22,12 +22,13 @@ global {
 	
 	
 	list<Room> available_rooms;
+	map<string,rgb> room_type_color <- [ROOM::#lightblue,DOCTOR_ROOM::#yellow, HEAD_DOCTOR_ROOM::#gold, NURSE_ROOM::#orange,MEETING_ROOM::#cyan,ADMISSION_ROOM::#violet, HALL::#gray, INJECT::#magenta , MEDICINE::#pink, MINOPERATION::#brown ];
 	
 
-}
+} 
 
  
-
+ 
 experiment hospital_no_intervention type: gui parent: "Abstract Experiment"{
 	
 	action _init_
@@ -38,5 +39,26 @@ experiment hospital_no_intervention type: gui parent: "Abstract Experiment"{
 			//ventilation_proba::0.7
 
 		];
+	}
+	
+	output {
+		display hospital_map parent: map_global{}
+		display map_1_floor type: opengl background: #black {
+			camera #default dynamic: true target: selected_bd = nil ? world : selected_bd distance: distance_camera ;
+			species Building ;
+			species Room ;
+			species Elevator ;
+			species Wall;
+			//species Bed;
+			species Doctor;
+			species Intern;
+			species Nurse;
+			species Caregiver;
+			species Staff;
+			species Inpatient;
+			species Outpatient;
+			
+		}
+		
 	}
 }

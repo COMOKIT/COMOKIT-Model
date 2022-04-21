@@ -34,17 +34,18 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 	Room current_room;
 	unit_cell current_cell;
 	bool has_to_renew_agenda <- true;
-	
+	float time_wait;
 	Room dst_room;
+	bool waiting_to_remove <- false;
 
 	float speed <- max(2,min(6,gauss(4,1))) #km/#h;
 
 	init {
 		is_outside <- true;
-		//do initialise_disease;
+		
 	}
 	
-
+	action remove_agent {do die;}
 	
 
 	//#############################################################
@@ -53,7 +54,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 	reflex renew_agenda when:has_to_renew_agenda and empty(current_agenda_week) {
 		loop t over: agenda_week.keys {
 			// Apply the correct date
-			current_agenda_week[t + time] <- current_agenda_week[t] ; 
+			current_agenda_week[t + time] <- agenda_week[t] ; 
 		}
 	}
 	
@@ -144,9 +145,8 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 		current_activity <- current_agenda_week.values[0];
 		current_agenda_week >> first(current_agenda_week);
 		map dest_act <- current_activity.get_destination(self);
-		
+		time_wait <- 0.0;
 		Room r <- dest_act[key_room];
-	
 		if (r != nil) {
 			dst_room <- r;
 			if is_outside {
@@ -168,7 +168,11 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 					continue_to_move <- false;
 					if (species(dst_room) = AreaEntry) {
 						is_outside <- true;
+						if not(has_to_renew_agenda) and empty(agenda_week) {
+							do remove_agent;
+						}
 					}
+					
 				} else {
 					current_room <- dst_room;
 				}
@@ -201,6 +205,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 			target <- {target.x,target.y,floor_high * dst_room.floor};
 		} else {
 			target <- nil;
+			waiting_to_remove <- current_activity.wandering_in_room >= 0;
 		}
 	}
 	
@@ -232,6 +237,15 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 					return any_location_in(el);
 				}
 			}
+		}
+	}
+	
+	reflex wait_to_move when: target = nil and waiting_to_remove and current_activity != nil{
+		time_wait <- time_wait + step;
+		if (time_wait >  current_activity.wandering_in_room) {
+			target <- define_target(current_room);
+			waiting_to_remove <- false;
+			time_wait <- 0.0;
 		}
 	}
 	

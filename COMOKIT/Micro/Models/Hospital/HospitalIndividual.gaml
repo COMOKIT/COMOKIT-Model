@@ -11,21 +11,21 @@ model HospitalIndividual
 import "Hospital Spatial Entities.gaml"
 
 import "HospitalActivity.gaml"
-
+ 
 import "Hospital Experiments.gaml"
 
-
+ 
 global {
 	int nb_doctors <- 100;
-	int nb_nurses <- 500;	
+	int nb_nurses <- 300;	
 	int nb_staffs <- 100;
 	
-	int nb_in_patient <- 500;
+	int nb_in_patients <- 200;
 	
-	int nb_caregivers <- 500;
+	int nb_caregivers <- 200;
 	
-	int nb_interns <- 100;
-	int nb_out_patients <- 5000;
+	int nb_interns <- 50;
+	int nb_out_patients <- 2000;
 	
 	action create_individuals {
 		do external_initilization;
@@ -34,7 +34,7 @@ global {
 		create Nurse number: nb_nurses;
 		create Staff number: nb_staffs;
 		create Intern number: nb_interns;
-		create Inpatient number: nb_in_patient;
+		create Inpatient number: nb_in_patients;
 		create Caregiver number: nb_caregivers;
 		
 	}
@@ -52,8 +52,9 @@ global {
 	}
 	
 	
-	reflex generate_out_patient_week when: every(#week){
+	reflex generate_patients_week when: every(#week){
 		create Outpatient number: nb_out_patients;
+		create Inpatient number: nb_in_patients;
 		
 	}
 }
@@ -86,7 +87,6 @@ species Doctor parent: Worker {
 		if(!nightshift){
 			date arrive <- date("06:30", TFS) add_days i + rnd(15#mn);
 			agenda_week[arrive] <- first(ActivityGoToOffice);
-			
 			date meeting <- date("07:00", TFS) add_days i;
 			agenda_week[meeting] <- first(ActivityGoToMeeting);
 			
@@ -310,9 +310,13 @@ species Inpatient parent: BuildingIndividual {
 	Bed mybed;
 	Room assigned_ward;
 	list<Caregiver> carer;
+	
 	init {
+		
+		has_to_renew_agenda <- false;
 		age <- int(skew_gauss(20.0, 80.0, 0.6, 0.3));
 		mybed <- any(Bed where (each.is_occupied = false));
+		if mybed = nil {do die;}
 		mybed.is_occupied <- true;
 		assigned_ward <- mybed.my_room;
 		current_room <- assigned_ward;
@@ -350,14 +354,19 @@ species Inpatient parent: BuildingIndividual {
 		}			
 	}
 	
+	action remove_agent {
+		mybed.is_occupied <- false;
+		do die;
+	}
+	
 	aspect default{
-		if!is_outside and (location overlaps circle(0.4, mybed.location)) and show_floor[current_floor]{
-			draw pple_lie size: people_size  at: location + {0, 0, 0.85} rotate: 0 color: color;
-			if(is_infected){draw circle(0.2)  at: location + {0, 0, 0.7} color: get_color();}
+		if !is_outside and int(current_building) = building_map and current_floor = floor_map and (current_activity = first(ActivityRest)) and (location = mybed.location){
+			draw pple_lie size: {0.5,people_size}  at: location + {0, 0, people_size/2.0} rotate: heading - 90 color: color;
+			if(is_infected){draw circle(0.7)  at: location + {0, 0, 0.7} color: get_color();}
 		}
-		else if !is_outside and show_floor[current_floor]{
-			draw pple_walk size: people_size  at: location + {0, 0, 0.7} rotate: heading - 90 color: color;
-			if(is_infected){draw circle(0.2)  at: location + {0, 0, 0.7} color: get_color();}
+		else if !is_outside and int(current_building) = building_map and current_floor = floor_map{
+			draw pple_walk size: {0.5,people_size}  at: location + {0, 0, people_size/2.0} rotate: heading - 90 color: color;
+			if(is_infected){draw circle(0.7)  at: location + {0, 0, 0.7} color: get_color();}
 		}
 	}
 
@@ -420,13 +429,14 @@ species Outpatient parent: BuildingIndividual{
 	Doctor doc;
 	date date_come;
 	init{
+		has_to_renew_agenda <- false;
 		age <- int(skew_gauss(20.0, 80.0, 0.6, 0.3));
 		
 		doc <- one_of(Doctor where (each.headdoc = false and each.is_outside = false));
 		date_come <- copy(current_date) add_hours rnd(23);
 		int day <- rnd(6);
 		// see doctor, go to do health examinations, see doctor again and go out
-		date see_doc <- date_come add_days day + rnd(15#mn);
+		date see_doc <- (date_come add_days day) + rnd(15#mn);
 		agenda_week[see_doc] <- first(ActivityMeetDoctor);
 		date test_perform <- see_doc +rnd(5#mn, 15#mn);
 		//Temporary assume that they will do a health check at the admission room

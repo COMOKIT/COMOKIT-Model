@@ -33,7 +33,7 @@ species ActivityVisitInpatient parent: BuildingActivity {
 		return results; 
 	}
 }
-
+ 
 
 
 species ActivityGoToAdmissionRoom parent: ActivityGotoRoom {
