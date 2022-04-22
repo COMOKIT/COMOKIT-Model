@@ -21,7 +21,7 @@ import "Abstract Experiment.gaml"
 
 global {
 	// Parameter used to define the duration of the lockdown policy
-	int num_days <- 1;
+	int num_days <- 100;
 
 	/*
 	 * Initialize the lockdown policy over a given duration: no activities are allowed.
@@ -31,7 +31,7 @@ global {
 			if (num_days > 0) {
 				policy <- create_lockdown_policy();
 				policy <- during(policy, num_days); 
-				policy <-  with_tolerance(policy,0.5) ;
+				policy <-  with_tolerance(policy,0.0) ;
 			}
 		}
 	}
