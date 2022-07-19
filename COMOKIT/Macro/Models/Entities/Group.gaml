@@ -138,7 +138,7 @@ species group_individuals {
 		}
 		
 		loop times: hospitalisation_period {
-			evol_states[HOSPITALISATION] <- [0.0];
+			evol_states[HOSPITALISATION] << 0.0;
 		}
 		
 		
