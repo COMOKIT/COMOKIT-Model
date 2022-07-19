@@ -107,6 +107,7 @@ global {
 	string epidemiological_proportion_icu <- "Proportion_icu";
 	string epidemiological_hospitalisation_to_ICU <- "Hospitalisation_to_ICU";
 	string epidemiological_stay_ICU <- "Stay_ICU";
+	string epidemiological_stay_Hospital <- "Stay_Hospital";
 	string epidemiological_proportion_death_symptomatic <- "Proportion_death_symptomatic";
 	string epidemiological_infectious_period_symptomatic <- "Infectious_period_symptomatic";
 	string epidemiological_infectious_period_asymptomatic <- "Infectious_period_asymptomatic";

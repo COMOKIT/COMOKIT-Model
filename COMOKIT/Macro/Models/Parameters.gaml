@@ -32,6 +32,7 @@ global {
 	date starting_date <- date([2022,2,14]);
 	date ending_date <- date([2022,8,14]);
 	
+	int hospital_icu_capacity <- #max_int;
 	
 	float mask_ratio <- 0.5;
 	float factor_contact_rate_wearing_mask <- 0.5;

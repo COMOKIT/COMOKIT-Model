@@ -24,7 +24,7 @@ import "Entities/Group.gaml"
 global { 
 	
 	geometry shape <-envelope(shape_file(shp_boundary_path));
-	list<string> evol_state_order <- [SYMPTOMATIC, PRESYMPTOMATIC, ASYMPTOMATIC,LATENT_SYMPTOMATIC, LATENT_ASYMPTOMATIC];
+	list<string> evol_state_order <- [SYMPTOMATIC, PRESYMPTOMATIC, ASYMPTOMATIC,LATENT_SYMPTOMATIC, LATENT_ASYMPTOMATIC, HOSPITALISATION, ICU ];
 	//The viral agent that infect this biological entity
 	virus viral_agent;
 	
