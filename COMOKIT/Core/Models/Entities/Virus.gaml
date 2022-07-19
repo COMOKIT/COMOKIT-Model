@@ -56,7 +56,7 @@ global {
 	/*
 	 * The comprehensive list of all sars-cov-2 strains
 	 */
-	list<virus> viruses -> VOC + VOI + original_strain;
+	list<virus> viruses -> VOC + VOI + [original_strain];
 
 	/*
 	 * Init the variants
