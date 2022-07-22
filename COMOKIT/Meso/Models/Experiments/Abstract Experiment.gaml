@@ -111,8 +111,8 @@ experiment "Abstract Experiment" virtual: true {
 	// ----------------------------------------------------- //
 	//				 MAIN DEFAULT DISPLAY					 //
 	// ----------------------------------------------------- //
-	output {
-		display "default_display" synchronized: false type: opengl background: background virtual: true axes: false {
+	output synchronized: false{
+		display "default_display"  type: opengl background: background virtual: true axes: false {
 			overlay position: {5, 5} size: {700 #px, 200 #px} transparency: 1 {
 				draw world.name font: default at: {20 #px, 20 #px} anchor: #top_left color: text_color;
 				draw ("Day " + int((current_date - starting_date) / #day)) + " | " + ("Cases " + world.number_of_infectious) font: default at: {20 #px, 50 #px} anchor: #top_left color:
@@ -137,7 +137,7 @@ experiment "Abstract Experiment" virtual: true {
 
 		}
 
-		display "default_3D_display" synchronized: false type: opengl background: #black axes: false virtual: true {
+		display "default_3D_display"  type: opengl background: #black axes: false virtual: true {
 			image file: file_exists(dataset_path + "/satellite.png") ? (dataset_path + "/satellite.png") : "../Utilities/white.png" transparency: 0.5 refresh: false;
 			species Building transparency: 0.7 refresh: false {
 				draw shape depth: rnd(50) color: #lightgrey wireframe: false width: 2;
@@ -157,7 +157,7 @@ experiment "Abstract Experiment" virtual: true {
 
 		}
 
-		display "simple_display" parent: default_display synchronized: false type: opengl background: #black virtual: true axes: false {
+		display "simple_display" parent: default_display  type: opengl background: #black virtual: true axes: false {
 			species Building {
 				draw shape color: #lightgrey wireframe: true width: 2;
 			}

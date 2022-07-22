@@ -29,8 +29,11 @@ species group_individuals {
 	int num_latent_symptomatics;
 	int num_recovered;
 	int num_dead;
+	int num_icu;
+	int num_hospitalisation;
+	int num_immune;
 	
-	
+	float immunity_evasion_rate;
 	int latent_period_asymptomatic;
 	int latent_period_symptomatic;
 	int presymptomatic_period;
@@ -69,6 +72,8 @@ species group_individuals {
 		list<float> list_rate_dead;
 		list<float> list_period_hospitalisation;
 		list<float> list_period_icu;
+		
+		list<float> list_immunity_evasion;
 		 
 		loop times: num_replication_parameters {
 			list_factor_contact_rate_asymptomatic << viral_agent.get_value_for_epidemiological_aspect(proto_entity,epidemiological_factor_asymptomatic);
@@ -86,7 +91,7 @@ species group_individuals {
 			list_rate_dead<< viral_agent.get_value_for_epidemiological_aspect(proto_entity,epidemiological_proportion_death_symptomatic);
 			list_period_hospitalisation << viral_agent.get_value_for_epidemiological_aspect(proto_entity,epidemiological_stay_Hospital);
 			list_period_icu << viral_agent.get_value_for_epidemiological_aspect(proto_entity,epidemiological_stay_ICU);
-	
+			list_immunity_evasion << viral_agent.get_value_for_epidemiological_aspect(proto_entity,epidemiological_immune_evasion);
 		}
 		
 		factor_contact_rate_asymptomatic <- mean(list_factor_contact_rate_asymptomatic);
@@ -102,7 +107,7 @@ species group_individuals {
 		rate_dead<- mean(list_rate_dead);
 		hospitalisation_period <- max(1,round(mean(list_period_hospitalisation)));
 		icu_period <- max(1,round(mean(list_period_icu)));
-	
+		immunity_evasion_rate <- mean(list_immunity_evasion);
 		
 		ask proto_entity {
 			do die;
@@ -112,6 +117,9 @@ species group_individuals {
 		evol_states[REMOVED] <- [0.0];
 		evol_states[LATENT_SYMPTOMATIC] <- [];
 		evol_states[LATENT_ASYMPTOMATIC] <- [];
+		evol_states[ICU] <- [];
+		evol_states[HOSPITALISATION] <- [];
+		
 		loop times: latent_period_symptomatic {
 			evol_states[LATENT_SYMPTOMATIC]<<0.0; 
 		}
@@ -150,6 +158,9 @@ species group_individuals {
 		list<string> states <- copy(evol_state_order);
 		if (num_symptomatic = 0) {states>> SYMPTOMATIC;}
 		if (num_asymptomatic = 0) {states>> ASYMPTOMATIC;}
+		if (num_icu = 0) {states>> ICU;}
+		if (num_hospitalisation = 0) {states>> HOSPITALISATION;}
+	
 		//if (num_latent_asymptomatics = 0) {states>> LATENT_ASYMPTOMATIC; states >> PRESYMPTOMATIC;}
 		if (num_latent_symptomatics = 0) {states>> LATENT_SYMPTOMATIC;}
 		if not empty(states) {
@@ -184,12 +195,13 @@ species group_individuals {
 						match ASYMPTOMATIC {
 							if allow_reinfection {
 								evol_states[SUSCEPTIBLE][0] <- evol_states[SUSCEPTIBLE][0]  + val;
-							
+								num_susceptibles<- num_susceptibles + val ;
 							} else {
 								evol_states[REMOVED][0] <- evol_states[REMOVED][0]  + val;
+								num_recovered <- num_recovered + val ;
+							
 							}
 							num_asymptomatic <-num_asymptomatic - val;
-							num_recovered <- num_recovered + val ;
 							
 						}
 						match SYMPTOMATIC {
@@ -208,27 +220,37 @@ species group_individuals {
 							
 							if allow_reinfection {
 								evol_states[SUSCEPTIBLE][0] <- evol_states[SUSCEPTIBLE][0]  + val;
+								num_immune <- num_immune + val;
+								num_susceptibles<- num_susceptibles + val ;
 							} else {
 								evol_states[REMOVED][0] <-  evol_states[REMOVED][0]  + val;
+								num_recovered <- num_recovered + nb_removed;
 							}
-							num_recovered <- num_recovered + val - nb_dead;
 							num_dead <- num_dead + nb_dead;
 							num_symptomatic <-num_symptomatic - val;
 						}
 						match ICU {
+							num_icu <- num_icu - val;
 							if allow_reinfection {
 								evol_states[SUSCEPTIBLE][0] <- evol_states[SUSCEPTIBLE][0]  + val;
+								num_immune <- num_immune + val;
+								num_susceptibles<- num_susceptibles + val ;
 							} else {
 								evol_states[REMOVED][0] <- evol_states[REMOVED][0] + val ;
+								num_recovered <- num_recovered + val;
 							}
 							hospital_icu_capacity<- hospital_icu_capacity + val;
 							
 						}
 						match HOSPITALISATION {
+							num_hospitalisation <- num_hospitalisation - val;
 							if allow_reinfection {
 								evol_states[SUSCEPTIBLE][0] <- evol_states[SUSCEPTIBLE][0]  + val;
+								num_susceptibles<- num_susceptibles + val ;
+								num_immune <- num_immune + val;
 							} else {
 								evol_states[REMOVED][0] <- evol_states[REMOVED][0] + val ;
+								num_recovered <- num_recovered + val;
 							}
 							
 						}
@@ -254,10 +276,11 @@ species compartment {
 		int num_symptomatic <- world.rate_to_num(group.num_symptomatic,coeff_infected );
 		int num_asymptomatic <- world.rate_to_num(group.num_asymptomatic,coeff_infected );
 		int num_susceptibles <- world.rate_to_num(group.num_susceptibles,coeff_susceptible );
+		float immune_rate <- 1.0 - (group.num_immune / group.num_individuals * group.immunity_evasion_rate);
 		if (num_symptomatic + num_asymptomatic + num_susceptibles) = 0 {return [];}
 		float factor_mask <- (factor_contact_rate_wearing_mask * ( 2 - mask_ratio));
 		float infection_factor <-  (num_symptomatic + (num_asymptomatic * group.factor_contact_rate_asymptomatic)) * factor_mask;
-		list group_ <- [self,num_susceptibles,infection_factor,group.contact_rate, group.rate_symptomatic];
+		list group_ <- [self,num_susceptibles,infection_factor,group.contact_rate, group.rate_symptomatic,immune_rate];
 		return group_;
 	}
 	

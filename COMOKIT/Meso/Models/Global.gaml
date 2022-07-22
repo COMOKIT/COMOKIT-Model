@@ -528,6 +528,7 @@ global {
 					[init_all_ages_distribution_type_hospitalisation_to_ICU,string(init_all_ages_parameter_1_hospitalisation_to_ICU),string(init_all_ages_parameter_2_hospitalisation_to_ICU)];
 				}
 				match epidemiological_stay_ICU{ params  <- [init_all_ages_distribution_type_stay_ICU,string(init_all_ages_parameter_1_stay_ICU),string(init_all_ages_parameter_2_stay_ICU)];}
+				match epidemiological_stay_Hospital{ params  <- [init_all_ages_distribution_type_stay_Hospital,string(init_all_ages_parameter_1_stay_Hospital),string(init_all_ages_parameter_2_stay_Hospital)];}
 				default{ /*There is no sens to have a default value for all parameters, or may be 42 */}
 			}
 				

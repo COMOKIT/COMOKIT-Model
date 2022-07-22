@@ -146,6 +146,9 @@ global {
 	string init_all_ages_distribution_type_stay_ICU <- epidemiological_normal;//Type of distribution of the time to stay in ICU
 	float init_all_ages_parameter_1_stay_ICU <- 8.0;//First parameter of the time to stay in ICU
 	float init_all_ages_parameter_2_stay_ICU <- 5.9;//Second parameter of the time to stay in ICU
+	string init_all_ages_distribution_type_stay_Hospital <- epidemiological_normal;//Type of distribution of the time to stay in ICU
+	float init_all_ages_parameter_1_stay_Hospital <- 13.0;//First parameter of the time to stay in ICU
+	float init_all_ages_parameter_2_stay_Hospital <- 2.0;//Second parameter of the time to stay in ICU
 	
 	// Immune escapement
 	float init_immune_escapement <- 1.0; // The extends to which the virus escape from previous exposition and/or vaccines (TODO : is there a distinction ?)

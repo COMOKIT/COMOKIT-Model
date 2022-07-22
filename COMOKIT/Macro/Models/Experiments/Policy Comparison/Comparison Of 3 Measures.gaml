@@ -59,7 +59,7 @@ experiment "Comparison"  parent: abstract_experiment autorun: true {
 	}
 	
 	output {
-		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;
+		layout #split consoles: false editors: false navigator: false tray: false tabs: true toolbars: false controls: true;
 		
 		display "Plot" parent: states_evolution_chart {}	
 	}

@@ -172,6 +172,7 @@ global {
 		epidemiological_onset_to_hospitalisation,
 		epidemiological_hospitalisation_to_ICU,
 		epidemiological_stay_ICU,
+		epidemiological_stay_Hospital,
 		epidemiological_immune_evasion
 	];
 	
@@ -221,6 +222,7 @@ global {
 			match epidemiological_hospitalisation_to_ICU { return get_period(parameters,mod, is_max); }
 			//Give the number of steps in ICU
 			match epidemiological_stay_ICU { return get_period(parameters); }
+			match epidemiological_stay_Hospital { return get_period(parameters); }
 			
 			// All parameters expressed as a factor 
 			default { return get_factor(parameters); }

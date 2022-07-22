@@ -35,10 +35,10 @@ experiment "Datasets" parent: "Abstract Experiment" autorun: true {
 		}
 	}
 
-	output {
+	output  synchronized: false{
 		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false;
 
-		display name synchronized: false type: opengl background: #black axes: false parent: default_3D_display {
+		display name type: opengl background: #black axes: false parent: default_3D_display {
 
 			graphics "Simulation Name" {
 				draw world.name  font: default at: {0, world.shape.height/2 - 30#px} color: text_color anchor: #top_left;
