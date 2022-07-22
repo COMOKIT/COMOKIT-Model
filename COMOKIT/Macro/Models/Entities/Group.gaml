@@ -196,6 +196,7 @@ species group_individuals {
 							if allow_reinfection {
 								evol_states[SUSCEPTIBLE][0] <- evol_states[SUSCEPTIBLE][0]  + val;
 								num_susceptibles<- num_susceptibles + val ;
+								num_immune <- num_immune + val;
 							} else {
 								evol_states[REMOVED][0] <- evol_states[REMOVED][0]  + val;
 								num_recovered <- num_recovered + val ;

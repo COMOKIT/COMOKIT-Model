@@ -43,7 +43,6 @@ species SpatialUnit {
 				if (infected_factor > 0) {
 					loop group over: groups {
 						int nb_s <- int(group[1]);
-						
 						float rate_infection <-infected_factor / area_types[type] * float(group[3]) * float(group[5]) * ((type in building_type_infection_factor.keys) ? building_type_infection_factor[type] : 1.0);
 						compartment my_compartment <-compartment(group[0]);
 						int nb_new_infected <- world.rate_to_num(int(group[1]),rate_infection);
