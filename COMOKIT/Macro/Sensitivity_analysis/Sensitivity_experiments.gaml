@@ -1,12 +1,45 @@
 /**
-* Name: experiments
-* Based on the internal empty template. 
-* Author: root
-* Tags: 
+* Name: Sensitivity_Analysis
+* 
+* This file define experiments to perform sensitivity analysis using Sobol and Morris methods.
+* The parameters to test are :
+* 			nb_init_infected,
+* 			density_ref_contact,
+*			init_all_ages_successful_contact_rate_human,
+*			init_all_ages_factor_contact_rate_asymptomatic,
+*			init_all_ages_proportion_asymptomatic,
+*			init_all_ages_proportion_hospitalisation,
+*			init_all_ages_proportion_icu,
+*			init_all_ages_proportion_dead_symptomatic
+* The output of interest are :
+* 			nb_dead,
+*			nb_recovered,
+*			nb_susceptibles,
+*			nb_infectious,
+*			nb_infected,
+*			step_max_peak,
+*			step_end_epidemiology
+* 
+* Gui experiment "test" can be run to perform 1 simulation and shows outputs of the model but doesn't
+* perform sensitivity analysis.
+* 
+* Gui experiment "headless" should be run headless with xml files generated with the python script
+* "generate_sensitivity.py" that perform Saltelli or Morris sampling. This will evaluate the model
+* for the corresponding sample and save result into "./Results/Results_COMOKIT.csv" file.
+* Then to compute Sobol or Morris indices please see 
+* 
+* Batch experiment "Sobol" and "Morris" can be use directly for fewer sample but the Sensitivity Analysis
+* won't be as good.
+* 
+* /!\ You should delete the folder "Results" before performing sensitivity analysis to ensure that 
+* the previous analysis doesn't interfere.
+* 
+* Author: Raphaël Dupont
+* Tags: Sensitivity
 */
 
 
-model Experiments
+model Sensitivity_Analysis
 
 import "../Models/Experiments/Abstract Experiment.gaml"
 
@@ -43,15 +76,6 @@ global {
 		max_hospitalized <- nb_hospitalized;
 	}
 	
-	// test that population is stable
-	int nb_tot <- 0 update: nb_susceptibles + nb_infected + nb_recovered + nb_hospitalized + nb_ICU + nb_dead;
-	int old_tot <- nb_tot;
-	reflex when: nb_tot != old_tot{
-		write "/!\\ pop changed : " + nb_tot + " " + old_tot;
-		old_tot <- nb_tot;
-	}
-	
-	
 	reflex start when: cycle=1{
 		// starting time of the experiment
 		t0 <- machine_time;
@@ -82,6 +106,8 @@ global {
 			nb_infected,
 			step_max_peak,
 			step_end_epidemiology,
+			
+			// To identify the experiment
 			seed
 		] to:"./Results/Results_COMOKIT.csv" type:"csv" rewrite: false;	
 		
@@ -91,8 +117,8 @@ global {
 		do pause;
 	}
 
-	
-	reflex save_outputs when: every(12#cycles){
+	// Save state of simulation twice a day for plots
+	reflex save_outputs when: every(nb_step_for_one_day/2#cycles){
 		save[
 			cycle,
 			nb_dead,
@@ -100,7 +126,7 @@ global {
 			nb_susceptibles,
 			nb_infectious,
 			nb_infected
-		] to: ("./Results/time_series_" + s + ".csv") type: "csv" rewrite: cycle=0 ? true : false;
+		] to: ("./Results/plots/time_series_" + s + ".csv") type: "csv" rewrite: cycle=0 ? true : false;
 	}
 	
 	init {
@@ -122,7 +148,6 @@ global {
 		];
 	}
 	
-	
 	action define_policy{   
 		ask Authority {
 			name <- "No containment policy";
@@ -134,7 +159,7 @@ global {
 
 
 
-experiment Sobol type: gui keep_simulations: false {
+experiment test type: gui keep_simulations: false {
     parameter "Nb init infected" var: nb_init_infected min:1 max:50000;
     parameter "Density ref contact" var:density_ref_contact min: 10.0 max: 500.0;
     parameter "Succeful contact rate proba" var: init_all_ages_successful_contact_rate_human min: 0.001 max: 0.999;
@@ -179,3 +204,62 @@ experiment Sobol type: gui keep_simulations: false {
 }
 
 
+experiment headless type: gui keep_simulations: false {
+    parameter "Nb init infected" var: nb_init_infected min:1 max:50000;
+    parameter "Density ref contact" var:density_ref_contact min: 10.0 max: 500.0;
+    parameter "Succeful contact rate proba" var: init_all_ages_successful_contact_rate_human min: 0.001 max: 0.999;
+    parameter "factor contact rate asymptomatic" var: init_all_ages_factor_contact_rate_asymptomatic min: 0.001 max: 0.999;
+    parameter "Asymptomatic proportion" var: init_all_ages_proportion_asymptomatic min: 0.001 max: 0.999;
+    parameter "Proportion of symptomatic case hospitalised" var: init_all_ages_proportion_hospitalisation min: 0.001 max: 0.999;
+    parameter "Proportion of hospitalised going to ICU" var: init_all_ages_proportion_icu min: 0.001 max: 0.999;
+    parameter "Proportion of symptomatic dying" var: init_all_ages_proportion_dead_symptomatic min: 0.001 max: 0.999;
+}
+
+
+experiment Sobol type:batch until: (cycle = MAX_STEP - 1) {
+	parameter "Nb init infected" var: nb_init_infected min:1 max:50000;
+    parameter "Density ref contact" var:density_ref_contact min: 10.0 max: 500.0;
+    parameter "Succeful contact rate proba" var: init_all_ages_successful_contact_rate_human min: 0.001 max: 0.999;
+    parameter "factor contact rate asymptomatic" var: init_all_ages_factor_contact_rate_asymptomatic min: 0.001 max: 0.999;
+    parameter "Asymptomatic proportion" var: init_all_ages_proportion_asymptomatic min: 0.001 max: 0.999;
+    parameter "Proportion of symptomatic case hospitalised" var: init_all_ages_proportion_hospitalisation min: 0.001 max: 0.999;
+    parameter "Proportion of hospitalised going to ICU" var: init_all_ages_proportion_icu min: 0.001 max: 0.999;
+    parameter "Proportion of symptomatic dying" var: init_all_ages_proportion_dead_symptomatic min: 0.001 max: 0.999;
+	method sobol
+		outputs:["nb_dead",						//List of outputs of interest
+			"nb_recovered",
+			"nb_susceptibles",
+			"nb_infectious",
+			"nb_infected",
+			"step_max_peak",
+			"step_end_epidemiology",
+			"seed"]
+    	sample:2    							// should be a power of 2	/!\ nb_sim = sample * (2 * nb_param + 2)
+    	path:"./Results/Sobol/sample.csv"		// path to the saltelli sample
+    	report:"./Results/Sobol/report.txt";	// path to the report
+}
+
+experiment Morris type:batch until: (cycle = MAX_STEP - 1) {
+	parameter "Nb init infected" var: nb_init_infected min:1 max:50000;
+    parameter "Density ref contact" var:density_ref_contact min: 10.0 max: 500.0;
+    parameter "Succeful contact rate proba" var: init_all_ages_successful_contact_rate_human min: 0.001 max: 0.999;
+    parameter "factor contact rate asymptomatic" var: init_all_ages_factor_contact_rate_asymptomatic min: 0.001 max: 0.999;
+    parameter "Asymptomatic proportion" var: init_all_ages_proportion_asymptomatic min: 0.001 max: 0.999;
+    parameter "Proportion of symptomatic case hospitalised" var: init_all_ages_proportion_hospitalisation min: 0.001 max: 0.999;
+    parameter "Proportion of hospitalised going to ICU" var: init_all_ages_proportion_icu min: 0.001 max: 0.999;
+    parameter "Proportion of symptomatic dying" var: init_all_ages_proportion_dead_symptomatic min: 0.001 max: 0.999;
+	method morris
+		outputs:["nb_dead",						//List of outputs of interest
+			"nb_recovered",
+			"nb_susceptibles",
+			"nb_infectious",
+			"nb_infected",
+			"step_max_peak",
+			"step_end_epidemiology",
+			"seed"]
+		levels: 4											// Level of Morris exploration
+		sample: 16											// should be a product of 2		/!\ nb_sim = 2 * sample
+		csv_file_parameters: "./Results/Morris/sample.csv"	// path to the sample
+    	results:"./Results/Morris/report.txt";				// path to the report
+		
+}
