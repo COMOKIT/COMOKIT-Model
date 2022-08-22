@@ -5,7 +5,7 @@
 * Tags: 
 */
 @no_experiment
-model anymodellevel
+model anymodellevel 
 
 import "../../Core/Models/Entities/Virus.gaml"
 
@@ -41,14 +41,13 @@ global {
 		ask group_individuals {
 			do initialise_disease;
 		}
-		write "area created: " + length(SpatialUnit) +" " + length(compartment);
+		//write "area created: " + length(SpatialUnit) +" " + length(compartment);
 		if test_mode {
 			do load_default_agenda;	
 		} else {
 			do load_agenda;
 		}
-		write sample(Activities);
-		write "agenda loaded";
+	//	write "agenda loaded";
 		ask SpatialUnit {
 			nb_individuals <- compartments_inhabitants sum_of each.group.num_individuals;
 		}
@@ -235,9 +234,6 @@ global {
 	}
 	
 	reflex main_dynamic {
-		
-		float t <- machine_time;
-		
 		ask SpatialUnit {
 			do reset_pop;
 		}

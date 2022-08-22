@@ -8,8 +8,8 @@
 @no_experiment
 
 model SpatialUnit
- 
-import "../Global.gaml"
+  
+import "../Global.gaml" 
  
 
 species SpatialUnit {

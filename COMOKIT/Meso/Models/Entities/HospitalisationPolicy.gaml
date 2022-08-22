@@ -18,7 +18,7 @@ import "../../../Core/Models/Entities/Policy.gaml"
 import "../Global.gaml"
 
 
-global {
+global { 
 	/*
 	 * To define a policy with ICU, hospitalisation and a given minimum number of test per day
 	 */
@@ -182,7 +182,7 @@ species HospitalisationPolicy parent: AbstractPolicy{
 	}
 	
 	//@TODO  : TO IMPLEMENT
-	float allowed(int source_area, int target_area, string activity_str, string building_type) {
-		return 1.0;
-	}
+	//float allowed(int source_area, int target_area, string activity_str, string building_type) {
+	//	return 1.0;
+	//} 
 }

@@ -90,6 +90,7 @@ experiment "Abstract Experiment" virtual: true {
 	 */
 	list<string> gather_dataset_names (string _datasets_folder_path <- project_path + DEFAULT_DATASETS_FOLDER_NAME) {
 		string dfp <- with_path_termination(_datasets_folder_path);
+		write sample(dfp) + " " + write sample(_datasets_folder_path);
 		if not (folder_exists(dfp)) {
 			error "Datasets folder does not exist : " + dfp;
 		}

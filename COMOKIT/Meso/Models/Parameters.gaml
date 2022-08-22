@@ -19,7 +19,7 @@ global {
 	
 	// The actual dataset path
 	//string dataset_path <- build_dataset_path();
-	string dataset_path <- "../Datasets/Ben Tre/";
+	string dataset_path <- "../Datasets/Vinh Phuc/";
 	
 	
 	bool parallel_computation <- false;

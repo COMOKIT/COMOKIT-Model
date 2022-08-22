@@ -23,7 +23,7 @@ global {
 	
 	list<string> EXCLUDED_CASE_STUDY_FOLDERS_NAME <- ["Test Generate GIS Data"] const:true;
 	string DEFAULT_CASE_STUDY_FOLDER_NAME <-"Ben Tre" const: true;
-	string DEFAULT_DATASETS_FOLDER_NAME <- "Datasets"  const: true;
+	string DEFAULT_DATASETS_FOLDER_NAME <- "Meso/Datasets"  const: true;
 	
 	// Parameter folder path
 	string parameters_folder_path <- "../Parameters/";
