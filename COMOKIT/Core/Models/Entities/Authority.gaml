@@ -188,7 +188,6 @@ species Authority {
 	 */
 	ActivitiesListingPolicy create_lockdown_policy {
 		create ActivitiesListingPolicy returns: result {
-			write "ici: " + sample(Activities);
 			loop s over: Activities.keys {
 				allowed_activities[s] <- false;
 			}

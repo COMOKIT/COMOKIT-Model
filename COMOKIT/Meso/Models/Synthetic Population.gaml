@@ -194,9 +194,7 @@ global {
 						\n Should be in "+[AGE,SEX,EMP,HID,IID];}
 			}
 		}
-		//write sample(age_map);
-		//write sample(gender_map);
-		//write sample(unemployed_map);
+		
 	}
 	
 	/*
@@ -282,7 +280,6 @@ global {
 				
 			}
 		}
-		write sample(individual_species);
 		list<list<Individual>> households;
 		ask homes parallel: parallel_computation{
 			loop times: nb_households {
@@ -404,7 +401,6 @@ global {
 	 
 	action create_social_networks(int min_student_age, int max_student_age) {
 		list<Individual> individuals <- list<Individual> (all_individuals);
-		write 5 among all_individuals;
 		map<Building, list<Individual>> WP<- (individuals where (each.working_place != nil)) group_by each.working_place;
 		map<Building, list<Individual>> Sc<- (individuals where (each.school != nil)) group_by each.school;
 		
@@ -771,25 +767,16 @@ global {
 	}
 	
 	Activity activity_choice_meso(Individual ind, list<Activity> possible_activities) {
-		write sample( weight_activity_per_age_sex_class);
-		write sample(possible_activities);
 		if (weight_activity_per_age_sex_class = nil ) or empty(weight_activity_per_age_sex_class) {
 			return any(possible_activities);
 		}
 		loop a over: weight_activity_per_age_sex_class.keys {
-			write sample(a);
 			if (ind.age >= a[0]) and (ind.age <= a[1]) {
-				write sample(weight_activity_per_age_sex_class[a]);
 				map<string, float> weight_act <-  weight_activity_per_age_sex_class[a][ind.sex];
-				write sample(weight_act);
 				list<float> proba_activity <- possible_activities collect ((each.name in weight_act.keys) ? weight_act[each.name]:1.0 );
 				
 				if (sum(proba_activity) = 0) {return any(possible_activities);}
-				int i <- rnd_choice(proba_activity);
-				write sample(i) + " " + sample(possible_activities);
-				Activity act2 <- possible_activities[i];
-				write sample(act2);
-				return act2;
+				return possible_activities[rnd_choice(proba_activity)];
 			}
 		}
 		return any(possible_activities);
