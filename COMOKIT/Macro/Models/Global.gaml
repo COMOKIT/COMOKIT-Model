@@ -52,11 +52,15 @@ global {
 			nb_individuals <- compartments_inhabitants sum_of each.group.num_individuals;
 		}
 		
+		list<int> w_c <- compartment collect each.group.num_individuals;
 		loop times: nb_init_infected {
-			ask one_of(SpatialUnit) {
+			/*ask one_of(SpatialUnit) {
 				ask one_of(compartments_inhabitants) {
 					do new_case(1); 
 				}
+			}*/
+			ask compartment[rnd_choice(w_c)] {
+				do new_case(1);
 			}
 		}
 		ask SpatialUnit {
