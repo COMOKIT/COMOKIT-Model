@@ -5,7 +5,7 @@
 * Tags: 
 */
 @no_experiment
-model anymodellevel
+model anymodellevel 
 
 import "../../Core/Models/Entities/Virus.gaml"
 
@@ -36,28 +36,38 @@ global {
 		do init_sars_cov_2;
 		viral_agent <- viruses first_with (each.name = variant);
 		do create_spatial_unit;
+		list<string> bd_types <- remove_duplicates(SpatialUnit accumulate each.area_types.keys);
+		//write sample(bd_types);
 		
 		list<string> dt <- SpatialUnit accumulate (each.area_types.keys);
 		ask group_individuals {
 			do initialise_disease;
 		}
-		write "area created: " + length(SpatialUnit) +" " + length(compartment);
+		list<string> bd_type_ag;
+		//write "area created: " + length(SpatialUnit) +" " + length(compartment);
 		if test_mode {
-			do load_default_agenda;	
+			bd_type_ag <- bd_type_ag +  load_default_agenda();	
 		} else {
-			do load_agenda;
+			bd_type_ag <- bd_type_ag + load_agenda();
 		}
-		write sample(Activities);
-		write "agenda loaded";
+		bd_type_ag <- remove_duplicates(bd_type_ag);
+		
+		//write sample(bd_type_ag);
+	//	write "agenda loaded";
 		ask SpatialUnit {
 			nb_individuals <- compartments_inhabitants sum_of each.group.num_individuals;
+			loop bt over: copy(area_types.keys) {
+				if not (bt in bd_type_ag) {
+					remove key: bt from: area_types;
+				}
+			}
 		}
 		
+		
+		list<int> w_c <- compartment collect each.group.num_individuals;
 		loop times: nb_init_infected {
-			ask one_of(SpatialUnit) {
-				ask one_of(compartments_inhabitants) {
-					do new_case(1); 
-				}
+			ask compartment[rnd_choice(w_c)] {
+				do new_case(1);
 			}
 		}
 		ask SpatialUnit {
@@ -65,7 +75,7 @@ global {
 		}
 	}
 	
-	action load_default_agenda {
+	list<string> load_default_agenda {
 		list<SpatialUnit> offices_sa <- (SpatialUnit where ("office" in each.area_types.keys));
 		list<SpatialUnit> schools_sa <- (SpatialUnit where ("school" in each.area_types.keys));
 		ask SpatialUnit {
@@ -95,9 +105,10 @@ global {
 		}	
 		
 		Activities <- [act_studying::nil, act_working::nil];
+		return ["home", "school", "office"];
 	}
 	
-	action load_agenda {
+	list<string>  load_agenda {
 		list<string> activity_list;
 		list<string> bd_type_list;
 		ask SpatialUnit {
@@ -167,11 +178,11 @@ global {
 			}
 		}
 		activity_list >> act_home;
-		write sample(activity_list);
 		Activities <-[];
 		loop act over: activity_list {
 			Activities[act] <- nil;
 		}
+		return bd_type_list;
 	}
 	action create_spatial_unit {
 		activities <- init_building_type_parameters_fct(building_type_per_activity_parameters, possible_workplaces,possible_schools, school_age ,active_age) ;
@@ -235,9 +246,6 @@ global {
 	}
 	
 	reflex main_dynamic {
-		
-		float t <- machine_time;
-		
 		ask SpatialUnit {
 			do reset_pop;
 		}

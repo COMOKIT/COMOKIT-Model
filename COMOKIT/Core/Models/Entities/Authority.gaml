@@ -19,7 +19,7 @@ import "../Global.gaml"
 
 import "Policy.gaml"
 
-global {
+global { 
 
 	action create_authority {
 		create Authority;
@@ -60,9 +60,9 @@ species Authority {
 		} 
 	}
 	
-	float allows_rate (int source_area, int target_area, string activity_str, string building_type) { 
+	list<float> allows_rate (int source_area, int target_area, string activity_str, string building_type, float tested_susceptible, float tested_infected) { 
 		float start <- BENCHMARK ? machine_time : 0.0;
-		float allowed_rate <- policy.allowed(source_area, target_area, activity_str, building_type);
+		list<float> allowed_rate <- policy.allowed(source_area, target_area, activity_str, building_type, tested_susceptible,  tested_infected);
 		if BENCHMARK {
 			bench["Authority.allows_rate|action"] <- (bench contains_key "Authority.allows_rate|action" ? 
 				bench["Authority.allows_rate|action"] : 0.0) + machine_time - start;
@@ -188,7 +188,6 @@ species Authority {
 	 */
 	ActivitiesListingPolicy create_lockdown_policy {
 		create ActivitiesListingPolicy returns: result {
-			write "ici: " + sample(Activities);
 			loop s over: Activities.keys {
 				allowed_activities[s] <- false;
 			}

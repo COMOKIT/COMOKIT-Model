@@ -23,7 +23,7 @@ global {
 	
 	list<string> EXCLUDED_CASE_STUDY_FOLDERS_NAME <- ["Test Generate GIS Data"] const:true;
 	string DEFAULT_CASE_STUDY_FOLDER_NAME <-"Ben Tre" const: true;
-	string DEFAULT_DATASETS_FOLDER_NAME <- "Datasets"  const: true;
+	string DEFAULT_DATASETS_FOLDER_NAME <- "Meso/Datasets"  const: true;
 	
 	// Parameter folder path
 	string parameters_folder_path <- "../Parameters/";
@@ -70,7 +70,7 @@ global {
 	float basic_viral_decrease <- 0.33; //Value to decrement the viral load in the environment
 	
 	// Re-infections
-	bool allow_reinfection <- true; // Allowing Individual to be infected by the sars-cov-2 virus multiple times
+	bool allow_reinfection <- false; // Allowing Individual to be infected by the sars-cov-2 virus multiple times
 	
 	// Behavioral parameters
 	float init_all_ages_proportion_wearing_mask <- 0.0; //Proportion of people wearing a mask

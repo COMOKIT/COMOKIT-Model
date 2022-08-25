@@ -12,9 +12,9 @@ model Group
 import "../../../Core/Models/Entities/Authority.gaml"
 
 import "../Global.gaml"  
+ 
 
-
-species group_individuals {
+species group_individuals { 
 	compartment my_compartment; 
 	int num_individuals;  
 	int age;
@@ -32,6 +32,8 @@ species group_individuals {
 	int num_icu;
 	int num_hospitalisation;
 	int num_immune;
+	int num_isolated_infected;
+	int num_isolated_non_infected;
 	
 	float immunity_evasion_rate;
 	int latent_period_asymptomatic;
@@ -294,17 +296,19 @@ species compartment {
 					map<string,float> bd_act <- ag_act[activity_type];
 					loop bd_type over: bd_act.keys{
 						float coeff <-bd_act[bd_type];
-						float allow_rate <- Authority[0].allows_rate (area_id, a.id_int, activity_type, bd_type);
-						if (allow_rate < 1.0) {
+						float tested_susceptible <- 0.0;//num_tested_;
+						float tested_infected;
+						list<float> allow_rate <- Authority[0].allows_rate (area_id, a.id_int, activity_type, bd_type, tested_susceptible, tested_infected);
+						if (sum(allow_rate) < 2.0) {
 							loop type_h over: homeplace.home_types_rates.keys {
-								list gp <- create_group(homeplace.home_types_rates[type_h] * coeff*(1.0 - allow_rate),coeff*(1.0 - allow_rate));
+								list gp <- create_group(homeplace.home_types_rates[type_h] * coeff*(1.0 - allow_rate[0]),coeff*(1.0 - allow_rate[1]));
 								if not empty(gp){
 									homeplace.current_groups[type_h]<< gp; 
 								}
 							}
 						}
-						if allow_rate > 0.0 {
-							list gp <- create_group(coeff*allow_rate,coeff*allow_rate);
+						if sum(allow_rate) > 0.0 {
+							list gp <- create_group(coeff*allow_rate[0],coeff*allow_rate[1]);
 							if not empty(gp){
 								a.current_groups[bd_type]<< gp; 
 							}

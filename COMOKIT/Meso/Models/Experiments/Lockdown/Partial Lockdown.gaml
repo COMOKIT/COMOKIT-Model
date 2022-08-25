@@ -45,7 +45,7 @@ global {
 experiment "Partial Lock Down" parent: "Abstract Experiment" autorun: true {
 
 	output {
-		layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;		
+		//layout #split consoles: false editors: false navigator: false tray: false tabs: false toolbars: false controls: true;		
 		
 		display "Main" parent: default_display {}
 		display "Chart" parent: states_evolution_chart {}

@@ -18,7 +18,7 @@ import "../../../Core/Models/Entities/Policy.gaml"
 import "../Global.gaml"
 
 
-global {
+global { 
 	/*
 	 * To define a policy with ICU, hospitalisation and a given minimum number of test per day
 	 */
@@ -34,7 +34,7 @@ global {
 } 
 /**
  * The policy used to use hospitals for cure  */
-species HospitalisationPolicy parent: AbstractPolicy{
+species HospitalisationPolicy parent: AbstractPolicy virtual: false{
 	//Allowing ICU admission or not (example, Lao PDR does not have ICU capacity)
 	bool is_allowing_ICU;
 	//Allowing hospitalisation or not (example, not wanting symptomatic people that are not in the need of ICU to maintain other services)
@@ -182,7 +182,7 @@ species HospitalisationPolicy parent: AbstractPolicy{
 	}
 	
 	//@TODO  : TO IMPLEMENT
-	float allowed(int source_area, int target_area, string activity_str, string building_type) {
-		return 1.0;
-	}
+	list<float> allowed(int source_area, int target_area, string activity_str, string building_type, float tested_susceptible, float tested_infected) {
+		return [1.0,1.0];
+	} 
 }

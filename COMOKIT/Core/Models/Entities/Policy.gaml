@@ -44,7 +44,7 @@ species AbstractPolicy virtual: true {
 	/**
 	 * This action - defined for the macro model - returns the rate of individuals coming from source area to carry out a given activity in a given type of building into a target area 
 	 */
-	float allowed(int source_area, int target_area, string activity_str, string building_type) virtual: true;
+	list<float> allowed(int source_area, int target_area, string activity_str, string building_type, float tested_susceptible, float tested_infected) virtual: true;
 }
 
 
@@ -60,8 +60,8 @@ species NoPolicy parent: AbstractPolicy {
 		return true;
 	}
 	
-	float allowed(int source_area, int target_area, string activity_str, string building_type) {
-		return 1.0;
+	list<float> allowed(int source_area, int target_area, string activity_str, string building_type,float tested_susceptible, float tested_infected) {
+		return [1.0,1.0];
 	}
 }
 
@@ -84,8 +84,8 @@ species ActivitiesListingPolicy parent: AbstractPolicy {
 		}
 	}
 	
-	float allowed(int source_area, int target_area, string activity_str, string building_type) {
-		return allowed_activities[activity_str] ? 1.0 : 0.0;
+	list<float> allowed(int source_area, int target_area, string activity_str, string building_type,float tested_susceptible, float tested_infected) {
+		return allowed_activities[activity_str] ? [1.0,1.0] : [0.0,0.0];
 	}
 	
 	
@@ -109,8 +109,8 @@ species PositiveAtHome parent: AbstractPolicy {
 	}
 	
 	//@todo : TO IMPLEMENT
-	float allowed(int source_area, int target_area, string activity_str, string building_type) {
-		return 1.0;
+	list<float> allowed(int source_area, int target_area, string activity_str, string building_type,float tested_susceptible, float tested_infected) {
+		return [1.0,1.0];
 	}
 }
 
@@ -131,8 +131,12 @@ species FamilyOfPositiveAtHome parent: AbstractPolicy {
 		return true;
 	}
 	//@TODO  : TO IMPLEMENT
-	float allowed(int source_area, int target_area, string activity_str, string building_type) {
-		return 1.0;
+	list<float> allowed(int source_area, int target_area, string activity_str, string building_type, float tested_susceptible, float tested_infected) {
+		if activity_str = act_home {
+			return [1.0,1.0];
+		}
+		
+		return [1.0 - tested_susceptible,1.0 - tested_infected];
 	}
 }
 
@@ -160,10 +164,11 @@ species CompoundPolicy parent: AbstractPolicy {
 		return true;
 	}
 	
-	float allowed(int source_area, int target_area, string activity_str, string building_type) {
-		float rate <- 1.0;
+	list<float> allowed(int source_area, int target_area, string activity_str, string building_type, float tested_susceptible, float tested_infected) {
+		list<float> rate <- [1.0,1.0];
 		loop p over: targets {
-			rate <- rate * p.allowed(source_area, target_area, activity_str, building_type);
+			list<float> r <-  p.allowed(source_area, target_area, activity_str, building_type, tested_susceptible, tested_infected);
+			rate <- [rate[0] * r[0],rate[1] * r[1]];
 		}
 		return rate;
 	}
@@ -189,8 +194,8 @@ species ForwardingPolicy parent: AbstractPolicy {
 		return target.is_allowed(i, activity);
 	}
 	
-	float allowed(int source_area, int target_area, string activity_str, string building_type) {
-		return target.allowed(source_area, target_area, activity_str, building_type);
+	list<float> allowed(int source_area, int target_area, string activity_str, string building_type,float tested_susceptible, float tested_infected) {
+		return target.allowed(source_area, target_area, activity_str, building_type, tested_susceptible,  tested_infected);
 	}
 
 }
@@ -211,8 +216,10 @@ species PartialPolicy parent: ForwardingPolicy {
 		return super.is_allowed(i, activity);
 	}
 	
-	float allowed(int source_area, int target_area, string activity_str, string building_type) {
-		return tolerance + ( 1 - tolerance) * super.allowed(source_area, target_area, activity_str, building_type);
+	list<float> allowed(int source_area, int target_area, string activity_str, string building_type, float tested_susceptible, float tested_infected) {
+		list<float> r <- super.allowed(source_area, target_area, activity_str, building_type, tested_susceptible, tested_infected) ;
+		float tol <- ( 1 - tolerance) ;
+		return [r[0] * tol, r[1] * tol];
 	}
 
 }
@@ -360,11 +367,11 @@ species TemporaryPolicy parent: ForwardingPolicy {
 		return super.is_allowed(i, activity);
 	}
 	
-	float allowed(int source_area, int target_area, string activity_str, string building_type) {
+	list<float> allowed(int source_area, int target_area, string activity_str, string building_type, float tested_susceptible, float tested_infected) {
 		if (!is_active()) {
-			return 1.0;
+			return [1.0,1.0];
 		}
-		return super.allowed(source_area, target_area, activity_str, building_type);
+		return super.allowed(source_area, target_area, activity_str, building_type, tested_susceptible, tested_infected);
 	}
 	
 
@@ -400,32 +407,37 @@ species DetectionPolicy parent: AbstractPolicy {
 	int nb_individual_tested_per_step;
 	bool symptomatic_only;
 	bool not_tested_only;
-
+	bool macro_model <- false;
+	
 	action apply {
-		
-		list<AbstractIndividual> individual_to_test;
-		if (symptomatic_only) {
-			individual_to_test <-  not_tested_only ? (all_individuals where (each.state = symptomatic and each.report_status = not_tested)) : (all_individuals where (each.state = symptomatic));
-			ask nb_individual_tested_per_step among individual_to_test {
-				do test_individual;
-			}
-		} else {
-			individual_to_test <-  (not_tested_only ? all_individuals where (each.clinical_status != dead and each.report_status = not_tested) : all_individuals where (each.clinical_status != dead));
-			ask nb_individual_tested_per_step among individual_to_test {
-				do test_individual;
+		if (macro_model) {
+			if (symptomatic_only) {
+			} else {
 				
 			}
-		}
-		
+		} else {
+			list<AbstractIndividual> individual_to_test;
+			if (symptomatic_only) {
+				individual_to_test <-  not_tested_only ? (all_individuals where (each.state = symptomatic and each.report_status = not_tested)) : (all_individuals where (each.state = symptomatic));
+				ask nb_individual_tested_per_step among individual_to_test {
+					do test_individual;
+				}
+			} else {
+				individual_to_test <-  (not_tested_only ? all_individuals where (each.clinical_status != dead and each.report_status = not_tested) : all_individuals where (each.clinical_status != dead));
+				ask nb_individual_tested_per_step among individual_to_test {
+					do test_individual;
+					
+				}
+			}
+		}	
 		
 	}
 	bool is_allowed (AbstractIndividual i, AbstractActivity activity) {
 		return true;
 	}
 
-//@TODO  : TO IMPLEMENT
-	float allowed(int source_area, int target_area, string activity_str, string building_type) {
-		return 1.0;
+	list<float> allowed(int source_area, int target_area, string activity_str, string building_type, float tested_susceptible, float tested_infected) {
+		return [1.0,1.0];
 	}
 }
 
@@ -474,7 +486,7 @@ species DetectionPolicy parent: AbstractPolicy {
  			// she/he is not an antivax, proceed to vaccination 
  			if flip(i.vax_willingness) {
  				
- 				int dose_nb;
+ 				int dose_nb; 
  				ask i {dose_nb <- vaccination(myself.v);} 
  				remaining_doses <-  remaining_doses - 1;
  				
@@ -495,13 +507,13 @@ species DetectionPolicy parent: AbstractPolicy {
  			}
  		}
  		
- 	}
+ 	} 
  	
  	bool is_allowed (AbstractIndividual i, AbstractActivity activity) { return true; }
  	
  	//@TODO  : TO IMPLEMENT
-	float allowed(int source_area, int target_area, string activity_str, string building_type) {
-		return 1.0;
+	list<float> allowed(int source_area, int target_area, string activity_str, string building_type, float tested_susceptible, float tested_infected) {
+		return [1.0,1.0];
 	}
  	
  } 

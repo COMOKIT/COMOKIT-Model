@@ -194,9 +194,7 @@ global {
 						\n Should be in "+[AGE,SEX,EMP,HID,IID];}
 			}
 		}
-		//write sample(age_map);
-		//write sample(gender_map);
-		//write sample(unemployed_map);
+		
 	}
 	
 	/*
@@ -282,7 +280,6 @@ global {
 				
 			}
 		}
-		write sample(individual_species);
 		list<list<Individual>> households;
 		ask homes parallel: parallel_computation{
 			loop times: nb_households {
@@ -404,7 +401,6 @@ global {
 	 
 	action create_social_networks(int min_student_age, int max_student_age) {
 		list<Individual> individuals <- list<Individual> (all_individuals);
-		write 5 among all_individuals;
 		map<Building, list<Individual>> WP<- (individuals where (each.working_place != nil)) group_by each.working_place;
 		map<Building, list<Individual>> Sc<- (individuals where (each.school != nil)) group_by each.school;
 		
@@ -671,7 +667,7 @@ global {
 					}
 					if not already and (age >= min_age_for_evening_act) and flip(proba_activity_evening) {
 						current_hour_ <- current_hour_ + rnd(1,max_duration_lunch);
-						Activity act <- myself.activity_choice(self, possible_activities);
+						Activity act <- myself.activity_choice_meso(self, possible_activities);
 						current_hour_ <- min(23,current_hour_ + rnd(1,max_duration_default));
 						int end_hour <- min(23,current_hour_ + rnd(1,max_duration_default));
 						if (species(act) = Activity) {
@@ -770,7 +766,7 @@ global {
 			
 	}
 	
-	Activity activity_choice(Individual ind, list<Activity> possible_activities) {
+	Activity activity_choice_meso(Individual ind, list<Activity> possible_activities) {
 		if (weight_activity_per_age_sex_class = nil ) or empty(weight_activity_per_age_sex_class) {
 			return any(possible_activities);
 		}
@@ -778,6 +774,7 @@ global {
 			if (ind.age >= a[0]) and (ind.age <= a[1]) {
 				map<string, float> weight_act <-  weight_activity_per_age_sex_class[a][ind.sex];
 				list<float> proba_activity <- possible_activities collect ((each.name in weight_act.keys) ? weight_act[each.name]:1.0 );
+				
 				if (sum(proba_activity) = 0) {return any(possible_activities);}
 				return possible_activities[rnd_choice(proba_activity)];
 			}
@@ -824,14 +821,14 @@ global {
 			if (current_hour_ >= end_hour) {
 				break;
 			}
-			Activity act <-activity_choice(current_ind, possible_activities);
-			if (species(act) = Activity) {
+			Activity act3 <-activity_choice_meso(current_ind, possible_activities);
+			if (species(act3) = Activity) {
 				
 				list<Individual> cands <- current_ind.friends where ((each.agenda_week[day - 1][current_hour_]) = nil);
 				list<Individual> inds <- max(0,gauss(nb_activity_fellows_mean,nb_activity_fellows_std)) among cands;
 				loop ind over: inds {
 					map<int,pair<Activity,list<Individual>>> agenda_day_ind <- ind.agenda_week[day - 1];
-					agenda_day_ind[current_hour_] <- act::(inds - ind + current_ind);
+					agenda_day_ind[current_hour_] <- act3::(inds - ind + current_ind);
 					bool return_home <- true;
 					loop h from: current_hour_ + 1 to: end_hour {
 						return_home <- agenda_day_ind[h] = nil;
@@ -839,9 +836,9 @@ global {
 					}
 					if (return_home) {agenda_day_ind[end_hour] <- staying_home[0]::[];}
 				}
-				agenda_day[current_hour_] <- act::inds;
+				agenda_day[current_hour_] <- act3::inds;
 			} else {
-				agenda_day[current_hour_] <- act::[];
+				agenda_day[current_hour_] <- act3::[];
 			}
 			agenda_day[end_hour] <- staying_home[0]::[];
 			current_hour_ <- end_hour + 1;
