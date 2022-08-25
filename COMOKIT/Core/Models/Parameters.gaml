@@ -70,7 +70,7 @@ global {
 	float basic_viral_decrease <- 0.33; //Value to decrement the viral load in the environment
 	
 	// Re-infections
-	bool allow_reinfection <- true; // Allowing Individual to be infected by the sars-cov-2 virus multiple times
+	bool allow_reinfection <- false; // Allowing Individual to be infected by the sars-cov-2 virus multiple times
 	
 	// Behavioral parameters
 	float init_all_ages_proportion_wearing_mask <- 0.0; //Proportion of people wearing a mask
