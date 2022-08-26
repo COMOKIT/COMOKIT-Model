@@ -38,7 +38,8 @@ global {
 	float factor_contact_rate_wearing_mask <- 0.5;
 
 	float density_ref_contact <- 200.0;
-	map<string,float> building_type_infection_factor <- ["home"::0.5];
+	float home_infection_rate <- 0.5;
+	map<string,float> building_type_infection_factor <- ["home"::home_infection_rate];
 	string variant <- DELTA;
 	int nb_init_infected <- 20;
 	

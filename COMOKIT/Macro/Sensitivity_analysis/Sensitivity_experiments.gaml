@@ -17,7 +17,7 @@
 *			nb_susceptibles,
 *			nb_infectious,
 *			nb_infected,
-*			step_max_peak,
+*			step_epidemiological_peak,
 *			step_end_epidemiology
 * 
 * Gui experiment "test" can be run to perform 1 simulation and shows outputs of the model but doesn't
@@ -52,28 +52,36 @@ global {
 	int MAX_STEP <- 365 * 24 const: true; // 1 year
 	
 	//output variables
+		// outputs per step of simulation
 	int nb_susceptibles -> group_individuals sum_of (each.num_susceptibles);
 	int nb_infected -> group_individuals sum_of(each.num_latent_asymptomatics + each.num_latent_symptomatics + each.num_symptomatic + each.num_asymptomatic);
 	int nb_infectious -> group_individuals sum_of (each.num_symptomatic + each.num_asymptomatic);
 	int nb_recovered -> group_individuals sum_of (each.num_recovered);
-	int nb_immune -> group_individuals sum_of(each.num_immune);
 	int nb_hospitalized -> group_individuals sum_of(each.num_hospitalisation);
 	int nb_ICU -> group_individuals sum_of(each.num_icu);
 	int nb_dead -> group_individuals sum_of (each.num_dead);
+		// aggregate output
+	int max_hospitalization <- -1;
+	int max_icu <- -1;
+	int step_epidemiological_peak <- 0;
+	int step_end_epidemiology <- MAX_STEP;
 	
-	int step_end_epidemiology <- MAX_STEP;	
-	int step_max_peak <- 0;
-	int max_hospitalized <- 0;
 	
-	// update max peak
-	int max_peak <- -1;
-	reflex update_peak when: nb_infected > max_peak{
-		max_peak <- nb_infected;
-		step_max_peak <- cycle;
+	// update step_epidemiological_peak
+	int max_epidemiological_peak <- -1;
+	reflex update_peak when: nb_infected > max_epidemiological_peak{
+		max_epidemiological_peak <- nb_infected;
+		step_epidemiological_peak <- cycle;
 	}
 	
-	reflex update_max_hospitalized when: max_hospitalized < nb_hospitalized{
-		max_hospitalized <- nb_hospitalized;
+	// update max_icu
+	reflex max_icu when: max_icu < nb_hospitalized{
+		max_icu <- nb_hospitalized;
+	}
+	
+	// update max_hospitalization
+	reflex update_max_hospitalized when: max_hospitalization < nb_hospitalized{
+		max_hospitalization <- nb_hospitalized;
 	}
 	
 	reflex start when: cycle=1{
@@ -82,7 +90,7 @@ global {
 		write "["+ s + "] Start experiment ...";
 	}
 	
-	reflex stop when: nb_infected <=0 or (cycle = MAX_STEP-1) {		
+	reflex stop_and_save when:(nb_infected <=0 and nb_infectious <=0 and nb_hospitalized <=0 and nb_ICU<=0) or (cycle = MAX_STEP-1) {
 		// Update step_end_epidemiology
 		step_end_epidemiology <- cycle;	
 		
@@ -97,14 +105,13 @@ global {
 			init_all_ages_proportion_hospitalisation,
 			init_all_ages_proportion_icu,
 			init_all_ages_proportion_dead_symptomatic,
+			home_infection_rate,
 			
 			// Outputs
 			nb_dead,
-			nb_recovered,
-			nb_susceptibles,
-			nb_infectious,
-			nb_infected,
-			step_max_peak,
+			max_icu,
+			max_hospitalization,
+			step_epidemiological_peak,
 			step_end_epidemiology,
 			
 			// To identify the experiment
@@ -114,25 +121,25 @@ global {
 		
 		// Write execution time
 		write "["+ s + "] End. Execution time : " + string ((machine_time - t0) / 1000) + "s. Result saved";
-		do pause;
+//		do pause;
 	}
 
-	// Save state of simulation twice a day for plots
-	reflex save_outputs when: every(nb_step_for_one_day/2#cycles){
+	// Save state of simulation once a day for plots
+	reflex save_outputs when: every(nb_step_for_one_day){
 		save[
 			cycle,
-			nb_dead,
-			nb_recovered,
 			nb_susceptibles,
-			nb_infectious,
-			nb_infected
+			nb_recovered,
+			nb_hospitalized,
+			nb_ICU,
+			nb_dead
 		] to: ("./Results/plots/time_series_" + s + ".csv") type: "csv" rewrite: cycle=0 ? true : false;
 	}
 	
 	init {
 		s <- floor(seed) as int;
 		
-		// Allow reinfection
+		// No reinfection
 		allow_reinfection <- false;
 		// TODO find and use actual values for icu capacity
 		hospital_icu_capacity <- 100000;
@@ -168,6 +175,7 @@ experiment test type: gui keep_simulations: false {
     parameter "Proportion of symptomatic case hospitalised" var: init_all_ages_proportion_hospitalisation min: 0.001 max: 0.999;
     parameter "Proportion of hospitalised going to ICU" var: init_all_ages_proportion_icu min: 0.001 max: 0.999;
     parameter "Proportion of symptomatic dying" var: init_all_ages_proportion_dead_symptomatic min: 0.001 max: 0.999;
+    parameter "Home infection rate" init:0.999 var: home_infection_rate min:0.001 max:0.999;
     
     
    output{
@@ -177,7 +185,6 @@ experiment test type: gui keep_simulations: false {
 	        	data "infected" value: nb_infected color: #orange;
 	        	data "infectious" value: nb_infectious color: #red;
 	        	data "recovered" value: nb_recovered color: #green;
-	        	data "immune" value: nb_immune color: #darkgreen;
 	        	data "hospitalized" value: nb_hospitalized color: #grey;
 	        	data "ICU" value: nb_ICU color: #darkgrey;
 	        	data "dead" value: nb_dead color: #black;
@@ -190,13 +197,14 @@ experiment test type: gui keep_simulations: false {
 	    		data "free ICU" value: hospital_icu_capacity - nb_ICU;
 	    	}
     	}
-    	monitor "max peak" value: step_max_peak;
-    	monitor "end_epidemiology" value: step_end_epidemiology;
+    	monitor "step_epidemiological_peak" value: step_epidemiological_peak;
+    	monitor "step_end_epidemiology" value: step_end_epidemiology;
+    	monitor "max_icu" value: max_icu;
+    	monitor "max_hospitalization" value: max_hospitalization;
     	monitor "susceptibles" value: nb_susceptibles;
     	monitor "infected" value: nb_infected;
     	monitor "infectious" value: nb_infectious;
     	monitor "recovered" value: nb_recovered;
-    	monitor "immune" value: nb_immune;
     	monitor "hospitalized" value: nb_hospitalized;
     	monitor "ICU" value: nb_ICU;
     	monitor "dead" value: nb_dead;
@@ -213,6 +221,7 @@ experiment headless type: gui keep_simulations: false {
     parameter "Proportion of symptomatic case hospitalised" var: init_all_ages_proportion_hospitalisation min: 0.001 max: 0.999;
     parameter "Proportion of hospitalised going to ICU" var: init_all_ages_proportion_icu min: 0.001 max: 0.999;
     parameter "Proportion of symptomatic dying" var: init_all_ages_proportion_dead_symptomatic min: 0.001 max: 0.999;
+    parameter "Home infection rate" var: home_infection_rate min:0.001 max:0.999;
 }
 
 
@@ -225,13 +234,15 @@ experiment Sobol type:batch until: (cycle = MAX_STEP - 1) {
     parameter "Proportion of symptomatic case hospitalised" var: init_all_ages_proportion_hospitalisation min: 0.001 max: 0.999;
     parameter "Proportion of hospitalised going to ICU" var: init_all_ages_proportion_icu min: 0.001 max: 0.999;
     parameter "Proportion of symptomatic dying" var: init_all_ages_proportion_dead_symptomatic min: 0.001 max: 0.999;
+    parameter "Home infection rate" var: home_infection_rate min:0.001 max:0.999;
+    
 	method sobol
 		outputs:["nb_dead",						//List of outputs of interest
 			"nb_recovered",
 			"nb_susceptibles",
 			"nb_infectious",
 			"nb_infected",
-			"step_max_peak",
+			"step_epidemiological_peak",
 			"step_end_epidemiology",
 			"seed"]
     	sample:2    							// should be a power of 2	/!\ nb_sim = sample * (2 * nb_param + 2)
@@ -248,13 +259,15 @@ experiment Morris type:batch until: (cycle = MAX_STEP - 1) {
     parameter "Proportion of symptomatic case hospitalised" var: init_all_ages_proportion_hospitalisation min: 0.001 max: 0.999;
     parameter "Proportion of hospitalised going to ICU" var: init_all_ages_proportion_icu min: 0.001 max: 0.999;
     parameter "Proportion of symptomatic dying" var: init_all_ages_proportion_dead_symptomatic min: 0.001 max: 0.999;
+    parameter "Home infection rate" var: home_infection_rate min:0.001 max:0.999;
+    
 	method morris
 		outputs:["nb_dead",						//List of outputs of interest
 			"nb_recovered",
 			"nb_susceptibles",
 			"nb_infectious",
 			"nb_infected",
-			"step_max_peak",
+			"step_epidemiological_peak",
 			"step_end_epidemiology",
 			"seed"]
 		levels: 4											// Level of Morris exploration
