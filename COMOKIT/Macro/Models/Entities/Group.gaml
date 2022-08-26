@@ -208,29 +208,34 @@ species group_individuals {
 							
 						}
 						match SYMPTOMATIC {
+							num_symptomatic <-num_symptomatic - val;
 							int nb_hospitalisation <- world.rate_to_num(val,rate_hospitalisation);
-							int nb_icu <- world.rate_to_num(val,rate_icu);
-							int nb_dead <- world.rate_to_num(val,rate_dead);
+							int nb_re <- val -nb_hospitalisation;
+							int nb_icu <- min(nb_re, world.rate_to_num(val,rate_icu));
+							nb_re <- nb_re - nb_icu;
+							int nb_dead <- min (nb_re, world.rate_to_num(val,rate_dead));
 							if nb_icu > hospital_icu_capacity {
 								nb_dead <- nb_dead + nb_icu - hospital_icu_capacity;
 								nb_icu <- hospital_icu_capacity;
 							}
 							hospital_icu_capacity<- hospital_icu_capacity - nb_icu;
 							
-							int nb_removed <- val - nb_hospitalisation - nb_dead - nb_icu;
-							evol_states[HOSPITALISATION][0] <- nb_hospitalisation;
-							evol_states[DEAD][0] <- nb_dead;
+							int nb_removed <- nb_re - nb_dead;
+							
+							evol_states[HOSPITALISATION][0] <- evol_states[HOSPITALISATION][0] + nb_hospitalisation;	
+							evol_states[ICU][0] <- evol_states[ICU][0] + nb_icu;
+							evol_states[DEAD][0] <- evol_states[DEAD][0] + nb_dead;
 							
 							if allow_reinfection {
-								evol_states[SUSCEPTIBLE][0] <- evol_states[SUSCEPTIBLE][0]  + val;
-								num_immune <- num_immune + val;
-								num_susceptibles<- num_susceptibles + val ;
+								evol_states[SUSCEPTIBLE][0] <- evol_states[SUSCEPTIBLE][0]  + nb_removed;
+								num_immune <- num_immune + nb_removed;
+								num_susceptibles<- num_susceptibles + nb_removed ;
 							} else {
-								evol_states[REMOVED][0] <-  evol_states[REMOVED][0]  + val;
+								evol_states[REMOVED][0] <-  evol_states[REMOVED][0]  + nb_removed;
 								num_recovered <- num_recovered + nb_removed;
 							}
 							num_dead <- num_dead + nb_dead;
-							num_symptomatic <-num_symptomatic - val;
+							
 						}
 						match ICU {
 							num_icu <- num_icu - val;
@@ -267,12 +272,20 @@ species group_individuals {
 }
 
 species compartment {
+	
 	int id;
 	group_individuals group;
 	list<list<map<SpatialUnit,map<string,map<string,float>>>>> agenda;
 	int area_id;
 	SpatialUnit homeplace;
 	
+	int num_individuals {
+		int nb <- 0;
+		loop o over: group.evol_states.values {
+			nb <- nb + sum(o);
+		}
+		return nb;
+	}
 	
 	list create_group (float coeff_susceptible, float coeff_infected){
 		
