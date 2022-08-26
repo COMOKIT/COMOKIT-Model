@@ -133,7 +133,7 @@ global {
 		s <- floor(seed) as int;
 		
 		// Allow reinfection
-		allow_reinfection <- true;
+		allow_reinfection <- false;
 		// TODO find and use actual values for icu capacity
 		hospital_icu_capacity <- 100000;
 		// List of parameters to study
