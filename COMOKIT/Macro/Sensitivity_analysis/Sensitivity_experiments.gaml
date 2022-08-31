@@ -3,8 +3,8 @@
 * 
 * This file define experiments to perform sensitivity analysis using Sobol and Morris methods.
 * The parameters to test are :
-* 			nb_init_infected,
-* 			density_ref_contact,
+*			nb_init_infected,
+*			density_ref_contact,
 *			init_all_ages_successful_contact_rate_human,
 *			init_all_ages_factor_contact_rate_asymptomatic,
 *			init_all_ages_proportion_asymptomatic,
@@ -12,7 +12,7 @@
 *			init_all_ages_proportion_icu,
 *			init_all_ages_proportion_dead_symptomatic
 * The output of interest are :
-* 			nb_dead,
+*			nb_dead,
 *			nb_recovered,
 *			nb_susceptibles,
 *			nb_infectious,
@@ -49,7 +49,7 @@ global {
 	int s; // seed of the xp
 	
 	// Maximum simulation step
-	int MAX_STEP <- 365 * 24 const: true; // 1 year
+	int MAX_STEP <- 2232 const: true; // 3 mois
 	
 	//output variables
 		// outputs per step of simulation
@@ -84,16 +84,18 @@ global {
 		max_hospitalization <- nb_hospitalized;
 	}
 	
+	// Update step_end_epidemiology
+	reflex end_epidemiology when: nb_infected <=0 and nb_infectious <=0 and nb_hospitalized <=0 and nb_ICU<=0 and step_end_epidemiology=MAX_STEP{
+		step_end_epidemiology <- cycle;
+	}
+	
 	reflex start when: cycle=1{
 		// starting time of the experiment
 		t0 <- machine_time;
 		write "["+ s + "] Start experiment ...";
 	}
-	
-	reflex stop_and_save when:(nb_infected <=0 and nb_infectious <=0 and nb_hospitalized <=0 and nb_ICU<=0) or (cycle = MAX_STEP-1) {
-		// Update step_end_epidemiology
-		step_end_epidemiology <- cycle;	
-		
+
+	reflex stop_and_save when: cycle = MAX_STEP-1 {
 		// Save final Results
 		save [
 			// Inputs
@@ -121,11 +123,11 @@ global {
 		
 		// Write execution time
 		write "["+ s + "] End. Execution time : " + string ((machine_time - t0) / 1000) + "s. Result saved";
-//		do pause;
+		
 	}
 
 	// Save state of simulation once a day for plots
-	reflex save_outputs when: every(nb_step_for_one_day){
+	reflex save_outputs when: every(nb_step_for_one_day#cycle){
 		save[
 			cycle,
 			nb_susceptibles,
@@ -179,35 +181,35 @@ experiment test type: gui keep_simulations: false {
     
     
    output{
-    	display Population_information refresh:every(1#cycles) {
-	    	chart "evolution" type: series{
-	        	data "susceptibles" value: nb_susceptibles color: #blue;
-	        	data "infected" value: nb_infected color: #orange;
-	        	data "infectious" value: nb_infectious color: #red;
-	        	data "recovered" value: nb_recovered color: #green;
-	        	data "hospitalized" value: nb_hospitalized color: #grey;
-	        	data "ICU" value: nb_ICU color: #darkgrey;
-	        	data "dead" value: nb_dead color: #black;
-	    	}	
+	display Population_information refresh:every(1#cycles) {
+		chart "evolution" type: series{
+			data "susceptibles" value: nb_susceptibles color: #blue;
+			data "infected" value: nb_infected color: #orange;
+			data "infectious" value: nb_infectious color: #red;
+			data "recovered" value: nb_recovered color: #green;
+			data "hospitalized" value: nb_hospitalized color: #grey;
+			data "ICU" value: nb_ICU color: #darkgrey;
+			data "dead" value: nb_dead color: #black;
+		}	
 	    }
 	    
 	    display icu_capacity refresh:every(1#cycles) {	
-	    	chart "ICU capacity" type:pie {
-	    		data "ICU used" value: nb_ICU;
-	    		data "free ICU" value: hospital_icu_capacity - nb_ICU;
-	    	}
-    	}
-    	monitor "step_epidemiological_peak" value: step_epidemiological_peak;
-    	monitor "step_end_epidemiology" value: step_end_epidemiology;
-    	monitor "max_icu" value: max_icu;
-    	monitor "max_hospitalization" value: max_hospitalization;
-    	monitor "susceptibles" value: nb_susceptibles;
-    	monitor "infected" value: nb_infected;
-    	monitor "infectious" value: nb_infectious;
-    	monitor "recovered" value: nb_recovered;
-    	monitor "hospitalized" value: nb_hospitalized;
-    	monitor "ICU" value: nb_ICU;
-    	monitor "dead" value: nb_dead;
+		chart "ICU capacity" type:pie {
+			data "ICU used" value: nb_ICU;
+			data "free ICU" value: hospital_icu_capacity - nb_ICU;
+		}
+	}
+	monitor "step_epidemiological_peak" value: step_epidemiological_peak;
+	monitor "step_end_epidemiology" value: step_end_epidemiology;
+	monitor "max_icu" value: max_icu;
+	monitor "max_hospitalization" value: max_hospitalization;
+	monitor "susceptibles" value: nb_susceptibles;
+	monitor "infected" value: nb_infected;
+	monitor "infectious" value: nb_infectious;
+	monitor "recovered" value: nb_recovered;
+	monitor "hospitalized" value: nb_hospitalized;
+	monitor "ICU" value: nb_ICU;
+	monitor "dead" value: nb_dead;
     }
 }
 
@@ -224,7 +226,7 @@ experiment headless type: gui keep_simulations: false {
     parameter "Home infection rate" var: home_infection_rate min:0.001 max:0.999;
 }
 
-
+/*
 experiment Sobol type:batch until: (cycle = MAX_STEP - 1) {
 	parameter "Nb init infected" var: nb_init_infected min:1 max:50000;
     parameter "Density ref contact" var:density_ref_contact min: 10.0 max: 500.0;
@@ -245,9 +247,9 @@ experiment Sobol type:batch until: (cycle = MAX_STEP - 1) {
 			"step_epidemiological_peak",
 			"step_end_epidemiology",
 			"seed"]
-    	sample:2    							// should be a power of 2	/!\ nb_sim = sample * (2 * nb_param + 2)
-    	path:"./Results/Sobol/sample.csv"		// path to the saltelli sample
-    	report:"./Results/Sobol/report.txt";	// path to the report
+	sample:2					// should be a power of 2	/!\ nb_sim = sample * (2 * nb_param + 2)
+	path:"./Results/Sobol/sample.csv"		// path to the saltelli sample
+	report:"./Results/Sobol/report.txt";		// path to the report
 }
 
 experiment Morris type:batch until: (cycle = MAX_STEP - 1) {
@@ -261,6 +263,7 @@ experiment Morris type:batch until: (cycle = MAX_STEP - 1) {
     parameter "Proportion of symptomatic dying" var: init_all_ages_proportion_dead_symptomatic min: 0.001 max: 0.999;
     parameter "Home infection rate" var: home_infection_rate min:0.001 max:0.999;
     
+    
 	method morris
 		outputs:["nb_dead",						//List of outputs of interest
 			"nb_recovered",
@@ -273,6 +276,7 @@ experiment Morris type:batch until: (cycle = MAX_STEP - 1) {
 		levels: 4											// Level of Morris exploration
 		sample: 16											// should be a product of 2		/!\ nb_sim = 2 * sample
 		csv_file_parameters: "./Results/Morris/sample.csv"	// path to the sample
-    	results:"./Results/Morris/report.txt";				// path to the report
+	results:"./Results/Morris/report.txt";				// path to the report
 		
 }
+*/
