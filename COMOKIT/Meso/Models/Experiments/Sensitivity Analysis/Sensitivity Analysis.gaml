@@ -27,8 +27,7 @@ global {
 
 experiment Sensitivity parent: "Abstract Batch" 
 	type: batch repeat: 60 keep_seed: false until: world.sim_stop() or cycle>=cycle_limit {
-	method exhaustive;
-	
+
 	permanent {
 		
 		display "charts" toolbar: false background: #black{

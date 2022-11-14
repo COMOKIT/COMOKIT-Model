@@ -276,7 +276,7 @@ species pseudo_individual parent:BiologicalEntity {
 experiment batch_Contact_Tracking parent:"Abstract Experiment" type:batch 
 	repeat:12 until:cycle>=duration_xp/step keep_simulations:false {
 
-	parameter "experiment length" var:duration_xp init:#month min:#day max:31536000.0;
+	parameter "experiment length" var:duration_xp init:1#month min:#day max:31536000.0; 
 	parameter "estimated R0" var:target_R0 init:2.7 min:0.1;
 
 	// string DEFAULT_DATASETS_FOLDER_NAME <- "your_datasets_folder_name";
@@ -301,7 +301,6 @@ experiment batch_Contact_Tracking parent:"Abstract Experiment" type:batch
 experiment estimate_beta type:batch until:world.stop_sim() repeat:4 keep_seed:true {
 	
 	parameter 'increment contact rate' var: inc init: 0.0 min:0.0 max: 0.01 step:0.001;
-	method exhaustive;// minimize: Re_fitness;
 		
 	//the permanent section allows to define a output section that will be kept during all the batch experiment
 	permanent {
