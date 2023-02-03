@@ -336,6 +336,10 @@ species DefaultWorker parent: BuildingIndividual {
 					
 					date lunch <- date("11:30", TFS) add_days i + rnd(60#mn);
 					agenda_week[lunch] <- first(ActivityGotoRestaurant);
+					
+					date lunch_end <- lunch + rnd(15#mn,60#mn);
+					agenda_week[lunch_end] <- first(ActivityGoToOffice);
+					
 						
 					date end <- date("17:00", TFS) add_days i + rnd(60#mn);
 					agenda_week[end] <- first(ActivityLeaveArea);
@@ -345,7 +349,7 @@ species DefaultWorker parent: BuildingIndividual {
 					date arrive <- date("17:30", TFS) add_days i + rnd(15#mn);
 					agenda_week[arrive] <- first(ActivityGoToOffice);
 						
-					date end <- date("06:00", TFS) add_days i + rnd(60#mn);
+					date end <- date("06:00", TFS) add_days (i+1) + rnd(60#mn);
 					agenda_week[end] <- first(ActivityLeaveArea);
 				}
 			}
