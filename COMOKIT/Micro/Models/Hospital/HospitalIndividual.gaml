@@ -86,7 +86,7 @@ species Doctor parent: Worker {
 //		nightshift: 18h arrive, 19h work, 5h next day go home
 		if(!nightshift){
 			date arrive <- date("06:30", TFS) add_days i + rnd(15#mn);
-			agenda_week[arrive] <- first(ActivityGoToOffice);
+			agenda_week[arrive] <- first(ActivityGoToOfficeHospital);
 			date meeting <- date("07:00", TFS) add_days i;
 			agenda_week[meeting] <- first(ActivityGoToMeeting);
 			
@@ -99,7 +99,7 @@ species Doctor parent: Worker {
 			date work <- date("08:20", TFS) add_days i;
 			int choice <- rnd_choice([0.4,0.3,0.3]);
 			if(headdoc){
-				agenda_week[work] <- first(ActivityGoToOffice);
+				agenda_week[work] <- first(ActivityGoToOfficeHospital);
 			}
 			else{
 				switch choice{
@@ -121,7 +121,7 @@ species Doctor parent: Worker {
 			
 			work <- date("13:30", TFS)  add_days i;
 			if(headdoc){
-				agenda_week[work] <- first(ActivityGoToOffice);
+				agenda_week[work] <- first(ActivityGoToOfficeHospital);
 			}
 			else{
 				switch choice{
@@ -145,7 +145,7 @@ species Doctor parent: Worker {
 		
 		else{
 			date arrive <- date("18:00", TFS)  add_days i + rnd(15#mn);
-			agenda_week[arrive] <- first(ActivityGoToOffice);
+			agenda_week[arrive] <- first(ActivityGoToOfficeHospital);
 			
 			date work <- date("19:00", TFS) add_days i;
 			agenda_week[work] <- first(ActivityGoToAdmissionRoom);
@@ -186,7 +186,7 @@ species Nurse parent: Worker {
 //		similar to daily rountine of doctor
 		if(!nightshift){
 			date arrive <- date("06:30", TFS) add_days i + rnd(15#mn);
-			agenda_week[arrive] <- first(ActivityGoToOffice);
+			agenda_week[arrive] <- first(ActivityGoToOfficeHospital);
 			
 			date meeting <- date("07:00", TFS) add_days i;
 			agenda_week[meeting] <- first(ActivityGoToMeeting);
@@ -246,7 +246,7 @@ species Nurse parent: Worker {
 		
 		else{
 			date arrive <- date("18:00", TFS) add_days i + rnd(15#mn);
-			agenda_week[arrive] <- first(ActivityGoToOffice);
+			agenda_week[arrive] <- first(ActivityGoToOfficeHospital);
 			
 			date work <- date("19:00", TFS) add_days i;
 			agenda_week[work] <- first(ActivityGoToAdmissionRoom);
@@ -492,7 +492,7 @@ species Intern parent: Worker{
 			
 			else{
 				date arrive <- date("18:00", TFS) add_days i + rnd(15#mn);
-				agenda_week[arrive] <- first(ActivityGoToOffice);
+				agenda_week[arrive] <- first(ActivityGoToOfficeHospital);
 				
 				date work <- date("19:00", TFS) add_days i ;
 				agenda_week[work] <- first(ActivityGoToAdmissionRoom);

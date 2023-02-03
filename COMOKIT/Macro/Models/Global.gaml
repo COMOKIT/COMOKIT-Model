@@ -247,8 +247,12 @@ global {
 	
 	reflex main_dynamic {
 		//write "total individuals:" + (compartment sum_of each.num_individuals());
+		
 		ask SpatialUnit {
 			do reset_pop;
+		}
+		ask experiment {
+			do compact_memory;
 		}
 		
 		ask SpatialUnit {

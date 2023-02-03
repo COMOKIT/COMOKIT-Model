@@ -17,6 +17,13 @@ global {
 		}
 	}	
 }
+
+
+experiment no_contaiment_bacth type: batch until: time >= 3#month repeat: 10 keep_simulations: false  {
+	string name_sim <- "No Containment";
+	
+	
+}
  
 experiment "No Containment" parent: abstract_experiment autorun: true  {
 	string name_sim <- "No Containment";

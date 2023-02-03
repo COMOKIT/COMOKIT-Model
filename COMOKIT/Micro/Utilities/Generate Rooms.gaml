@@ -12,7 +12,7 @@ import "Generate pedestrian paths.gaml"
 global {
 	
 	
-	string dataset_path <- "../Datasets/Danang Hospital/";
+	string dataset_path <- "../Datasets/Simple Building/";
 	string buildings_path <- dataset_path + "Buildings.shp";
 	string rooms_path <- dataset_path + "Rooms.shp" ;
 	string walls_path <- dataset_path + "Walls.shp" ;
@@ -363,7 +363,6 @@ experiment generating_rooms_path type: gui {
 			species BuildingEntry;
 			species Bed;
 			
-			//species OpenArea refresh: false;
 			species PedestrianPath refresh: false;
 			
 		}

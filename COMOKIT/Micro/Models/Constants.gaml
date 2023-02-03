@@ -50,6 +50,8 @@ global {
 
 	
 	// Room types
+	string OFFICE <- "office";
+	string RESTAURANT <- "restaurant";
 	string DOCTOR_ROOM <- "doctor_room";
 	string HEAD_DOCTOR_ROOM <- "head_doctor_room";
 	string NURSE_ROOM <- "nurse_room";

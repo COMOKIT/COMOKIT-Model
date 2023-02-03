@@ -21,7 +21,7 @@ global {
 	geometry shape <- envelope(obstacles_path);
 	bool display_free_space <- false parameter: true;
 	float P_shoulder_length <- 0.45 parameter: true;
-	
+	float min_open_area <- 5.0;
 	float simplification_dist <- 0.5; //simplification distance for the final geometries
 	
 	bool add_points_open_area <- true;//add points to open areas
@@ -29,8 +29,8 @@ global {
  	float min_dist_open_area <- 0.1;//min distance to considered an area as open area, 
  	float density_open_area <- 0.05; //density of points in the open areas (float)
  	bool clean_network <-  true; 
-	float tol_cliping <- 1.0; //tolerance for the cliping in triangulation (float; distance), 
-	float tol_triangulation <- 0.1; //tolerance for the triangulation 
+	float tol_cliping <- 0.1; //tolerance for the cliping in triangulation (float; distance), 
+	float tol_triangulation <- 0.01; //tolerance for the triangulation 
 	float min_dist_obstacles_filtering <- 0.0;// minimal distance to obstacles to keep a path (float; if 0.0, no filtering), 
 	
 	
@@ -50,14 +50,18 @@ global {
 		loop g over: obstacles {
 			open <- open -(g buffer (P_shoulder_length/2.0));
 		}
-		create OpenArea from: open.geometries with: (building:id_bd, floor:id_floor) returns: oa;
-		list<geometry> generated_lines <- generate_pedestrian_network([],open.geometries,add_points_open_area,random_densification,min_dist_open_area,density_open_area,clean_network,tol_cliping,tol_triangulation,min_dist_obstacles_filtering,simplification_dist);
-		write sample(length(generated_lines));
-		create PedestrianPath from: generated_lines with: (building:id_bd, floor:id_floor)  returns: pp{
-			area <- min(10.0,(Wall closest_to self) distance_to self) * shape.perimeter;
-			
+		if open != nil and open.area > min_open_area {
+			create OpenArea from: open.geometries with: (building:id_bd, floor:id_floor) returns: oa;
+			list<geometry> generated_lines <- generate_pedestrian_network([],open.geometries,add_points_open_area,random_densification,min_dist_open_area,density_open_area,clean_network,tol_cliping,tol_triangulation,min_dist_obstacles_filtering,simplification_dist);
+			write sample(length(generated_lines));
+			create PedestrianPath from: generated_lines with: (building:id_bd, floor:id_floor)  returns: pp{
+				area <- min(10.0,(Wall closest_to self) distance_to self) * shape.perimeter;
+				
+			}
+			return [oa,pp];
 		}
-		return [oa,pp];
+		return [];
+		
 		
 	}
 }
@@ -93,12 +97,3 @@ species Wall {
 }
 
 
-experiment generating_path type: gui {
-		output {
-		display map type: opengl{
-			species Wall refresh: false;
-			species OpenArea refresh: false;
-			species PedestrianPath refresh: false;
-		}
-	}
-}

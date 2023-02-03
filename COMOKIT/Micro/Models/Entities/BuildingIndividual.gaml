@@ -251,11 +251,25 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 	
 	reflex goto_activity when: target != nil {
 		PedestrianPath prev_edge <- current_edge = nil ? nil :PedestrianPath(current_edge);
-		
 		list<int> k <- [current_building = nil ? -1 : int(current_building), current_floor];
 		graph concerned_graph <- pedestrian_network[k];
-		
+		//write sample(length(connected_components_of(concerned_graph)));
+		//write name + " goto_activity : " + location + "  " + target + " path: " + path_between(concerned_graph, location, target);
+		if  path_between(concerned_graph, location, target) = nil {
+			
+			write sample((concerned_graph.edges mean_of first(agent(each).shape.points).z));
+			write name + " goto_activity : " + location + "  " + target + " path: " + path_between(concerned_graph, location, target);
+			write  path_between(concerned_graph, one_of(concerned_graph.vertices), one_of(concerned_graph.vertices));
+		//	save (concerned_graph.edges) type: shp to:"network.shp";
+			write sample(location);
+			write sample(target);
+			ask world {
+				do pause;
+			}
+		}
+		//write sample(concerned_graph.vertices);
 		do goto target: target on: concerned_graph move_weights: move_weights[k];
+		//write name + " after: " + location ;
 		if (current_building = nil) {
 			current_cell <- nil;
 		} 
@@ -301,4 +315,41 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 
 		}
 	}
+}
+
+
+species DefaultWorker parent: BuildingIndividual {
+	Room working_place;
+	rgb color <- #white;
+	bool nightshift <- flip(0.2);
+	init {
+		age <- int(skew_gauss(22.0, 65.0, 0.6, 0.3));
+		
+		working_place <- one_of(Room where (each.type = OFFICE));
+		
+		list<int> working_days <- 5 among [0,1,2,3,4,5,6];
+		loop i from: 0 to: 6 {
+			if (copy(current_date) add_days i).day_of_week in working_days {
+				if(!nightshift){
+					date arrive <- date("06:30", TFS) add_days i + rnd(15#mn);
+					agenda_week[arrive] <- first(ActivityGoToOffice);
+					
+					date lunch <- date("11:30", TFS) add_days i + rnd(60#mn);
+					agenda_week[lunch] <- first(ActivityGotoRestaurant);
+						
+					date end <- date("17:00", TFS) add_days i + rnd(60#mn);
+					agenda_week[end] <- first(ActivityLeaveArea);
+				}
+				
+				else{
+					date arrive <- date("17:30", TFS) add_days i + rnd(15#mn);
+					agenda_week[arrive] <- first(ActivityGoToOffice);
+						
+					date end <- date("06:00", TFS) add_days i + rnd(60#mn);
+					agenda_week[end] <- first(ActivityLeaveArea);
+				}
+			}
+		}
+	}
+
 }
