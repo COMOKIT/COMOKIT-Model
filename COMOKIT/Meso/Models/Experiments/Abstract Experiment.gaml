@@ -96,6 +96,7 @@ experiment "Abstract Experiment" virtual: true {
 		}
 		list<string> dirs <- folder(dfp).contents;
 		dirs <- dirs where folder_exists(dfp + each);
+		remove "Sample" from: dirs;
 		return dirs;
 	}
 
