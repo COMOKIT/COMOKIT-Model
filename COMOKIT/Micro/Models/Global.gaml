@@ -11,7 +11,7 @@
 
 @no_experiment
 
-model CoVid19
+model CoVid19 
 
 import "../../Core/Models/Entities/Virus.gaml"
 

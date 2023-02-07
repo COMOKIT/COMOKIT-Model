@@ -13,7 +13,7 @@ import "Hospital Experiments.gaml"
  
 
 // Activities of Doctors
-species ActivityGoToOffice parent: BuildingActivity {
+species ActivityGoToOfficeHospital parent: BuildingActivity {
 	map get_destination(BuildingIndividual p) {
 		Worker w <- Worker(p);
 		Room r <- w.working_place;

@@ -16,7 +16,7 @@ model CoVid19
 import "../Global.gaml"
 
 global {
-	float distance_camera <- 150.0 parameter: "Distance of the camera" category: "Visualization" min: 10.0 max: 1000.0;
+	float distance_camera <- 50.0 parameter: "Distance of the camera" category: "Visualization" min: 10.0 max: 1000.0;
 }
 experiment "Abstract Experiment" type:gui autorun:false virtual: true{
 	

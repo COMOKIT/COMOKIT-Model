@@ -52,6 +52,27 @@ species ActivityLeaveArea parent: BuildingActivity {
 	}
 }
 
+species ActivityGoToOffice parent: BuildingActivity {
+	map get_destination(BuildingIndividual p) {
+		DefaultWorker w <- DefaultWorker(p);
+		Room r <- w.working_place;
+		map results;
+		results[key_room] <- r;
+		return results; 
+	}
+}
+
+species ActivityGotoRestaurant parent: BuildingActivity {
+	map get_destination(BuildingIndividual p) {
+		Room r <- one_of(Room where (each.type = RESTAURANT));
+		map results;
+		results[key_room] <- r;
+		return results; 
+	}
+}
+
+
+
 species ActivityGotoRoom parent: BuildingActivity {
 	bool same_building_if_possible <- true;
 	bool same_floor_if_possible <- true;

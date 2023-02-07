@@ -14,7 +14,7 @@ import "Constants.gaml"
 
 global {
 	
-	string dataset_path <- "../Datasets/Danang Hospital/";
+	string dataset_path <- "../Datasets/Simple Building/";
 	
 	date starting_date <- date([2020,4,6]);
 	date final_date <- date([2020,4,20]);
@@ -29,8 +29,8 @@ global {
 	float diminution_infection_rate_separator <- 0.9;
 	float unit_cell_size <- 2#m;
 
-	float basic_viral_air_increase_per_day <- 0.1;
-	float basic_viral_local_increase_per_day <- 0.1;
+	float basic_viral_air_increase_per_day <- 1.0;
+	float basic_viral_local_increase_per_day <- 1.0;
 	float basic_viral_air_decrease_per_day <- 0.025;
 	float basic_viral_local_decrease_per_day <- 0.025;
 	float ventilated_viral_air_decrease_per_day <- 0.1;
@@ -65,27 +65,10 @@ global {
 	float udpate_path_weights_every	<- 5#mn;
 	// Utils variable for the look and feel of simulation GUI
 	font default <- font("Helvetica", 18, #bold) const: true;
-	float coeff_visu_virus_load_cell <- 100.0;
-	float coeff_visu_virus_load_room <- 3000.0;
+	float coeff_visu_virus_load_cell <- 500.0;
+	float coeff_visu_virus_load_room <- 5000.0;
 		
-	//PEDESTRIAN PARAMETERS
-	float P_shoulder_length <- 0.2;
-	float P_proba_detour <- 0.5;
-	bool P_avoid_other <- false;
-	float P_obstacle_consideration_distance <- 3.0;
-	float P_pedestrian_consideration_distance <- 3.0;
-	float P_minimal_distance <- 0.0;
-	float P_tolerance_target <- 0.2;
 
-	bool P_use_geometry_target <- true;
-
-	float P_A_pedestrian_SFM  <- 0.16;
-	float P_A_obstacles_SFM  <- 1.9;
-	float P_B_pedestrian_SFM  <- 0.1;
-	float P_B_obstacles_SFM  <- 1.0;
-	float P_relaxion_SFM <- 0.5;
-	float P_gama_SFM <- 0.35;
-	float P_lambda_SFM <- 0.1;
 	
 
 }
