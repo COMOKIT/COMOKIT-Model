@@ -72,7 +72,8 @@ global {
 	/********************/
 	
 	// PARAMETERS
-	float duration_xp <- 1#month min:#week; // Duration of a run for contact tracking
+	float month_value <- 1#month const: true;
+	float duration_xp <- month_value min:#week; // Duration of a run for contact tracking
 	
 	// INNER VARIABLES
 	bool _contact_tracking <- false;
@@ -276,8 +277,8 @@ species pseudo_individual parent:BiologicalEntity {
 experiment batch_Contact_Tracking parent:"Abstract Experiment" type:batch 
 	repeat:12 until:cycle>=duration_xp/step keep_simulations:false {
 
-	parameter "experiment length" var:duration_xp init:1#month min:#day max:31536000.0; 
-	parameter "estimated R0" var:target_R0 init:2.7 min:0.1;
+	parameter "experiment length" var:duration_xp  min:#day max:31536000.0; 
+	parameter "estimated R0" var:target_R0 init:2.7 min:0.1; 
 
 	// string DEFAULT_DATASETS_FOLDER_NAME <- "your_datasets_folder_name";
 	// string DEFAULT_CASE_STUDY_FOLDER_NAME <- "your_case_study_folder_name";
