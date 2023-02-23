@@ -22,8 +22,10 @@ import "../Constants.gaml"
 import "Building Spatial Entities.gaml" 
  
 import "../Global.gaml"
+
+species IndividualScheduler schedules: shuffle(agents of_generic_species BuildingIndividual) where (each.clinical_status != dead);
  
-species BuildingIndividual parent: AbstractIndividual schedules: shuffle(BuildingIndividual where (each.clinical_status != dead)) skills: [moving] {
+species BuildingIndividual parent: AbstractIndividual  skills: [moving] schedules:[]{
  	int current_floor <- 0;
  	rgb color <- #violet;
 	map<date, BuildingActivity> agenda_week;
@@ -318,7 +320,7 @@ species BuildingIndividual parent: AbstractIndividual schedules: shuffle(Buildin
 }
 
 
-species DefaultWorker parent: BuildingIndividual {
+species DefaultWorker parent: BuildingIndividual schedules:[]{
 	Room working_place;
 	rgb color <- #white;
 	bool nightshift <- flip(0.2);

@@ -47,16 +47,7 @@ experiment no_intervention type: gui parent: "Abstract Experiment"{
 			species DefaultWorker;
 			
 		}
-		display "states_evolution_chart"  refresh: every(#h) {
-			chart "Population epidemiological states evolution" background: #white axes: #black color: #black title_font: default legend_font: font("Helvetica", 14, #bold) {
-				data "Susceptible" value: length(all_individuals where (each.state = susceptible)) color: #green marker: false style: line;
-				data "Latent" value: length(all_individuals where (each.is_latent())) color: #orange marker: false style: line;
-				data "Infectious" value: length(all_individuals where (each.is_infectious)) color: #red marker: false style: line;
-				data "Recovered" value: length(all_individuals where (each.clinical_status = recovered)) color: #blue marker: false style: line;
-				data "Dead" value: length(all_individuals where (each.clinical_status = dead)) color: #black marker: false style: line;
-			}
-
-		}
+		display evolution_chart parent:states_evolution_chart{}
 		
 	}
 }

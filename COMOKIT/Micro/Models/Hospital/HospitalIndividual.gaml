@@ -8,11 +8,12 @@
 
 model HospitalIndividual
 
+import "../Experiments/Hospital Experiments.gaml"
+
 import "Hospital Spatial Entities.gaml"
 
 import "HospitalActivity.gaml"
  
-import "Hospital Experiments.gaml"
 
  
 global {
@@ -58,10 +59,10 @@ global {
 		
 	}
 }
-species Worker parent: BuildingIndividual {
+species Worker parent: BuildingIndividual schedules:[] {
 	Room working_place;
 }
-species Doctor parent: Worker {
+species Doctor parent: Worker schedules:[]{
 	rgb color <- #white;
 	bool headdoc <- false;
 	bool nightshift <- false;
@@ -165,7 +166,7 @@ species Doctor parent: Worker {
 
 }
 
-species Nurse parent: Worker {
+species Nurse parent: Worker schedules:[]{
 	rgb color <-#blue;
 	bool nightshift <- false;
 	
@@ -265,7 +266,7 @@ species Nurse parent: Worker {
 
 }
 
-species Staff parent: Worker{
+species Staff parent: Worker schedules:[]{
 	rgb color <- #lightblue;
 	
 	init {
@@ -305,7 +306,7 @@ species Staff parent: Worker{
 	}
 }
 
-species Inpatient parent: BuildingIndividual {
+species Inpatient parent: BuildingIndividual schedules:[]{
 	rgb color <- #yellow;
 	Bed mybed;
 	Room assigned_ward;
@@ -372,7 +373,7 @@ species Inpatient parent: BuildingIndividual {
 
 }
 
-species Caregiver parent: BuildingIndividual {
+species Caregiver parent: BuildingIndividual schedules:[]{
 	rgb color <- #orange;
 	Inpatient sicker;
 	init {
@@ -425,7 +426,7 @@ species Caregiver parent: BuildingIndividual {
 
 }
 
-species Outpatient parent: BuildingIndividual{
+species Outpatient parent: BuildingIndividual schedules:[]{
 	Doctor doc;
 	date date_come;
 	init{
@@ -449,7 +450,7 @@ species Outpatient parent: BuildingIndividual{
 	}
 }
 
-species Intern parent: Worker{
+species Intern parent: Worker schedules:[]{
 	bool nightshift <- false;
 	init {
 		age <- int(skew_gauss(30.0, 40.0, 0.6, 0.3));

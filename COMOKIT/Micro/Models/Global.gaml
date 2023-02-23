@@ -80,11 +80,12 @@ global {
 	map<list<int>,list<unit_cell>> unit_cells; 
 	virus viral_agent;
 	
-	int floor_map <- -1 ;
+	int floor_map <- 0 ;
 	int building_map <- -1 ;
 	Building selected_bd;
 	
 	init {
+		create IndividualScheduler;
 		step <- step_duration;
 	 	nb_step_for_one_day <- #day / step;
 		create Outside ;
@@ -166,6 +167,10 @@ global {
 			do define_new_case(myself.viral_agent);
 		}
 		all_individuals <- agents of_generic_species BuildingIndividual;
+		ask all_individuals  { do initialise_epidemiological_behavior();}
+            
+		selected_bd <- Building with_max_of (each.shape.area);
+		building_map <- int(selected_bd);
 	}
 
 	

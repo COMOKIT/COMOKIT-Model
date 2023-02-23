@@ -16,23 +16,24 @@ model CoVid19
 import "../Global.gaml"
 
 global {
-	float distance_camera <- 50.0 parameter: "Distance of the camera" category: "Visualization" min: 10.0 max: 1000.0;
+	float distance_camera <- 50.0 min: 10.0 max: 1000.0 on_change: {ask experiment {do update_outputs;}};
 }
 experiment "Abstract Experiment" type:gui autorun:false virtual: true{
 	
-	
+	parameter "Distance of the camera" var: distance_camera <- 50.0  category: "Visualization" min: 10.0 max: 1000.0;
 	output{
 		layout #split; 
 	  	
 	  	
-		display map_global type: opengl  background: #black virtual: true{
+		display map_global type: opengl  background: #black virtual: true axes: false{
 			species Building aspect: draw_infected;
 			event mouse_down action: select_building;
 		
 			
 		}
 		
-		display map_1_floor type: opengl background: #black virtual: true {
+		display map_1_floor type: opengl background: #black virtual: true axes: false {
+			
 			camera #default dynamic: true target: selected_bd = nil ? world : selected_bd distance: distance_camera ;
 			species Building ;
 			species Room ;

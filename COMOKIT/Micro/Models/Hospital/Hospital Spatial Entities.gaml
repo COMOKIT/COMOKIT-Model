@@ -8,8 +8,7 @@
 
 model HospitalSpatialEntities
 
-import "Hospital Experiments.gaml"
-
+import "../Experiments/Hospital Experiments.gaml"
 global {
 	action external_initilization {
 		ask Room {

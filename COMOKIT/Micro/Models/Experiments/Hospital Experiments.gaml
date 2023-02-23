@@ -9,17 +9,17 @@
 ******************************************************************/
 model CoVid19
 
-import "HospitalActivity.gaml"  
+import "../Hospital/HospitalActivity.gaml"
 
-import "HospitalIndividual.gaml"
+import "../Hospital/HospitalIndividual.gaml"
 
-import "Hospital Spatial Entities.gaml" 
+import "../Hospital/Hospital Spatial Entities.gaml" 
 
 
-import "../Experiments/Abstract Experiment.gaml"
-
+import "Abstract Experiment.gaml"
+ 
 global {
-	
+	string dataset_path <- "../Datasets/Danang Hospital/";
 	
 	list<Room> available_rooms;
 	map<string,rgb> room_type_color <- [ROOM::#lightblue,DOCTOR_ROOM::#yellow, HEAD_DOCTOR_ROOM::#gold, NURSE_ROOM::#orange,MEETING_ROOM::#cyan,ADMISSION_ROOM::#violet, HALL::#gray, INJECT::#magenta , MEDICINE::#pink, MINOPERATION::#brown ];
@@ -59,6 +59,7 @@ experiment hospital_no_intervention type: gui parent: "Abstract Experiment"{
 			species Outpatient;
 			
 		}
+		display evolution_chart parent:states_evolution_chart{}
 		
 	}
 }

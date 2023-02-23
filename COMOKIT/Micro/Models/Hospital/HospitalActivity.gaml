@@ -8,7 +8,7 @@
 
 model HospitalActivity
 
-import "Hospital Experiments.gaml"
+import "../Experiments/Hospital Experiments.gaml"
 
  
 
