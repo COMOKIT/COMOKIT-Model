@@ -27,7 +27,7 @@ experiment "Abstract Experiment" type:gui autorun:false virtual: true{
 	  	
 		display map_global type: opengl  background: #black virtual: true axes: false{
 			species Building aspect: draw_infected;
-			event mouse_down action: select_building;
+			event #mouse_down action: select_building;
 		
 			
 		}

@@ -104,7 +104,7 @@ global {
 			target_R0/global_infectious_period()/average_contact_nb_per_step*nb_step_for_one_day,
 			target_R0/global_infectious_period()/median_contact_nb_per_step*nb_step_for_one_day
 		] 
-		type:csv to:output_folder+output_contact_tracking_file header:false rewrite:false;
+		format:csv to:output_folder+output_contact_tracking_file header:false rewrite:false;
 	}
 	
 	/*
@@ -292,7 +292,7 @@ experiment batch_Contact_Tracking parent:"Abstract Experiment" type:batch
 			"average contacts a day of weekend", "average contacts per step",
 			"median contacts per step", "estimated beta from average contacts",
 			"estimated beta from median contacts"
-		] type:csv to:output_folder+output_contact_tracking_file header:false rewrite:true;
+		] format:csv to:output_folder+output_contact_tracking_file header:false rewrite:true;
 	}
 }
 
@@ -319,11 +319,11 @@ experiment estimate_beta type:batch until:world.stop_sim() repeat:4 keep_seed:tr
 	reflex save_result {
 		if int(first(simulations))=0 {
 			save ["simulation","beta","Re","Fitness"] 
-				type:csv to:output_folder+output_beta_calibration_file header:false rewrite:true;
+				format:csv to:output_folder+output_beta_calibration_file header:false rewrite:true;
 		}
 		ask simulations {
 			save [string(self),inc+_estimated_beta,Re,Re_fitness] 
-				type:csv to:output_folder+output_beta_calibration_file header:false rewrite:false;
+				format:csv to:output_folder+output_beta_calibration_file header:false rewrite:false;
 		}
 	}
 	

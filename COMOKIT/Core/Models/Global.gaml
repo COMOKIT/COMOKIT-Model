@@ -420,7 +420,7 @@ global {
 					default {write msg;}
 				}	
 			}
-			if SAVE_LOG {save msg to:log_name rewrite: false type:text;}
+			if SAVE_LOG {save msg to:log_name rewrite: false format:text;}
 		}
 	}
 	

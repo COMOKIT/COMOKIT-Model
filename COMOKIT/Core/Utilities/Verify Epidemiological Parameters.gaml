@@ -56,13 +56,13 @@ global
 		
 		total_number_individual <- length(pseudo_individual);
 		
-		save ["NAME","AGE","VALUE"] to: "recovery.csv" type:"csv" header:false rewrite:true;
-		save ["NAME","AGE","VALUE"] to: "serial.csv" type:"csv" header:false rewrite:true;
-		save ["NAME","AGE","VALUE"] to: "incubation.csv" type:"csv" header:false rewrite:true;
-		save ["NAME","AGE","VALUE"] to: "hospitalisation.csv" type:"csv" header:false rewrite:true;
-		save ["NAME","AGE","VALUE"] to: "ICU.csv" type:"csv" header:false rewrite:true;
-		save ["NAME","AGE","VALUE"] to: "stay_ICU.csv" type:"csv" header:false rewrite:true;
-		save ["NAME","AGE","VALUE"] to: "status.csv" type:"csv" header:true rewrite:true;
+		save ["NAME","AGE","VALUE"] to: "recovery.csv" format:"csv" header:false rewrite:true;
+		save ["NAME","AGE","VALUE"] to: "serial.csv" format:"csv" header:false rewrite:true;
+		save ["NAME","AGE","VALUE"] to: "incubation.csv" format:"csv" header:false rewrite:true;
+		save ["NAME","AGE","VALUE"] to: "hospitalisation.csv" format:"csv" header:false rewrite:true;
+		save ["NAME","AGE","VALUE"] to: "ICU.csv" format:"csv" header:false rewrite:true;
+		save ["NAME","AGE","VALUE"] to: "stay_ICU.csv" format:"csv" header:false rewrite:true;
+		save ["NAME","AGE","VALUE"] to: "status.csv" format:"csv" header:true rewrite:true;
 	}
 	
 	
@@ -70,13 +70,13 @@ global
 		if(nb_infected=0 and cycle>0){
 			stop <- true;
 			ask pseudo_individual{
-				save [self.name,self.age,self.infectious_period] to: "recovery.csv" type:"csv" header:false rewrite:false;
-				save [self.name,self.age,self.presymptomatic_period] to: "serial.csv" type:csv header:false rewrite:false;
-				save [self.name,self.age,self.latent_period] to: "latent.csv" type:csv header:false rewrite:false;
-				save [self.name,self.age,self.time_symptoms_to_hospitalisation] to: "hospitalisation.csv" type:csv header:false rewrite:false;
-				save [self.name,self.age,self.time_hospitalisation_to_ICU] to: "ICU.csv" type:csv header:false rewrite:false;
-				save [self.name,self.age,self.time_stay_ICU] to: "stay_ICU.csv" type:csv header:false rewrite:false;
-				save [self.name,self.age,self.clinical_status] to: "status.csv" type:csv header:false rewrite:false;
+				save [self.name,self.age,self.infectious_period] to: "recovery.csv" format:"csv" header:false rewrite:false;
+				save [self.name,self.age,self.presymptomatic_period] to: "serial.csv" format:csv header:false rewrite:false;
+				save [self.name,self.age,self.latent_period] to: "latent.csv" format:csv header:false rewrite:false;
+				save [self.name,self.age,self.time_symptoms_to_hospitalisation] to: "hospitalisation.csv" format:csv header:false rewrite:false;
+				save [self.name,self.age,self.time_hospitalisation_to_ICU] to: "ICU.csv" format:csv header:false rewrite:false;
+				save [self.name,self.age,self.time_stay_ICU] to: "stay_ICU.csv" format:csv header:false rewrite:false;
+				save [self.name,self.age,self.clinical_status] to: "status.csv" format:csv header:false rewrite:false;
 			}
 			do pause;
 		}

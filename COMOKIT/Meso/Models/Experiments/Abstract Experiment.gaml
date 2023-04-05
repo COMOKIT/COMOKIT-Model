@@ -120,7 +120,7 @@ experiment "Abstract Experiment" virtual: true {
 				draw ("Day " + int((current_date - starting_date) / #day)) + " | " + ("Cases " + world.number_of_infectious) font: default at: {20 #px, 50 #px} anchor: #top_left color:
 				text_color;
 			}
-			image file: file_exists(dataset_path + "/satellite.png") ? (dataset_path + "/satellite.png") : "../Utilities/white.png" transparency: 0.5 refresh: false;
+			image file_exists(dataset_path + "/satellite.png") ? (dataset_path + "/satellite.png") : "../Utilities/white.png" transparency: 0.5 refresh: false;
 			species Building {
 				
 				if (use_activity_precomputation) {
@@ -140,7 +140,7 @@ experiment "Abstract Experiment" virtual: true {
 		}
 
 		display "default_3D_display"  type: opengl background: #black axes: false virtual: true {
-			image file: file_exists(dataset_path + "/satellite.png") ? (dataset_path + "/satellite.png") : "../Utilities/white.png" transparency: 0.5 refresh: false;
+			image file_exists(dataset_path + "/satellite.png") ? (dataset_path + "/satellite.png") : "../Utilities/white.png" transparency: 0.5 refresh: false;
 			species Building transparency: 0.7 refresh: false {
 				draw shape depth: rnd(50) color: #lightgrey wireframe: false width: 2;
 			}

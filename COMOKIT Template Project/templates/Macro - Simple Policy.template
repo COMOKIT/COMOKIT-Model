@@ -32,7 +32,7 @@ global {
 
 }
 
-experiment $TITLE$ parent: "Abstract Experiment" {
+experiment $TITLE$ parent: abstract_experiment{
 	
 	output {
 		// A basic layout where nothing but the displays and the experiment controls appear on screen

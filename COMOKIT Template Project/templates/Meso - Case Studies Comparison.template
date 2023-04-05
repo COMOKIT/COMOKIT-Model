@@ -16,7 +16,7 @@ global {
 	// Parameter file folder
 	// by default parameter files are placed in Parameters/ folder of COMOKIT
 	// if you decide to redefine the path to that folder identify the place COMOKIT can find your parameter files
-	string parameters_folder_path <- "../../COMOKIT/Parameters/";
+	string parameters_folder_path <- "../../COMOKIT/Core/Parameters/";
 	  
 	string POLICY_NAME <- "your_policy"; // Not mandatory but will be used in GUI
 }

@@ -27,7 +27,11 @@ experiment $TITLE$ parent: "Abstract Experiment" {
 	output {
 		
 		// Graphical display showing the geographical representation of the model 
-		display "Main" parent: map {}
+		display "Main map" parent: map_global {}
+		
+		// Graphical display showing the geographical representation of the model 
+		display "Floor map" parent: map_1_floor {}
+		
 		
 		// Setup a chart to follow the number of infectious cases 
 		display "Plot" parent: states_evolution_chart {}		

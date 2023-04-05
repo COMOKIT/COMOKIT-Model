@@ -105,12 +105,12 @@ global {
 		ask Room {
 			id <- cpt; cpt <- cpt + 1;
 		}
-		save BuildingEntry type:shp to: building_entry_path attributes: ["building"];
-		save Room type:shp to: rooms_path attributes: ["id", "floor", "building", "type"];
-		save RoomEntry type:shp to: room_entry_path attributes: ["floor", "room_id"];
-		save Elevator type:shp to: elevators_path attributes: ["floor", "building"];
-		save Wall type:shp to: walls_path attributes: ["floor", "building"];
-		save Bed type:shp to: beds_path attributes: ["room_id", "floor", "building"];
+		save BuildingEntry format:shp to: building_entry_path attributes: ["building"];
+		save Room format:shp to: rooms_path attributes: ["id", "floor", "building", "type"];
+		save RoomEntry format:shp to: room_entry_path attributes: ["floor", "room_id"];
+		save Elevator format:shp to: elevators_path attributes: ["floor", "building"];
+		save Wall format:shp to: walls_path attributes: ["floor", "building"];
+		save Bed format:shp to: beds_path attributes: ["room_id", "floor", "building"];
 		
 		loop bd over: Building {
 			list<list<agent>> created_agents;
@@ -139,8 +139,8 @@ global {
 			location <- location + {0,0, floor * floor_high};
 		}
 		
-		save OpenArea type: shp to: open_area_path attributes: ["building", "floor"];
-		save PedestrianPath type: shp to: pedestrian_paths_path attributes: ["building", "floor", "area"];
+		save OpenArea format: shp to: open_area_path attributes: ["building", "floor"];
+		save PedestrianPath format: shp to: pedestrian_paths_path attributes: ["building", "floor", "area"];
 		
 	}
 	

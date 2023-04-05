@@ -732,21 +732,21 @@ global {
 		
 		
 		
-		save boundary type:shp to: spatial_unit_output_path attributes: ["name", "id", "population"];
-		save "id,categories,types" to: spatial_unit_data_output_path type:text;
+		save boundary format:shp to: spatial_unit_output_path attributes: ["name", "id", "population"];
+		save "id,categories,types" to: spatial_unit_data_output_path format:text;
 		ask boundary {
-			save ""+ id +","+categories+","+types to: spatial_unit_data_output_path rewrite: false type:text;
+			save ""+ id +","+categories+","+types to: spatial_unit_data_output_path rewrite: false format:text;
 		
 		}
 		
-		save "id,age,sex,occupation,role,household_id, area_id,group_id"  to:pop_output_path type:text rewrite: true;
+		save "id,age,sex,occupation,role,household_id, area_id,group_id"  to:pop_output_path format:text rewrite: true;
 			cpt<- 0;
 			ask dummy_agent {
 				cpt <- cpt + 1;
 				if (cpt mod int(length(dummy_agent)/100) = 0) {
 					write "processing csv file save: " + int(cpt * 100 / length(dummy_agent)) + "%";
 				}
-				save [int(self),Age,Sex,Activity,role,int(household), id_area,id_group]  to:pop_output_path type:csv rewrite: false;
+				save [int(self),Age,Sex,Activity,role,int(household), id_area,id_group]  to:pop_output_path format:csv rewrite: false;
 			
 		}
 		write "Population saved";		

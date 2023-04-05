@@ -37,8 +37,8 @@ global {
 	action process_data {
 		create Wall from:file(obstacles_path);
 		do generate_path(shape,Wall as list,-1,0);
-		save OpenArea type: shp to: dataset_path+"/open area.shp" attributes: ["building", "floor"];
-		save PedestrianPath type: shp to: dataset_path+"/pedestrian paths.shp" attributes: ["building", "floor", "area"];
+		save OpenArea format: shp to: dataset_path+"/open area.shp" attributes: ["building", "floor"];
+		save PedestrianPath format: shp to: dataset_path+"/pedestrian paths.shp" attributes: ["building", "floor", "area"];
 	}
 	
 	init {

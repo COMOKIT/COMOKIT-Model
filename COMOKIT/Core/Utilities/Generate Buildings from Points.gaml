@@ -79,7 +79,7 @@ global {
 		}
 		
 		
-		save (output_building collect each.shape) to:output_building_file_path type:shp attributes:atts;		
+		save (output_building collect each.shape) to:output_building_file_path format:shp attributes:atts;		
 	}
 	
 }

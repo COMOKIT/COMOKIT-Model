@@ -81,7 +81,7 @@ global {
 				}
 			}
 			string save_bd <-""+ ii+"," +  location.x + "," + location.y+functions_str; 
-			save save_bd to: dataset_path + precomputation_folder +file_building_precomputation_path +"/"  +world.to_bd_id(self) + ".data" type: text ;
+			save save_bd to: dataset_path + precomputation_folder +file_building_precomputation_path +"/"  +world.to_bd_id(self) + ".data" format: text ;
 			ii <- ii + 1;
 				
 		} 
@@ -101,7 +101,7 @@ global {
 				to_save <- to_save +  day +"&&" ;
 			}
 			to_save <- to_save + "%%" + world.to_targets_id(building_targets);
-			save to_save type: text to: dataset_path + precomputation_folder + file_agenda_precomputation_path + "/" + id_int + ".data" rewrite: true;
+			save to_save format: text to: dataset_path + precomputation_folder + file_agenda_precomputation_path + "/" + id_int + ".data" rewrite: true;
 		}
 	} 
 	
@@ -162,7 +162,7 @@ global {
 				}
 				//if (need_to_save) {
 				//write sample(path_file +"/" + world.to_bd_id(self) +".data");
-				save to_save type: text rewrite: true to: path_file +"/" + file_building_precomputation_path+"/" +world.to_bd_id(self) +".data";
+				save to_save format: text rewrite: true to: path_file +"/" + file_building_precomputation_path+"/" +world.to_bd_id(self) +".data";
 				//}
 			}	
 			 
@@ -170,7 +170,7 @@ global {
 		ask individual_species as: Individual{
 			string path_of_file <- path_file  +"/"+ file_population_precomputation_path +"/" +id_int + ".data" ;
 			string save_ind <-""+ id_int+"," +  location.x + "," + location.y+","+age+","+sex+"," +is_unemployed + ","+ factor_contact_rate_wearing_mask+ ","+proba_wearing_mask+ ","+vax_willingness+ ","+ free_rider+ ","+world.to_bd_id(home) +"," + world.to_bds_id(buildings_concerned);
-			save save_ind to: path_of_file type: text ;
+			save save_ind to: path_of_file format: text ;
 			string index_bd <- "";
 			string index_group <- "";
 			loop w from: 0 to: length(index_building_agenda) - 1 {
@@ -183,8 +183,8 @@ global {
 			}
 			index_bd <- index_bd copy_between (0, length(index_bd) - 1);
 			index_group <- index_group copy_between (0, length(index_group) - 1);
-			save index_bd to:path_of_file rewrite: false type: text ;
-			save index_group to:path_of_file rewrite: false type: text ;
+			save index_bd to:path_of_file rewrite: false format: text ;
+			save index_group to:path_of_file rewrite: false format: text ;
 		}
 	}
 	

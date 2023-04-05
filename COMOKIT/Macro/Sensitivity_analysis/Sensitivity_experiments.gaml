@@ -118,7 +118,7 @@ global {
 			
 			// To identify the experiment
 			seed
-		] to:"./Results/Results_COMOKIT.csv" type:"csv" rewrite: false;	
+		] to:"./Results/Results_COMOKIT.csv" format:"csv" rewrite: false;	
 		
 		
 		// Write execution time
@@ -135,7 +135,7 @@ global {
 			nb_hospitalized,
 			nb_ICU,
 			nb_dead
-		] to: ("./Results/plots/time_series_" + s + ".csv") type: "csv" rewrite: cycle=0 ? true : false;
+		] to: ("./Results/plots/time_series_" + s + ".csv") format: "csv" rewrite: cycle=0 ? true : false;
 	}
 	
 	init {

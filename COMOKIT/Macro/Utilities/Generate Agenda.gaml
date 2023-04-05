@@ -501,9 +501,9 @@ global {
 		ask boundary {
 			string path_name <- agenda_path + id + ".data";
 			write "saving boundary " + id; 
-			save act_types_str to: path_name type: text; 
+			save act_types_str to: path_name format: text; 
 		
-			save bd_types_str to: path_name type: text rewrite: false; 
+			save bd_types_str to: path_name format: text rewrite: false; 
 				
 				loop comp over: agenda.keys {
 					list<list<map<string,map<string,map<string,float>>>>> agenda_comp <- agenda[comp];
@@ -527,7 +527,7 @@ global {
 								}
 								age_str <- age_str +"%";
 							}
-							save age_str to: path_name type: text rewrite: false; 
+							save age_str to: path_name format: text rewrite: false; 
 							//age_str <- age_str +"&";
 						}
 						//age_str <- age_str +"|";
@@ -675,8 +675,8 @@ global {
 	
 	action generate_agenda_parameter {
 		list<people_data> people_area <-  people_data where (each.zone_id in study_area );
-		save "Parameter,Value" type:text to: case_study_path + "Agenda parameter.csv";
-		save "non_working_days,6,7" type:text to: case_study_path + "Agenda parameter.csv" rewrite: false;
+		save "Parameter,Value" format:text to: case_study_path + "Agenda parameter.csv";
+		save "non_working_days,6,7" format:text to: case_study_path + "Agenda parameter.csv" rewrite: false;
 		
 		
 		list<int> min_school_hour_l ;

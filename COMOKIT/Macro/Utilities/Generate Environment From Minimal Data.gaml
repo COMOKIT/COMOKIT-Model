@@ -30,7 +30,7 @@ global {
 	
 	
 	init {
-		save "province,district,population" to: "population_district.csv" type: "text";
+		save "province,district,population" to: "population_district.csv" format: "text";
 		create boundary from: adm_shape_file with: (admin1:get(admin_1_att), admin2:get(admin_2_att));
 		map<string, boundary> boundaries <- boundary as_map (each.admin1 + "_" + each.admin2::each);
 		matrix mat_data <- matrix(population_csv_file);
@@ -40,7 +40,7 @@ global {
 			bd.population <- int(mat_data[2,j]);
 			
 		}
-		save boundary to: "boundaryZZZ.shp" type: shp ;
+		save boundary to: "boundaryZZZ.shp" format: shp ;
 	}
 }
 

@@ -129,7 +129,7 @@ global {
 		//creation of the boundary of the studied area
 		create Boundary from: data_file;
 		if (not file_exists(dataset_path +"/boundary.shp")) {
-			save Boundary crs:"EPSG:3857" to:dataset_path +"/boundary.shp" type: shp ;
+			save Boundary crs:"EPSG:3857" to:dataset_path +"/boundary.shp" format: shp ;
 		}
 		
 		//load OSM data (if necessary)
@@ -174,7 +174,7 @@ global {
 		}
 	
 		//save the building using the pseudo mercator crs with the type, flats, heights and levels attributes
-		save Building crs:"EPSG:3857" to:dataset_path +"/buildings.shp" type: shp attributes: ["type"::type, "flats"::flats,"height"::height, "levels"::levels];
+		save Building crs:"EPSG:3857" to:dataset_path +"/buildings.shp" format: shp attributes: ["type"::type, "flats"::flats,"height"::height, "levels"::levels];
 		
 		
 		//for type of building, assign a random color
@@ -287,9 +287,9 @@ global {
 	
 	//action for vectorizing an existing google image
 	action load_google_image {
-		image_file image <- image_file(googlemap_path);
+		image image_ <- image(googlemap_path);
 		ask cell_google {		
-			color <-rgb( (image) at {grid_x ,grid_y }) ;
+			color <-rgb( matrix(image_) at {grid_x ,grid_y }) ;
 		}
 		
 		list<cell_google> cells ;
@@ -400,7 +400,7 @@ global {
 			color <-rgb( (static_map_request) at {grid_x,1500 - (grid_y + 1) }) ;
 		}
 		//save the image retrieved
-		save cell to: dataset_path +"/satellite.png" type: image;
+		save cell to: dataset_path +"/satellite.png" format: image;
 		
 		//add meta-data to georeferenced the image
 		string rest_link2<- "https://dev.virtualearth.net/REST/v1/Imagery/Map/Aerial/?mapArea="+bottom_right.y+"," + top_left.x + ","+ top_left.y + "," + bottom_right.x + "&mmd=1&mapSize="+size_x+","+size_y+ "&key=AvZ5t7w-HChgI2LOFoy_UF4cf77ypi2ctGYxCgWOLGFwMGIGrsiDpCDCjliUliln" ;
@@ -571,7 +571,7 @@ global {
 		} else {
 			//at the end, save the building
 			if (not empty(data_google)) {
-				save Building crs:"EPSG:3857" to:dataset_path +"/buildings.shp" type: shp attributes: ["type"::type, "flats"::flats,"height"::height, "levels"::levels];
+				save Building crs:"EPSG:3857" to:dataset_path +"/buildings.shp" format: shp attributes: ["type"::type, "flats"::flats,"height"::height, "levels"::levels];
 			}
 			do pause;
 		}

@@ -53,7 +53,7 @@ global{
 				s <- s + "\n";
 			}
 		}
-		save s to:sorted_path type:csv header:false;
+		save s to:sorted_path format:csv header:false;
 		write "Done. \"" + sorted_path + "\" created.\n";
 	}
 	
@@ -83,7 +83,7 @@ experiment Morris type:gui autorun:true{
 			nb_param		// Number of variable in the model
 		);
 		write s color:rgb(150,0,0);
-		save s to: morris_report;
+		save s to: morris_report format:text;
 		write "Done" color:rgb(150,0,0);
 	}
 }

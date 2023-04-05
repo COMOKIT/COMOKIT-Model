@@ -63,7 +63,7 @@ experiment abstract_experiment virtual: true type: gui {
 			}
 		}
 		
-		display "states_evolution_chart"  refresh: every(#day)  virtual: true {
+		display states_evolution_chart  refresh: every(#day)  virtual: true {
 			chart "Population epidemiological states evolution - " + name background: #black axes:  #white color:  #white title_font: default legend_font: font("Helvetica", 14, #bold) {
 				data "Susceptible" value:group_individuals sum_of (each.num_susceptibles) color: #lightgreen marker: false style: line;
 				data "Latent" value: group_individuals sum_of (each.num_latent_asymptomatics + each.num_latent_symptomatics) color: #orange marker: false style: line;

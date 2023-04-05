@@ -46,9 +46,9 @@ global{
 		float start <- BENCHMARK ? machine_time : 0.0;
 		if(cycle=0)
 		{
-			save building_infections.keys type:"csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_building.csv" rewrite:true header:false;
+			save building_infections.keys format:"csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_building.csv" rewrite:true header:false;
 		}
-		save building_infections.values type:"csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_building.csv" rewrite:false;
+		save building_infections.values format:"csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_building.csv" rewrite:false;
 			
 		loop i from: ageCategory to: 100 step: ageCategory{
 			
@@ -89,10 +89,10 @@ global{
 				subIndividual count (each.clinical_status = recovered),			
 				// Number of dead per step per age category
 				subIndividual count (each.clinical_status = dead)
-			] type: "csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_" + (i - ageCategory) + "-" + (i-1) + ".csv" rewrite: (cycle = 0);
+			] format: "csv" to: result_folder + "batchDetailed-" + modelName + "-" + idSimulation + "_" + (i - ageCategory) + "-" + (i-1) + ".csv" rewrite: (cycle = 0);
 			
 		}
-		
+		 
 		loop i from:0 to:max_age {
 			int age <- i;
 			int total <- all_individuals count (each.age=i);
@@ -102,7 +102,7 @@ global{
 			int icu <- tn_icu contains_key i ? tn_icu[i] : 0;
 			int death <- tn_deaths contains_key i ? tn_deaths[i] : 0;
 			save [age, total, infected, reported, hospitalised, icu, death] 
-				type: csv 
+				format: csv 
 				to: result_folder + "batchAggregated-"+modelName+"-"+idSimulation+".csv" 
 				rewrite: i=0;
 		}
