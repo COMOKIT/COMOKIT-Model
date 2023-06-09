@@ -68,7 +68,7 @@ global {
 	float reduction_coeff_all_buildings_individuals <- 0.05; //reduction of the contact rate for unknown individuals in the same place
 	float basic_viral_release <- 3.0; //Viral load released in the environment by infectious individual
 	float basic_viral_decrease <- 0.33; //Value to decrement the viral load in the environment
-	
+	float ventilation_viral_decrease <- 100.0; //Value to decrement the viral load thanks to the ventilation in the environment
 	// Re-infections
 	bool allow_reinfection <- false; // Allowing Individual to be infected by the sars-cov-2 virus multiple times
 	

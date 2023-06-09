@@ -16,13 +16,23 @@ model CoVid19
 import "../Global.gaml"
 
 global {
-	float distance_camera <- 50.0 min: 10.0 max: 1000.0 on_change: {ask experiment {do update_outputs;}};
+	float distance_camera <- 50.0;// min: 10.0 max: 1000.0 on_change: {ask experiment {do update_outputs;}};
 }
 experiment "Abstract Experiment" type:gui autorun:false virtual: true{
+	action select_building {
+		ask world {
+			list<Building> bds <- Building overlapping #user_location;
+			if not empty(bds) {
+				ask bds {
+					do select_command;
+				}
+			}
+		}
 	
+	}
 	parameter "Distance of the camera" var: distance_camera <- 50.0  category: "Visualization" min: 10.0 max: 1000.0;
 	output{
-		layout #split; 
+		layout #split;  
 	  	
 	  	
 		display map_global type: opengl  background: #black virtual: true axes: false{
@@ -34,12 +44,12 @@ experiment "Abstract Experiment" type:gui autorun:false virtual: true{
 		
 		display map_1_floor type: opengl background: #black virtual: true axes: false {
 			
-			camera #default dynamic: true target: selected_bd = nil ? world : selected_bd distance: distance_camera ;
+		//	camera #default dynamic: true target: (selected_bd = nil) ? world : selected_bd distance: distance_camera ;
 			species Building ;
 			species Room ;
 			species Elevator ;
 			species Wall;
-			species BuildingIndividual;
+			agents "People" value: (agents of_generic_species BuildingIndividual); 
 		}
 		
 		display "states_evolution_chart"  refresh: every(1#h)  virtual: true {

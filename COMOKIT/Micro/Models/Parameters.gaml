@@ -23,17 +23,14 @@ global {
 	//EPIDEMIOLOGIC PARAMETERS
 	string variant <- DELTA; 
 	
-	int initial_nb_infected<-1;
-	string init_state <- "symptomatic";
-	float infectionDistance <- 2#m;
-	float diminution_infection_rate_separator <- 0.9;
-	float unit_cell_size <- 2#m;
+	float infectionDistance <- 1.5#m;
+	float unit_cell_size <- 1#m;
 
-	float basic_viral_air_increase_per_day <- 1.0;
+	float basic_viral_air_increase_per_day <- 2.0;
 	float basic_viral_local_increase_per_day <- 1.0;
-	float basic_viral_air_decrease_per_day <- 0.025;
-	float basic_viral_local_decrease_per_day <- 0.025;
-	float ventilated_viral_air_decrease_per_day <- 0.1;
+	float basic_viral_air_decrease_per_day <- 0.3;
+	float basic_viral_local_decrease_per_day <- 0.3;
+	float ventilated_viral_air_decrease_per_day <- 1.8;
 
 	bool allow_air_transmission <- true;
 	bool allow_direct_transmission <- true;
@@ -68,7 +65,8 @@ global {
 	float coeff_visu_virus_load_cell <- 500.0;
 	float coeff_visu_virus_load_room <- 5000.0;
 		
-
+	
+	float min_distance_between_people <- 0.0;
 	
 
 }

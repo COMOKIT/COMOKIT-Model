@@ -288,45 +288,57 @@ species compartment {
 	}
 	
 	list create_group (float coeff_susceptible, float coeff_infected){
-		
 		int num_symptomatic <- world.rate_to_num(group.num_symptomatic,coeff_infected );
 		int num_asymptomatic <- world.rate_to_num(group.num_asymptomatic,coeff_infected );
 		int num_susceptibles <- world.rate_to_num(group.num_susceptibles,coeff_susceptible );
 		float immune_rate <- 1.0 - (group.num_immune / group.num_individuals * group.immunity_evasion_rate);
-		if (num_symptomatic + num_asymptomatic + num_susceptibles) = 0 {return [];}
+		int nb_individuals <- (num_symptomatic + num_asymptomatic + num_susceptibles);
+		if (nb_individuals) = 0 {return [];}
 		float factor_mask <- (factor_contact_rate_wearing_mask * ( 2 - mask_ratio));
 		float infection_factor <-  (num_symptomatic + (num_asymptomatic * group.factor_contact_rate_asymptomatic)) * factor_mask;
-		list group_ <- [self,num_susceptibles,infection_factor,group.contact_rate, group.rate_symptomatic,immune_rate];
+		list group_ <- [self,num_susceptibles,infection_factor,group.contact_rate, group.rate_symptomatic,immune_rate,nb_individuals];
 		return group_;
 	}
 	
 	action carry_out_activities {
 		map<SpatialUnit,map<string,map<string,float>>> agenda_hour <- agenda[current_date.day_of_week - 1][current_date.hour];
 		if agenda_hour != nil {
+			float tot <- 0.0;
 			loop a over: agenda_hour.keys {
 				map<string,map<string,float>> ag_act <- agenda_hour[a];
 				loop activity_type over: ag_act.keys{
 					map<string,float> bd_act <- ag_act[activity_type];
+					int numAllowed <- 0;
+					int numTot;
+					tot<- tot + sum(bd_act.values);
 					loop bd_type over: bd_act.keys{
 						float coeff <-bd_act[bd_type];
 						float tested_susceptible <- 0.0;//num_tested_;
 						float tested_infected;
+						
 						list<float> allow_rate <- Authority[0].allows_rate (area_id, a.id_int, activity_type, bd_type, tested_susceptible, tested_infected);
 						if (sum(allow_rate) < 2.0) {
 							loop type_h over: homeplace.home_types_rates.keys {
 								list gp <- create_group(homeplace.home_types_rates[type_h] * coeff*(1.0 - allow_rate[0]),coeff*(1.0 - allow_rate[1]));
 								if not empty(gp){
 									homeplace.current_groups[type_h]<< gp; 
+									numTot<- numTot + int(last(gp));
 								}
 							}
 						}
 						if sum(allow_rate) > 0.0 {
 							list gp <- create_group(coeff*allow_rate[0],coeff*allow_rate[1]);
 							if not empty(gp){
+								numAllowed <- numAllowed + int(last(gp));
+								numTot<- numTot + int(last(gp));
 								a.current_groups[bd_type]<< gp; 
 							}
 						}
-					} 
+					}
+					ask Authority {
+						do update_monitor_rate(activity_type,numTot,numAllowed );
+					}
+						 
 				}
 			}  
 		}

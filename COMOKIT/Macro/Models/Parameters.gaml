@@ -25,7 +25,6 @@ global {
 	//Population data 
 	string csv_building_type_weights_path <- (dataset_path+"Building type weights.csv") ;
 		
-	
 	string csv_activity_weights_path <- (dataset_path+"Activity weights.csv") ;
 	
 	float step <- 1#h;
@@ -37,8 +36,8 @@ global {
 	float mask_ratio <- 0.5;
 	float factor_contact_rate_wearing_mask <- 0.5;
 
-	float density_ref_contact <- 200.0;
-	float home_infection_rate <- 0.5;
+	float density_ref_contact <- 50.0;
+	float home_infection_rate <- 0.1;
 	map<string,float> building_type_infection_factor <- ["home"::home_infection_rate];
 	string variant <- DELTA;
 	int nb_init_infected <- 20;

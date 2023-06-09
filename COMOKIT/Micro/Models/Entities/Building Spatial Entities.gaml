@@ -30,18 +30,47 @@ species Room parent: AbstractPlace {
 	int floor;
 	int id;
 	rgb color <- #lightgray;
-	
+	geometry geom_free;
+	bool compute_geom_free <- false;
 	Building my_building;
 	list<RoomEntry> entrances;
+	list<BuildingIndividual> individuals;
 	
+	init {
+		if compute_geom_free {
+			geom_free <- copy(shape);
+		}
+	}
 	
 	float ceiling_height <- floor_high;
 	
-	aspect default {
-		if (building = building_map) and (floor = floor_map) {
-			draw shape color: color;
+	action update_geom_free {
+		geom_free <- copy(shape);
+		loop i over: individuals {
+			geom_free <- geom_free - (i.location buffer min_distance_between_people);
 		}
+		
+	}
+
 	
+	point location_inside {
+		if compute_geom_free {
+			tot_localisation <- tot_localisation + 1;
+			if geom_free != nil {
+				return any_location_in(geom_free);
+			} else {
+				tot_localisation_failure <- tot_localisation_failure + 1;
+				//return any_location_in(shape);
+				return nil;
+			}
+		}else { 
+			return any_location_in(shape);
+		}
+	}
+	aspect default {
+		//if (building = building_map) and (floor = floor_map) {
+			draw shape color: color;
+		//}
 	}
 	
 	aspect viral {
@@ -67,6 +96,7 @@ species Building {
  		building_map <- int(self);
  		map  result <- user_input_dialog("Selection of a floor",[choose("Floor to inspect",int,0, rooms.keys)]);
  		floor_map <- int(result["Floor to inspect"]);
+ 		
 			
  	}
 	aspect draw_infected {
@@ -80,9 +110,9 @@ species Building {
 	}
 	 
 	aspect default {
-		if int(self) = building_map {
+		//if int(self) = building_map {
 			draw shape color: #pink;
-		}
+		//}
 		
 	}
 }	
@@ -139,9 +169,9 @@ species Wall {
 	
 	aspect default {
 		
-		if (building = building_map) and (floor = floor_map) {
+		//if (building = building_map) and (floor = floor_map) {
 			draw shape depth: 2.0 color: #lightgray border: #black;
-		}
+		//}
 	}
 }
 
@@ -168,11 +198,11 @@ species BuildingEntry {
 
 species Elevator parent: Room {
 	aspect default {
-		if (building = building_map) and (floor = floor_map) {
+		//if (building = building_map) and (floor = floor_map) {
 		
 			draw shape color: #gold ;
 			
-		}
+		//}
 	}
 }
 

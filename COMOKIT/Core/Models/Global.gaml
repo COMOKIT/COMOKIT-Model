@@ -44,13 +44,14 @@ global {
 	
 	
 	action init_building_type_parameters {
-		file csv_parameters <- csv_file(building_type_per_activity_parameters,",",true);
+		file csv_parameters <- csv_file(building_type_per_activity_parameters,",",false);
+		write sample(file_exists(csv_parameters.path));
 		matrix data <- matrix(csv_parameters);
 		// Modifiers can be weights, age range, or anything else
 		list<string> available_modifiers <- [WEIGHT,RANGE];
 		map<string,string> activity_modifiers;
 		//Loading the different rows number for the parameters in the file
-		loop i from: 0 to: data.rows-1{
+		loop i from: 1 to: data.rows-1{
 			string activity_type <- data[0,i];
 			bool modifier <- available_modifiers contains activity_type;
 			list<string> bd_type;

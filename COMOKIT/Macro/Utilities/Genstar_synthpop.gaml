@@ -441,7 +441,8 @@ global {
 				int i <- hh_composition.keys index_of compo;
 				int j <- hh_children_number.keys index_of nb_child + 1;
 				int contingency <- int(menage_aggTable_10_csv_file.contents[j,i]);
-				if contingency > 0 { hh_composition_distribution[pair(compo,nb_child)] <- int(menage_aggTable_10_csv_file.contents[j,i]); }
+				pair<string,string> p <- pair(compo::nb_child);
+				if contingency > 0 { hh_composition_distribution[p] <- int(menage_aggTable_10_csv_file.contents[j,i]); }
 			}
 		}
 		

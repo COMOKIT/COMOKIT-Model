@@ -229,20 +229,25 @@ species PartialPolicy parent: ForwardingPolicy {
  * The area is recomputed everyday, given the infected people. 
  */
 
-species DynamicSpatialPolicy parent: CompoundPolicy {
-	AbstractPolicy target;
+species DynamicSpatialPolicy parent: SpatialPolicy {
+	//AbstractPolicy target;
 	float radius ;
 	
 	action apply {
 		if(every(1#day)) {
 			list<AbstractIndividual> infecteds <- all_individuals where(each.report_status = tested_positive);
-			ask targets {do die;}
-			targets <- [];
-			loop i over: infecteds {
-				create SpatialPolicy with: [target::target, application_area::(circle(radius) at_location i.location)] returns: result;
-								
-				targets << first(result);
-			}
+			//ask targets {do die;}
+			//target <- target;
+			application_area <- nil;
+			//loop i over: infecteds {
+				if (not empty(infecteds)) {
+				//	write "la: " + length(infecteds);
+					application_area<-union(infecteds collect (circle(radius) at_location each.location));
+					// SpatialPolicy with: [target::target, application_area::union(infecteds collect (circle(radius) at_location each.location))] returns: result;
+					//targets << first(result);
+					
+				}
+			//}
 		}
 	}
 }
@@ -254,7 +259,7 @@ species SpatialPolicy parent: ForwardingPolicy {
 	geometry application_area;
 	
 	bool is_allowed (AbstractIndividual i, AbstractActivity activity) {
-		if (application_area overlaps i) {
+		if (application_area != nil  and application_area overlaps i) {
 			return super.is_allowed(i, activity);
 		} else {
 			return true;

@@ -60,9 +60,18 @@ species Authority {
 		} 
 	}
 	
+	action update_monitor_rate(string act, int total, int allowed) {
+		if(act_monitor != nil){
+			ask act_monitor { 
+				do update_stat_rate(act, total, allowed);
+			}			 
+		} 
+	}
+	
 	list<float> allows_rate (int source_area, int target_area, string activity_str, string building_type, float tested_susceptible, float tested_infected) { 
 		float start <- BENCHMARK ? machine_time : 0.0;
 		list<float> allowed_rate <- policy.allowed(source_area, target_area, activity_str, building_type, tested_susceptible,  tested_infected);
+		
 		if BENCHMARK {
 			bench["Authority.allows_rate|action"] <- (bench contains_key "Authority.allows_rate|action" ? 
 				bench["Authority.allows_rate|action"] : 0.0) + machine_time - start;

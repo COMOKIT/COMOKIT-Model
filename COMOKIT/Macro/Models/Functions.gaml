@@ -13,13 +13,18 @@ import "../../Core/Models/Constants.gaml"
 global {
 	map<string, list<string>> init_building_type_parameters_fct(string building_type_per_activity_parameters, 	map<string, float> possible_workplaces, map<string, list<int>> possible_schools, int school_age ,int active_age) {
 		map<string, list<string>> activities <- [];
-		file csv_parameters <- csv_file(building_type_per_activity_parameters,",",true);
+		string building_type_per_activity_parameters_tmp <- "../../Core/Parameters/Building type per activity type.csv";
+	
+		write sample(building_type_per_activity_parameters_tmp);
+		write sample(file_exists(building_type_per_activity_parameters_tmp));
+		
+		file csv_parameters <- csv_file(building_type_per_activity_parameters,",",false);
 		matrix data <- matrix(csv_parameters);
 		// Modifiers can be weights, age range, or anything else
 		list<string> available_modifiers <- [WEIGHT,RANGE];
 		map<string,string> activity_modifiers;
 		//Loading the different rows number for the parameters in the file
-		loop i from: 0 to: data.rows-1{
+		loop i from: 1 to: data.rows-1{
 			string activity_type <- data[0,i];
 			bool modifier <- available_modifiers contains activity_type;
 			list<string> bd_type;

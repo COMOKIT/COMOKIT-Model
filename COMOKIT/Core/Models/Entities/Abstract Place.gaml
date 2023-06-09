@@ -11,7 +11,7 @@
 ******************************************************************/
 
 @no_experiment
-
+ 
 model CoVid19
 
 import "Abstract Individual.gaml"  
@@ -53,6 +53,7 @@ species AbstractPlace virtual: true {
 	//Usages of the building
 	list<string> functions;
 	bool allow_transmission -> {allow_transmission_building};
+	bool has_ventilation <- false;
 
 	int nb_contaminated;
 	//Action to add viral load to the building
@@ -86,7 +87,9 @@ species AbstractPlace virtual: true {
 	//Action to update the viral load (i.e. trigger decreases)
 	reflex update_viral_load when: allow_transmission_building and has_virus{
 		float start <- BENCHMARK ? machine_time : 0.0;
-		do decrease_viral_load(basic_viral_decrease/nb_step_for_one_day);
+		float viral_decrease <- basic_viral_decrease;
+		if has_ventilation {viral_decrease <- viral_decrease + ventilation_viral_decrease;}
+		do decrease_viral_load(viral_decrease/nb_step_for_one_day);
 		has_virus <- viral_load.values one_matches (each > 0);
 		if BENCHMARK {bench["Building.update_viral_load"] <- bench["Building.update_viral_load"] + machine_time - start; }
 	}

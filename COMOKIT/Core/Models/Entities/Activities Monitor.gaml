@@ -30,6 +30,15 @@ species ActivitiesMonitor schedules: [] {
 		stat_activities <- map([]);
 	}
 	
+	action update_stat_rate(string act, int total, int allowed) {
+		
+		if(stat_activities[act] = nil) {
+			stat_activities[act] <- [0,0];
+		}
+		stat_activities[act][0] <- stat_activities[act][0] + total;
+		stat_activities[act][1] <- stat_activities[act][1] + allowed;				
+	}	
+	
 	action update_stat(AbstractActivity act, bool allowed) {
 		
 		if(stat_activities[act.name] = nil) {

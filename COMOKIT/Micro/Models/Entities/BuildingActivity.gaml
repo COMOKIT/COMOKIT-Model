@@ -35,7 +35,21 @@ global {
 species BuildingActivity virtual: true {
 	list<Room> activity_places;
 	float wandering_in_room <- -1.0;
+	bool can_be_advanced <- true;
 	map get_destination(BuildingIndividual p) virtual: true;
+	
+	Room selectedRoom(list<Room> possible_rooms) {
+		if min_distance_between_people > 0  {
+			list<Room> free_rooms <- possible_rooms where (not each.compute_geom_free or (each.geom_free != nil and each.geom_free.area > 0));
+			if empty(free_rooms) {
+				return one_of(possible_rooms);
+			}
+			else {
+				return one_of(free_rooms);
+			}
+		}
+		return one_of(possible_rooms);
+	}
 	
 }
 
@@ -62,8 +76,14 @@ species ActivityGoToOffice parent: BuildingActivity {
 	}
 }
 
+
 species ActivityGotoRestaurant parent: BuildingActivity {
+	bool can_be_advanced <- false;
+	
 	map get_destination(BuildingIndividual p) {
+		if (min_distance_between_people > 0 ) {
+			
+		}
 		Room r <- one_of(Room where (each.type = RESTAURANT));
 		map results;
 		results[key_room] <- r;

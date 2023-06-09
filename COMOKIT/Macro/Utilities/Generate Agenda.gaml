@@ -20,7 +20,7 @@ global {
 	
 	bool MODE_TEST <- false;
 		
-	string folder_path <- "../../Datasets/";
+	string folder_path <- "../Datasets/";
 	string dataset <- "Alpes-Maritimes";
 	string case_study_path <- folder_path + dataset +"/";
 	string folder_generated <- case_study_path+"generated/";
@@ -36,7 +36,7 @@ global {
 	string agenda_path <- folder_generated+"agenda_data/";
 	string population_path <- case_study_path+"generated/population.csv";
 	
-	float proba_min <-0.005;
+	float proba_min <-0.05;
 
 	int age_step <- 10;
 	int age_max <- 100;

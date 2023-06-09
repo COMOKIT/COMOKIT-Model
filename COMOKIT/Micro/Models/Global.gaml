@@ -69,6 +69,9 @@ global {
 	int nb_latent <- 0 update: (BiologicalEntity count (each.state = latent));
 	int nb_infected <- 0 update: (BiologicalEntity count (each.state in [asymptomatic, presymptomatic, symptomatic]));
 	
+	int tot_localisation_failure;
+	int tot_localisation;
+	
 	float floor_high <- 5.0 #m;
 	float tolerance_dist <- 0.1;
 	
@@ -169,21 +172,14 @@ global {
 		all_individuals <- agents of_generic_species BuildingIndividual;
 		ask all_individuals  { do initialise_epidemiological_behavior();}
             
-		selected_bd <- Building with_max_of (each.shape.area);
-		building_map <- int(selected_bd);
+		//selected_bd <- Building with_max_of (each.shape.area);
+		//building_map <- int(selected_bd);
 	}
 
 	
 	action create_individuals;
 	
-	action select_building {
-		list<Building> bds <- Building overlapping #user_location;
-		if not empty(bds) {
-			ask bds {
-				do select_command;
-			}
-		}
-	}
+	
 	
 	reflex update_moving_weight when: every(udpate_path_weights_every) {
 		ask PedestrianPath where each.update_coeff {

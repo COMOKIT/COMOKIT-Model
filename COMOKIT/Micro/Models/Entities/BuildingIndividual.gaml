@@ -23,6 +23,12 @@ import "Building Spatial Entities.gaml"
  
 import "../Global.gaml"
 
+global {
+	int infection_direct;
+	int infection_object;
+	int infection_air;
+}
+
 species IndividualScheduler schedules: shuffle(agents of_generic_species BuildingIndividual) where (each.clinical_status != dead);
  
 species BuildingIndividual parent: AbstractIndividual  skills: [moving] schedules:[]{
@@ -96,12 +102,17 @@ species BuildingIndividual parent: AbstractIndividual  skills: [moving] schedule
 		if allow_direct_transmission {
 			float proba <- contact_rate*reduction_factor;
 			//If the Individual is at home, perform transmission on the household level with a higher factor
-			loop succesful_contact over: (BuildingIndividual at_distance infectionDistance) where 
+			loop succesful_contact over: ((agents of_generic_species BuildingIndividual) at_distance infectionDistance) where 
 											((each.state = susceptible) and (each.current_floor = self.current_floor)) {
 				geometry line <- line([self,succesful_contact]);
 				if empty(Wall overlapping line) {
+					float dist <- max(0.5, line.perimeter );		
+					proba <- proba / (dist^2);
+					
 					if flip(proba) {
 						do infect_someone(succesful_contact);
+						
+						infection_direct <- infection_direct + 1;
 					}
 				}
 			}
@@ -120,11 +131,12 @@ species BuildingIndividual parent: AbstractIndividual  skills: [moving] schedule
 	reflex update_epidemiology when:(state!=removed) {
 		float start <- BENCHMARK ? machine_time : 0.0;
 		if(allow_air_transmission and (not is_infected)and(self.current_room!=nil))
-		{
+		{ 
 			// TODO: viral_load is now a map, but idk how to properly update these formula
 			if(flip(current_room.viral_load[original_strain]*successful_contact_rate_building/ (current_room.shape.area * current_room.ceiling_height)))
 			{
 				infectious_contacts_with[current_place] <- define_new_case(original_strain);
+				infection_air <- infection_air + 1;
 			}
 		}
 		if(allow_local_transmission and (not is_infected) and current_cell != nil)
@@ -133,6 +145,7 @@ species BuildingIndividual parent: AbstractIndividual  skills: [moving] schedule
 			if(current_cell != nil and flip(current_cell.viral_load[original_strain]*successful_contact_rate_building))
 			{
 				infectious_contacts_with[current_place] <- define_new_case(original_strain);
+				infection_object <- infection_object + 1;
 			}
 		}
 		do update_wear_mask();
@@ -141,25 +154,66 @@ species BuildingIndividual parent: AbstractIndividual  skills: [moving] schedule
 
 
 	
-	reflex define_activity when: not empty(current_agenda_week) and 
-								(after(current_agenda_week.keys[0])) {
-		// Pop the next activity out of the agenda and get the new destination
-		current_activity <- current_agenda_week.values[0];
-		current_agenda_week >> first(current_agenda_week);
+	action manage_activity(BuildingActivity act) {
+		current_activity <- act;
+		if (act in current_agenda_week.values) {
+			remove key:current_agenda_week.keys[(current_agenda_week.values index_of act)] from:current_agenda_week;
+		}
 		map dest_act <- current_activity.get_destination(self);
 		time_wait <- 0.0;
 		Room r <- dest_act[key_room];
 		if (r != nil) {
+			if (current_room != nil) {
+				ask current_room {
+					if myself in individuals {
+						individuals >> myself;
+						do update_geom_free;
+					}
+				}
+			}
 			dst_room <- r;
 			if is_outside {
 				is_outside <- false;
 				location <- any_location_in(one_of(AreaEntry));
 			}
 			target <- define_target(dst_room);
-			target <- {target.x,target.y,floor_high * dst_room.floor};
-		} 
+			if (target != nil) {
+				target <- {target.x,target.y,floor_high * dst_room.floor};	
+			} else {
+				do changeActivity;
+			}
+			
+		}
+	}
+	reflex define_activity when: not empty(current_agenda_week) and 
+								(after(current_agenda_week.keys[0])) {
+		// Pop the next activity out of the agenda and get the new destination
+		do manage_activity(current_agenda_week.values[0]);
+		
 	}
 
+	action changeActivity {
+		BuildingActivity act <- nil;
+		loop while: true {
+			
+			act <- empty(current_agenda_week) ? nil : current_agenda_week.values[0];
+			if act != nil {
+				if (act != first(ActivityLeaveArea)) and not act.can_be_advanced {
+					remove key:current_agenda_week.keys[(current_agenda_week.values index_of act)] from:current_agenda_week;
+					act <- nil;
+				}
+			}
+			if (act != nil) or empty(current_agenda_week) {
+				break;
+			}
+		}
+		if act != nil {
+			do manage_activity(act);
+		} else {
+			do manage_activity(first(ActivityLeaveArea));
+		}	
+	
+	}
 	
 	
 	action arrived_at_target {
@@ -204,10 +258,20 @@ species BuildingIndividual parent: AbstractIndividual  skills: [moving] schedule
 		}
 		if continue_to_move {
 			target <- define_target(dst_room);
-			target <- {target.x,target.y,floor_high * dst_room.floor};
+			if (target != nil) {
+				target <- {target.x,target.y,floor_high * dst_room.floor};	
+			} else {
+				do changeActivity;
+			}
 		} else {
 			target <- nil;
 			waiting_to_remove <- current_activity.wandering_in_room >= 0;
+			if (current_room != nil and not waiting_to_remove) {
+				ask current_room {
+					individuals << myself;
+					do update_geom_free;
+				}
+			}
 		}
 	}
 	
@@ -215,13 +279,14 @@ species BuildingIndividual parent: AbstractIndividual  skills: [moving] schedule
 		if (current_building = r.my_building) {
 			if (current_floor = r.floor) {
 				if (current_room = r) or (r.entrances = nil) or empty(r.entrances){
-					return any_location_in(r);
+					return r.location_inside();
+					
 				} else {
 					return (r.entrances closest_to self).location;
 				}
 			} else {
 				Elevator el <- current_building.elevators[current_floor] closest_to self;
-				return any_location_in(el);
+				return el.location_inside();
 			}
 		} else {
 			if(current_building = nil) {
@@ -236,7 +301,7 @@ species BuildingIndividual parent: AbstractIndividual  skills: [moving] schedule
 					return (current_building.entrances closest_to self).location;
 				} else {
 					Elevator el <- current_building.elevators[current_floor] closest_to self;
-					return any_location_in(el);
+					return el.location_inside();
 				}
 			}
 		}
@@ -246,6 +311,11 @@ species BuildingIndividual parent: AbstractIndividual  skills: [moving] schedule
 		time_wait <- time_wait + step;
 		if (time_wait >  current_activity.wandering_in_room) {
 			target <- define_target(current_room);
+			if (target != nil) {
+				target <- {target.x,target.y,floor_high * dst_room.floor};	
+			} else {
+				do changeActivity;
+			}
 			waiting_to_remove <- false;
 			time_wait <- 0.0;
 		}
@@ -311,10 +381,10 @@ species BuildingIndividual parent: AbstractIndividual  skills: [moving] schedule
 
  	
  	aspect default {
-		if (current_building != nil) and (int(current_building) = building_map) and (current_floor = floor_map) {
+		if (current_building != nil)  {
 			draw pple_walk size: {0.5,people_size}  at: location + {0, 0, people_size/2.0} rotate: heading - 90 color: color;
-			if(is_infected){draw circle(0.7)  at: location + {0, 0, 0.7} color: get_color();}
-
+			if(is_infected){draw circle(infectionDistance)  at: location + {0, 0, 0.7} color: get_color();}
+			
 		}
 	}
 }
