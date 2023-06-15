@@ -235,7 +235,8 @@ species DynamicSpatialPolicy parent: SpatialPolicy {
 	
 	action apply {
 		if(every(1#day)) {
-			list<AbstractIndividual> infecteds <- all_individuals where(each.report_status = tested_positive);
+			list<AbstractIndividual> infecteds <- all_individuals where((each.report_status = tested_positive) and each.is_infectious );
+			write sample(length(infecteds));
 			//ask targets {do die;}
 			//target <- target;
 			application_area <- nil;
@@ -243,6 +244,8 @@ species DynamicSpatialPolicy parent: SpatialPolicy {
 				if (not empty(infecteds)) {
 				//	write "la: " + length(infecteds);
 					application_area<-union(infecteds collect (circle(radius) at_location each.location));
+					write sample(application_area.perimeter);
+			
 					// SpatialPolicy with: [target::target, application_area::union(infecteds collect (circle(radius) at_location each.location))] returns: result;
 					//targets << first(result);
 					

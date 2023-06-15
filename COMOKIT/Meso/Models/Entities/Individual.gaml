@@ -303,9 +303,9 @@ species Individual parent: AbstractIndividual schedules: use_activity_precomputa
 				is_activity_allowed<- Authority[0].allows(self, act.key);
 				nb_max_fellow <- Authority[0].limitGroupActivity(self, act.key) - 1;
 			}
-			else if (Authority[0].allows(self, act.key)) {
+			else if (act.key.always_allowed or  Authority[0].allows(self, act.key)) {
 				int nb_fellows <- Authority[0].limitGroupActivity(self, act.key) - 1;
-					if (nb_fellows > 0) {
+					if (nb_fellows > 0) { 
 					activity_fellows <-nb_fellows among act.value;
 				} else {
 					activity_fellows <- [];

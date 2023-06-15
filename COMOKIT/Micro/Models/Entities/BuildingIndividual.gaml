@@ -27,6 +27,8 @@ global {
 	int infection_direct;
 	int infection_object;
 	int infection_air;
+	int infection_restaurant;
+	int infection_office;
 }
 
 species IndividualScheduler schedules: shuffle(agents of_generic_species BuildingIndividual) where (each.clinical_status != dead);
@@ -111,7 +113,13 @@ species BuildingIndividual parent: AbstractIndividual  skills: [moving] schedule
 					
 					if flip(proba) {
 						do infect_someone(succesful_contact);
-						
+						if (succesful_contact.current_room.type = "restaurant") {
+							infection_restaurant <- infection_restaurant + 1;
+						} 
+						if (succesful_contact.current_room.type = "office") {
+							infection_office <- infection_office + 1;
+						} 
+
 						infection_direct <- infection_direct + 1;
 					}
 				}

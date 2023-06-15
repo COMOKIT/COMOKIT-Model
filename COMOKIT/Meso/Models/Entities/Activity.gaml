@@ -216,6 +216,7 @@ global {
 species Activity parent: AbstractActivity frequency: 0 {
 	list<string> types_of_building <- [];
 	map<string,list<Building>> buildings;
+	bool always_allowed <- false;
 	
 	map<Building,list<Individual>> find_target (Individual i) {
 		float start <- BENCHMARK ? machine_time : 0.0; 
@@ -318,6 +319,7 @@ species studying parent: Activity {
 
 species staying_home parent: Activity {
 	string name <- act_home;
+	bool always_allowed <- true;
 	map<Building,list<Individual>> find_target (Individual i) {
 		return [i.home::list<Individual>(i.relatives)];
 	}

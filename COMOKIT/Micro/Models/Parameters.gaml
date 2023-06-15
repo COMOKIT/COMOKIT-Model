@@ -23,14 +23,14 @@ global {
 	//EPIDEMIOLOGIC PARAMETERS
 	string variant <- DELTA; 
 	
-	float infectionDistance <- 1.5#m;
+	float infectionDistance <- 1.4#m;
 	float unit_cell_size <- 1#m;
-
-	float basic_viral_air_increase_per_day <- 2.0;
-	float basic_viral_local_increase_per_day <- 1.0;
-	float basic_viral_air_decrease_per_day <- 0.3;
-	float basic_viral_local_decrease_per_day <- 0.3;
-	float ventilated_viral_air_decrease_per_day <- 1.8;
+	
+	float basic_viral_air_increase_per_day <- 1.0;
+	float basic_viral_local_increase_per_day <- 0.8;
+	float basic_viral_air_decrease_per_day <- 0.2;
+	float basic_viral_local_decrease_per_day <- 0.5;
+	float ventilated_viral_air_decrease_per_day <- 100.0;
 
 	bool allow_air_transmission <- true;
 	bool allow_direct_transmission <- true;

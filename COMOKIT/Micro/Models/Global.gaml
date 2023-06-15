@@ -162,7 +162,8 @@ global {
 		//map<string, list<Room>> rooms_type <- Room group_by each.type;
 		
 		do create_individuals;
-		
+		ventilation_viral_decrease <- ventilated_viral_air_decrease_per_day;
+	
 		do init_epidemiological_parameters;
 		do init_sars_cov_2;
 		viral_agent <- viruses first_with (each.name = variant);

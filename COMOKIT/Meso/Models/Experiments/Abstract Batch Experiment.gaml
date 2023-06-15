@@ -32,6 +32,7 @@ global{
 	bool sim_stop { return (all_individuals all_match ([susceptible, removed] contains each.state)); }
 	
 	init{
+		mode_batch <- true;
 		if (idSimulation = -1){
 			idSimulation <- int(self);
 		}

@@ -39,6 +39,7 @@ global {
 	list agents_history; 
 	list<int> all_individuals_id;
 	
+	bool mode_batch <- false;
 	list<Building> all_buildings;
 	geometry shape <- envelope(file_exists(shp_boundary_path) ?shape_file(shp_boundary_path) : shape_file(shp_buildings_path) );
 	Outside the_outside;
@@ -191,7 +192,7 @@ global {
 		firsts <- false;
 	}
 	
-	reflex end when:  cycle > 24 and (use_activity_precomputation ? empty(all_individuals): ((all_individuals count (each.is_susceptible or (each.state = removed))) = length(all_individuals))) {
+	reflex end when: not mode_batch and cycle > 24 and (use_activity_precomputation ? empty(all_individuals): ((all_individuals count (each.is_susceptible or (each.state = removed))) = length(all_individuals))) {
 		write "nb cycle: " + cycle;
 		write "time tot: " + (machine_time - t_ref);
 		write "time cycle: " + (machine_time - t_ref2) / cycle;
